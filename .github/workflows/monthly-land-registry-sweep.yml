@@ -1,0 +1,32 @@
+name: Monthly Land Registry Sweep
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 1 * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-land-registry-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run INSIGHT sweeper
+        run: python3 scripts/sweep_land_registry.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git add outputs/surrey-transactions.js work/land-reg-surrey-3m-2010.csv
+          if git diff --cached --quiet; then
+            echo "No Land Registry data changes to commit."
+          else
+            git commit -m "Update INSIGHT Land Registry data"
+            git push
+          fi
