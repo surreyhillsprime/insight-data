@@ -1,4 +1,4 @@
-name: Monthly Land Registry Sweep
+name: Monthly Land Registry and EPC Sweep
 
 on:
   workflow_dispatch:
@@ -9,24 +9,37 @@ permissions:
   contents: write
 
 jobs:
-  update-land-registry-data:
+  update-insight-data:
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Run INSIGHT sweeper
+      - name: Run Land Registry sweeper
         run: python3 scripts/sweep_land_registry.py
+
+      - name: Enrich with EPC floor areas
+        env:
+          EPC_BEARER_TOKEN: ${{ secrets.EPC_BEARER_TOKEN }}
+        run: |
+          if [ -n "$EPC_BEARER_TOKEN" ]; then
+            python3 scripts/enrich_epc_data.py
+          else
+            echo "No EPC_BEARER_TOKEN secret configured; publishing Land Registry data without EPC sqft enrichment."
+          fi
 
       - name: Commit updated data
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
           git add outputs/surrey-transactions.js work/land-reg-surrey-3m-2010.csv
+          if [ -f work/epc-cache.json ]; then
+            git add work/epc-cache.json
+          fi
           if git diff --cached --quiet; then
-            echo "No Land Registry data changes to commit."
+            echo "No INSIGHT data changes to commit."
           else
-            git commit -m "Update INSIGHT Land Registry data"
+            git commit -m "Update INSIGHT property data"
             git push
           fi
