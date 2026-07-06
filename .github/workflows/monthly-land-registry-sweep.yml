@@ -23,11 +23,11 @@ jobs:
         env:
           EPC_BEARER_TOKEN: ${{ secrets.EPC_BEARER_TOKEN }}
         run: |
-          if [ -n "$EPC_BEARER_TOKEN" ]; then
-            python3 scripts/enrich_epc_data.py
-          else
-            echo "No EPC_BEARER_TOKEN secret configured; publishing Land Registry data without EPC sqft enrichment."
+          if [ -z "$EPC_BEARER_TOKEN" ]; then
+            echo "::error::No EPC_BEARER_TOKEN secret configured. Add the GOV.UK EPC bearer token in Settings -> Secrets and variables -> Actions."
+            exit 1
           fi
+          python3 scripts/enrich_epc_data.py --refresh-days 0 --fail-under-matches 1
 
       - name: Commit updated data
         run: |

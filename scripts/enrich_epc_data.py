@@ -16,6 +16,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -27,6 +28,7 @@ DEFAULT_CACHE = ROOT / "work" / "epc-cache.json"
 API_BASE = "https://api.get-energy-performance-data.communities.gov.uk"
 SQM_TO_SQFT = 10.76391041671
 DEFAULT_MIN_SCORE = 0.55
+CACHE_VERSION = 2
 
 NOISE_TOKENS = {
     "A",
@@ -146,11 +148,13 @@ def write_js(path, transactions, meta):
 def load_cache(path):
     path = Path(path)
     if not path.exists():
-        return {"version": 1, "records": {}}
+        return {"version": CACHE_VERSION, "records": {}}
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
-        return {"version": 1, "records": {}}
+        return {"version": CACHE_VERSION, "records": {}}
+    if payload.get("version") != CACHE_VERSION:
+        return {"version": CACHE_VERSION, "records": {}}
     if "records" not in payload or not isinstance(payload["records"], dict):
         payload["records"] = {}
     return payload
@@ -159,6 +163,7 @@ def load_cache(path):
 def write_cache(path, cache):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    cache["version"] = CACHE_VERSION
     cache["updatedAt"] = utc_now()
     path.write_text(json.dumps(cache, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
@@ -244,6 +249,16 @@ def floor_area_from_certificate(record):
             if area:
                 return area
     return None
+
+
+def certificate_debug_keys(record):
+    keys = []
+    for key, value in flatten_dict(record).items():
+        normalised = normalise_key(key)
+        if any(term in normalised for term in ("floorarea", "totalfloor", "certificate", "address", "postcode")):
+            if value not in (None, "", [], {}):
+                keys.append(key)
+    return keys[:16]
 
 
 def flatten_dict(value, prefix=""):
@@ -401,16 +416,39 @@ def best_epc_match(transaction, token, page_size, min_score, max_certificate_fet
     )
 
     best = None
+    diagnostics = Counter()
+    best_seen = {
+        "roughScore": round(scored[0][0], 3) if scored else 0,
+        "finalScore": 0,
+        "certificateNumber": extract_certificate_number(scored[0][1]) if scored else "",
+        "address": candidate_address(scored[0][1]) if scored else "",
+        "areaFound": False,
+        "certificateKeys": [],
+    }
     for rough_score, candidate in scored[:max_certificate_fetches]:
         if rough_score < min_score - 0.2:
+            diagnostics["rough_score_too_low"] += 1
             continue
         certificate_number = extract_certificate_number(candidate)
         certificate = fetch_certificate(certificate_number, token)
         final_score = address_score(transaction, candidate, certificate)
-        area_sqm = floor_area_from_certificate(certificate)
+        area_sqm = floor_area_from_certificate(certificate) or floor_area_from_certificate(candidate)
+        if final_score > best_seen["finalScore"]:
+            best_seen.update({
+                "finalScore": round(final_score, 3),
+                "certificateNumber": certificate_number,
+                "address": candidate_address(certificate) or candidate_address(candidate),
+                "areaFound": bool(area_sqm),
+                "certificateKeys": certificate_debug_keys(certificate),
+            })
+        if final_score < min_score:
+            diagnostics["weak_address_match"] += 1
+        if not area_sqm:
+            diagnostics["missing_floor_area"] += 1
         if final_score >= min_score and area_sqm:
             sqft = round(area_sqm * SQM_TO_SQFT)
             if sqft <= 0:
+                diagnostics["invalid_floor_area"] += 1
                 continue
             match = {
                 "status": "matched",
@@ -438,7 +476,13 @@ def best_epc_match(transaction, token, page_size, min_score, max_certificate_fet
         "status": "no_match",
         "reason": "No certificate cleared address match and floor-area checks",
         "candidateCount": len(candidates),
-        "bestRoughScore": round(scored[0][0], 3) if scored else 0,
+        "diagnostics": dict(diagnostics),
+        "bestRoughScore": best_seen["roughScore"],
+        "bestFinalScore": best_seen["finalScore"],
+        "bestCertificateNumber": best_seen["certificateNumber"],
+        "bestAddress": best_seen["address"],
+        "bestAreaFound": best_seen["areaFound"],
+        "bestCertificateKeys": best_seen["certificateKeys"],
     }
 
 
@@ -487,6 +531,7 @@ def enrich_transactions(transactions, cache, token, args):
         "errors": 0,
         "skipped": 0,
     }
+    reasons = Counter()
     limit = args.limit if args.limit and args.limit > 0 else None
 
     for index, item in enumerate(transactions, start=1):
@@ -530,12 +575,17 @@ def enrich_transactions(transactions, cache, token, args):
             stats["matched"] += 1
         elif result and result.get("status") == "no_match":
             stats["noMatch"] += 1
+            reasons[result.get("reason") or "No match"] += 1
+            for reason, count in (result.get("diagnostics") or {}).items():
+                reasons[f"diagnostic:{reason}"] += count
+        elif result and result.get("status") == "error":
+            reasons["error:" + (result.get("reason") or "Unknown error")[:120]] += 1
         enriched.append(output)
 
         if index % 50 == 0:
             print(f"Processed {index}/{len(transactions)} transactions; EPC matches so far: {stats['matched']}")
 
-    return enriched, stats
+    return enriched, stats, reasons
 
 
 def parse_args():
@@ -550,6 +600,7 @@ def parse_args():
     parser.add_argument("--refresh-days", type=int, default=90, help="How soon to retry prior no-match lookups.")
     parser.add_argument("--pause", type=float, default=0.02, help="Pause between uncached lookups, in seconds.")
     parser.add_argument("--limit", type=int, default=0, help="Only enrich the first N transactions; useful for testing.")
+    parser.add_argument("--fail-under-matches", type=int, default=0, help="Return an error if fewer than this many EPC matches are produced.")
     parser.add_argument("--dry-run", action="store_true", help="Report what would happen without writing files.")
     return parser.parse_args()
 
@@ -569,7 +620,7 @@ def main():
             print("Add the GOV.UK EPC bearer token before running a write sweep.", file=sys.stderr)
             return 2
 
-    enriched, stats = enrich_transactions(transactions, cache, token, args)
+    enriched, stats, reasons = enrich_transactions(transactions, cache, token, args)
     matched = sum(1 for item in enriched if numeric(item.get("pricePerSqft")))
     coverage = round(matched / len(enriched) * 100, 1) if enriched else 0
     print(f"EPC matches: {matched} ({coverage}%)")
@@ -577,9 +628,21 @@ def main():
         "Lookup summary: "
         + ", ".join(f"{key}={value}" for key, value in stats.items())
     )
+    if reasons:
+        print("Top EPC no-match/error reasons:")
+        for reason, count in reasons.most_common(12):
+            print(f"- {reason}: {count}")
 
     if args.dry_run:
         return 0
+
+    if args.fail_under_matches and matched < args.fail_under_matches:
+        write_cache(args.cache, cache)
+        print(
+            f"EPC enrichment produced {matched} matches, below required minimum {args.fail_under_matches}.",
+            file=sys.stderr,
+        )
+        return 3
 
     meta["epcEnrichment"] = {
         "source": "MHCLG Get energy performance of buildings data API",
