@@ -41,5 +41,6 @@ jobs:
             echo "No INSIGHT data changes to commit."
           else
             git commit -m "Update INSIGHT property data"
+            git pull --rebase origin main
             git push
           fi
