@@ -199,6 +199,14 @@ def read_schools_csv(path_or_url, args):
         return handle.read()
 
 
+def try_transformer():
+    try:
+        from pyproj import Transformer
+    except Exception:
+        return None
+    return Transformer.from_crs("EPSG:27700", "EPSG:4326", always_xy=True)
+
+
 def school_rows(cache, args):
     source = os.environ.get("SCHOOLS_CSV_URL", "").strip()
     local = str(DEFAULT_SCHOOLS_CACHE)
@@ -214,6 +222,7 @@ def school_rows(cache, args):
         return []
 
     rows = []
+    transformer = try_transformer()
     for raw in csv.DictReader(StringIO(text)):
         name = column(raw, ["EstablishmentName", "SchoolName", "Name"])
         postcode = column(raw, ["Postcode", "SchoolPostcode"])
@@ -224,6 +233,10 @@ def school_rows(cache, args):
             continue
         lat = parse_float(column(raw, ["Latitude", "Lat"]))
         lon = parse_float(column(raw, ["Longitude", "Lon", "Long"]))
+        easting = parse_float(column(raw, ["Easting", "EASTING", "X_COORDINATE", "X"]))
+        northing = parse_float(column(raw, ["Northing", "NORTHING", "Y_COORDINATE", "Y"]))
+        if (lat is None or lon is None) and transformer and easting is not None and northing is not None:
+            lon, lat = transformer.transform(easting, northing)
         if (lat is None or lon is None) and postcode:
             try:
                 geocode = postcode_lookup(postcode, cache, refresh_days=args.geocode_refresh_days, timeout=args.timeout, retries=args.retries)

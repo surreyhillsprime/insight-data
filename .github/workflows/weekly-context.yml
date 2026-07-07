@@ -21,6 +21,9 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Install coordinate transformer
+        run: python3 -m pip install --user pyproj
+
       - name: Refresh weekly planning, heritage, and school context
         env:
           SCHOOLS_CSV_URL: ${{ secrets.SCHOOLS_CSV_URL }}
