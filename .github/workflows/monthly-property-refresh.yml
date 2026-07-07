@@ -1,7 +1,9 @@
-name: Legacy Manual INSIGHT Sweep
+name: Monthly INSIGHT Property Refresh
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 6 1 * *"
 
 permissions:
   contents: write
@@ -11,9 +13,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  update-insight-data:
+  monthly-property-refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 360
 
     steps:
       - name: Check out repository
@@ -31,24 +33,24 @@ jobs:
             exit 1
           fi
           python3 scripts/enrich_epc_data.py \
-            --refresh-days 0 \
+            --refresh-days 30 \
             --fail-under-matches 1 \
             --fail-if-no-matches-after 150 \
-            --max-run-minutes 105 \
-            --max-errors 75 \
+            --max-run-minutes 330 \
+            --max-errors 150 \
             --request-timeout 15 \
             --request-retries 6 \
             --max-certificate-fetches 3 \
-            --pause 0.75 \
+            --pause 1.25 \
             --allow-partial-success \
             --progress-every 25
 
-      - name: Enrich with optional property context
+      - name: Refresh monthly flood and amenity context
         run: |
           python3 scripts/enrich_property_context.py \
             --pause 0.15 \
             --progress-every 25 \
-            --max-source-errors 20
+            --max-source-errors 25
 
       - name: Commit updated data
         run: |
@@ -63,8 +65,8 @@ jobs:
             git add work/property-context-cache.json
           fi
           if git diff --cached --quiet; then
-            echo "No INSIGHT data changes to commit."
+            echo "No monthly INSIGHT changes to commit."
           else
-            git commit -m "Update INSIGHT property data"
+            git commit -m "Update INSIGHT monthly property data"
             git push
           fi

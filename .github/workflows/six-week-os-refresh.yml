@@ -1,0 +1,68 @@
+name: Six Week INSIGHT OS Refresh
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 6 * * 0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insight-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  six-week-os-refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Check six-week cadence
+        id: cadence
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          WEEK=$(date -u +%V)
+          if [ $((10#$WEEK % 6)) -ne 0 ]; then
+            echo "This is ISO week $WEEK, not a six-week refresh week. Skipping."
+            echo "run_refresh=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_refresh=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out repository
+        if: github.event_name == 'workflow_dispatch' || steps.cadence.outputs.run_refresh == 'true'
+        uses: actions/checkout@v4
+
+      - name: Install coordinate transformer
+        if: github.event_name == 'workflow_dispatch' || steps.cadence.outputs.run_refresh == 'true'
+        run: python3 -m pip install --user pyproj
+
+      - name: Refresh OS UPRN matching
+        if: github.event_name == 'workflow_dispatch' || steps.cadence.outputs.run_refresh == 'true'
+        env:
+          OS_OPEN_UPRN_CSV_URL: ${{ secrets.OS_OPEN_UPRN_CSV_URL }}
+        run: |
+          python3 scripts/enrich_os_uprn.py \
+            --max-match-distance-m 150 \
+            --progress-every 25
+
+      - name: Commit updated data
+        if: github.event_name == 'workflow_dispatch' || steps.cadence.outputs.run_refresh == 'true'
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git pull --rebase --autostash origin main
+          git add outputs/surrey-transactions.js
+          if [ -f work/os-uprn-cache.json ]; then
+            git add work/os-uprn-cache.json
+          fi
+          if [ -f work/os-open-uprn-surrey.csv ]; then
+            git add work/os-open-uprn-surrey.csv
+          fi
+          if git diff --cached --quiet; then
+            echo "No OS INSIGHT changes to commit."
+          else
+            git commit -m "Update INSIGHT OS UPRN matches"
+            git push
+          fi

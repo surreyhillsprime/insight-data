@@ -1,0 +1,49 @@
+name: Daily INSIGHT Intelligence
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 5 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insight-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  daily-intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Refresh daily planning and company intelligence
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+        run: |
+          python3 scripts/enrich_daily_intelligence.py \
+            --planning-days 45 \
+            --planning-radius-m 1200 \
+            --pause 0.15 \
+            --progress-every 25 \
+            --max-source-errors 25
+
+      - name: Commit updated data
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git pull --rebase --autostash origin main
+          git add outputs/surrey-transactions.js
+          if [ -f work/daily-intelligence-cache.json ]; then
+            git add work/daily-intelligence-cache.json
+          fi
+          if git diff --cached --quiet; then
+            echo "No daily INSIGHT changes to commit."
+          else
+            git commit -m "Update INSIGHT daily intelligence"
+            git push
+          fi

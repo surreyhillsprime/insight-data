@@ -1,0 +1,50 @@
+name: Weekly INSIGHT Context
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "35 5 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insight-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  weekly-context:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Refresh weekly planning, heritage, and school context
+        env:
+          SCHOOLS_CSV_URL: ${{ secrets.SCHOOLS_CSV_URL }}
+        run: |
+          python3 scripts/enrich_weekly_context.py \
+            --pause 0.15 \
+            --progress-every 25 \
+            --max-source-errors 25
+
+      - name: Commit updated data
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git pull --rebase --autostash origin main
+          git add outputs/surrey-transactions.js
+          if [ -f work/weekly-context-cache.json ]; then
+            git add work/weekly-context-cache.json
+          fi
+          if [ -f work/schools.csv ]; then
+            git add work/schools.csv
+          fi
+          if git diff --cached --quiet; then
+            echo "No weekly INSIGHT changes to commit."
+          else
+            git commit -m "Update INSIGHT weekly context"
+            git push
+          fi

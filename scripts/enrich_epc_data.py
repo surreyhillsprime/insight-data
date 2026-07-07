@@ -606,6 +606,9 @@ def enrich_transactions(transactions, cache, token, args):
         if index % args.progress_every == 0:
             print(f"Processed {index}/{len(transactions)} transactions; EPC matches so far: {stats['matched']}")
 
+    if aborted_reason and len(enriched) < len(transactions):
+        enriched.extend(transactions[len(enriched):])
+
     return enriched, stats, reasons, aborted_reason
 
 
@@ -627,6 +630,7 @@ def parse_args():
     parser.add_argument("--max-errors", type=int, default=25, help="Stop early after this many EPC API errors. Use 0 to disable.")
     parser.add_argument("--max-run-minutes", type=float, default=45, help="Stop early after this many minutes. Use 0 to disable.")
     parser.add_argument("--fail-if-no-matches-after", type=int, default=0, help="Stop early if this many transactions have been searched with zero EPC matches.")
+    parser.add_argument("--allow-partial-success", action="store_true", help="Write partial EPC progress and return success when the run reaches the time limit after finding matches.")
     parser.add_argument("--progress-every", type=int, default=25, help="Print progress every N processed transactions.")
     parser.add_argument("--dry-run", action="store_true", help="Report what would happen without writing files.")
     return parser.parse_args()
@@ -667,12 +671,6 @@ def main():
     if args.dry_run:
         return 0
 
-    if aborted_reason:
-        write_cache(args.cache, cache)
-        print(aborted_reason, file=sys.stderr)
-        print(f"Updated {args.cache}")
-        return 4
-
     if args.fail_under_matches and matched < args.fail_under_matches:
         write_cache(args.cache, cache)
         print(
@@ -689,11 +687,20 @@ def main():
         "floorAreaUnit": "sq m converted to sq ft",
         "pricePerSqft": True,
         "minimumAddressMatchScore": args.min_score,
+        "status": "partial" if aborted_reason else "complete",
     }
+    if aborted_reason:
+        meta["epcEnrichment"]["note"] = aborted_reason
     write_cache(args.cache, cache)
     write_js(args.write_js, enriched, meta)
     print(f"Updated {args.write_js}")
     print(f"Updated {args.cache}")
+    if aborted_reason:
+        print(aborted_reason, file=sys.stderr)
+        if args.allow_partial_success and stats["matched"] > 0 and "minutes" in aborted_reason:
+            print("Partial EPC progress saved; rerun the workflow to continue from the cache.")
+            return 0
+        return 4
     return 0
 
 
