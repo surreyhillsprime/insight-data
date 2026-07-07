@@ -366,7 +366,8 @@ def request_json(path, token, params=None, retries=None, timeout=None):
             if exc.code == 404:
                 return {"data": []}
             if exc.code == 429 and attempt < retries:
-                wait = parse_float(exc.headers.get("Retry-After")) or (2 + attempt * 2)
+                wait = parse_float(exc.headers.get("Retry-After")) or min(90, 25 * (attempt + 1))
+                print(f"EPC API rate limit reached; waiting {wait:.0f}s before retry {attempt + 1}/{retries}.", flush=True)
                 time.sleep(wait)
                 continue
             detail = exc.read().decode("utf-8", errors="replace")

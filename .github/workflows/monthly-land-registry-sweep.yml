@@ -11,7 +11,7 @@ permissions:
 jobs:
   update-insight-data:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
 
     steps:
       - name: Check out repository
@@ -32,12 +32,13 @@ jobs:
             --refresh-days 0 \
             --fail-under-matches 1 \
             --fail-if-no-matches-after 150 \
-            --max-run-minutes 45 \
-            --max-errors 20 \
-            --request-timeout 10 \
-            --request-retries 0 \
+            --max-run-minutes 105 \
+            --max-errors 75 \
+            --request-timeout 15 \
+            --request-retries 6 \
             --max-certificate-fetches 3 \
-            --progress-every 10
+            --pause 0.75 \
+            --progress-every 25
 
       - name: Commit updated data
         run: |
