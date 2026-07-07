@@ -28,7 +28,9 @@ DEFAULT_CACHE = ROOT / "work" / "epc-cache.json"
 API_BASE = "https://api.get-energy-performance-data.communities.gov.uk"
 SQM_TO_SQFT = 10.76391041671
 DEFAULT_MIN_SCORE = 0.55
-CACHE_VERSION = 2
+CACHE_VERSION = 3
+REQUEST_TIMEOUT = 12
+REQUEST_RETRIES = 1
 
 NOISE_TOKENS = {
     "A",
@@ -345,7 +347,9 @@ def response_rows(payload):
     return []
 
 
-def request_json(path, token, params=None, retries=3):
+def request_json(path, token, params=None, retries=None, timeout=None):
+    retries = REQUEST_RETRIES if retries is None else retries
+    timeout = REQUEST_TIMEOUT if timeout is None else timeout
     query = urllib.parse.urlencode(params or {}, doseq=True)
     url = API_BASE + path + (("?" + query) if query else "")
     headers = {
@@ -356,7 +360,7 @@ def request_json(path, token, params=None, retries=3):
     for attempt in range(retries + 1):
         request = urllib.request.Request(url, headers=headers)
         try:
-            with urllib.request.urlopen(request, timeout=45) as response:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
                 return json.loads(response.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             if exc.code == 404:
@@ -533,8 +537,15 @@ def enrich_transactions(transactions, cache, token, args):
     }
     reasons = Counter()
     limit = args.limit if args.limit and args.limit > 0 else None
+    started = time.monotonic()
+    max_seconds = args.max_run_minutes * 60 if args.max_run_minutes else 0
+    aborted_reason = ""
 
     for index, item in enumerate(transactions, start=1):
+        if max_seconds and time.monotonic() - started > max_seconds:
+            aborted_reason = f"Stopped after {args.max_run_minutes} minutes before processing transaction {index}."
+            break
+
         if limit and index > limit:
             enriched.append(clear_epc_fields(item))
             continue
@@ -565,6 +576,8 @@ def enrich_transactions(transactions, cache, token, args):
                     "postcode": item.get("postcode"),
                 }
                 records[key] = result
+                if args.max_errors and stats["errors"] >= args.max_errors:
+                    aborted_reason = f"Stopped after {stats['errors']} EPC API errors."
         else:
             stats["skipped"] += 1
             result = cached
@@ -582,10 +595,17 @@ def enrich_transactions(transactions, cache, token, args):
             reasons["error:" + (result.get("reason") or "Unknown error")[:120]] += 1
         enriched.append(output)
 
-        if index % 50 == 0:
+        if aborted_reason:
+            break
+
+        if args.fail_if_no_matches_after and index >= args.fail_if_no_matches_after and stats["matched"] == 0:
+            aborted_reason = f"Stopped after {index} transactions because no EPC matches had been found."
+            break
+
+        if index % args.progress_every == 0:
             print(f"Processed {index}/{len(transactions)} transactions; EPC matches so far: {stats['matched']}")
 
-    return enriched, stats, reasons
+    return enriched, stats, reasons, aborted_reason
 
 
 def parse_args():
@@ -601,12 +621,22 @@ def parse_args():
     parser.add_argument("--pause", type=float, default=0.02, help="Pause between uncached lookups, in seconds.")
     parser.add_argument("--limit", type=int, default=0, help="Only enrich the first N transactions; useful for testing.")
     parser.add_argument("--fail-under-matches", type=int, default=0, help="Return an error if fewer than this many EPC matches are produced.")
+    parser.add_argument("--request-timeout", type=float, default=12, help="Seconds before one EPC API request times out.")
+    parser.add_argument("--request-retries", type=int, default=1, help="Retries for transient EPC API connection failures.")
+    parser.add_argument("--max-errors", type=int, default=25, help="Stop early after this many EPC API errors. Use 0 to disable.")
+    parser.add_argument("--max-run-minutes", type=float, default=45, help="Stop early after this many minutes. Use 0 to disable.")
+    parser.add_argument("--fail-if-no-matches-after", type=int, default=0, help="Stop early if this many transactions have been searched with zero EPC matches.")
+    parser.add_argument("--progress-every", type=int, default=25, help="Print progress every N processed transactions.")
     parser.add_argument("--dry-run", action="store_true", help="Report what would happen without writing files.")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+    global REQUEST_TIMEOUT, REQUEST_RETRIES
+    REQUEST_TIMEOUT = max(3, args.request_timeout)
+    REQUEST_RETRIES = max(0, args.request_retries)
+    args.progress_every = max(1, args.progress_every)
     token = clean(os.getenv(args.token_env))
     transactions, _summary, meta = read_js(args.input_js)
     cache = load_cache(args.cache)
@@ -620,7 +650,7 @@ def main():
             print("Add the GOV.UK EPC bearer token before running a write sweep.", file=sys.stderr)
             return 2
 
-    enriched, stats, reasons = enrich_transactions(transactions, cache, token, args)
+    enriched, stats, reasons, aborted_reason = enrich_transactions(transactions, cache, token, args)
     matched = sum(1 for item in enriched if numeric(item.get("pricePerSqft")))
     coverage = round(matched / len(enriched) * 100, 1) if enriched else 0
     print(f"EPC matches: {matched} ({coverage}%)")
@@ -635,6 +665,12 @@ def main():
 
     if args.dry_run:
         return 0
+
+    if aborted_reason:
+        write_cache(args.cache, cache)
+        print(aborted_reason, file=sys.stderr)
+        print(f"Updated {args.cache}")
+        return 4
 
     if args.fail_under_matches and matched < args.fail_under_matches:
         write_cache(args.cache, cache)

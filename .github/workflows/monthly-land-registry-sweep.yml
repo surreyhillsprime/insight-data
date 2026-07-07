@@ -11,6 +11,7 @@ permissions:
 jobs:
   update-insight-data:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
       - name: Check out repository
@@ -27,7 +28,16 @@ jobs:
             echo "::error::No EPC_BEARER_TOKEN secret configured. Add the GOV.UK EPC bearer token in Settings -> Secrets and variables -> Actions."
             exit 1
           fi
-          python3 scripts/enrich_epc_data.py --refresh-days 0 --fail-under-matches 1
+          python3 scripts/enrich_epc_data.py \
+            --refresh-days 0 \
+            --fail-under-matches 1 \
+            --fail-if-no-matches-after 150 \
+            --max-run-minutes 45 \
+            --max-errors 20 \
+            --request-timeout 10 \
+            --request-retries 0 \
+            --max-certificate-fetches 3 \
+            --progress-every 10
 
       - name: Commit updated data
         run: |
