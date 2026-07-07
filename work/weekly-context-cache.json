@@ -1,0 +1,4609 @@
+{
+  "planningConstraints": {
+    "128020297": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:47Z"
+    },
+    "33029752": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 219217/2, 92756/3",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:17Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:17Z"
+    },
+    "33032820": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "floodRiskZone": "Flood risk zone: 209350/2",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:06Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:06Z"
+    },
+    "33035072": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Lower Halliford Conservation Area",
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 218857/2",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:43Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:43Z"
+    },
+    "33037274": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "floodRiskZone": "Flood risk zone: 186505/2",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:10Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:10Z"
+    },
+    "33038959": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Lower Sunbury Conservation Area",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Spelthorne",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:00Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:00Z"
+    },
+    "33054940": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "floodRiskZone": "Flood risk zone: 186607/2",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:58:18Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:58:18Z"
+    },
+    "68100841": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:52Z"
+    },
+    "68100843": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:52Z"
+    },
+    "68100857": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:36Z"
+    },
+    "68115499": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Reigate and Banstead",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:01Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:01Z"
+    },
+    "68116458": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:51Z"
+    },
+    "68120840": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Reigate and Banstead",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:02Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:02Z"
+    },
+    "68121185": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:22Z"
+    },
+    "68121621": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:05Z"
+    },
+    "68124275": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:16Z"
+    },
+    "68124315": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:33Z"
+    },
+    "68130471": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "floodRiskZone": "Flood risk zone: 178588/2",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:14Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:14Z"
+    },
+    "68144548": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:08Z"
+    },
+    "68145516": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:16Z"
+    },
+    "68152251": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:39Z"
+    },
+    "68158958": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Reigate and Banstead",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:41Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:41Z"
+    },
+    "68163222": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Reigate Town Centre",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:24Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:24Z"
+    },
+    "68166549": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:40Z"
+    },
+    "68168740": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:40Z"
+    },
+    "68169799": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:53Z"
+    },
+    "68171327": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:11Z"
+    },
+    "68171584": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:08Z"
+    },
+    "68172893": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:18Z"
+    },
+    "68175388": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:01Z"
+    },
+    "68176230": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:06Z"
+    },
+    "68181103": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:19Z"
+    },
+    "68182014": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:07Z"
+    },
+    "CR37BB": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Tandridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:08Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:08Z"
+    },
+    "CR37BF": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Tandridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:40Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:40Z"
+    },
+    "CR37DN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:07Z"
+    },
+    "GU101JX": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:35Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:35Z"
+    },
+    "GU101LG": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:42Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:42Z"
+    },
+    "GU101NA": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:03Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:03Z"
+    },
+    "GU101NG": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:39Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:39Z"
+    },
+    "GU101PX": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:51Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:51Z"
+    },
+    "GU101QH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:17Z"
+    },
+    "GU101QX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:50Z"
+    },
+    "GU101QY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:23Z"
+    },
+    "GU101QZ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:39Z"
+    },
+    "GU101RB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:17Z"
+    },
+    "GU101RH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:39Z"
+    },
+    "GU101RQ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:00Z"
+    },
+    "GU102BP": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:53Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:53Z"
+    },
+    "GU102BU": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: TILFORD",
+          "constraintCount": 5,
+          "floodRiskZone": "Flood risk zone: 164115/2, 74296/3",
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:47Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:47Z"
+    },
+    "GU102DD": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:48Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:48Z"
+    },
+    "GU102ER": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "article4": "Article 4: Land encompassing Lane End and Millbridge (1958)",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:53Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:53Z"
+    },
+    "GU102HS": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "article4": "Article 4: Land encompassing Lane End and Millbridge (1958)",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:57Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:57Z"
+    },
+    "GU102LD": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "article4": "Article 4: Land encompassing Lane End and Millbridge (1958)",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:25Z"
+    },
+    "GU103AN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:59Z"
+    },
+    "GU103AR": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:49Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:49Z"
+    },
+    "GU103EE": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:49Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:49Z"
+    },
+    "GU103EF": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:58Z"
+    },
+    "GU103EH": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:19Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:19Z"
+    },
+    "GU103JH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:38Z"
+    },
+    "GU103RB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:08Z"
+    },
+    "GU104EU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:42Z"
+    },
+    "GU105EB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:11:34Z"
+    },
+    "GU11SW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:01Z"
+    },
+    "GU12BT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:01Z"
+    },
+    "GU12ES": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:05Z"
+    },
+    "GU12HH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:33Z"
+    },
+    "GU12JG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:27Z"
+    },
+    "GU12XN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:45Z"
+    },
+    "GU13SX": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Guildford Town Centre",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:49Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:49Z"
+    },
+    "GU13TD": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:31Z"
+    },
+    "GU13TE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:26Z"
+    },
+    "GU13TF": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:56Z"
+    },
+    "GU13TG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:57Z"
+    },
+    "GU13TL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:12Z"
+    },
+    "GU13TP": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:19Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:19Z"
+    },
+    "GU13TS": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:56Z"
+    },
+    "GU13TX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:35Z"
+    },
+    "GU13XT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:54Z"
+    },
+    "GU13XU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:37Z"
+    },
+    "GU195AE": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Bagshot Village",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:01Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:01Z"
+    },
+    "GU195HX": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:05Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:05Z"
+    },
+    "GU195NL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:39Z"
+    },
+    "GU206AD": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:46Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:46Z"
+    },
+    "GU206BN": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Church Road, Windlesham",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:42Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:42Z"
+    },
+    "GU206LJ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:20Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:20Z"
+    },
+    "GU206LP": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:22Z"
+    },
+    "GU206LS": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:38Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:38Z"
+    },
+    "GU206LT": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:47Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:47Z"
+    },
+    "GU206LW": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:34Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:34Z"
+    },
+    "GU206LX": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:12Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:12Z"
+    },
+    "GU206NA": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:32Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:32Z"
+    },
+    "GU206PB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:26Z"
+    },
+    "GU206PP": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:09Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:09Z"
+    },
+    "GU214XZ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Woking",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:54Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:54Z"
+    },
+    "GU220LB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:28Z"
+    },
+    "GU220PY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:08Z"
+    },
+    "GU220QD": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Fishers Hill, Hook Heath",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Woking",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:20Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:20Z"
+    },
+    "GU220QE": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Fishers Hill, Hook Heath",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Woking",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:09Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:09Z"
+    },
+    "GU220QS": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Woking",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:46Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:46Z"
+    },
+    "GU220QU": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Woking",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:14Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:14Z"
+    },
+    "GU220SR": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Woking",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:55Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:55Z"
+    },
+    "GU227HJ": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: The Hockering, Woking",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:58:43Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:58:43Z"
+    },
+    "GU227HL": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: The Hockering, Woking",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:25Z"
+    },
+    "GU227HP": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: The Hockering, Woking",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:30Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:30Z"
+    },
+    "GU228XD": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Woking",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:13Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:13Z"
+    },
+    "GU228XH": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Pyrford",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Woking",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:58:50Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:58:50Z"
+    },
+    "GU236QT": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Ockham Mill",
+          "constraintCount": 3,
+          "floodRiskZone": "Flood risk zone: 183572/2",
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:28Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:28Z"
+    },
+    "GU240BN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:33Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:33Z"
+    },
+    "GU248AN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:27Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:27Z"
+    },
+    "GU248DP": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:44Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:44Z"
+    },
+    "GU248DW": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:24Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:24Z"
+    },
+    "GU248HA": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:43Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:43Z"
+    },
+    "GU248HN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:30Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:30Z"
+    },
+    "GU248JE": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:37Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:37Z"
+    },
+    "GU248RU": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:58Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:58Z"
+    },
+    "GU248TE": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:54Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:54Z"
+    },
+    "GU24EY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:06Z"
+    },
+    "GU24EZ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:32Z"
+    },
+    "GU24HB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:11Z"
+    },
+    "GU24LR": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:11Z"
+    },
+    "GU24RH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:19Z"
+    },
+    "GU254AS": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:02Z"
+    },
+    "GU254AU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:29Z"
+    },
+    "GU254AW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:42Z"
+    },
+    "GU254AX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:30Z"
+    },
+    "GU254JP": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:58:00Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:58:00Z"
+    },
+    "GU254JR": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:03Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:03Z"
+    },
+    "GU254JT": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:59Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:59Z"
+    },
+    "GU254JU": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:15Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:15Z"
+    },
+    "GU254JY": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:59Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:59Z"
+    },
+    "GU254JZ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:06Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:06Z"
+    },
+    "GU254LD": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:23Z"
+    },
+    "GU254LE": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:29Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:29Z"
+    },
+    "GU254LY": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:50Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:50Z"
+    },
+    "GU254LZ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:30Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:30Z"
+    },
+    "GU254NA": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:58Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:58Z"
+    },
+    "GU254ND": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:06Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:06Z"
+    },
+    "GU254NE": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:21Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:21Z"
+    },
+    "GU254NF": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:09Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:09Z"
+    },
+    "GU254NG": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:00Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:00Z"
+    },
+    "GU254NH": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:45Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:45Z"
+    },
+    "GU254NL": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:38Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:38Z"
+    },
+    "GU254NN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:26Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:26Z"
+    },
+    "GU254NQ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:29Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:29Z"
+    },
+    "GU254NR": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:20Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:20Z"
+    },
+    "GU254NS": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:45Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:45Z"
+    },
+    "GU254NT": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:58Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:58Z"
+    },
+    "GU254NY": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:17Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:17Z"
+    },
+    "GU254PA": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:33Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:33Z"
+    },
+    "GU254PH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:48Z"
+    },
+    "GU254PJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:10:59Z"
+    },
+    "GU254PL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:11Z"
+    },
+    "GU254PN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:31Z"
+    },
+    "GU254PP": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:17Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:17Z"
+    },
+    "GU254PS": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:53Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:53Z"
+    },
+    "GU254PW": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:06Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:06Z"
+    },
+    "GU254PY": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:29Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:29Z"
+    },
+    "GU254PZ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:22Z"
+    },
+    "GU254QD": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:07Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:07Z"
+    },
+    "GU254QN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:51Z"
+    },
+    "GU254QS": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:57Z"
+    },
+    "GU254QT": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:29Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:29Z"
+    },
+    "GU254QU": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:52Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:52Z"
+    },
+    "GU254QW": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:58:59Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:58:59Z"
+    },
+    "GU254QZ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:02Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:02Z"
+    },
+    "GU254RS": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:35Z"
+    },
+    "GU254RT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:44Z"
+    },
+    "GU254RU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:13Z"
+    },
+    "GU254RW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:40Z"
+    },
+    "GU254RX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:18Z"
+    },
+    "GU254RY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:05Z"
+    },
+    "GU254RZ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:08Z"
+    },
+    "GU254SA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:32Z"
+    },
+    "GU254SB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:11:12Z"
+    },
+    "GU254SD": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:29Z"
+    },
+    "GU254SE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:56Z"
+    },
+    "GU254SF": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:41Z"
+    },
+    "GU266HY": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:12Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:12Z"
+    },
+    "GU271AJ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:44Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:44Z"
+    },
+    "GU272EU": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:31Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:31Z"
+    },
+    "GU272LD": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:29Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:29Z"
+    },
+    "GU272LH": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:44Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:44Z"
+    },
+    "GU273AF": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:54Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:54Z"
+    },
+    "GU273PJ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:43Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:43Z"
+    },
+    "GU31BQ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:23Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:23Z"
+    },
+    "GU31HF": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: St Catherines Guildford Town Centre",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:46Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:46Z"
+    },
+    "GU31HN": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: Littleton",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:01Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:01Z"
+    },
+    "GU31HW": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: Littleton",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:58:32Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:58:32Z"
+    },
+    "GU33QB": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Woking",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:52Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:52Z"
+    },
+    "GU33QF": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Woking",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:12Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:12Z"
+    },
+    "GU47QL": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Sutton Park and Sutton Green",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Woking",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:12Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:12Z"
+    },
+    "GU47RP": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:55Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:55Z"
+    },
+    "GU48BT": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Shalford",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:01Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:01Z"
+    },
+    "GU48HN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:17Z"
+    },
+    "GU48PL": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:30Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:30Z"
+    },
+    "GU48PP": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:34Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:34Z"
+    },
+    "GU48PR": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:55Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:55Z"
+    },
+    "GU48PS": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:00Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:00Z"
+    },
+    "GU48PZ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:08Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:08Z"
+    },
+    "GU48QS": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:31Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:31Z"
+    },
+    "GU48QY": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: BLACKHEATH WONERSH",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:57Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:57Z"
+    },
+    "GU48RB": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:51Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:51Z"
+    },
+    "GU50BU": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:56:58Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:56:58Z"
+    },
+    "GU50DA": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:26Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:26Z"
+    },
+    "GU50DD": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:38Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:38Z"
+    },
+    "GU50QS": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:15Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:15Z"
+    },
+    "GU50QW": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:50Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:50Z"
+    },
+    "GU50SU": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:53Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:53Z"
+    },
+    "GU50TF": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:43Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:43Z"
+    },
+    "GU59BG": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:08Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:08Z"
+    },
+    "GU59EQ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:58:02Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:58:02Z"
+    },
+    "GU59JQ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:22Z"
+    },
+    "GU59QE": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:15Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:15Z"
+    },
+    "GU59QW": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:57Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:57Z"
+    },
+    "GU59RT": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:45Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:45Z"
+    },
+    "GU59SL": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:49Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:49Z"
+    },
+    "GU67NL": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:31Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:31Z"
+    },
+    "GU67NP": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:22Z"
+    },
+    "GU68EU": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: ALFOLD",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:45Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:45Z"
+    },
+    "GU71ES": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Godalming Town Centre Conservation Area",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:58:52Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:58:52Z"
+    },
+    "GU72RA": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:25Z"
+    },
+    "GU72RJ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:46Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:46Z"
+    },
+    "GU84AA": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:20Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:20Z"
+    },
+    "GU84AD": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:25Z"
+    },
+    "GU84AE": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:04Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:04Z"
+    },
+    "GU84AP": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:36Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:36Z"
+    },
+    "GU84AY": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:38Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:38Z"
+    },
+    "GU84AZ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:38Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:38Z"
+    },
+    "GU84BQ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:17Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:17Z"
+    },
+    "GU84BT": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:02Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:02Z"
+    },
+    "GU84DP": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:58:14Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:58:14Z"
+    },
+    "GU84EB": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:06Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:06Z"
+    },
+    "GU84SJ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:25Z"
+    },
+    "GU84TS": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:43Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:43Z"
+    },
+    "GU84TU": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: Chiddingfold Conservation Area",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:58:24Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:58:24Z"
+    },
+    "GU84XY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:20Z"
+    },
+    "GU84YD": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:05Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:05Z"
+    },
+    "GU85UB": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:48Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:48Z"
+    },
+    "GU85UR": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: SANDHILLS WITLEY",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:34Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:34Z"
+    },
+    "GU86AY": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:37Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:37Z"
+    },
+    "GU86AZ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:56:59Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:56:59Z"
+    },
+    "GU86BG": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: Peper Harow Conservation Area",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:15Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:15Z"
+    },
+    "GU86LJ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:09Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:09Z"
+    },
+    "GU86NA": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:26Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:26Z"
+    },
+    "GU86NH": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 4,
+          "floodRiskZone": "Flood risk zone: 153783/2, 73807/3",
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:30Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:30Z"
+    },
+    "GU86NT": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:27Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:27Z"
+    },
+    "GU86QE": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: THURSLEY",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Waverley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:55Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:55Z"
+    },
+    "GU97JG": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: FARNHAM",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:11Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:11Z"
+    },
+    "GU98AZ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:31Z"
+    },
+    "GU98BH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:02Z"
+    },
+    "GU98DU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:48Z"
+    },
+    "GU98DX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:50Z"
+    },
+    "GU98EH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:48Z"
+    },
+    "GU98JW": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: GREAT AUSTINS FARNHAM",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:56Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:56Z"
+    },
+    "KT100TZ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:27Z"
+    },
+    "KT108AP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:32Z"
+    },
+    "KT108LF": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: West End",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:11Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:11Z"
+    },
+    "KT108LQ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:11Z"
+    },
+    "KT108PG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:23Z"
+    },
+    "KT108QA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:04Z"
+    },
+    "KT108QB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:44Z"
+    },
+    "KT108QG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:33Z"
+    },
+    "KT109DY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:49Z"
+    },
+    "KT109ET": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:18Z"
+    },
+    "KT109FG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:10:49Z"
+    },
+    "KT109FH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:38Z"
+    },
+    "KT109HA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:33Z"
+    },
+    "KT109HE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:11:58Z"
+    },
+    "KT109HF": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:33Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:33Z"
+    },
+    "KT109HG": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:54Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:54Z"
+    },
+    "KT109HJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:45Z"
+    },
+    "KT109JP": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:28Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:28Z"
+    },
+    "KT109JQ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:04Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:04Z"
+    },
+    "KT109JR": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:11Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:11Z"
+    },
+    "KT109JW": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:36Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:36Z"
+    },
+    "KT109LL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:11:41Z"
+    },
+    "KT109LS": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:12Z"
+    },
+    "KT109LT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:56Z"
+    },
+    "KT109LU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:08Z"
+    },
+    "KT109NA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:50Z"
+    },
+    "KT109NB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:06Z"
+    },
+    "KT109NH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:51Z"
+    },
+    "KT109NN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:49Z"
+    },
+    "KT109NP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:56:54Z"
+    },
+    "KT109NT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:03Z"
+    },
+    "KT109NX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:48Z"
+    },
+    "KT109PB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:37Z"
+    },
+    "KT109PF": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:32Z"
+    },
+    "KT109PG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:06Z"
+    },
+    "KT109TT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:33Z"
+    },
+    "KT109TU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:30Z"
+    },
+    "KT109UE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:39Z"
+    },
+    "KT111DY": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:12Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:12Z"
+    },
+    "KT111EE": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:13Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:13Z"
+    },
+    "KT111LP": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:19Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:19Z"
+    },
+    "KT112AL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:04Z"
+    },
+    "KT112BT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:05Z"
+    },
+    "KT112DD": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:13Z"
+    },
+    "KT112DF": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:48Z"
+    },
+    "KT112DG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:27Z"
+    },
+    "KT112DS": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:22Z"
+    },
+    "KT112EB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:50Z"
+    },
+    "KT112EE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:40Z"
+    },
+    "KT112EP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:10:40Z"
+    },
+    "KT112FG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:01Z"
+    },
+    "KT112FN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:02Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:02Z"
+    },
+    "KT112HH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:07Z"
+    },
+    "KT112HL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:19Z"
+    },
+    "KT112HU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:02Z"
+    },
+    "KT112HY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:14Z"
+    },
+    "KT112JA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:33Z"
+    },
+    "KT112JB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:45Z"
+    },
+    "KT112JD": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:38Z"
+    },
+    "KT112JE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:11:14Z"
+    },
+    "KT112JF": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:39Z"
+    },
+    "KT112JG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:09Z"
+    },
+    "KT112JH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:11:07Z"
+    },
+    "KT112JJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:10Z"
+    },
+    "KT112JQ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:19Z"
+    },
+    "KT112JY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:32Z"
+    },
+    "KT112NG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:25Z"
+    },
+    "KT112NH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:09Z"
+    },
+    "KT112NJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:46Z"
+    },
+    "KT112NL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:49Z"
+    },
+    "KT112NN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:29Z"
+    },
+    "KT112NQ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:03Z"
+    },
+    "KT112PA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:17Z"
+    },
+    "KT112PB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:03Z"
+    },
+    "KT112PH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:52Z"
+    },
+    "KT112QJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:34Z"
+    },
+    "KT112RG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:09Z"
+    },
+    "KT112RH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:03Z"
+    },
+    "KT112RJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:44Z"
+    },
+    "KT112RL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:41Z"
+    },
+    "KT112RN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:49Z"
+    },
+    "KT112RP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:54Z"
+    },
+    "KT112RR": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:10:57Z"
+    },
+    "KT112RS": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:12Z"
+    },
+    "KT112RU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:32Z"
+    },
+    "KT112RW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:20Z"
+    },
+    "KT113AX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:06Z"
+    },
+    "KT113BA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:55Z"
+    },
+    "KT113PU": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Stoke D'Abernon",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:57Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:57Z"
+    },
+    "KT113QD": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:14Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:14Z"
+    },
+    "KT113QJ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:42Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:42Z"
+    },
+    "KT121EH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:12Z"
+    },
+    "KT121EJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:17Z"
+    },
+    "KT121EL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:19Z"
+    },
+    "KT121EN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:23Z"
+    },
+    "KT121EQ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:57Z"
+    },
+    "KT121ET": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:24Z"
+    },
+    "KT121EU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:48Z"
+    },
+    "KT121EW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:51Z"
+    },
+    "KT121JL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:23Z"
+    },
+    "KT121NA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:25Z"
+    },
+    "KT121NE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:54Z"
+    },
+    "KT124AU": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:38Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:38Z"
+    },
+    "KT124LL": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 218488/2",
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:42Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:42Z"
+    },
+    "KT124LN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 207607/2",
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:49Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:49Z"
+    },
+    "KT125AY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:58Z"
+    },
+    "KT125AZ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:06Z"
+    },
+    "KT125BA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:57Z"
+    },
+    "KT125BB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:31Z"
+    },
+    "KT125BJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:26Z"
+    },
+    "KT125BL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:36Z"
+    },
+    "KT125BP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:16Z"
+    },
+    "KT125BS": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:54Z"
+    },
+    "KT125BT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:40Z"
+    },
+    "KT125BU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:55Z"
+    },
+    "KT125BW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:17Z"
+    },
+    "KT125BX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:10:41Z"
+    },
+    "KT125BY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:27Z"
+    },
+    "KT125DB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:24Z"
+    },
+    "KT125DD": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:22Z"
+    },
+    "KT125DE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:50Z"
+    },
+    "KT125DF": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:32Z"
+    },
+    "KT125DG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:10:11Z"
+    },
+    "KT125DH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:43Z"
+    },
+    "KT125DJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:34Z"
+    },
+    "KT125DN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:09Z"
+    },
+    "KT125DR": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:24Z"
+    },
+    "KT125DS": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:19Z"
+    },
+    "KT125DT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:52Z"
+    },
+    "KT125DW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:49Z"
+    },
+    "KT125DX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:17Z"
+    },
+    "KT125DY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:57Z"
+    },
+    "KT125EB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:53Z"
+    },
+    "KT130JP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:54Z"
+    },
+    "KT130JR": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:36Z"
+    },
+    "KT130JU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:59Z"
+    },
+    "KT130JX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:51Z"
+    },
+    "KT130JY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:22Z"
+    },
+    "KT130JZ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:36Z"
+    },
+    "KT130LB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:45Z"
+    },
+    "KT130LD": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:47Z"
+    },
+    "KT130LE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:28Z"
+    },
+    "KT130LF": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:26Z"
+    },
+    "KT130LG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:55Z"
+    },
+    "KT130LH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:28Z"
+    },
+    "KT130LQ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:26Z"
+    },
+    "KT130LT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:59Z"
+    },
+    "KT130LX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:10:18Z"
+    },
+    "KT130LY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:10:19Z"
+    },
+    "KT130LZ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:23Z"
+    },
+    "KT130NA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:34Z"
+    },
+    "KT130NB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:25Z"
+    },
+    "KT130NF": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:06Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:06Z"
+    },
+    "KT130NG": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:34Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:34Z"
+    },
+    "KT130NJ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:38Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:38Z"
+    },
+    "KT130NP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:04Z"
+    },
+    "KT130NQ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Elmbridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:58:10Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:58:10Z"
+    },
+    "KT130NR": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:25Z"
+    },
+    "KT130NS": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "scheduledMonument": "Scheduled monument: Large multivallate hillfort on St George's Hill",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:47Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:47Z"
+    },
+    "KT130NU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:04Z"
+    },
+    "KT130NW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:15Z"
+    },
+    "KT130NX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:00Z"
+    },
+    "KT130PA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:10:29Z"
+    },
+    "KT130PT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:10Z"
+    },
+    "KT130PU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:51Z"
+    },
+    "KT130PW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:55Z"
+    },
+    "KT130PX": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:11:11Z"
+    },
+    "KT130PY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:10Z"
+    },
+    "KT130PZ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:24Z"
+    },
+    "KT130QA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:42Z"
+    },
+    "KT130QB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:21Z"
+    },
+    "KT130QD": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:57Z"
+    },
+    "KT130QE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:02Z"
+    },
+    "KT130QF": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:56:55Z"
+    },
+    "KT130QH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:10:16Z"
+    },
+    "KT130QJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:37Z"
+    },
+    "KT130QL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:35Z"
+    },
+    "KT130QW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:21Z"
+    },
+    "KT130UA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:36Z"
+    },
+    "KT138SH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:33Z"
+    },
+    "KT138SL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:31Z"
+    },
+    "KT138XD": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:59Z"
+    },
+    "KT139QE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:43Z"
+    },
+    "KT139TD": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:05:56Z"
+    },
+    "KT146JE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:11:24Z"
+    },
+    "KT146JW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:14Z"
+    },
+    "KT151QH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:53Z"
+    },
+    "KT160QN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:39Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:39Z"
+    },
+    "KT171EY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:36Z"
+    },
+    "KT187EP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:45Z"
+    },
+    "KT187ET": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:12Z"
+    },
+    "KT211EY": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "heritageAtRisk": "Heritage at risk: Ashtead Park, Ashtead",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:45Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:45Z"
+    },
+    "KT211LU": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Ashstead, Conservation_Area.TAB",
+          "constraintCount": 2,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:28Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:28Z"
+    },
+    "KT212SG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:21Z"
+    },
+    "KT220DJ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:56:56Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:56:56Z"
+    },
+    "KT220ER": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:05Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:05Z"
+    },
+    "KT220HR": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:03Z"
+    },
+    "KT220HU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:10Z"
+    },
+    "KT220HY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:25Z"
+    },
+    "KT220HZ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:09Z"
+    },
+    "KT220JT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:21Z"
+    },
+    "KT220LP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:11:15Z"
+    },
+    "KT220LR": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:11:04Z"
+    },
+    "KT220LW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:17Z"
+    },
+    "KT220NG": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:47Z"
+    },
+    "KT220NJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:56Z"
+    },
+    "KT220NT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:37Z"
+    },
+    "KT220NU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:11:18Z"
+    },
+    "KT220PB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:27Z"
+    },
+    "KT220PE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:20Z"
+    },
+    "KT220PF": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:36Z"
+    },
+    "KT220PH": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:14Z"
+    },
+    "KT220PL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:25Z"
+    },
+    "KT220PN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 207101/2, 90847/3",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:33Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:33Z"
+    },
+    "KT220PP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:55Z"
+    },
+    "KT220PQ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:58Z"
+    },
+    "KT220PS": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:42Z"
+    },
+    "KT220PZ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:26Z"
+    },
+    "KT220QB": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:40Z"
+    },
+    "KT220QE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:14Z"
+    },
+    "KT220QJ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:21Z"
+    },
+    "KT220QL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:23Z"
+    },
+    "KT220QP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:08:34Z"
+    },
+    "KT220QR": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:53Z"
+    },
+    "KT220SA": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:22Z"
+    },
+    "KT220SP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:17Z"
+    },
+    "KT220ST": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:03:31Z"
+    },
+    "KT220SU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:10:02Z"
+    },
+    "KT220SW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:07:27Z"
+    },
+    "KT220TJ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 207044/2, 90796/3",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:16Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:16Z"
+    },
+    "KT220TW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:21Z"
+    },
+    "KT220UF": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 207044/2, 90796/3",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:04Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:04Z"
+    },
+    "KT220UL": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:57:10Z"
+    },
+    "KT220UP": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:35Z"
+    },
+    "KT220UR": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:01:58Z"
+    },
+    "KT220UT": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:44Z"
+    },
+    "KT220UU": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:28Z"
+    },
+    "KT228JZ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:41Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:41Z"
+    },
+    "KT228LA": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:13Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:13Z"
+    },
+    "KT228QJ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:23Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:23Z"
+    },
+    "KT228QW": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:06:34Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:06:34Z"
+    },
+    "KT233DS": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:00:04Z"
+    },
+    "KT245AN": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:22Z"
+    },
+    "KT245DE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:59:58Z"
+    },
+    "KT245PJ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:16Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:16Z"
+    },
+    "KT245PN": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:13Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:13Z"
+    },
+    "KT246AX": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: West Horsley",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:16Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:16Z"
+    },
+    "KT65EY": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T19:58:27Z"
+    },
+    "KT70NU": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Thames Ditton",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:48Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:48Z"
+    },
+    "KT80SX": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: East Molesey Old Village",
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 208707/2",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:46Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:46Z"
+    },
+    "KT89DJ": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: East Molesey Kent Town",
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 208707/2",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:36Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:36Z"
+    },
+    "KT89DL": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: East Molesey Kent Town",
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 208707/2",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:07Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:07Z"
+    },
+    "KT89DN": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: East Molesey Kent Town",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:48Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:48Z"
+    },
+    "KT89DW": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: East Molesey Kent Town",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:00:15Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:00:15Z"
+    },
+    "KT89EL": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: East Molesey Kent Town",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:18Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:18Z"
+    },
+    "KT89EW": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: East Molesey Kent Town",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:54Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:54Z"
+    },
+    "KT89JF": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: East Molesey Kent Town",
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 208707/2",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:24Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:24Z"
+    },
+    "RH14LS": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Tandridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:10:37Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:10:37Z"
+    },
+    "RH28NN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:50Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:50Z"
+    },
+    "RH28NX": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:41Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:41Z"
+    },
+    "RH43JU": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:15Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:15Z"
+    },
+    "RH43JX": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:42Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:42Z"
+    },
+    "RH54ED": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:37Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:37Z"
+    },
+    "RH55SQ": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:04:59Z"
+    },
+    "RH56AN": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:03:52Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:03:52Z"
+    },
+    "RH56DE": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:43Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:43Z"
+    },
+    "RH56JS": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:06Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:06Z"
+    },
+    "RH56JX": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:09:13Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:09:13Z"
+    },
+    "RH56NB": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:57Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:57Z"
+    },
+    "RH56NP": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: Holmbury St Mary",
+          "constraintCount": 4,
+          "greenBelt": "Green belt: Guildford",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:53Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:53Z"
+    },
+    "RH56PS": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Mole Valley",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:05:34Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:05:34Z"
+    },
+    "RH80ED": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Tandridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:53Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:53Z"
+    },
+    "RH80SL": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Tandridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:05Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:05Z"
+    },
+    "RH80SN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Tandridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:42Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:42Z"
+    },
+    "RH80TL": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Tandridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:47Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:47Z"
+    },
+    "RH89DW": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:06:00Z"
+    },
+    "RH89HE": {
+      "data": {},
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:09:40Z"
+    },
+    "RH89JN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Tandridge",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:18Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:18Z"
+    },
+    "SL50LF": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:14Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:14Z"
+    },
+    "SL50LG": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:57:37Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:57:37Z"
+    },
+    "SL50LH": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:11:26Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:11:26Z"
+    },
+    "TW200GR": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:35Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:35Z"
+    },
+    "TW200GS": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:04:58Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:04:58Z"
+    },
+    "TW200GT": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:16Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:16Z"
+    },
+    "TW200JU": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Englefield Green",
+          "constraintCount": 1,
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:07:14Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:07:14Z"
+    },
+    "TW200NB": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:18Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:18Z"
+    },
+    "TW200XY": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:39Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:39Z"
+    },
+    "TW200YD": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T19:59:26Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:59:26Z"
+    },
+    "TW200YG": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:01:02Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:01:02Z"
+    },
+    "TW200YJ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:02:20Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:02:20Z"
+    },
+    "TW200YX": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Englefield Green",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Runnymede",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-07T20:08:21Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T20:08:21Z"
+    }
+  },
+  "postcodes": {
+    "CR27HY": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Croydon",
+          "country": "England",
+          "postcodeDistrict": "CR2",
+          "precision": "Postcode centroid",
+          "region": "London",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.362237,
+        "longitude": -0.078205
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:56:52Z"
+    },
+    "GU111WT": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Rushmoor",
+          "country": "England",
+          "postcodeDistrict": "GU11",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.248548,
+        "longitude": -0.778024
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:56:52Z"
+    },
+    "GU343EW": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "East Hampshire",
+          "country": "England",
+          "postcodeDistrict": "GU34",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.093762,
+        "longitude": -1.021988
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:56:52Z"
+    },
+    "KT13BW": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Kingston upon Thames",
+          "country": "England",
+          "postcodeDistrict": "KT1",
+          "precision": "Postcode centroid",
+          "region": "London",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.400879,
+        "longitude": -0.28574
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-07T19:56:53Z"
+    },
+    "TW200HH": {
+      "status": "no_match",
+      "updatedAt": "2026-07-07T20:02:04Z"
+    }
+  },
+  "updatedAt": "2026-07-07T20:11:58Z",
+  "version": 1
+}
