@@ -34,6 +34,12 @@ jobs:
         if: github.event_name == 'workflow_dispatch' || steps.cadence.outputs.run_refresh == 'true'
         uses: actions/checkout@v4
 
+      - name: Synchronise latest main
+        if: github.event_name == 'workflow_dispatch' || steps.cadence.outputs.run_refresh == 'true'
+        run: |
+          git fetch origin main
+          git checkout -B main origin/main
+
       - name: Install coordinate transformer
         if: github.event_name == 'workflow_dispatch' || steps.cadence.outputs.run_refresh == 'true'
         run: python3 -m pip install --user pyproj
@@ -53,6 +59,11 @@ jobs:
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
           git pull --rebase --autostash origin main
+          if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
+            echo "::error::Refresh produced Git conflicts; refusing to commit."
+            exit 1
+          fi
+          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==2'
           git add outputs/surrey-transactions.js
           if [ -f work/os-uprn-cache.json ]; then
             git add work/os-uprn-cache.json
