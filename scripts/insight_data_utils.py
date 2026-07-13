@@ -15,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT_JS = ROOT / "outputs" / "surrey-transactions.js"
 POSTCODES_API = "https://api.postcodes.io/postcodes/"
+FEED_SCHEMA_VERSION = 2
 
 
 def utc_now():
@@ -44,10 +45,11 @@ def numeric(value):
 
 
 def parse_window_json(text, name, default):
-    match = re.search(rf"window\.{re.escape(name)}\s*=\s*(.*?);\s*(?=window\.|$)", text, re.S)
-    if not match:
-        return default
-    return json.loads(match.group(1))
+    prefix = f"window.{name} = "
+    for line in text.splitlines():
+        if line.startswith(prefix) and line.endswith(";"):
+            return json.loads(line[len(prefix) : -1])
+    return default
 
 
 def read_js(path=DEFAULT_INPUT_JS):
@@ -83,6 +85,8 @@ def summary_by_market(transactions):
 def write_js(path, transactions, meta):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    meta = dict(meta)
+    meta["schemaVersion"] = FEED_SCHEMA_VERSION
     content = "\n".join(
         [
             "window.SURREY_LAND_REG_TRANSACTIONS = " + json.dumps(transactions, separators=(",", ":")) + ";",
@@ -198,6 +202,8 @@ def postcode_lookup(postcode, cache, *, refresh_days=365, timeout=15, retries=1)
     data = {
         "longitude": round(lon, 7),
         "latitude": round(lat, 7),
+        "coordinateSource": "Postcodes.io",
+        "coordinatePrecision": "postcode-centroid",
         "geocode": {
             "source": "Postcodes.io",
             "precision": "Postcode centroid",
