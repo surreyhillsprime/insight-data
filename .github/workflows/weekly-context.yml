@@ -3,7 +3,7 @@ name: Weekly INSIGHT Context
 on:
   workflow_dispatch:
   schedule:
-    - cron: "35 5 * * 1"
+    - cron: "15 7 * * 1"
 
 permissions:
   contents: write
@@ -20,6 +20,11 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Synchronise latest main
+        run: |
+          git fetch origin main
+          git checkout -B main origin/main
 
       - name: Install coordinate transformer
         run: python3 -m pip install --user pyproj
@@ -38,6 +43,25 @@ jobs:
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
           git pull --rebase --autostash origin main
+          if git diff --name-only --diff-filter=U | grep -q .; then
+            echo "::error::Refresh produced unresolved Git conflicts; refusing to commit."
+            exit 1
+          fi
+          if grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
+            echo "::error::Feed contains Git conflict markers; refusing to commit."
+            exit 1
+          fi
+          PYTHONPATH=scripts python3 - <<'PY'
+          from pathlib import Path
+          from insight_data_utils import read_js
+
+          path = Path("outputs/surrey-transactions.js")
+          text = path.read_text(encoding="utf-8")
+          transactions, summary, meta = read_js(path)
+          assert text.count("window.SURREY_LAND_REG_") == 3, "feed must contain exactly three assignments"
+          assert transactions and isinstance(summary, dict), "feed data is incomplete"
+          assert meta.get("schemaVersion") == 2, "feed schemaVersion must be 2"
+          PY
           git add outputs/surrey-transactions.js
           if [ -f work/weekly-context-cache.json ]; then
             git add work/weekly-context-cache.json
