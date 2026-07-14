@@ -51,6 +51,7 @@ jobs:
       - name: Enrich with optional property context
         run: |
           python3 scripts/enrich_property_context.py \
+            --missing-only \
             --pause 0.15 \
             --progress-every 25 \
             --max-source-errors 20
@@ -65,7 +66,7 @@ jobs:
             exit 1
           fi
           PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==2'
-          git add outputs/surrey-transactions.js work/land-reg-surrey-3m-2010.csv
+          git add outputs/surrey-transactions.js work/land-reg-surrey-3m-1995.csv work/land-reg-surrey-3m-1995-2009.csv work/land-reg-surrey-3m-2010.csv
           if [ -f work/epc-cache.json ]; then
             git add work/epc-cache.json
           fi

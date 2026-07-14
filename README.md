@@ -23,7 +23,20 @@ INSIGHT now uses separate refresh jobs so high-change sources stay fresh without
 
 `monthly-land-registry-sweep.yml` has been left as a manual legacy fallback only. The scheduled monthly job is now `monthly-property-refresh.yml`.
 
-All workflows update:
+The monthly workflow now carries the Land Registry expansion through the full
+dependency chain. After the base/EPC/property job commits, a second job aligns
+planning constraints, heritage, schools, recent planning intelligence and OS
+UPRN data with every newly added transaction before committing the shared feed.
+The base sweep preserves existing enrichment fields on unchanged transactions.
+
+`sales-history-feed.yml` is a deliberately dormant commercial publication path
+for the separate complete Price Paid history feed. It has no schedule and its
+job cannot run until the `SALES_HISTORY_COMMERCIAL_ENABLED` repository variable
+is explicitly set to `true`. Its postcode cache is resumable; its published
+output is `outputs/sales-history.js`. This is Price Paid transaction history
+from 1995 onwards, not the legal title register, ownership, deeds, or charges.
+
+The scheduled market-enrichment workflows update:
 
 ```text
 outputs/surrey-transactions.js
@@ -95,7 +108,7 @@ Do not overwrite these live data files unless you deliberately want to reset the
 outputs/surrey-transactions.js
 work/epc-cache.json
 work/property-context-cache.json
-work/land-reg-surrey-3m-2010.csv
+work/land-reg-surrey-3m-1995.csv
 ```
 
 The new workflows will update the live data files themselves.
@@ -108,7 +121,7 @@ If this is a brand new empty repository, upload these folders/files:
 .github/workflows/
 scripts/
 outputs/surrey-transactions.js
-work/land-reg-surrey-3m-2010.csv
+work/land-reg-surrey-3m-1995.csv
 .nojekyll
 README.md
 ```
@@ -126,10 +139,13 @@ The enrichment scripts are source-aware:
 
 ## Current Data Scope
 
+Contains HM Land Registry data © Crown copyright and database right 2021.
+This data is licensed under the Open Government Licence v3.0.
+
 - Surrey Land Registry sales
 - GBP 3m+
 - Residential property types
-- From 2010-01-01
+- From 1995-01-01 (the beginning of HM Land Registry Price Paid Data)
 - Domestic EPC floor area where a confident address match is found
 - GBP/sq ft calculated from Land Registry sold price divided by matched EPC floor area
 - Optional public context where sources return usable data

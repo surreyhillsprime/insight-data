@@ -398,16 +398,16 @@ def main():
         "updatedAt": utc_now(),
         "planningConstraints": {
             "source": "Planning Data API",
-            "records": stats.get("planningConstraints", 0),
+            "records": sum(1 for item in enriched if item.get("planningConstraints")),
         },
         "historicEngland": {
             "source": "Planning Data API listed-building dataset",
-            "records": stats.get("historicEngland", 0),
+            "records": sum(1 for item in enriched if item.get("historicEngland")),
         },
         "schools": {
             "source": "DfE / Ofsted school data",
-            "records": stats.get("schools", 0),
-            "loaded": schools_loaded,
+            "records": sum(1 for item in enriched if item.get("ofsted")),
+            "loaded": schools_loaded or any(item.get("ofsted") for item in enriched),
         },
     }
     write_cache(args.cache, cache, CACHE_VERSION)

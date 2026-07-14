@@ -1,0 +1,44 @@
+name: Planning history feed
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: planning-history-feed
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Deliberately dormant until commercial licensing and publication are approved.
+    if: ${{ vars.PLANNING_COMMERCIAL_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require licensed source
+        env:
+          PLANNING_DATA_SOURCE: ${{ secrets.PLANNING_DATA_SOURCE }}
+        run: test -n "$PLANNING_DATA_SOURCE"
+      - name: Build planning feed
+        env:
+          PLANNING_DATA_SOURCE: ${{ secrets.PLANNING_DATA_SOURCE }}
+        run: >-
+          python3 scripts/build_commercial_planning_feed.py
+          --source "$PLANNING_DATA_SOURCE"
+          --input-js outputs/surrey-transactions.js
+          --write-js outputs/planning-history.js
+      - name: Validate project and feed
+        run: python3 scripts/validate_planning_feed.py outputs/planning-history.js
+      - name: Commit changed feed
+        run: |
+          if git diff --quiet -- outputs/planning-history.js; then exit 0; fi
+          git config user.name "insight-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add outputs/planning-history.js
+          git commit -m "Update planning history feed"
+          git push

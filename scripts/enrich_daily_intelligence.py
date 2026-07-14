@@ -277,12 +277,24 @@ def enrich_transactions(transactions, cache, args):
     stats = Counter()
     disabled = set()
     limit = args.limit if args.limit and args.limit > 0 else None
+    planning_donors = {}
+    if args.missing_only:
+        for transaction in transactions:
+            postcode = normalise_postcode(transaction.get("postcode"))
+            if postcode and transaction.get("planning"):
+                planning_donors.setdefault(postcode, transaction.get("planning"))
 
     for index, item in enumerate(transactions, start=1):
         output = dict(item)
         if limit and index > limit:
             enriched.append(output)
             continue
+
+        if args.missing_only and not output.get("planning"):
+            donor = planning_donors.get(normalise_postcode(item.get("postcode")))
+            if donor:
+                output["planning"] = donor
+                stats["planningReused"] += 1
 
         lat = lon = None
         if "geocode" not in disabled:
@@ -299,7 +311,7 @@ def enrich_transactions(transactions, cache, args):
         else:
             lat, lon = coordinates_from_item(output)
 
-        if lat is not None and lon is not None and "planning" not in disabled and not args.disable_planning:
+        if lat is not None and lon is not None and "planning" not in disabled and not args.disable_planning and not (args.missing_only and output.get("planning")):
             try:
                 planning = recent_planning_for_item(item, lat, lon, cache, args, since)
                 if planning:
@@ -352,6 +364,7 @@ def parse_args():
     parser.add_argument("--planning-limit", type=int, default=50, help="Planning API limit per property.")
     parser.add_argument("--max-applications-per-property", type=int, default=6, help="Store this many recent planning application summaries.")
     parser.add_argument("--disable-planning", action="store_true", help="Skip Planning Data API.")
+    parser.add_argument("--missing-only", action="store_true", help="Preserve existing intelligence and populate only transactions that still lack it.")
     parser.add_argument("--disable-companies-house", action="store_true", help="Skip Companies House API.")
     parser.add_argument("--dry-run", action="store_true", help="Do not write outputs.")
     return parser.parse_args()
@@ -372,13 +385,13 @@ def main():
         "updatedAt": utc_now(),
         "planning": {
             "source": "Planning Data API",
-            "records": stats.get("planning", 0),
+            "records": sum(1 for item in enriched if item.get("planning")),
             "lookbackDays": args.planning_days,
             "radiusMetres": args.planning_radius_m,
         },
         "companiesHouse": {
             "source": "Companies House API",
-            "records": stats.get("companiesHouse", 0),
+            "records": sum(1 for item in enriched if item.get("companiesHouse")),
             "requiresCompanyNumber": True,
         },
     }

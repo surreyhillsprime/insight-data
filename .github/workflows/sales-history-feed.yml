@@ -1,0 +1,53 @@
+name: Sales history feed
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sales-history-feed
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Deliberately dormant until commercial publication is approved.
+    if: ${{ vars.SALES_HISTORY_COMMERCIAL_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore resumable postcode cache
+        uses: actions/cache/restore@v4
+        with:
+          path: work/title-history-cache.json
+          key: title-history-${{ github.run_id }}
+          restore-keys: title-history-
+      - name: Build complete Price Paid history feed
+        run: >-
+          python3 scripts/collect_title_history.py
+          --input outputs/surrey-transactions.js
+          --output outputs/sales-history.js
+          --cache work/title-history-cache.json
+          --deployment-mode commercial
+          --workers 3
+          --batch-size 8
+      - name: Validate commercial feed
+        run: python3 scripts/validate_sales_history_feed.py outputs/sales-history.js
+      - name: Save resumable postcode cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: work/title-history-cache.json
+          key: title-history-${{ github.run_id }}
+      - name: Commit changed feed
+        run: |
+          if git diff --quiet -- outputs/sales-history.js; then exit 0; fi
+          git config user.name "insight-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add outputs/sales-history.js
+          git commit -m "Update complete sales history feed"
+          git push

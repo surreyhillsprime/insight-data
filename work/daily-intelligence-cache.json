@@ -1,5 +1,21 @@
 {
   "planningApplications": {
+    "CR37AN|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:22Z"
+    },
     "CR37BB|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -335,6 +351,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:49:43Z"
+    },
+    "CR69LU|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:21Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:21Z"
     },
     "GU101JX|2026-05-23|1200": {
       "data": {
@@ -2912,6 +2944,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:33:33Z"
     },
+    "GU103EP|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:22Z"
+    },
     "GU103JH|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -3359,6 +3407,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T14:05:53Z"
+    },
+    "GU105EE|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:19Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:19Z"
     },
     "GU11SW|2026-05-23|1200": {
       "data": {
@@ -5600,6 +5664,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T14:00:05Z"
     },
+    "GU206AB|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:24Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:24Z"
+    },
     "GU206AD|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -5824,6 +5904,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T14:02:45Z"
     },
+    "GU206HX|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:23Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:23Z"
+    },
     "GU206LJ|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -6047,6 +6143,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:59:31Z"
+    },
+    "GU206LQ|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:28Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:28Z"
     },
     "GU206LS|2026-05-23|1200": {
       "data": {
@@ -8288,6 +8400,38 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:37:06Z"
     },
+    "GU236NS|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:20Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:20Z"
+    },
+    "GU236PG|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:27Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:27Z"
+    },
     "GU236QT|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -9184,6 +9328,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T14:02:26Z"
     },
+    "GU248RG|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:23Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:23Z"
+    },
     "GU248RU|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -9407,6 +9567,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:56:05Z"
+    },
+    "GU248TN|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:28Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:28Z"
     },
     "GU24EY|2026-05-23|1200": {
       "data": {
@@ -9967,6 +10143,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:50:03Z"
+    },
+    "GU254AP|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:27Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:27Z"
     },
     "GU254AS|2026-05-23|1200": {
       "data": {
@@ -12992,6 +13184,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:48:04Z"
     },
+    "GU254NZ|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:22Z"
+    },
     "GU254PA|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -13103,6 +13311,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T14:03:58Z"
+    },
+    "GU254PB|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:25Z"
     },
     "GU254PH|2026-05-23|1200": {
       "data": {
@@ -17920,6 +18144,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T14:06:43Z"
     },
+    "GU47SY|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:25Z"
+    },
     "GU48BT|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -19264,6 +19504,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:48:30Z"
     },
+    "GU50DB|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:26Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:26Z"
+    },
     "GU50DD|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -19375,6 +19631,38 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T14:06:09Z"
+    },
+    "GU50PF|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:24Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:24Z"
+    },
+    "GU50QH|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:19Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:19Z"
     },
     "GU50QS|2026-05-23|1200": {
       "data": {
@@ -19823,6 +20111,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:41:39Z"
+    },
+    "GU50UD|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:23Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:23Z"
     },
     "GU59BG|2026-05-23|1200": {
       "data": {
@@ -20384,6 +20688,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:49:26Z"
     },
+    "GU59RS|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:28Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:28Z"
+    },
     "GU59RT|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -20607,6 +20927,38 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T14:06:27Z"
+    },
+    "GU59SR|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:20Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:20Z"
+    },
+    "GU67DH|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:22Z"
     },
     "GU67NL|2026-05-23|1200": {
       "data": {
@@ -20832,6 +21184,54 @@
       "status": "matched",
       "updatedAt": "2026-07-13T14:03:44Z"
     },
+    "GU67NT|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:27Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:27Z"
+    },
+    "GU67SR|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:20Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:20Z"
+    },
+    "GU67SW|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:22Z"
+    },
     "GU68EU|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -21055,6 +21455,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:37:09Z"
+    },
+    "GU71UN|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:21Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:21Z"
     },
     "GU72RA|2026-05-23|1200": {
       "data": {
@@ -21728,6 +22144,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T14:06:02Z"
     },
+    "GU84AR|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:19Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:19Z"
+    },
     "GU84AY|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -22400,6 +22832,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:33:03Z"
     },
+    "GU84NP|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:27Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:27Z"
+    },
     "GU84SJ|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -22511,6 +22959,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:38:19Z"
+    },
+    "GU84TG|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:21Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:21Z"
     },
     "GU84TS|2026-05-23|1200": {
       "data": {
@@ -22847,6 +23311,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:36:11Z"
+    },
+    "GU84YA|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:25Z"
     },
     "GU84YD|2026-05-23|1200": {
       "data": {
@@ -26767,6 +27247,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:51:09Z"
+    },
+    "KT109JH|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:26Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:26Z"
     },
     "KT109JP|2026-05-23|1200": {
       "data": {
@@ -33152,6 +33648,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:37:29Z"
     },
+    "KT112PG|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:25Z"
+    },
     "KT112PH|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -36399,6 +36911,38 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T14:02:34Z"
+    },
+    "KT124DE|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:22Z"
+    },
+    "KT124DF|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:26Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:26Z"
     },
     "KT124LL|2026-05-23|1200": {
       "data": {
@@ -39983,6 +40527,38 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:44:15Z"
+    },
+    "KT130JS|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:22Z"
+    },
+    "KT130JT|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:26Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:26Z"
     },
     "KT130JU|2026-05-23|1200": {
       "data": {
@@ -45136,6 +45712,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:38:32Z"
     },
+    "KT138TB|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:28Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:28Z"
+    },
     "KT138XD|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -45807,6 +46399,38 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:49:14Z"
+    },
+    "KT160EJ|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:24Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:24Z"
+    },
+    "KT160EQ|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:27Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:27Z"
     },
     "KT160QN|2026-05-23|1200": {
       "data": {
@@ -48383,6 +49007,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:56:36Z"
+    },
+    "KT206UQ|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:26Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:26Z"
     },
     "KT211EY|2026-05-23|1200": {
       "data": {
@@ -53536,6 +54176,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:36:24Z"
     },
+    "KT227DE|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:28Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:28Z"
+    },
     "KT228JZ|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -54543,6 +55199,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:58:58Z"
+    },
+    "KT245RH|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:25Z"
     },
     "KT246AX|2026-05-23|1200": {
       "data": {
@@ -55664,6 +56336,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:48:05Z"
     },
+    "KT89EN|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:21Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:21Z"
+    },
     "KT89EW|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -55887,6 +56575,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T14:03:45Z"
+    },
+    "RH123AT|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:23Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:23Z"
     },
     "RH14LS|2026-05-23|1200": {
       "data": {
@@ -56896,6 +57600,38 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:53:10Z"
     },
+    "RH28QZ|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:24Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:24Z"
+    },
+    "RH29RA|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:25Z"
+    },
     "RH29SS|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -57568,6 +58304,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:49:13Z"
     },
+    "RH56BQ|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:21Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:21Z"
+    },
     "RH56DE|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -57679,6 +58431,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:57:53Z"
+    },
+    "RH56JA|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:23Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:23Z"
     },
     "RH56JS|2026-05-23|1200": {
       "data": {
@@ -58128,6 +58896,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T14:06:37Z"
     },
+    "RH56NR|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:28Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:28Z"
+    },
     "RH56PS|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -58239,6 +59023,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-13T13:52:59Z"
+    },
+    "RH56SY|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:24Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:24Z"
     },
     "RH69ER|2026-05-23|1200": {
       "data": {
@@ -60480,6 +61280,22 @@
       "status": "matched",
       "updatedAt": "2026-07-13T13:56:59Z"
     },
+    "TW200HT|2026-05-30|1200": {
+      "data": {
+        "planning": {
+          "latestApplication": "No recent applications within 1.2km",
+          "latestDecision": "",
+          "period": "Since 2026-05-30",
+          "recentApplicationCount": 0,
+          "recentApplications": [],
+          "searchRadius": "1.2km",
+          "source": "Planning Data API",
+          "updatedAt": "2026-07-14T08:28:20Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-07-14T08:28:20Z"
+    },
     "TW200JU|2026-05-23|1200": {
       "data": {
         "planning": {
@@ -61271,6 +62087,6 @@
       "updatedAt": "2026-07-07T20:22:38Z"
     }
   },
-  "updatedAt": "2026-07-13T16:28:55Z",
+  "updatedAt": "2026-07-14T08:28:28Z",
   "version": 1
 }

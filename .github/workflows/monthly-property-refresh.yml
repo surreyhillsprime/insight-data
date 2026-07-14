@@ -53,6 +53,7 @@ jobs:
       - name: Refresh monthly flood and amenity context
         run: |
           python3 scripts/enrich_property_context.py \
+            --missing-only \
             --pause 0.15 \
             --progress-every 25 \
             --max-source-errors 25
@@ -67,7 +68,7 @@ jobs:
             exit 1
           fi
           PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==2'
-          git add outputs/surrey-transactions.js work/land-reg-surrey-3m-2010.csv
+          git add outputs/surrey-transactions.js work/land-reg-surrey-3m-1995.csv work/land-reg-surrey-3m-1995-2009.csv work/land-reg-surrey-3m-2010.csv
           if [ -f work/epc-cache.json ]; then
             git add work/epc-cache.json
           fi
@@ -78,5 +79,66 @@ jobs:
             echo "No monthly INSIGHT changes to commit."
           else
             git commit -m "Update INSIGHT monthly property data"
+            git push
+          fi
+
+  align-expanded-context:
+    needs: monthly-property-refresh
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Check out refreshed main feed
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install coordinate transformer
+        run: python3 -m pip install --user pyproj
+
+      - name: Align weekly planning, heritage, and school context
+        env:
+          SCHOOLS_CSV_URL: ${{ secrets.SCHOOLS_CSV_URL }}
+        run: |
+          python3 scripts/enrich_weekly_context.py \
+            --pause 0.15 \
+            --progress-every 25 \
+            --max-source-errors 25
+
+      - name: Align daily planning and company intelligence
+        env:
+          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+        run: |
+          python3 scripts/enrich_daily_intelligence.py \
+            --missing-only \
+            --planning-days 45 \
+            --planning-radius-m 1200 \
+            --pause 0.15 \
+            --progress-every 25 \
+            --max-source-errors 25
+
+      - name: Align OS UPRN context
+        run: |
+          python3 scripts/enrich_os_uprn.py \
+            --progress-every 25
+
+      - name: Commit aligned context
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git pull --rebase --autostash origin main
+          if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
+            echo "::error::Context alignment produced Git conflicts; refusing to commit."
+            exit 1
+          fi
+          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==2'
+          git add outputs/surrey-transactions.js
+          for cache in work/weekly-context-cache.json work/daily-intelligence-cache.json work/os-uprn-cache.json work/schools.csv; do
+            if [ -f "$cache" ]; then git add "$cache"; fi
+          done
+          if git diff --cached --quiet; then
+            echo "No expanded context changes to commit."
+          else
+            git commit -m "Align context with expanded Land Registry history"
             git push
           fi

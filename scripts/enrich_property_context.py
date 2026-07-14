@@ -375,12 +375,29 @@ def enrich_transactions(transactions, cache, args):
     disabled = set()
     flood_runtime_cache = {}
     limit = args.limit if args.limit and args.limit > 0 else None
+    context_fields = ("latitude", "longitude", "geocode", "environmentAgency", "openStreetMap")
+    donors = {}
+    if args.missing_only:
+        for transaction in transactions:
+            postcode = normalise_postcode(transaction.get("postcode"))
+            if postcode and parse_float(transaction.get("latitude")) is not None and parse_float(transaction.get("longitude")) is not None:
+                donors.setdefault(postcode, transaction)
 
     for index, item in enumerate(transactions, start=1):
         output = dict(item)
         if limit and index > limit:
             enriched.append(output)
             continue
+
+        if args.missing_only:
+            donor = donors.get(normalise_postcode(item.get("postcode")), {})
+            for field in context_fields:
+                if field not in output and field in donor:
+                    output[field] = donor[field]
+            if parse_float(output.get("latitude")) is not None and parse_float(output.get("longitude")) is not None and output.get("environmentAgency"):
+                enriched.append(output)
+                stats["preservedOrReused"] += 1
+                continue
 
         postcode_data = None
         if "postcodes" not in disabled:
@@ -450,6 +467,7 @@ def parse_args():
     parser.add_argument("--osm-radius-m", type=int, default=1800, help="OpenStreetMap nearby amenity radius.")
     parser.add_argument("--disable-environment-agency", action="store_true", help="Skip Environment Agency live flood alerts.")
     parser.add_argument("--disable-osm", action="store_true", help="Skip OpenStreetMap amenities.")
+    parser.add_argument("--missing-only", action="store_true", help="Preserve existing context and only populate transactions that still lack it.")
     parser.add_argument("--dry-run", action="store_true", help="Report without writing files.")
     return parser.parse_args()
 
@@ -469,17 +487,17 @@ def main():
         "updatedAt": utc_now(),
         "postcodes": {
             "source": "Postcodes.io",
-            "matched": stats.get("postcodes", 0),
+            "matched": sum(1 for item in enriched if item.get("latitude") is not None and item.get("longitude") is not None),
             "precision": "postcode centroid",
         },
         "environmentAgency": {
             "source": "Environment Agency Real Time flood-monitoring API",
-            "records": stats.get("environmentAgency", 0),
+            "records": sum(1 for item in enriched if item.get("environmentAgency")),
             "type": "current flood alerts within configured radius",
         },
         "openStreetMap": {
             "source": "OpenStreetMap via Overpass API",
-            "records": stats.get("openStreetMap", 0),
+            "records": sum(1 for item in enriched if item.get("openStreetMap")),
             "type": "nearby amenities and approximate walking-time labels",
         },
     }
