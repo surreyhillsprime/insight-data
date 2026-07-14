@@ -13,6 +13,7 @@ import re
 import sys
 import urllib.request
 from collections import Counter, defaultdict
+from datetime import datetime
 from difflib import SequenceMatcher
 from io import StringIO
 from pathlib import Path
@@ -116,8 +117,15 @@ def application_year(app):
     value = " ".join(str(app.get(key, "")) for key in (
         "decisionDate", "validatedDate", "receivedDate", "reference"
     ))
-    match = re.search(r"(?:19|20)\d{2}", value)
-    return int(match.group(0)) if match else None
+    years = [int(match) for match in re.findall(r"(?:19|20)\d{2}", value) if match != "1900"]
+    if years:
+        return years[0]
+    reference = str(app.get("reference", "")).strip()
+    short_year = re.match(r"^(\d{2})(?:[A-Z/])", reference, flags=re.I)
+    if short_year:
+        value = int(short_year.group(1))
+        return 2000 + value if value <= datetime.now().year % 100 else 1900 + value
+    return None
 
 
 def application_year_range(applications):
