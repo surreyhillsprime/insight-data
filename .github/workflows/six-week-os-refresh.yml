@@ -53,6 +53,10 @@ jobs:
             --max-match-distance-m 150 \
             --progress-every 25
 
+      - name: Check data completeness
+        if: github.event_name == 'workflow_dispatch' || steps.cadence.outputs.run_refresh == 'true'
+        run: python3 scripts/check_data_completeness.py
+
       - name: Commit updated data
         if: github.event_name == 'workflow_dispatch' || steps.cadence.outputs.run_refresh == 'true'
         run: |

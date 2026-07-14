@@ -20,8 +20,14 @@ INSIGHT now uses separate refresh jobs so high-change sources stay fresh without
 | `weekly-context.yml` | Mondays at 05:35 UTC | Planning constraints, listed-building matches, conservation/heritage overlays, and schools if a school CSV feed is supplied |
 | `monthly-property-refresh.yml` | 1st of each month at 06:00 UTC | Land Registry, EPC floor areas, GBP/sq ft, live flood-alert context, and OSM amenities |
 | `six-week-os-refresh.yml` | Guarded Sunday schedule | OS Open UPRN matching and geometry/linkage improvement when an OS CSV is supplied |
+| `data-completeness.yml` | Daily at 11:00 UTC | Validates historic coverage, source-level minimums and enrichment metadata |
 
 `monthly-land-registry-sweep.yml` has been left as a manual legacy fallback only. The scheduled monthly job is now `monthly-property-refresh.yml`.
+
+Every active producer workflow runs `scripts/check_data_completeness.py` before
+committing its result. A separate daily audit runs the stricter metadata check
+so a stale percentage or a major source-coverage regression is visible even
+when no producer workflow is being run manually.
 
 The monthly workflow now carries the Land Registry expansion through the full
 dependency chain. After the base/EPC/property job commits, a second job aligns

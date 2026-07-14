@@ -58,6 +58,9 @@ jobs:
             --progress-every 25 \
             --max-source-errors 25
 
+      - name: Check base data completeness
+        run: python3 scripts/check_data_completeness.py
+
       - name: Commit updated data
         run: |
           git config user.name "INSIGHT data bot"
@@ -121,6 +124,9 @@ jobs:
         run: |
           python3 scripts/enrich_os_uprn.py \
             --progress-every 25
+
+      - name: Check aligned data completeness
+        run: python3 scripts/check_data_completeness.py --strict-metadata
 
       - name: Commit aligned context
         run: |

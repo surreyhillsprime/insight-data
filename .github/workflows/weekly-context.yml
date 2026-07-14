@@ -38,6 +38,9 @@ jobs:
             --progress-every 25 \
             --max-source-errors 25
 
+      - name: Check data completeness
+        run: python3 scripts/check_data_completeness.py
+
       - name: Commit updated data
         run: |
           git config user.name "INSIGHT data bot"
