@@ -112,8 +112,29 @@ def application_date(app):
     return app.get("decisionDate") or app.get("validatedDate") or app.get("receivedDate") or ""
 
 
+def application_year(app):
+    value = " ".join(str(app.get(key, "")) for key in (
+        "decisionDate", "validatedDate", "receivedDate", "reference"
+    ))
+    match = re.search(r"(?:19|20)\d{2}", value)
+    return int(match.group(0)) if match else None
+
+
+def application_year_range(applications):
+    years = [year for app in applications if (year := application_year(app)) is not None]
+    return (min(years), max(years)) if years else (None, None)
+
+
 def property_uprn(item):
     return clean(item.get("uprn") or (item.get("ordnanceSurvey") or {}).get("uprn"))
+
+
+def property_match_key(item):
+    uprn = property_uprn(item)
+    if uprn:
+        return f"uprn:{uprn}"
+    address = re.sub(r"[^A-Z0-9]+", " ", clean(item.get("address")).upper()).strip()
+    return f"address:{address}|{normalise_postcode(item.get('postcode'))}"
 
 
 def match_applications(item, postcode_index, uprn_index, minimum_score):
@@ -153,13 +174,21 @@ def enrich(transactions, applications, minimum_score=0.72):
         if app.get("uprn"):
             uprn_index[app["uprn"]].append(app)
 
+    earliest_year, latest_year = application_year_range(unique.values())
     stats = Counter(sourceApplications=len(unique))
+    stats["earliestApplicationYear"] = earliest_year or 0
+    stats["latestApplicationYear"] = latest_year or 0
     enriched = []
+    property_matches = {}
+    matched_property_keys = set()
     checked_at = utc_now()
     for item in transactions:
         output = dict(item)
-        matches, method, confidence = match_applications(item, postcode_index, uprn_index, minimum_score)
-        stats["propertiesChecked"] += 1
+        key = property_match_key(item)
+        if key not in property_matches:
+            property_matches[key] = match_applications(item, postcode_index, uprn_index, minimum_score)
+            stats["propertiesChecked"] += 1
+        matches, method, confidence = property_matches[key]
         if matches:
             latest = matches[0]
             output["planningHistory"] = {
@@ -172,8 +201,10 @@ def enrich(transactions, applications, minimum_score=0.72):
                 "matchMethod": method,
                 "matchConfidence": confidence,
             }
-            stats["propertiesWithHistory"] += 1
-            stats["applicationMatches"] += len(matches)
+            if key not in matched_property_keys:
+                stats["propertiesWithHistory"] += 1
+                stats["applicationMatches"] += len(matches)
+                matched_property_keys.add(key)
         enriched.append(output)
     return enriched, stats
 
@@ -203,6 +234,9 @@ def main():
         "propertiesChecked": stats["propertiesChecked"],
         "propertiesWithHistory": stats["propertiesWithHistory"],
         "applicationsFound": stats["applicationMatches"],
+        "coverageMode": "full-available-history",
+        "earliestApplicationYear": stats["earliestApplicationYear"] or None,
+        "latestApplicationYear": stats["latestApplicationYear"] or None,
     }
     write_js(args.write_js, enriched, meta)
     print(f"Updated {args.write_js}")

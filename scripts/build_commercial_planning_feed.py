@@ -25,6 +25,9 @@ def write_planning_js(path, histories, stats, coverage):
         "propertiesChecked": stats["propertiesChecked"],
         "propertiesWithHistory": stats["propertiesWithHistory"],
         "applicationsFound": stats["applicationsFound"],
+        "coverageMode": "full-available-history",
+        "earliestApplicationYear": stats.get("earliestApplicationYear") or None,
+        "latestApplicationYear": stats.get("latestApplicationYear") or None,
         "authorities": [item["authority"] for item in coverage],
         "authorityCoverage": coverage,
     }
@@ -62,9 +65,11 @@ def main():
         propertiesChecked=source_stats["propertiesChecked"],
         propertiesWithHistory=source_stats["propertiesWithHistory"],
         applicationsFound=source_stats["applicationMatches"],
+        earliestApplicationYear=source_stats["earliestApplicationYear"],
+        latestApplicationYear=source_stats["latestApplicationYear"],
     )
     coverage = [
-        {"authority": name, "propertiesWithHistory": count, "status": "licensed-source"}
+        {"authority": name, "propertiesWithHistory": count, "status": "licensed-source", "coverageMode": "full-available-history"}
         for name, count in sorted(authorities.items())
     ]
     write_planning_js(args.write_js, histories, stats, coverage)

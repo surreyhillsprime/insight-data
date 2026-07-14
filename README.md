@@ -29,6 +29,15 @@ planning constraints, heritage, schools, recent planning intelligence and OS
 UPRN data with every newly added transaction before committing the shared feed.
 The base sweep preserves existing enrichment fields on unchanged transactions.
 
+Planning uses two deliberately separate time horizons. The daily intelligence
+job remains a rolling 45-day alert search. The dormant licensed planning-history
+feed imports each provider's complete available archive, records the earliest
+and latest application years supplied, and searches each distinct property only
+once even when it has several Land Registry transactions. EPC, constraints,
+flood, school and OS enrichment is applied across every property in the expanded
+feed using each source's full available or current coverage; those snapshot
+sources are not artificially backdated to 1995.
+
 `sales-history-feed.yml` is a deliberately dormant commercial publication path
 for the separate complete Price Paid history feed. It has no schedule and its
 job cannot run until the `SALES_HISTORY_COMMERCIAL_ENABLED` repository variable
