@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "prime-resi",
+      "name": "PrimeResi",
+      "url": "https://primeresi.com/feed/",
+      "category": "prime-specialist",
+      "quality": 9,
+      "primePropertyBias": 8,
+      "defaultGeography": "",
+      "rightsMode": "link-only",
+      "enabled": true
+    },
+    {
+      "id": "country-life-property",
+      "name": "Country Life",
+      "url": "https://www.countrylife.co.uk/property/feed",
+      "category": "prime-specialist",
+      "quality": 8,
+      "primePropertyBias": 6,
+      "defaultGeography": "",
+      "rightsMode": "link-only",
+      "enabled": true
+    },
+    {
+      "id": "property-industry-eye",
+      "name": "Property Industry Eye",
+      "url": "https://propertyindustryeye.com/feed/",
+      "category": "industry-press",
+      "quality": 8,
+      "primePropertyBias": 3,
+      "defaultGeography": "",
+      "rightsMode": "link-only",
+      "enabled": true
+    },
+    {
+      "id": "bbc-surrey",
+      "name": "BBC Surrey",
+      "url": "https://feeds.bbci.co.uk/news/england/surrey/rss.xml",
+      "category": "surrey-local",
+      "quality": 9,
+      "primePropertyBias": 0,
+      "defaultGeography": "Surrey",
+      "rightsMode": "link-only",
+      "enabled": true
+    },
+    {
+      "id": "surrey-live",
+      "name": "SurreyLive",
+      "url": "https://www.getsurrey.co.uk/news/?service=rss",
+      "category": "surrey-local",
+      "quality": 6,
+      "primePropertyBias": 0,
+      "defaultGeography": "Surrey",
+      "minimumScore": 45,
+      "rightsMode": "link-only",
+      "enabled": true
+    }
+  ]
+}

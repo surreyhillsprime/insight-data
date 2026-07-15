@@ -1,0 +1,48 @@
+name: Surrey intelligence news feed
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insight-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Start from current main
+        run: |
+          git fetch origin main
+          git rebase origin/main
+      - name: Collect and score link-only article metadata
+        run: python3 scripts/collect_news.py
+      - name: Validate news feed
+        run: python3 scripts/validate_news_feed.py outputs/news-feed.js
+      - name: Refuse conflicted output
+        run: |
+          if grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/news-feed.js; then
+            echo 'Conflict markers found in news feed' >&2
+            exit 1
+          fi
+      - name: Commit changed feed
+        run: |
+          if git diff --quiet -- outputs/news-feed.js; then exit 0; fi
+          git config user.name "insight-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add outputs/news-feed.js
+          git commit -m "Update Surrey intelligence news feed"
+          git pull --rebase origin main
+          python3 scripts/validate_news_feed.py outputs/news-feed.js
+          git push
