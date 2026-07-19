@@ -10,7 +10,7 @@
     "gitTagCreated": false
   },
   "provenance": {
-    "dataSourceCommit": "595b89041d892d7f51c2f552c75cbb76b8d8ab26",
+    "releaseContentCommit": "8ba53550381a16ecef1f578e218421b9b9f2360b",
     "dataBranch": "release-v1.5.1",
     "appSourceSnapshot": "INSIGHT-v1.5.1-source",
     "appSourceSnapshotIsGitVersioned": false,

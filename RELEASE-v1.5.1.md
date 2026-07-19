@@ -31,7 +31,7 @@ engineering evidence, not legal advice.
 | Minimum macOS | 12.0 on both slices |
 | Code signature | Strict verification passed; ad-hoc; no Team ID |
 | Dataset fingerprint | `f85c31d13a3a6edeb22948262e1d6082df07b6b4ef6ce60f1ae487fed6183823` |
-| Data source commit | `595b89041d892d7f51c2f552c75cbb76b8d8ab26` |
+| Release content commit | `8ba53550381a16ecef1f578e218421b9b9f2360b` |
 
 The exact ZIP was extracted and independently validated. Its 26 bundled web
 assets match the audited source, and the installed `/Applications/INSIGHT.app`
