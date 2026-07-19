@@ -34,6 +34,13 @@ CACHE_VERSION = 1
 DEFAULT_CACHE = DEFAULT_INPUT_JS.parents[1] / "work" / "daily-intelligence-cache.json"
 PLANNING_ENTITY_API = "https://www.planning.data.gov.uk/entity.json"
 COMPANIES_HOUSE_API = "https://api.company-information.service.gov.uk"
+PLANNING_COVERAGE_OBSERVED = "observed"
+PLANNING_COVERAGE_UNKNOWN = "unknown"
+PLANNING_COVERAGE_STATUSES = {PLANNING_COVERAGE_OBSERVED, PLANNING_COVERAGE_UNKNOWN, "unavailable"}
+PLANNING_COVERAGE_NOTE = (
+    "Planning Data coverage varies by authority; an empty spatial response is not evidence "
+    "that no nearby applications exist."
+)
 
 
 def nested_value(source, path):
@@ -61,6 +68,24 @@ def entity_list(payload):
         if isinstance(value, list):
             return value
     return []
+
+
+def next_page_link(payload):
+    """Return the API's declared next-page link, across supported link shapes."""
+
+    links = payload.get("links") if isinstance(payload, dict) else None
+    if isinstance(links, dict):
+        value = links.get("next")
+        if isinstance(value, dict):
+            value = value.get("href") or value.get("url")
+        return clean(value)
+    if isinstance(links, list):
+        for value in links:
+            if not isinstance(value, dict):
+                continue
+            if clean(value.get("rel") or value.get("name")).lower() == "next":
+                return clean(value.get("href") or value.get("url"))
+    return ""
 
 
 def entity_value(entity, names):
@@ -115,6 +140,90 @@ def application_label(application):
     return name
 
 
+def planning_context_is_truthful(context):
+    if not isinstance(context, dict):
+        return False
+    status = clean(context.get("coverageStatus")).lower()
+    applications = context.get("recentApplications")
+    applications = applications if isinstance(applications, list) else []
+    latest = clean(context.get("latestApplication"))
+    if status == PLANNING_COVERAGE_OBSERVED:
+        return (
+            context.get("coverageMode") == "positive-results-only"
+            and bool(applications)
+            and bool(latest)
+            and not latest.lower().startswith("no recent")
+        )
+    if status in PLANNING_COVERAGE_STATUSES - {PLANNING_COVERAGE_OBSERVED}:
+        return (
+            context.get("coverageMode") == "no-authoritative-negative-coverage"
+            and not applications
+            and not latest
+            and "recentApplicationCount" not in context
+        )
+    return False
+
+
+def planning_context_is_current(context, refresh_hours):
+    if not planning_context_is_truthful(context):
+        return False
+    return cache_fresh(
+        {"updatedAt": context.get("updatedAt")},
+        refresh_hours * 60 * 60,
+    )
+
+
+def normalise_existing_planning(context):
+    if not isinstance(context, dict):
+        return None
+    if planning_context_is_truthful(context):
+        return dict(context)
+
+    applications = context.get("recentApplications")
+    applications = applications if isinstance(applications, list) else []
+    base = {
+        key: context[key]
+        for key in ("source", "updatedAt", "period", "searchRadius")
+        if context.get(key) not in (None, "")
+    }
+    base.setdefault("source", "Planning Data API")
+    base["coverageNote"] = PLANNING_COVERAGE_NOTE
+    if applications:
+        base.update({
+            "coverageStatus": PLANNING_COVERAGE_OBSERVED,
+            "coverageMode": "positive-results-only",
+            "queryResultCount": len(applications),
+            "recentApplicationCount": len(applications),
+            "latestApplication": application_label(applications[0]),
+            "latestDecision": clean(first_value(applications[0], ["decision", "status"])),
+            "recentApplications": applications,
+        })
+        return base
+
+    base.update({
+        "coverageStatus": PLANNING_COVERAGE_UNKNOWN,
+        "coverageMode": "no-authoritative-negative-coverage",
+        "coverageReason": "legacy-or-empty-spatial-result-unproven",
+        "queryResultCount": 0,
+        "recentApplications": [],
+    })
+    return base
+
+
+def unavailable_planning_context(args, since, reason):
+    return {
+        "source": "Planning Data API",
+        "updatedAt": utc_now(),
+        "period": f"Since {since.isoformat()}",
+        "searchRadius": format_distance(args.planning_radius_m),
+        "coverageStatus": "unavailable",
+        "coverageMode": "no-authoritative-negative-coverage",
+        "coverageReason": reason,
+        "coverageNote": PLANNING_COVERAGE_NOTE,
+        "recentApplications": [],
+    }
+
+
 def planning_cache_key(item, since, radius_m):
     postcode = normalise_postcode(item.get("postcode"))
     return f"{postcode or item.get('id')}|{since.isoformat()}|{int(radius_m)}"
@@ -124,8 +233,10 @@ def recent_planning_for_item(item, lat, lon, cache, args, since):
     key = planning_cache_key(item, since, args.planning_radius_m)
     planning_cache = cache.setdefault("planningApplications", {})
     cached = planning_cache.get(key)
-    if cache_fresh(cached, args.refresh_hours * 60 * 60):
-        return cached.get("data")
+    cached_data = cached.get("data") if isinstance(cached, dict) else None
+    cached_context = cached_data.get("planning") if isinstance(cached_data, dict) else None
+    if cache_fresh(cached, args.refresh_hours * 60 * 60) and planning_context_is_truthful(cached_context):
+        return cached_data
 
     params = {
         "dataset": "planning-application",
@@ -137,16 +248,38 @@ def recent_planning_for_item(item, lat, lon, cache, args, since):
         "start_date_match": "since",
         "limit": args.planning_limit,
     }
-    payload = request_json(
-        PLANNING_ENTITY_API,
-        params=params,
-        timeout=args.timeout,
-        retries=args.retries,
-        user_agent="INSIGHT daily planning monitor",
-    )
+    entities = []
+    query_pages = 0
+    offset = 0
+    while True:
+        payload = request_json(
+            PLANNING_ENTITY_API,
+            params={**params, "offset": offset},
+            timeout=args.timeout,
+            retries=args.retries,
+            user_agent="INSIGHT daily planning monitor",
+        )
+        query_pages += 1
+        entities.extend(entity_list(payload))
+        if not next_page_link(payload):
+            break
+        if query_pages >= args.planning_max_pages:
+            raise RuntimeError(
+                f"Planning Data pagination exceeded the {args.planning_max_pages}-page safety cap"
+            )
+        offset += args.planning_limit
+
     applications = []
-    for entity in entity_list(payload):
+    unlocated_results = 0
+    outside_radius_results = 0
+    for entity in entities:
         distance_m = entity_distance(entity, lat, lon)
+        if distance_m is None:
+            unlocated_results += 1
+            continue
+        if distance_m > args.planning_radius_m:
+            outside_radius_results += 1
+            continue
         app = {
             "name": clean(entity_value(entity, ["name", "description", "development_description", "proposal"])),
             "reference": clean(entity_value(entity, ["reference", "application_reference", "planning_application_reference"])),
@@ -169,20 +302,38 @@ def recent_planning_for_item(item, lat, lon, cache, args, since):
 
     applications.sort(key=lambda row: (row.get("date", ""), -row.get("metres", 0)), reverse=True)
     limited = applications[: args.max_applications_per_property]
-    latest = application_label(limited[0]) if limited else ""
-    data = {
-        "planning": {
-            "source": "Planning Data API",
-            "updatedAt": utc_now(),
-            "period": f"Since {since.isoformat()}",
-            "searchRadius": format_distance(args.planning_radius_m),
-            "recentApplicationCount": len(applications),
-            "latestApplication": latest or f"No recent applications within {format_distance(args.planning_radius_m)}",
-            "latestDecision": clean(first_value(limited[0], ["decision", "status"])) if limited else "",
-            "recentApplications": limited,
-        }
+    observed_at = utc_now()
+    context = {
+        "source": "Planning Data API",
+        "updatedAt": observed_at,
+        "period": f"Since {since.isoformat()}",
+        "searchRadius": format_distance(args.planning_radius_m),
+        "queryResultCount": len(applications),
+        "sourceResultCount": len(entities),
+        "queryPages": query_pages,
+        "unlocatedResultCount": unlocated_results,
+        "outsideRadiusResultCount": outside_radius_results,
+        "recentApplications": limited,
+        "coverageNote": PLANNING_COVERAGE_NOTE,
     }
-    planning_cache[key] = {"status": "matched", "updatedAt": utc_now(), "data": data}
+    if limited:
+        context.update({
+            "coverageStatus": PLANNING_COVERAGE_OBSERVED,
+            "coverageMode": "positive-results-only",
+            "recentApplicationCount": len(applications),
+            "latestApplication": application_label(limited[0]),
+            "latestDecision": clean(first_value(limited[0], ["decision", "status"])),
+        })
+        cache_status = "matched"
+    else:
+        context.update({
+            "coverageStatus": PLANNING_COVERAGE_UNKNOWN,
+            "coverageMode": "no-authoritative-negative-coverage",
+            "coverageReason": "no-proven-within-radius-result",
+        })
+        cache_status = "unknown"
+    data = {"planning": context}
+    planning_cache[key] = {"status": cache_status, "updatedAt": observed_at, "data": data}
     return data
 
 
@@ -281,16 +432,21 @@ def enrich_transactions(transactions, cache, args):
     if args.missing_only:
         for transaction in transactions:
             postcode = normalise_postcode(transaction.get("postcode"))
-            if postcode and transaction.get("planning"):
-                planning_donors.setdefault(postcode, transaction.get("planning"))
+            planning = normalise_existing_planning(transaction.get("planning"))
+            if postcode and planning and planning_context_is_current(planning, args.refresh_hours):
+                planning_donors.setdefault(postcode, planning)
 
     for index, item in enumerate(transactions, start=1):
         output = dict(item)
+        if output.get("planning"):
+            output["planning"] = normalise_existing_planning(output.get("planning"))
+            if output["planning"] != item.get("planning"):
+                stats["planningNormalised"] += 1
         if limit and index > limit:
             enriched.append(output)
             continue
 
-        if args.missing_only and not output.get("planning"):
+        if args.missing_only and not planning_context_is_truthful(output.get("planning")):
             donor = planning_donors.get(normalise_postcode(item.get("postcode")))
             if donor:
                 output["planning"] = donor
@@ -311,7 +467,11 @@ def enrich_transactions(transactions, cache, args):
         else:
             lat, lon = coordinates_from_item(output)
 
-        if lat is not None and lon is not None and "planning" not in disabled and not args.disable_planning and not (args.missing_only and output.get("planning")):
+        has_reusable_planning = args.missing_only and planning_context_is_current(
+            output.get("planning"),
+            args.refresh_hours,
+        )
+        if lat is not None and lon is not None and "planning" not in disabled and not args.disable_planning and not has_reusable_planning:
             try:
                 planning = recent_planning_for_item(item, lat, lon, cache, args, since)
                 if planning:
@@ -320,8 +480,32 @@ def enrich_transactions(transactions, cache, args):
             except Exception as exc:
                 stats["planningErrors"] += 1
                 print(f"Planning Data skipped for {item.get('id')}: {exc}", file=sys.stderr)
+                existing = output.get("planning")
+                if not (
+                    planning_context_is_truthful(existing)
+                    and existing.get("coverageStatus") == PLANNING_COVERAGE_OBSERVED
+                ):
+                    output["planning"] = unavailable_planning_context(args, since, "request-failed")
                 if args.max_source_errors and stats["planningErrors"] >= args.max_source_errors:
                     disabled.add("planning")
+        elif not args.disable_planning and "planning" in disabled:
+            existing = output.get("planning")
+            if not (
+                planning_context_is_truthful(existing)
+                and existing.get("coverageStatus") == PLANNING_COVERAGE_OBSERVED
+            ):
+                output["planning"] = unavailable_planning_context(
+                    args,
+                    since,
+                    "source-disabled-after-request-failures",
+                )
+        elif (lat is None or lon is None) and not args.disable_planning:
+            existing = output.get("planning")
+            if not (
+                planning_context_is_truthful(existing)
+                and existing.get("coverageStatus") == PLANNING_COVERAGE_OBSERVED
+            ):
+                output["planning"] = unavailable_planning_context(args, since, "missing-coordinates")
 
         company_number = company_number_from_item(output)
         if company_number and "companiesHouse" not in disabled and not args.disable_companies_house:
@@ -362,6 +546,7 @@ def parse_args():
     parser.add_argument("--planning-days", type=int, default=45, help="Look back this many days for planning applications.")
     parser.add_argument("--planning-radius-m", type=int, default=1200, help="Planning search radius around each property.")
     parser.add_argument("--planning-limit", type=int, default=50, help="Planning API limit per property.")
+    parser.add_argument("--planning-max-pages", type=int, default=20, help="Fail closed if one planning query exceeds this many API pages.")
     parser.add_argument("--max-applications-per-property", type=int, default=6, help="Store this many recent planning application summaries.")
     parser.add_argument("--disable-planning", action="store_true", help="Skip Planning Data API.")
     parser.add_argument("--missing-only", action="store_true", help="Preserve existing intelligence and populate only transactions that still lack it.")
@@ -381,11 +566,32 @@ def main():
     if args.dry_run:
         return 0
 
+    planning_records = [
+        item.get("planning") for item in enriched
+        if planning_context_is_truthful(item.get("planning"))
+    ]
     meta["dailyIntelligence"] = {
         "updatedAt": utc_now(),
         "planning": {
             "source": "Planning Data API",
-            "records": sum(1 for item in enriched if item.get("planning")),
+            "records": len(planning_records),
+            "observedRecords": sum(
+                1 for item in planning_records
+                if item.get("coverageStatus") == PLANNING_COVERAGE_OBSERVED
+            ),
+            "unknownRecords": sum(
+                1 for item in planning_records
+                if item.get("coverageStatus") == PLANNING_COVERAGE_UNKNOWN
+            ),
+            "unavailableRecords": sum(
+                1 for item in planning_records
+                if item.get("coverageStatus") == "unavailable"
+            ),
+            "successfulResponses": sum(
+                1 for item in planning_records
+                if item.get("coverageStatus") in {PLANNING_COVERAGE_OBSERVED, PLANNING_COVERAGE_UNKNOWN}
+            ),
+            "coverageMode": "positive-observations-only",
             "lookbackDays": args.planning_days,
             "radiusMetres": args.planning_radius_m,
         },

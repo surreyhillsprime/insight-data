@@ -67,7 +67,7 @@ jobs:
             echo "::error::Refresh produced Git conflicts; refusing to commit."
             exit 1
           fi
-          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==2'
+          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==3 and meta.get("propertyRecordSchemaVersion")==1 and all(str(row.get("propertyRecordId", "")).startswith("property:") for row in rows)'
           git add outputs/surrey-transactions.js
           if [ -f work/os-uprn-cache.json ]; then
             git add work/os-uprn-cache.json

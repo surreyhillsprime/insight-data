@@ -292,7 +292,7 @@ def schools_for_item(lat, lon, schools, args):
         best = f"{rated[0]['rating']}: {rated[0]['name']} ({rated[0]['distance']})"
     return {
         "ofsted": {
-            "source": "DfE / Ofsted school data",
+            "source": "DfE Get Information about Schools public download",
             "updatedAt": utc_now(),
             "nearestSchools": nearest,
             "bestNearbyRating": best,
@@ -405,7 +405,7 @@ def main():
             "records": sum(1 for item in enriched if item.get("historicEngland")),
         },
         "schools": {
-            "source": "DfE / Ofsted school data",
+            "source": "DfE Get Information about Schools public download",
             "records": sum(1 for item in enriched if item.get("ofsted")),
             "loaded": schools_loaded or any(item.get("ofsted") for item in enriched),
         },

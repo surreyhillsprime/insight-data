@@ -63,14 +63,13 @@ jobs:
           transactions, summary, meta = read_js(path)
           assert text.count("window.SURREY_LAND_REG_") == 3, "feed must contain exactly three assignments"
           assert transactions and isinstance(summary, dict), "feed data is incomplete"
-          assert meta.get("schemaVersion") == 2, "feed schemaVersion must be 2"
+          assert meta.get("schemaVersion") == 3, "feed schemaVersion must be 3"
+          assert meta.get("propertyRecordSchemaVersion") == 1, "property identity schema must be 1"
+          assert all(str(item.get("propertyRecordId", "")).startswith("property:") for item in transactions), "every row needs a canonical property ID"
           PY
           git add outputs/surrey-transactions.js
           if [ -f work/weekly-context-cache.json ]; then
             git add work/weekly-context-cache.json
-          fi
-          if [ -f work/schools.csv ]; then
-            git add work/schools.csv
           fi
           if git diff --cached --quiet; then
             echo "No weekly INSIGHT changes to commit."

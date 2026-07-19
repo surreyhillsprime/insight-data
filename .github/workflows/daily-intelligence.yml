@@ -26,19 +26,41 @@ jobs:
           git fetch origin main
           git checkout -B main origin/main
 
-      - name: Refresh daily planning and company intelligence
-        env:
-          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+      - name: Restore operational planning-query cache
+        uses: actions/cache/restore@v4
+        with:
+          path: work/daily-intelligence-cache.json
+          key: daily-intelligence-v2-${{ github.run_id }}
+          restore-keys: daily-intelligence-v2-
+
+      - name: Refresh current Environment Agency flood status
+        run: |
+          python3 scripts/enrich_property_context.py \
+            --missing-only \
+            --disable-osm \
+            --pause 0.05 \
+            --progress-every 25 \
+            --max-source-errors 25
+
+      - name: Refresh daily planning intelligence
         run: |
           python3 scripts/enrich_daily_intelligence.py \
             --planning-days 45 \
             --planning-radius-m 1200 \
+            --disable-companies-house \
             --pause 0.15 \
             --progress-every 25 \
             --max-source-errors 25
 
       - name: Check data completeness
         run: python3 scripts/check_data_completeness.py
+
+      - name: Save operational planning-query cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: work/daily-intelligence-cache.json
+          key: daily-intelligence-v2-${{ github.run_id }}
 
       - name: Commit updated data
         run: |
@@ -62,12 +84,11 @@ jobs:
           transactions, summary, meta = read_js(path)
           assert text.count("window.SURREY_LAND_REG_") == 3, "feed must contain exactly three assignments"
           assert transactions and isinstance(summary, dict), "feed data is incomplete"
-          assert meta.get("schemaVersion") == 2, "feed schemaVersion must be 2"
+          assert meta.get("schemaVersion") == 3, "feed schemaVersion must be 3"
+          assert meta.get("propertyRecordSchemaVersion") == 1, "property identity schema must be 1"
+          assert all(str(item.get("propertyRecordId", "")).startswith("property:") for item in transactions), "every row needs a canonical property ID"
           PY
           git add outputs/surrey-transactions.js
-          if [ -f work/daily-intelligence-cache.json ]; then
-            git add work/daily-intelligence-cache.json
-          fi
           if git diff --cached --quiet; then
             echo "No daily INSIGHT changes to commit."
           else

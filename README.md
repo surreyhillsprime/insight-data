@@ -32,9 +32,9 @@ INSIGHT now uses separate refresh jobs so high-change sources stay fresh without
 
 | Workflow | Runs | What it refreshes |
 | --- | --- | --- |
-| `daily-intelligence.yml` | Daily at 05:15 UTC | Recent planning applications near tracked properties, plus Companies House where a company number already exists |
-| `weekly-context.yml` | Mondays at 05:35 UTC | Planning constraints, listed-building matches, conservation/heritage overlays, and schools if a school CSV feed is supplied |
-| `monthly-property-refresh.yml` | 1st of each month at 06:00 UTC | Land Registry, EPC floor areas, GBP/sq ft, live flood-alert context, and OSM amenities |
+| `daily-intelligence.yml` | Daily at 05:15 UTC | Recent planning applications near tracked properties, with explicit unknown coverage when the live source cannot prove a result |
+| `weekly-context.yml` | Mondays at 07:15 UTC | Planning constraints, listed-building matches, conservation/heritage overlays, and schools if an approved GIAS CSV feed is supplied |
+| `monthly-property-refresh.yml` | 1st of each month at 06:00 UTC | Land Registry, EPC floor areas, GBP/sq ft, and live flood-alert context |
 | `sales-history-feed.yml` | 2nd of each month at 06:30 UTC | Complete HM Land Registry Price Paid history for properties in the base feed |
 | `six-week-os-refresh.yml` | Guarded Sunday schedule | OS Open UPRN matching and geometry/linkage improvement when an OS CSV is supplied |
 | `data-completeness.yml` | Daily at 11:00 UTC | Validates historic coverage, source-level minimums and enrichment metadata |
@@ -65,6 +65,11 @@ sources are not artificially backdated to 1995.
 feed each month. Its postcode cache is resumable and its output is
 `outputs/sales-history.js`. This is Price Paid transaction history from 1995
 onwards, not the legal title register, ownership, deeds, or charges.
+The collector defaults to local-only output; the workflow must explicitly use
+`--deployment-mode commercial`, and the publication validator rejects a local
+feed. That is an engineering gate, not a substitute for checking that the
+product remains a residential property price information service within the
+HM Land Registry address-data permission recorded in [NOTICE.md](NOTICE.md).
 
 The audited private-estate registry is published as
 `outputs/private-estates.js`, with its evidence and exact road rules under
@@ -102,9 +107,13 @@ The monthly job will fail if this is missing, because EPC floor area is required
 The EPC API can rate-limit long first runs. The EPC script now treats a useful time-limit stop as a checkpoint:
 
 - matched records are written into `outputs/surrey-transactions.js`
-- lookup progress is written into `work/epc-cache.json`
-- the workflow can still commit those files
-- the next run continues from the cache instead of starting again
+- lookup progress is written into the private `work/epc-cache.json`
+- the runner encrypts it with the existing EPC bearer secret before GitHub Actions persists the ciphertext outside the repository
+- the next run decrypts it only on the runner and continues instead of starting again
+
+The published row contains only the approved EPC-derived fields. Certificate
+numbers, certificate addresses, match scores, search diagnostics and source
+addresses are not part of the publication contract.
 
 If the job stops because of repeated real API errors, it still fails.
 
@@ -113,16 +122,13 @@ If the job stops because of repeated real API errors, it still fails.
 These are useful, but the workflows will still run if they are not supplied.
 
 ```text
-COMPANIES_HOUSE_API_KEY
-```
-
-Used by the daily job, but only when an INSIGHT record already contains a company number from another source.
-
-```text
 SCHOOLS_CSV_URL
 ```
 
-A direct CSV URL for school/location/rating data. If omitted, the weekly job skips school enrichment and the app hides the school section unless existing school data is present.
+The approved DfE Get Information about Schools bulk CSV URL. If omitted, the
+weekly job skips school enrichment and the app hides the school section unless
+existing field-minimised school data is present. The current GIAS path does not
+claim an Ofsted rating.
 
 ```text
 OS_OPEN_UPRN_CSV_URL
@@ -150,8 +156,6 @@ Do not overwrite these live data files unless you deliberately want to reset the
 
 ```text
 outputs/surrey-transactions.js
-work/epc-cache.json
-work/property-context-cache.json
 work/land-reg-surrey-3m-1995.csv
 ```
 
@@ -178,6 +182,24 @@ README.md
 
 Do not delete cache files already created by a running workflow unless you deliberately want to force a full re-lookup.
 
+`work/epc-cache.json` and its encrypted form are deliberately excluded from
+Git. The monthly workflow saves only ciphertext in the Actions cache and
+decrypts it transiently on the runner. Rotating the EPC bearer token makes an
+old cache unreadable; the workflow then starts a fresh cache.
+
+`work/property-context-cache.json` is also operational-only request state and
+is ignored by Git. Reviewed postcode-centroid results are published only in the
+field-allowlisted transaction feed; Overpass payloads are not published.
+
+`work/daily-intelligence-cache.json` is an off-repository Actions cache. It is
+never a product artifact; only planning observations that pass the circular
+distance, pagination and truthfulness gates reach the canonical feed.
+
+`SCHOOLS_CSV_URL` must identify the approved DfE Get Information about Schools
+bulk download. The raw CSV is transient and ignored by Git; only the
+field-minimised nearby-school summaries allowed by the publication contract
+are written to the public feed.
+
 ## Data Behaviour
 
 The enrichment scripts are source-aware:
@@ -186,6 +208,14 @@ The enrichment scripts are source-aware:
 - If a source is unavailable or no optional secret is supplied, the script skips that section.
 - The app hides empty sections rather than showing blanks.
 - Existing useful enrichment is not wiped just because a public API has a bad day.
+- Planning Data's square API prefilter is reduced to the stated circular radius
+  using measured point distance, and every declared result page is consumed
+  before a latest observed application can be shown.
+- The shared writer has a fail-closed top-level field allowlist. A new public
+  field requires an explicit code review and contract update.
+
+Source licences, required attributions, publication boundaries and unresolved
+external-review items are recorded in [NOTICE.md](NOTICE.md).
 
 ## Current Data Scope
 

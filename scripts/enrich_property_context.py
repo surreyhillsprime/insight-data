@@ -19,12 +19,15 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+from insight_data_utils import write_js as write_canonical_js
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT_JS = ROOT / "outputs" / "surrey-transactions.js"
 DEFAULT_OUTPUT_JS = DEFAULT_INPUT_JS
 DEFAULT_CACHE = ROOT / "work" / "property-context-cache.json"
 CACHE_VERSION = 1
+DEFAULT_FLOOD_MAX_AGE_HOURS = 30
 POSTCODES_API = "https://api.postcodes.io/postcodes/"
 EA_FLOOD_API = "https://environment.data.gov.uk/flood-monitoring/id/floods"
 OVERPASS_API = "https://overpass-api.de/api/interpreter"
@@ -130,6 +133,34 @@ def cache_fresh(record, refresh_days):
     except ValueError:
         return False
     return (datetime.now(timezone.utc) - updated).days < refresh_days
+
+
+def environment_agency_is_fresh(context, max_age_hours, now=None):
+    if not isinstance(context, dict) or max_age_hours <= 0:
+        return False
+    timestamp = context.get("observedAt") or context.get("updatedAt")
+    try:
+        observed = datetime.fromisoformat(str(timestamp or "").replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return False
+    if observed.tzinfo is None:
+        observed = observed.replace(tzinfo=timezone.utc)
+    checked_at = now or datetime.now(timezone.utc)
+    age_hours = (checked_at - observed).total_seconds() / 3600
+    return 0 <= age_hours <= max_age_hours
+
+
+def flood_freshness_counts(transactions, max_age_hours, now=None):
+    counts = Counter()
+    for item in transactions:
+        context = item.get("environmentAgency")
+        if not isinstance(context, dict):
+            counts["missing"] += 1
+        elif environment_agency_is_fresh(context, max_age_hours, now=now):
+            counts["fresh"] += 1
+        else:
+            counts["stale"] += 1
+    return counts
 
 
 def request_json(url, *, method="GET", data=None, timeout=15, retries=1, headers=None):
@@ -238,7 +269,13 @@ def postcode_context(postcode, cache, args):
 def flood_context(lat, lon, args):
     params = urllib.parse.urlencode({"lat": f"{lat:.7f}", "long": f"{lon:.7f}", "dist": args.flood_radius_km})
     payload = request_json(f"{EA_FLOOD_API}?{params}", timeout=args.timeout, retries=args.retries)
-    items = payload.get("items", []) if isinstance(payload, dict) else []
+    if not isinstance(payload, dict) or payload.get("status") == 404 or "items" not in payload:
+        raise RuntimeError("Environment Agency response did not prove the current flood-alert state")
+    items = payload.get("items")
+    if isinstance(items, dict):
+        items = [items]
+    if not isinstance(items, list):
+        raise RuntimeError("Environment Agency flood-alert items were not a list")
     active = []
     for item in items if isinstance(items, list) else []:
         severity = int(parse_float(item.get("severityLevel")) or 0)
@@ -254,6 +291,7 @@ def flood_context(lat, lon, args):
         severity_text = "None"
         status = f"No current flood alert within {args.flood_radius_km:g}km"
         nearest = ""
+    observed_at = utc_now()
     return {
         "environmentAgency": {
             "floodStatus": status,
@@ -262,7 +300,166 @@ def flood_context(lat, lon, args):
             "nearestFloodAlert": nearest,
             "searchRadius": f"{args.flood_radius_km:g}km",
             "source": "Environment Agency Real Time flood-monitoring API",
-            "updatedAt": utc_now(),
+            "observedAt": observed_at,
+            "updatedAt": observed_at,
+        }
+    }
+
+
+def _geometry_polygons(payload):
+    """Return GeoJSON polygons while preserving every interior hole."""
+
+    polygons = []
+    features = payload.get("features") if isinstance(payload, dict) else None
+    for feature in features if isinstance(features, list) else []:
+        geometry = feature.get("geometry") if isinstance(feature, dict) else None
+        if not isinstance(geometry, dict):
+            continue
+        coordinates = geometry.get("coordinates")
+        if geometry.get("type") == "Polygon" and isinstance(coordinates, list):
+            candidates = [coordinates]
+        elif geometry.get("type") == "MultiPolygon" and isinstance(coordinates, list):
+            candidates = coordinates
+        else:
+            candidates = []
+        for candidate in candidates:
+            parsed_rings = []
+            for candidate_ring in candidate if isinstance(candidate, list) else []:
+                ring = []
+                for point in candidate_ring if isinstance(candidate_ring, list) else []:
+                    if not isinstance(point, list) or len(point) < 2:
+                        continue
+                    try:
+                        ring.append((float(point[0]), float(point[1])))
+                    except (TypeError, ValueError):
+                        continue
+                if len(ring) >= 4:
+                    parsed_rings.append(ring)
+            if parsed_rings:
+                polygons.append({"outer": parsed_rings[0], "holes": parsed_rings[1:]})
+    return polygons
+
+
+def _point_in_ring(lon, lat, ring):
+    inside = False
+    previous_lon, previous_lat = ring[-1]
+    for current_lon, current_lat in ring:
+        crosses = (current_lat > lat) != (previous_lat > lat)
+        if crosses:
+            crossing_lon = (previous_lon - current_lon) * (lat - current_lat) / (previous_lat - current_lat) + current_lon
+            if lon < crossing_lon:
+                inside = not inside
+        previous_lon, previous_lat = current_lon, current_lat
+    return inside
+
+
+def _point_segment_distance_km(lon, lat, start, end):
+    cos_lat = max(0.01, math.cos(math.radians(lat)))
+    start_x = (start[0] - lon) * 111.320 * cos_lat
+    start_y = (start[1] - lat) * 110.574
+    end_x = (end[0] - lon) * 111.320 * cos_lat
+    end_y = (end[1] - lat) * 110.574
+    delta_x = end_x - start_x
+    delta_y = end_y - start_y
+    length_sq = delta_x * delta_x + delta_y * delta_y
+    if length_sq <= 0:
+        return math.hypot(start_x, start_y)
+    projection = max(0.0, min(1.0, -(start_x * delta_x + start_y * delta_y) / length_sq))
+    return math.hypot(start_x + projection * delta_x, start_y + projection * delta_y)
+
+
+def _distance_to_polygons_km(lon, lat, polygons, maximum_distance_km):
+    best = math.inf
+    latitude_margin = maximum_distance_km / 110.574
+    longitude_margin = maximum_distance_km / (111.320 * max(0.01, math.cos(math.radians(lat))))
+    for polygon in polygons:
+        outer = polygon.get("outer") if isinstance(polygon, dict) else None
+        holes = polygon.get("holes", []) if isinstance(polygon, dict) else []
+        if not outer:
+            continue
+        longitudes = [point[0] for point in outer]
+        latitudes = [point[1] for point in outer]
+        if lon < min(longitudes) - longitude_margin or lon > max(longitudes) + longitude_margin:
+            continue
+        if lat < min(latitudes) - latitude_margin or lat > max(latitudes) + latitude_margin:
+            continue
+        inside_outer = _point_in_ring(lon, lat, outer)
+        inside_hole = any(_point_in_ring(lon, lat, hole) for hole in holes)
+        if inside_outer and not inside_hole:
+            return 0.0
+        for ring in [outer, *holes]:
+            for index, start in enumerate(ring):
+                distance = _point_segment_distance_km(lon, lat, start, ring[(index + 1) % len(ring)])
+                best = min(best, distance)
+                if best <= 0:
+                    return 0.0
+    return best
+
+
+def active_flood_snapshot(args):
+    """Fetch all current alerts once and load polygons only for active alerts."""
+
+    payload = request_json(EA_FLOOD_API, timeout=args.timeout, retries=args.retries)
+    if not isinstance(payload, dict) or "items" not in payload:
+        raise RuntimeError("Environment Agency bulk response did not prove the current flood-alert state")
+    items = payload.get("items")
+    if isinstance(items, dict):
+        items = [items]
+    if not isinstance(items, list):
+        raise RuntimeError("Environment Agency bulk flood-alert items were not a list")
+
+    alerts = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        severity = int(parse_float(item.get("severityLevel")) or 0)
+        if not 1 <= severity <= 3:
+            continue
+        flood_area = item.get("floodArea") if isinstance(item.get("floodArea"), dict) else {}
+        polygon_url = clean(flood_area.get("polygon"))
+        if not polygon_url:
+            raise RuntimeError(f"Active Environment Agency alert {clean(item.get('floodAreaID')) or 'unknown'} has no polygon")
+        polygon_url = re.sub(r"^http://", "https://", polygon_url)
+        polygon = request_json(polygon_url, timeout=args.timeout, retries=args.retries)
+        polygons = _geometry_polygons(polygon)
+        if not polygons:
+            raise RuntimeError(f"Active Environment Agency alert {clean(item.get('floodAreaID')) or 'unknown'} has no usable polygon")
+        alerts.append({"alert": item, "polygons": polygons})
+        if args.pause:
+            time.sleep(args.pause)
+    return {"observedAt": utc_now(), "alerts": alerts}
+
+
+def flood_context_from_snapshot(lat, lon, args, snapshot):
+    nearby = []
+    for entry in snapshot.get("alerts", []):
+        polygons = entry.get("polygons")
+        if polygons is None:
+            polygons = [{"outer": ring, "holes": []} for ring in entry.get("rings", [])]
+        distance = _distance_to_polygons_km(lon, lat, polygons, args.flood_radius_km)
+        if distance <= args.flood_radius_km:
+            nearby.append((int(parse_float(entry["alert"].get("severityLevel")) or 9), distance, entry["alert"]))
+    nearby.sort(key=lambda entry: (entry[0], entry[1]))
+    if nearby:
+        highest = nearby[0][2]
+        severity_text = clean(highest.get("severity")) or f"Severity {highest.get('severityLevel')}"
+        status = f"{len(nearby)} active alert{'s' if len(nearby) != 1 else ''} within {args.flood_radius_km:g}km"
+        nearest = clean(highest.get("description")) or clean((highest.get("floodArea") or {}).get("label"))
+    else:
+        severity_text = "None"
+        status = f"No current flood alert within {args.flood_radius_km:g}km"
+        nearest = ""
+    observed_at = snapshot["observedAt"]
+    return {
+        "environmentAgency": {
+            "floodStatus": status,
+            "currentFloodAlertCount": len(nearby),
+            "highestCurrentSeverity": severity_text,
+            "nearestFloodAlert": nearest,
+            "searchRadius": f"{args.flood_radius_km:g}km",
+            "source": "Environment Agency Real Time flood-monitoring API (bulk alert polygons)",
+            "observedAt": observed_at,
+            "updatedAt": observed_at,
         }
     }
 
@@ -374,6 +571,17 @@ def enrich_transactions(transactions, cache, args):
     stats = Counter()
     disabled = set()
     flood_runtime_cache = {}
+    flood_query_mode = getattr(args, "flood_query_mode", "point")
+    bulk_flood_snapshot = None
+    if not args.disable_environment_agency and flood_query_mode == "bulk":
+        try:
+            bulk_flood_snapshot = active_flood_snapshot(args)
+            stats["environmentAgencyRequests"] += 1 + len(bulk_flood_snapshot["alerts"])
+            stats["environmentAgencyActiveAreas"] = len(bulk_flood_snapshot["alerts"])
+        except Exception as exc:
+            stats["environmentAgencyErrors"] += 1
+            disabled.add("environmentAgency")
+            print(f"Environment Agency bulk snapshot skipped: {exc}", file=sys.stderr)
     limit = args.limit if args.limit and args.limit > 0 else None
     context_fields = ("latitude", "longitude", "geocode", "environmentAgency", "openStreetMap")
     donors = {}
@@ -394,18 +602,18 @@ def enrich_transactions(transactions, cache, args):
             for field in context_fields:
                 if field not in output and field in donor:
                     output[field] = donor[field]
-            if parse_float(output.get("latitude")) is not None and parse_float(output.get("longitude")) is not None and output.get("environmentAgency"):
-                enriched.append(output)
-                stats["preservedOrReused"] += 1
-                continue
 
         postcode_data = None
-        if "postcodes" not in disabled:
+        has_coordinates = parse_float(output.get("latitude")) is not None and parse_float(output.get("longitude")) is not None
+        needs_postcode_context = not args.missing_only or not has_coordinates or not output.get("geocode")
+        if needs_postcode_context and "postcodes" not in disabled:
             try:
                 postcode_data = postcode_context(item.get("postcode"), cache, args)
                 if postcode_data:
                     output.update(postcode_data)
                     stats["postcodes"] += 1
+                if args.pause:
+                    time.sleep(args.pause)
             except Exception as exc:
                 stats["postcodeErrors"] += 1
                 print(f"Postcodes.io skipped for {item.get('id')}: {exc}", file=sys.stderr)
@@ -415,25 +623,53 @@ def enrich_transactions(transactions, cache, args):
         lat = parse_float(output.get("latitude"))
         lon = parse_float(output.get("longitude"))
         if lat is not None and lon is not None:
-            if not args.disable_environment_agency and "environmentAgency" not in disabled:
-                try:
+            if not args.disable_environment_agency:
+                if args.missing_only and environment_agency_is_fresh(
+                    output.get("environmentAgency"),
+                    args.flood_max_age_hours,
+                ):
+                    stats["environmentAgencyFreshRetained"] += 1
+                elif "environmentAgency" in disabled:
+                    stats["environmentAgencySkippedAfterErrors"] += 1
+                    if output.get("environmentAgency"):
+                        stats["environmentAgencyRetainedAfterError"] += 1
+                else:
                     flood_key = normalise_postcode(item.get("postcode")) or f"{lat:.5f},{lon:.5f}"
-                    if flood_key not in flood_runtime_cache:
-                        flood_runtime_cache[flood_key] = flood_context(lat, lon, args)
-                    output.update(flood_runtime_cache[flood_key])
-                    stats["environmentAgency"] += 1
-                except Exception as exc:
-                    stats["environmentAgencyErrors"] += 1
-                    print(f"Environment Agency skipped for {item.get('id')}: {exc}", file=sys.stderr)
-                    if args.max_source_errors and stats["environmentAgencyErrors"] >= args.max_source_errors:
-                        disabled.add("environmentAgency")
+                    first_request = flood_key not in flood_runtime_cache
+                    if first_request:
+                        try:
+                            if bulk_flood_snapshot is not None:
+                                flood_runtime_cache[flood_key] = {
+                                    "data": flood_context_from_snapshot(lat, lon, args, bulk_flood_snapshot)
+                                }
+                                stats["environmentAgencyEvaluations"] += 1
+                            else:
+                                flood_runtime_cache[flood_key] = {"data": flood_context(lat, lon, args)}
+                                stats["environmentAgencyRequests"] += 1
+                                if args.pause:
+                                    time.sleep(args.pause)
+                        except Exception as exc:
+                            flood_runtime_cache[flood_key] = {"error": exc}
+                            stats["environmentAgencyErrors"] += 1
+                            print(f"Environment Agency skipped for {item.get('id')}: {exc}", file=sys.stderr)
+                            if args.max_source_errors and stats["environmentAgencyErrors"] >= args.max_source_errors:
+                                disabled.add("environmentAgency")
+                    lookup = flood_runtime_cache[flood_key]
+                    if lookup.get("data"):
+                        output.update(lookup["data"])
+                        stats["environmentAgency"] += 1
+                    elif output.get("environmentAgency"):
+                        stats["environmentAgencyRetainedAfterError"] += 1
 
-            if not args.disable_osm and "openStreetMap" not in disabled:
+            needs_osm_context = not args.missing_only or not output.get("openStreetMap")
+            if needs_osm_context and not args.disable_osm and "openStreetMap" not in disabled:
                 try:
                     osm = osm_context(item.get("postcode"), lat, lon, cache, args)
                     if osm:
                         output.update(osm)
                         stats["openStreetMap"] += 1
+                    if args.pause:
+                        time.sleep(args.pause)
                 except Exception as exc:
                     stats["openStreetMapErrors"] += 1
                     print(f"OpenStreetMap skipped for {item.get('id')}: {exc}", file=sys.stderr)
@@ -441,8 +677,6 @@ def enrich_transactions(transactions, cache, args):
                         disabled.add("openStreetMap")
 
         enriched.append(output)
-        if args.pause:
-            time.sleep(args.pause)
         if index % args.progress_every == 0:
             print(f"Processed {index}/{len(transactions)} properties; context fields so far: {dict(stats)}")
 
@@ -464,8 +698,20 @@ def parse_args():
     parser.add_argument("--geocode-refresh-days", type=int, default=365, help="How long to cache postcode coordinates.")
     parser.add_argument("--osm-refresh-days", type=int, default=120, help="How long to cache OSM amenity context.")
     parser.add_argument("--flood-radius-km", type=float, default=5, help="Environment Agency current-alert radius.")
+    parser.add_argument(
+        "--flood-max-age-hours",
+        type=float,
+        default=DEFAULT_FLOOD_MAX_AGE_HOURS,
+        help="Maximum age for a flood observation to count as current in the publication gate.",
+    )
     parser.add_argument("--osm-radius-m", type=int, default=1800, help="OpenStreetMap nearby amenity radius.")
     parser.add_argument("--disable-environment-agency", action="store_true", help="Skip Environment Agency live flood alerts.")
+    parser.add_argument(
+        "--flood-query-mode",
+        choices=("bulk", "point"),
+        default="bulk",
+        help="Use one bulk alert snapshot plus official polygons, or the legacy per-point endpoint.",
+    )
     parser.add_argument("--disable-osm", action="store_true", help="Skip OpenStreetMap amenities.")
     parser.add_argument("--missing-only", action="store_true", help="Preserve existing context and only populate transactions that still lack it.")
     parser.add_argument("--dry-run", action="store_true", help="Report without writing files.")
@@ -483,6 +729,7 @@ def main():
     if args.dry_run:
         return 0
 
+    flood_freshness = flood_freshness_counts(enriched, args.flood_max_age_hours)
     meta["propertyContext"] = {
         "updatedAt": utc_now(),
         "postcodes": {
@@ -492,7 +739,17 @@ def main():
         },
         "environmentAgency": {
             "source": "Environment Agency Real Time flood-monitoring API",
+            "queryMode": args.flood_query_mode,
             "records": sum(1 for item in enriched if item.get("environmentAgency")),
+            "freshRecords": flood_freshness["fresh"],
+            "staleRecords": flood_freshness["stale"],
+            "missingRecords": flood_freshness["missing"],
+            "maximumAgeHours": args.flood_max_age_hours,
+            "freshnessCheckedAt": utc_now(),
+            "requestFailures": stats["environmentAgencyErrors"],
+            "freshObservationsRetainedWithinTtl": stats["environmentAgencyFreshRetained"],
+            "retainedAfterRequestFailure": stats["environmentAgencyRetainedAfterError"],
+            "skippedAfterRequestFailures": stats["environmentAgencySkippedAfterErrors"],
             "type": "current flood alerts within configured radius",
         },
         "openStreetMap": {
@@ -502,7 +759,7 @@ def main():
         },
     }
     write_cache(args.cache, cache)
-    write_js(args.write_js, enriched, meta)
+    write_canonical_js(args.write_js, enriched, meta)
     print(f"Updated {args.write_js}")
     print(f"Updated {args.cache}")
     return 0

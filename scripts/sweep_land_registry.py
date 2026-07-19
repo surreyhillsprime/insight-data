@@ -20,6 +20,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from private_estates import classify_estate, load_compiled_registry
+from insight_data_utils import FEED_SCHEMA_VERSION, PROPERTY_RECORD_SCHEMA_VERSION, property_record_id
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,12 +31,11 @@ DEFAULT_JS = ROOT / "outputs" / "surrey-transactions.js"
 START_DATE = "1995-01-01"
 CURRENT_START_DATE = "2010-01-01"
 PRICE_FLOOR = 3_000_000
-FEED_SCHEMA_VERSION = 2
 SPARQL_ENDPOINT = "https://landregistry.data.gov.uk/landregistry/query"
 FETCH_RETRIES = 2
 ARCHIVE_URL = "https://price-paid-data.publicdata.landregistry.gov.uk/pp-{year}.csv"
 BASE_TRANSACTION_FIELDS = {
-    "id", "market", "district", "address", "paon", "saon", "street", "locality", "town",
+    "id", "propertyRecordId", "market", "district", "address", "paon", "saon", "street", "locality", "town",
     "postcode", "price", "priceText", "date", "propertyType", "estateId", "estate",
     "estateClassification", "estateType", "estateRuleId", "estateRegistryVersion",
     "estateEvidenceStatus", "estateReviewStatus", "source", "kind", "category",
@@ -46,6 +46,7 @@ BASE_METADATA_FIELDS = {
     "estateTypeSummary", "estateRegistryVersion", "estateClassifierMode",
     "estateClassificationMode", "estateStructuredFieldCoverage",
     "estateActiveDefinitionCount", "estateActiveRuleCount",
+    "propertyRecordSchemaVersion", "canonicalPropertyRecords", "propertyIdentityMode",
 }
 
 CANONICAL_DISTRICTS = {
@@ -357,10 +358,7 @@ def stable_transaction_key(item):
 
 
 def stable_property_key(item):
-    return "|".join([
-        re.sub(r"[^A-Z0-9]+", " ", clean(item.get("address")).upper()).strip(),
-        re.sub(r"[^A-Z0-9]", "", clean(item.get("postcode")).upper()),
-    ])
+    return property_record_id(item)
 
 
 def source_transaction_key(item):
@@ -531,10 +529,12 @@ def normalise_rows(rows):
         item["id"] = stable_transaction_id(
             item["address"], item["postcode"], item["price"], item["date"], item["propertyType"], item["category"]
         )
+        item["propertyRecordId"] = property_record_id(item)
     ordered = []
     for item in transactions:
         ordered.append({
             "id": item["id"],
+            "propertyRecordId": item["propertyRecordId"],
             "market": item["market"],
             "district": item["district"],
             "address": item["address"],
@@ -596,6 +596,9 @@ def metadata(raw_count, transactions):
         "propertyTypes": list(PROPERTY_TYPES.keys()),
         "updateCadence": "monthly",
         "officialSearch": "county=Surrey; price >= GBP 3,000,000; date >= 1995-01-01; residential property types",
+        "propertyRecordSchemaVersion": PROPERTY_RECORD_SCHEMA_VERSION,
+        "canonicalPropertyRecords": len({item["propertyRecordId"] for item in transactions}),
+        "propertyIdentityMode": "full-normalised-address-plus-postcode-fail-closed",
         "estateSummary": dict(estates),
         "estateIdSummary": dict(estate_ids),
         "estateTypeSummary": dict(estate_types),
@@ -616,7 +619,7 @@ def metadata(raw_count, transactions):
 def write_processed_csv(path, transactions):
     path.parent.mkdir(parents=True, exist_ok=True)
     fields = [
-        "address", "paon", "saon", "street", "locality", "town", "postcode", "district",
+        "propertyRecordId", "address", "paon", "saon", "street", "locality", "town", "postcode", "district",
         "propertyType", "estateId", "estate", "estateClassification", "estateType", "estateRuleId",
         "estateRegistryVersion", "estateEvidenceStatus", "estateReviewStatus",
         "price", "date", "market", "category",

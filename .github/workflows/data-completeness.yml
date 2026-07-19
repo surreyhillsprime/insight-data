@@ -1,6 +1,9 @@
 name: INSIGHT Data Completeness
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
   schedule:
     - cron: "0 11 * * *"
@@ -20,3 +23,5 @@ jobs:
           git diff --exit-code -- outputs/private-estates.js
       - name: Check shared feed coverage
         run: python3 scripts/check_data_completeness.py --strict-metadata
+      - name: Verify schema publication contract
+        run: python3 -m unittest discover -s tests -v

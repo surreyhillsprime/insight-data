@@ -1,3 +1,18 @@
 .DS_Store
 __pycache__/
 *.pyc
+
+# EPC API response/matching state is an operational private cache. Persist it
+# with the workflow cache service; never publish it in Git.
+work/epc-cache.json
+work/epc-cache.json.enc
+
+# Postcode/Overpass request state is operational only. The release feed keeps
+# reviewed postcode centroids but never publishes or versions the raw cache.
+work/property-context-cache.json
+work/daily-intelligence-cache.json
+
+# The raw GIAS download contains many fields the product does not publish.
+# Fetch it transiently from the approved bulk-download URL; commit only the
+# field-minimised nearby-school summaries in the canonical feed.
+work/schools.csv

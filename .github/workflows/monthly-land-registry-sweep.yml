@@ -30,6 +30,26 @@ jobs:
       - name: Run Land Registry sweeper
         run: python3 scripts/sweep_land_registry.py
 
+      - name: Restore encrypted EPC lookup cache
+        uses: actions/cache/restore@v4
+        with:
+          path: work/epc-cache.json.enc
+          key: epc-v3-encrypted-${{ github.run_id }}
+          restore-keys: epc-v3-encrypted-
+
+      - name: Decrypt EPC lookup cache on the runner
+        env:
+          EPC_BEARER_TOKEN: ${{ secrets.EPC_BEARER_TOKEN }}
+        run: |
+          if [ -f work/epc-cache.json.enc ]; then
+            if printf '%s' "$EPC_BEARER_TOKEN" | openssl enc -d -aes-256-cbc -pbkdf2 -pass stdin -in work/epc-cache.json.enc -out work/epc-cache.json.tmp; then
+              mv work/epc-cache.json.tmp work/epc-cache.json
+            else
+              rm -f work/epc-cache.json.tmp work/epc-cache.json
+              echo "::warning::Encrypted EPC cache could not be decrypted; starting a fresh cache."
+            fi
+          fi
+
       - name: Enrich with EPC floor areas
         env:
           EPC_BEARER_TOKEN: ${{ secrets.EPC_BEARER_TOKEN }}
@@ -51,10 +71,28 @@ jobs:
             --allow-partial-success \
             --progress-every 25
 
+      - name: Encrypt EPC lookup cache off-repository
+        if: always()
+        env:
+          EPC_BEARER_TOKEN: ${{ secrets.EPC_BEARER_TOKEN }}
+        run: |
+          if [ -f work/epc-cache.json ] && [ -n "$EPC_BEARER_TOKEN" ]; then
+            printf '%s' "$EPC_BEARER_TOKEN" | openssl enc -aes-256-cbc -salt -pbkdf2 -pass stdin -in work/epc-cache.json -out work/epc-cache.json.enc
+            rm -f work/epc-cache.json
+          fi
+
+      - name: Save encrypted EPC lookup cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: work/epc-cache.json.enc
+          key: epc-v3-encrypted-${{ github.run_id }}
+
       - name: Enrich with optional property context
         run: |
           python3 scripts/enrich_property_context.py \
             --missing-only \
+            --disable-osm \
             --pause 0.15 \
             --progress-every 25 \
             --max-source-errors 20
@@ -71,14 +109,8 @@ jobs:
             echo "::error::Refresh produced Git conflicts; refusing to commit."
             exit 1
           fi
-          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==2'
+          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==3 and meta.get("propertyRecordSchemaVersion")==1 and all(str(row.get("propertyRecordId", "")).startswith("property:") for row in rows)'
           git add outputs/surrey-transactions.js outputs/private-estates.js work/land-reg-surrey-3m-1995.csv work/land-reg-surrey-3m-1995-2009.csv work/land-reg-surrey-3m-2010.csv
-          if [ -f work/epc-cache.json ]; then
-            git add work/epc-cache.json
-          fi
-          if [ -f work/property-context-cache.json ]; then
-            git add work/property-context-cache.json
-          fi
           if git diff --cached --quiet; then
             echo "No INSIGHT data changes to commit."
           else

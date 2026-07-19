@@ -15,7 +15,78 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT_JS = ROOT / "outputs" / "surrey-transactions.js"
 POSTCODES_API = "https://api.postcodes.io/postcodes/"
-FEED_SCHEMA_VERSION = 2
+FEED_SCHEMA_VERSION = 3
+PROPERTY_RECORD_SCHEMA_VERSION = 1
+_POSTCODE_AT_END_RE = re.compile(r"\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\s*$", re.I)
+
+# This is the public row contract, not merely a schema hint. New top-level
+# fields must be reviewed here before any workflow can publish them.
+PUBLIC_TRANSACTION_FIELDS = frozenset({
+    "id",
+    "propertyRecordId",
+    "market",
+    "district",
+    "address",
+    "paon",
+    "saon",
+    "street",
+    "locality",
+    "town",
+    "postcode",
+    "price",
+    "priceText",
+    "date",
+    "propertyType",
+    "estateId",
+    "estate",
+    "estateClassification",
+    "estateType",
+    "estateRuleId",
+    "estateRegistryVersion",
+    "estateEvidenceStatus",
+    "estateReviewStatus",
+    "source",
+    "kind",
+    "category",
+    "epcMatched",
+    "floorAreaSqm",
+    "floorAreaSqft",
+    "pricePerSqft",
+    "epcRating",
+    "epcRegistrationDate",
+    "epcSource",
+    "latitude",
+    "longitude",
+    "coordinateSource",
+    "coordinatePrecision",
+    "geocode",
+    "environmentAgency",
+    "ordnanceSurvey",
+    "uprn",
+    "ofsted",
+    "planning",
+    "planningConstraints",
+    "historicEngland",
+})
+
+# These fields existed in the pre-v1.5.1 public feed. The writer removes them
+# during migration, while the validator rejects any published recurrence.
+RESTRICTED_PUBLIC_TRANSACTION_FIELDS = frozenset({
+    "epcAddress",
+    "epcCertificateNumber",
+    "epcMatchScore",
+    "epcSearch",
+    "epcSearchDiagnostics",
+    "epcMatchDiagnostics",
+    "epcHistory",
+    "epcSourceAddress",
+    "sourceAddress",
+    "searchAddress",
+    "queryAddress",
+    "openStreetMap",
+    "companiesHouse",
+    "planningHistory",
+})
 
 
 def utc_now():
@@ -28,6 +99,80 @@ def clean(value):
 
 def normalise_postcode(value):
     return re.sub(r"[^A-Z0-9]", "", clean(value).upper())
+
+
+def canonical_address(value):
+    """Return the fail-closed full-address identity shared by INSIGHT feeds."""
+
+    return re.sub(r"[^A-Z0-9]+", " ", clean(value).upper()).strip()
+
+
+def property_record_id(item):
+    """Return the canonical property id without trusting approximate UPRNs."""
+
+    if isinstance(item, dict):
+        address = canonical_address(item.get("address"))
+        postcode = normalise_postcode(item.get("postcode"))
+        if not postcode:
+            match = _POSTCODE_AT_END_RE.search(clean(item.get("address")).upper())
+            if match:
+                postcode = normalise_postcode("".join(match.groups()))
+        if not address and not postcode:
+            return clean(item.get("propertyRecordId"))
+    else:
+        address = canonical_address(item)
+        postcode = ""
+    return f"property:{address}|{postcode or 'NOPOSTCODE'}" if address else ""
+
+
+def public_transaction(item):
+    """Return one fail-closed public row, removing only known legacy leakage."""
+
+    fields = set(item)
+    unknown = fields - PUBLIC_TRANSACTION_FIELDS - RESTRICTED_PUBLIC_TRANSACTION_FIELDS
+    if unknown:
+        raise ValueError(
+            "Unreviewed public transaction fields: " + ", ".join(sorted(unknown))
+        )
+    output = {key: value for key, value in item.items() if key in PUBLIC_TRANSACTION_FIELDS}
+    schools = output.get("ofsted")
+    if isinstance(schools, dict) and schools.get("source") in {
+        "DfE / Ofsted school data",
+        "Get Information About Schools Surrey extract",
+    }:
+        output["ofsted"] = {
+            **schools,
+            "source": "DfE Get Information about Schools (GIAS)",
+        }
+    return output
+
+
+def publication_contract_failures(transactions):
+    """Describe public-row contract violations without mutating the feed."""
+
+    failures = []
+    restricted = sorted({
+        key
+        for item in transactions
+        for key in item
+        if key in RESTRICTED_PUBLIC_TRANSACTION_FIELDS
+    })
+    if restricted:
+        failures.append(
+            "Publication contract: restricted fields are present: " + ", ".join(restricted)
+        )
+    unknown = sorted({
+        key
+        for item in transactions
+        for key in item
+        if key not in PUBLIC_TRANSACTION_FIELDS
+        and key not in RESTRICTED_PUBLIC_TRANSACTION_FIELDS
+    })
+    if unknown:
+        failures.append(
+            "Publication contract: unreviewed fields are present: " + ", ".join(unknown)
+        )
+    return failures
 
 
 def parse_float(value):
@@ -82,15 +227,105 @@ def summary_by_market(transactions):
     return summary
 
 
+def recompute_coverage_metadata(transactions, meta):
+    """Replay row-level totals so schema migration cannot leave stale metadata."""
+
+    meta = dict(meta)
+
+    def populated(key):
+        return sum(1 for item in transactions if item.get(key) not in (None, "", [], {}))
+
+    epc = dict(meta.get("epcEnrichment") or {})
+    if epc:
+        matched = sum(1 for item in transactions if item.get("epcMatched") is True and numeric(item.get("floorAreaSqft")))
+        epc["matched"] = matched
+        epc["coveragePercent"] = round(matched * 100 / len(transactions), 1) if transactions else 0
+        meta["epcEnrichment"] = epc
+
+    context = dict(meta.get("propertyContext") or {})
+    if context:
+        postcodes = dict(context.get("postcodes") or {})
+        if postcodes:
+            postcodes["matched"] = populated("geocode")
+            context["postcodes"] = postcodes
+        environment = dict(context.get("environmentAgency") or {})
+        if environment:
+            environment["records"] = populated("environmentAgency")
+            context["environmentAgency"] = environment
+        context.pop("openStreetMap", None)
+        meta["propertyContext"] = context
+
+    os_refresh = dict(meta.get("osRefresh") or {})
+    if os_refresh:
+        os_refresh["uprnMatches"] = populated("ordnanceSurvey")
+        meta["osRefresh"] = os_refresh
+
+    weekly = dict(meta.get("weeklyContext") or {})
+    if weekly:
+        constraints = dict(weekly.get("planningConstraints") or {})
+        if constraints:
+            constraints["records"] = populated("planningConstraints")
+            weekly["planningConstraints"] = constraints
+        historic = dict(weekly.get("historicEngland") or {})
+        if historic:
+            historic["records"] = sum(
+                1 for item in transactions
+                if item.get("historicEngland")
+                or (
+                    isinstance(item.get("planningConstraints"), dict)
+                    and item["planningConstraints"].get("historicEngland")
+                )
+            )
+            weekly["historicEngland"] = historic
+        schools = dict(weekly.get("schools") or {})
+        if schools:
+            schools["records"] = populated("ofsted")
+            schools["source"] = "DfE Get Information about Schools (GIAS)"
+            weekly["schools"] = schools
+        meta["weeklyContext"] = weekly
+
+    daily = dict(meta.get("dailyIntelligence") or {})
+    if daily:
+        planning = dict(daily.get("planning") or {})
+        if planning:
+            planning_rows = [
+                item["planning"] for item in transactions
+                if isinstance(item.get("planning"), dict)
+            ]
+            planning["records"] = len(planning_rows)
+            planning["observedRecords"] = sum(
+                1 for item in planning_rows if item.get("coverageStatus") == "observed"
+            )
+            planning["unknownRecords"] = sum(
+                1 for item in planning_rows if item.get("coverageStatus") == "unknown"
+            )
+            planning["unavailableRecords"] = sum(
+                1 for item in planning_rows if item.get("coverageStatus") == "unavailable"
+            )
+            planning["successfulResponses"] = planning["observedRecords"] + planning["unknownRecords"]
+            daily["planning"] = planning
+        daily.pop("companiesHouse", None)
+        meta["dailyIntelligence"] = daily
+    return meta
+
+
 def write_js(path, transactions, meta):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    meta = dict(meta)
+    canonical_transactions = []
+    for item in transactions:
+        output = dict(item)
+        output["propertyRecordId"] = property_record_id(output)
+        canonical_transactions.append(public_transaction(output))
+    meta = recompute_coverage_metadata(canonical_transactions, meta)
     meta["schemaVersion"] = FEED_SCHEMA_VERSION
+    meta["propertyRecordSchemaVersion"] = PROPERTY_RECORD_SCHEMA_VERSION
+    meta["canonicalPropertyRecords"] = len({item["propertyRecordId"] for item in canonical_transactions})
+    meta["propertyIdentityMode"] = "full-normalised-address-plus-postcode-fail-closed"
     content = "\n".join(
         [
-            "window.SURREY_LAND_REG_TRANSACTIONS = " + json.dumps(transactions, separators=(",", ":")) + ";",
-            "window.SURREY_LAND_REG_SUMMARY = " + json.dumps(summary_by_market(transactions), separators=(",", ":")) + ";",
+            "window.SURREY_LAND_REG_TRANSACTIONS = " + json.dumps(canonical_transactions, separators=(",", ":")) + ";",
+            "window.SURREY_LAND_REG_SUMMARY = " + json.dumps(summary_by_market(canonical_transactions), separators=(",", ":")) + ";",
             "window.SURREY_LAND_REG_META = " + json.dumps(meta, separators=(",", ":")) + ";",
             "",
         ]
