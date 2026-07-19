@@ -26,12 +26,17 @@ The current macOS package is published at:
 https://raw.githubusercontent.com/surreyhillsprime/insight-data/main/downloads/INSIGHT-macOS.zip
 ```
 
-SHA-256: `e1d640bfac647c8741c552619c4b17c1b017a5323ccd3d012465227bd63a5d0a`
+SHA-256: `00d9f26083f7d149127c025907b885c1494d515bd42aae42aaad776cf57aae11`
 
 This package is strictly ad-hoc signed for controlled internal use. It is not
 Developer ID signed or Apple-notarized and must not be represented as an
 external commercial distribution build. The remaining rights and repository
 history reviews are recorded in [NOTICE.md](NOTICE.md).
+
+The internal build streams a custom label-free OpenFreeMap road basemap with
+visible OpenFreeMap/OpenMapTiles/OpenStreetMap attribution. It does not show
+upstream place labels or INSIGHT town-sales circles. The public tile service has
+no SLA; a contracted or self-hosted basemap remains an external-release gate.
 
 The package contains the matching private-estate registry and app code. On
 first launch, INSIGHT downloads the current base feed from this repository.

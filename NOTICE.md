@@ -11,6 +11,7 @@ source terms; it is not legal advice or a completed data-protection assessment.
 | MHCLG energy certificate data | EPC rating, registration date, floor area and derived GBP/sq ft in the base ledger | [Licensing restrictions](https://get-energy-performance-data.communities.gov.uk/guidance/licensing-restrictions) put non-address fields under OGL v3 but restrict EPC address/postcode data. [Data-protection guidance](https://get-energy-performance-data.communities.gov.uk/guidance/data-protection-requirements) says address-level EPC data is personal data. v1.5.1 excludes certificate numbers, EPC addresses, match scores and search diagnostics from Git and keeps the lookup cache private. |
 | Planning Data | Recent applications, constraints and listed-building context | [Planning Data terms](https://www.planning.data.gov.uk/terms-and-conditions) say most content is OGL unless marked otherwise. Each dataset/provider exception must be checked before adding a field. |
 | Environment Agency real-time flood API | Flood alert context | [API terms and attribution](https://environment.data.gov.uk/flood-monitoring/doc/reference) publish the API under OGL. Attribution required: this uses Environment Agency flood and river level data from the real-time data API (Beta). |
+| OpenFreeMap / OpenMapTiles / OpenStreetMap vector basemap | Label-free roads, rail, water, land use and buildings for the internal app | OpenFreeMap permits commercial use and requires OpenMapTiles/OpenStreetMap attribution, which remains visible in the app. Its [terms](https://openfreemap.org/tos/) provide the public service as-is, without an SLA, and prohibit automated collection without permission. INSIGHT performs normal interactive requests only and does not prefetch or redistribute tiles. A contracted or self-hosted production basemap remains an external-release gate. |
 | OpenStreetMap via Overpass | Optional local-only research context | v1.5.1 removes this field and its operational cache from the current release tree because it is unused by the app and its derived-database boundary has not been separately reviewed. Any future publication must comply with [OpenStreetMap attribution and ODbL requirements](https://www.openstreetmap.org/copyright). |
 | OS Open UPRN | UPRN/coordinate linkage | [OS Open UPRN](https://www.ordnancesurvey.co.uk/products/os-open-uprn) and the [Open Identifiers policy](https://www.ordnancesurvey.co.uk/products/open-mastermap-programme/open-id-policy) make the open identifier product available under OGL. Preserve the current OS attribution for any published use. |
 | Companies House API | Optional local-only research | v1.5.1 does not publish company, PSC or filing fields. Future property-level publication requires a documented necessity, privacy and product-rights review even though the [official API](https://developer.company-information.service.gov.uk/) exposes public company information. |
@@ -44,7 +45,9 @@ broad external launch, obtain and record:
    data at property level;
 4. confirmation that future uses of HM Land Registry address fields stay within
    the residential property price information permission; and
-5. a repository-history remediation decision: releases before v1.5.1 committed
+5. a contracted or self-hosted production basemap decision covering SLA,
+   privacy, caching, offline use and redistribution; and
+6. a repository-history remediation decision: releases before v1.5.1 committed
    the EPC lookup cache/raw match fields, the raw GIAS CSV, and an operational
    postcode/Overpass cache. This release removes them from the current branch
    and prevents recurrence, but deliberately does not rewrite earlier Git

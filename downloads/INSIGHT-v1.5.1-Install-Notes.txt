@@ -1,14 +1,16 @@
 INSIGHT 1.5.1 (build 17)
 Internal investor-demonstration release — 19 July 2026
 
-Package: INSIGHT.zip
-SHA-256: e1d640bfac647c8741c552619c4b17c1b017a5323ccd3d012465227bd63a5d0a
+Published package: INSIGHT-macOS.zip
+SHA-256: 00d9f26083f7d149127c025907b885c1494d515bd42aae42aaad776cf57aae11
 Architecture: universal arm64 + x86_64
 Minimum macOS: 12.0
 Data snapshot: HM Land Registry Price Paid Data through 6 May 2026
 Property-record as-of date: 2026-07-19
 
-The map engine, worker, analytical geometry, fonts and notices are bundled for
-offline use. The app is ad-hoc signed for controlled internal demonstration;
-it is not Developer ID signed, notarized, or certified for public distribution.
-See DATA-NOTICES.txt inside the app and the v1.5.1 release audit.
+The map engine, worker, analytical geometry, fonts and notices are bundled.
+The label-free road basemap streams OpenFreeMap vector tiles and requires a
+network connection; attribution remains visible. The app is ad-hoc signed for
+controlled internal demonstration; it is not Developer ID signed, notarized,
+or certified for public distribution. See DATA-NOTICES.txt inside the app and
+the v1.5.1 release audit.
