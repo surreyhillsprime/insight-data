@@ -8,6 +8,10 @@ The Mac app uses this canonical base-feed URL:
 https://raw.githubusercontent.com/surreyhillsprime/insight-data/main/outputs/surrey-transactions.js
 ```
 
+The audited v1.5.1 internal build is deliberately pinned to the matching
+`release-v1.5.1` branch for its transaction, planning, sales-history and news
+feeds until the release is approved and merged to the default branch.
+
 The feed is one transaction ledger from 1995 onwards. Pre-2010 and 2010+
 transactions are not separate product datasets. Each row retains the structured
 HM Land Registry address fields used by the exact, fail-closed private-estate
@@ -23,10 +27,10 @@ manifest are in [RELEASE-v1.5.1.md](RELEASE-v1.5.1.md) and
 The current macOS package is published at:
 
 ```text
-https://raw.githubusercontent.com/surreyhillsprime/insight-data/main/downloads/INSIGHT-macOS.zip
+https://raw.githubusercontent.com/surreyhillsprime/insight-data/release-v1.5.1/downloads/INSIGHT-macOS.zip
 ```
 
-SHA-256: `00d9f26083f7d149127c025907b885c1494d515bd42aae42aaad776cf57aae11`
+SHA-256: `7352e21eb93375becdc6579585e348b962ff7b3fd549a0ff6935bad4395be838`
 
 This package is strictly ad-hoc signed for controlled internal use. It is not
 Developer ID signed or Apple-notarized and must not be represented as an
@@ -34,14 +38,18 @@ external commercial distribution build. The remaining rights and repository
 history reviews are recorded in [NOTICE.md](NOTICE.md).
 
 The internal build streams a custom label-free OpenFreeMap road basemap with
-visible OpenFreeMap/OpenMapTiles/OpenStreetMap attribution. It does not show
-upstream place labels or INSIGHT town-sales circles. The public tile service has
-no SLA; a contracted or self-hosted basemap remains an external-release gate.
+visible OpenFreeMap/OpenMapTiles/OpenStreetMap attribution. Local-authority
+polygons open with their heat colouring and separated edges; the map does not
+show upstream place labels, INSIGHT town-sales circles or permanent private-
+estate names. Estate name and current velocity appear on hover. The public tile
+service has no SLA; a contracted or self-hosted basemap remains an external-
+release gate.
 
 The package contains the matching private-estate registry and app code. On
-first launch, INSIGHT downloads the current base feed from this repository.
-The installer and feed are released together whenever their required estate
-registry version changes.
+first launch, INSIGHT checks the pinned release feed and accepts it only when it
+meets the v1.5.1 date, row-count and completeness gates; otherwise it keeps the
+validated bundled snapshot. The installer and feed are released together
+whenever their required estate registry version changes.
 
 ## V2 Workflow Schedule
 

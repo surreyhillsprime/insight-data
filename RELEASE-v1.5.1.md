@@ -24,8 +24,8 @@ engineering evidence, not legal advice.
 | Item | Result |
 | --- | --- |
 | Package | `downloads/INSIGHT-macOS.zip` |
-| SHA-256 | `00d9f26083f7d149127c025907b885c1494d515bd42aae42aaad776cf57aae11` |
-| Size | 7,136,635 bytes |
+| SHA-256 | `7352e21eb93375becdc6579585e348b962ff7b3fd549a0ff6935bad4395be838` |
+| Size | 4,147,637 bytes |
 | Bundle | `com.surreyhillsprime.insight` |
 | Architectures | arm64 and x86_64 |
 | Minimum macOS | 12.0 on both slices |
@@ -42,7 +42,7 @@ matches v1.5.1 build 17 with a valid strict signature.
 | Gate | Evidence | Result |
 | --- | --- | --- |
 | Data unit and contract tests | 30/30 | PASS |
-| App regression tests | 115/115 | PASS |
+| App regression tests | 116/116 | PASS |
 | Strict completeness metadata | All seven thresholds | PASS |
 | Python, shell and JavaScript syntax | 30 Python, 3 shell, 5 release JS assets | PASS |
 | Release ZIP | Version/build, extraction, universal binary, macOS 12, signature | PASS |
@@ -60,14 +60,19 @@ showed:
 
 - a real label-free road/context basemap with water, land use, rail and
   buildings;
-- no artificial town circles, town or authority sales labels, or glow/ring
-  layers;
-- the optional authority Heat layer switched off by default; and
+- distinct local-authority heat polygons and heat-coloured separating edges,
+  switched on by default;
+- no artificial town circles, town or authority sales labels, permanent estate
+  names, property halos or estate glow/ring layers;
+- estate name and current velocity on hover, including while Average value is
+  the selected authority map mode;
+- five map modes only, with the former Momentum mode, score, inspector rows and
+  Ask INSIGHT outputs removed; and
 - visible OpenFreeMap, OpenMapTiles and OpenStreetMap attribution clear of the
   Ask and inspector panels.
 
 The preceding full native interaction run, whose application logic is covered
-by the same final 115-test suite and source-to-ZIP parity gate, also showed:
+by the same final 116-test suite and source-to-ZIP parity gate, also showed:
 
 - exact `Market News` wording and all six current link-only stories;
 - populated Local Authorities, Private Estates and Towns panels;
@@ -120,10 +125,18 @@ time-gated and polygon holes are preserved.
   cannot blank the product UI.
 - Packaging validates the staged app and an extracted pending ZIP before the
   release ZIP becomes authoritative.
+- The native wrapper rejects cached or remote transaction feeds that fall below
+  the v1.5.1 row-count, coverage-date or enrichment-completeness gates, and the
+  four live feed URLs are pinned to `release-v1.5.1` for this candidate.
 - The map uses an allowlisted OpenFreeMap vector endpoint with a custom
   non-symbol style. No upstream place/town labels are loaded; artificial town
-  geometry and every product glow/ring layer have been removed. Heat is
-  optional and off by default, and required attribution is visibly positioned.
+  geometry, property halos, estate labels and estate glow/ring layers have been
+  removed. The local-authority heat glow is retained deliberately, is on by
+  default, and required attribution is visibly positioned.
+- The former composite Momentum score is absent from active source and package;
+  velocity, the 90-day activity signal and repeat-sale price movement remain
+  separate evidence measures. Ambiguous ranking prompts are rejected instead
+  of silently substituting another metric.
 - The stale v1.4.3 public installer and obsolete July staging tree were replaced
   or quarantined; neither is present in this release package.
 

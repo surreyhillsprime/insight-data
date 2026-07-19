@@ -2,7 +2,7 @@ INSIGHT 1.5.1 (build 17)
 Internal investor-demonstration release — 19 July 2026
 
 Published package: INSIGHT-macOS.zip
-SHA-256: 00d9f26083f7d149127c025907b885c1494d515bd42aae42aaad776cf57aae11
+SHA-256: 7352e21eb93375becdc6579585e348b962ff7b3fd549a0ff6935bad4395be838
 Architecture: universal arm64 + x86_64
 Minimum macOS: 12.0
 Data snapshot: HM Land Registry Price Paid Data through 6 May 2026
