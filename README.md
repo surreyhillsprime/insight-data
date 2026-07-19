@@ -2,13 +2,29 @@
 
 This repository publishes the shared data feed for INSIGHT.
 
-The Mac app should use this feed URL:
+The Mac app uses this canonical base-feed URL:
 
 ```text
-https://raw.githubusercontent.com/YOUR-GITHUB-USERNAME/insight-data/main/outputs/surrey-transactions.js
+https://raw.githubusercontent.com/surreyhillsprime/insight-data/main/outputs/surrey-transactions.js
 ```
 
-Replace `YOUR-GITHUB-USERNAME` with the GitHub username that owns this repository.
+The feed is one transaction ledger from 1995 onwards. Pre-2010 and 2010+
+transactions are not separate product datasets. Each row retains the structured
+HM Land Registry address fields used by the exact, fail-closed private-estate
+classifier.
+
+## Install INSIGHT
+
+The current macOS package is published at:
+
+```text
+https://raw.githubusercontent.com/surreyhillsprime/insight-data/main/downloads/INSIGHT-macOS.zip
+```
+
+The package contains the matching private-estate registry and app code. On
+first launch, INSIGHT downloads the current base feed from this repository.
+The installer and feed are released together whenever their required estate
+registry version changes.
 
 ## V2 Workflow Schedule
 
@@ -19,6 +35,7 @@ INSIGHT now uses separate refresh jobs so high-change sources stay fresh without
 | `daily-intelligence.yml` | Daily at 05:15 UTC | Recent planning applications near tracked properties, plus Companies House where a company number already exists |
 | `weekly-context.yml` | Mondays at 05:35 UTC | Planning constraints, listed-building matches, conservation/heritage overlays, and schools if a school CSV feed is supplied |
 | `monthly-property-refresh.yml` | 1st of each month at 06:00 UTC | Land Registry, EPC floor areas, GBP/sq ft, live flood-alert context, and OSM amenities |
+| `sales-history-feed.yml` | 2nd of each month at 06:30 UTC | Complete HM Land Registry Price Paid history for properties in the base feed |
 | `six-week-os-refresh.yml` | Guarded Sunday schedule | OS Open UPRN matching and geometry/linkage improvement when an OS CSV is supplied |
 | `data-completeness.yml` | Daily at 11:00 UTC | Validates historic coverage, source-level minimums and enrichment metadata |
 
@@ -44,12 +61,21 @@ flood, school and OS enrichment is applied across every property in the expanded
 feed using each source's full available or current coverage; those snapshot
 sources are not artificially backdated to 1995.
 
-`sales-history-feed.yml` is a deliberately dormant commercial publication path
-for the separate complete Price Paid history feed. It has no schedule and its
-job cannot run until the `SALES_HISTORY_COMMERCIAL_ENABLED` repository variable
-is explicitly set to `true`. Its postcode cache is resumable; its published
-output is `outputs/sales-history.js`. This is Price Paid transaction history
-from 1995 onwards, not the legal title register, ownership, deeds, or charges.
+`sales-history-feed.yml` publishes the separate complete Price Paid history
+feed each month. Its postcode cache is resumable and its output is
+`outputs/sales-history.js`. This is Price Paid transaction history from 1995
+onwards, not the legal title register, ownership, deeds, or charges.
+
+The audited private-estate registry is published as
+`outputs/private-estates.js`, with its evidence and exact road rules under
+`config/`. Every matching transaction carries `estateId` plus the display
+estate name. Every row, including unmatched rows, carries the registry version
+that evaluated it. This is a property classification layer; INSIGHT does not
+draw or claim legal estate perimeters.
+
+`outputs/planning-history.js` remains a separate licensed-provider publication
+path. It must not be populated from a source whose terms do not permit product
+redistribution. Recent public planning context in the base feed is unaffected.
 
 The scheduled market-enrichment workflows update:
 
@@ -113,6 +139,9 @@ If this repository is already live and has run EPC/Land Registry workflows, uplo
 ```text
 .github/workflows/
 scripts/
+config/
+outputs/private-estates.js
+downloads/INSIGHT-macOS.zip
 README.md
 .nojekyll
 ```
@@ -136,7 +165,13 @@ If this is a brand new empty repository, upload these folders/files:
 .github/workflows/
 scripts/
 outputs/surrey-transactions.js
+outputs/private-estates.js
+outputs/sales-history.js
+config/
+downloads/INSIGHT-macOS.zip
 work/land-reg-surrey-3m-1995.csv
+work/land-reg-surrey-3m-1995-2009.csv
+work/land-reg-surrey-3m-2010.csv
 .nojekyll
 README.md
 ```
@@ -161,6 +196,9 @@ This data is licensed under the Open Government Licence v3.0.
 - GBP 3m+
 - Residential property types
 - From 1995-01-01 (the beginning of HM Land Registry Price Paid Data)
+- One unified 1995+ transaction database, with stable transaction IDs
+- Audited exact-road private-estate classification replayed across every row
+- Estate registry version recorded on every matched and unmatched transaction
 - Domestic EPC floor area where a confident address match is found
 - GBP/sq ft calculated from Land Registry sold price divided by matched EPC floor area
 - Optional public context where sources return usable data

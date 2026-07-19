@@ -1,0 +1,801 @@
+{
+  "$schema": "./private-estates.map-geometry.schema.json",
+  "schemaVersion": 1,
+  "registryVersion": "surrey-private-estates-2026-07-19-corrected-4",
+  "sourceRegistrySha256": "5e2a803b346084158b9a7c0252e521b7b1a7abdcec88ad68658700d9d7ff89af",
+  "geometryVersion": "surrey-private-estates-geometry-2026-07-19-navigation-only",
+  "asOf": "2026-07-18",
+  "status": "installed_navigation_anchors_only",
+  "crs": "OGC:CRS84",
+  "coordinateOrder": "longitude_latitude",
+  "purpose": "Source geometry for installed estate navigation anchors and internal location research. The product does not render estate perimeters.",
+  "accuracyNotice": "A navigation label point is a cartographic anchor, not evidence of legal extent. Estate boundary geometry is not part of the installed product contract.",
+  "sourceRefs": {
+    "coordinate-audit-2026-07-18": {
+      "type": "cross_source_coordinate_audit",
+      "title": "INSIGHT Surrey private-estate display-anchor audit",
+      "publisher": "INSIGHT research",
+      "accessedAt": "2026-07-18",
+      "reuseStatus": "research_candidate_only",
+      "notes": "Coordinates were reconciled from named-place, postcode and estate-map evidence. Each remains candidate until tied to a frozen source record and reviewed on an included road/property or approved polygon."
+    },
+    "postcodes-io-2026-07-18": {
+      "type": "postcode_centroid_api",
+      "title": "Postcodes.io",
+      "publisher": "Ideal Postcodes / Ordnance Survey derived open data",
+      "accessedAt": "2026-07-18",
+      "url": "https://postcodes.io/",
+      "reuseStatus": "candidate_geocoding_only",
+      "notes": "A postcode centroid is not a parcel or estate centroid."
+    },
+    "wentworth-official-map": {
+      "type": "official_estate_map",
+      "title": "Wentworth Estate map",
+      "publisher": "Wentworth Estate Roads Committee",
+      "accessedAt": "2026-07-18",
+      "url": "https://www.wentworthestate.org.uk/copy-of-information-for-residents"
+    },
+    "st-georges-estate-act": {
+      "type": "estate_act_without_deposited_plan",
+      "title": "St George's Hill Estate Act 1990",
+      "publisher": "UK Local Act",
+      "accessedAt": "2026-07-18",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c5/St._George%27s_Hill%2C_Weybridge%2C_Estate_Act_1990_%28UKLA_1990-1%29.pdf"
+    },
+    "burwood-official-map": {
+      "type": "official_estate_map",
+      "title": "Burwood Park map",
+      "publisher": "Burwood Park Residents Limited",
+      "accessedAt": "2026-07-18",
+      "url": "https://burwoodpark.co.uk/map"
+    },
+    "ashley-official-map": {
+      "type": "official_estate_map",
+      "title": "Ashley Park estate map",
+      "publisher": "Ashley Park Residents Association",
+      "accessedAt": "2026-07-18",
+      "url": "https://www.apraltd.com/uploads/8/2/8/2/82821254/ashley_park_estate_map.pdf"
+    },
+    "weybridge-park-official-map": {
+      "type": "official_estate_map",
+      "title": "Weybridge Park location map",
+      "publisher": "Weybridge Park Estate Limited",
+      "accessedAt": "2026-07-18",
+      "url": "https://www.weybridgepark.com/location-map-2"
+    },
+    "givons-official-map": {
+      "type": "official_estate_map",
+      "title": "Givons Grove map of estate and houses",
+      "publisher": "Givons Grove Estate Limited",
+      "accessedAt": "2026-07-18",
+      "url": "https://www.givonsgrove.com/map-of-the-estate-houses/"
+    },
+    "manygate-council-map": {
+      "type": "council_conservation_area_map",
+      "title": "Manygate Lane Estate conservation area map",
+      "publisher": "Spelthorne Borough Council",
+      "accessedAt": "2026-07-18",
+      "url": "https://www.spelthorne.gov.uk/sites/default/files/migration/media/1846/Manygate-Lane-Estate-conservation-area-map/pdf/ManygateLaneEstateCAA_29January2025_Copy.pdf"
+    },
+    "dormans-roads-trust-map": {
+      "type": "official_roads_trust_map",
+      "title": "Dormans Park map",
+      "publisher": "Dormans Park Roads Trust",
+      "documentDate": "2020-07",
+      "accessedAt": "2026-07-18",
+      "url": "https://dormanspark.co.uk/wp-content/uploads/2021/11/Dormans-Park-map-2020-hi-res-WEB.pdf"
+    },
+    "existing-app-seed": {
+      "type": "legacy_unverified_app_coordinate",
+      "title": "Current INSIGHT estate pin seed",
+      "publisher": "INSIGHT",
+      "accessedAt": "2026-07-18",
+      "reuseStatus": "do_not_install_without_new_provenance"
+    }
+  },
+  "pinPolicy": {
+    "approvedAnchorBasis": [
+      "inside_authoritative_boundary",
+      "verified_internal_address",
+      "verified_internal_road"
+    ],
+    "candidateOnlyAnchorBasis": [
+      "official_map_named_feature",
+      "postcode_centroid",
+      "postcode_cluster_centroid",
+      "named_locality_centroid",
+      "legacy_app_seed"
+    ],
+    "rules": [
+      "Pins are fixed by geographyVersion and never recomputed from transactions.",
+      "A candidate point must not be described as a legal, parcel or estate centroid.",
+      "Before approval, freeze coordinate provenance and verify the point on an included road/property or inside an approved display boundary.",
+      "Changing an approved point requires a geographyVersion bump and review record.",
+      "Held, reclassified and excluded entities cannot receive a live private-estate pin."
+    ]
+  },
+  "boundaryPolicy": {
+    "geometryStatusEnum": [
+      "authoritative_georeferenced",
+      "official_map_needs_georeferencing",
+      "authoritative_plan_not_obtained",
+      "road_schedule_only",
+      "title_or_member_allowlist_required",
+      "historic_context_only",
+      "no_boundary_evidence",
+      "excluded"
+    ],
+    "rules": [
+      "DisplayBoundary and classificationGeometry require independent provenance and approval.",
+      "Never derive a boundary from a pin, postcode centroid, transaction hull, road-centreline buffer or estate-agent map.",
+      "A georeferenced plan records at least four well-distributed control points, transform, residuals, source scale, operator and peer reviewer.",
+      "Polygon and MultiPolygon only; validate closed rings, topology, Surrey containment, label-point containment and every edge against the source plan.",
+      "Boundary records remain research evidence only and are not rendered or used for classification."
+    ]
+  },
+  "approvalSummary": {
+    "registryEntityCount": 71,
+    "productionCandidateRecordCount": 23,
+    "productionCandidateWithLabelPointCount": 23,
+    "candidateLabelPointCount": 56,
+    "approvedLabelPointCount": 0,
+    "authoritativeGeoreferencedBoundaryCount": 0,
+    "notes": "Every ready/partial-ready estate has a navigation anchor. These anchors are installed for map interaction only; no candidate point implies a legal boundary."
+  },
+  "entities": [
+    {
+      "estateId": "wentworth-estate",
+      "registryDisposition": "partial_ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.57245, 51.40269]}, "readiness": "candidate", "anchorBasis": "named_locality_centroid", "derivation": {"method": "geocoder_cross_check", "provider": "named-place sources"}, "sourceRefs": ["coordinate-audit-2026-07-18", "wentworth-official-map"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": [], "notes": "No single main gate; official evidence describes generally unbarriered private roads."},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": ["wentworth-official-map"], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Georeference and edge-review the official map; reconcile title-controlled boundary-road properties."]
+    },
+    {
+      "estateId": "st-georges-hill",
+      "registryDisposition": "partial_ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.44301, 51.34997]}, "readiness": "candidate", "anchorBasis": "named_locality_centroid", "derivation": {"method": "geocoder_cross_check", "provider": "named-place sources"}, "sourceRefs": ["coordinate-audit-2026-07-18", "st-georges-estate-act"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": {"entranceId": "old-avenue", "role": "primary_vehicular", "accessType": "gated", "geometry": {"type": "Point", "coordinates": [-0.43923, 51.35396]}, "readiness": "candidate", "validation": {"boundaryRelation": "unchecked"}}, "secondary": [{"entranceId": "brooklands-road", "role": "vehicular", "accessType": "gated", "geometry": {"type": "Point", "coordinates": [-0.45756, 51.35396]}, "readiness": "candidate_postcode_approximation"}]},
+      "displayBoundary": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": ["st-georges-estate-act"], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain the substituted deposited plan and verify Old Avenue's exact gate/property segment."]
+    },
+    {
+      "estateId": "burwood-park",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.42441, 51.35909]}, "readiness": "candidate", "anchorBasis": "official_map_named_feature", "derivation": {"method": "named_locality_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18", "burwood-official-map"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": {"entranceId": "queens-road-a317", "role": "primary_vehicular", "accessType": "gated", "geometry": {"type": "Point", "coordinates": [-0.42430, 51.37049]}, "readiness": "candidate", "validation": {"boundaryRelation": "unchecked"}}, "secondary": []},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": ["burwood-official-map"], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Georeference and edge-review the current estate map."]
+    },
+    {
+      "estateId": "oxshott-way-estate",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.39378, 51.33017]}, "readiness": "candidate", "anchorBasis": "postcode_cluster_centroid", "derivation": {"method": "mean_of_included_road_postcode_points"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": [{"entranceId": "mizen-way-leigh-hill", "role": "vehicular", "accessType": "open_private", "geometry": {"type": "Point", "coordinates": [-0.40290, 51.32633]}, "readiness": "candidate_postcode_approximation"}]},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Digitise and review an association-approved perimeter and entrances."]
+    },
+    {
+      "estateId": "ashley-park",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.41932, 51.37930]}, "readiness": "candidate", "anchorBasis": "official_map_named_feature", "derivation": {"method": "named_locality_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18", "ashley-official-map"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": {"entranceId": "charlottes-gate", "role": "primary_vehicular", "accessType": "gated", "geometry": {"type": "Point", "coordinates": [-0.42173, 51.38372]}, "readiness": "candidate", "validation": {"boundaryRelation": "unchecked"}}, "secondary": []},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": ["ashley-official-map"], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Map estate plot IDs and gate segment to current addresses/UPRNs before pin or rule approval."]
+    },
+    {
+      "estateId": "fairmile-section-one",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.39995, 51.33581]}, "readiness": "candidate", "anchorBasis": "verified_internal_road", "derivation": {"method": "included_road_postcode_midpoint"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": {"entranceId": "portsmouth-road", "role": "vehicular", "accessType": "gated", "geometry": {"type": "Point", "coordinates": [-0.40401, 51.33765]}, "readiness": "candidate"}, "secondary": [{"entranceId": "leigh-hill-road", "role": "vehicular", "accessType": "gated", "geometry": {"type": "Point", "coordinates": [-0.39644, 51.33320]}, "readiness": "candidate"}]},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Survey/digitise the exact road-edge and gate geometry."]
+    },
+    {
+      "estateId": "weybridge-park",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.45590, 51.36815]}, "readiness": "candidate", "anchorBasis": "verified_internal_road", "derivation": {"method": "internal_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18", "weybridge-park-official-map"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": ["weybridge-park-official-map"], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Georeference the official map and validate Melrose-access properties."]
+    },
+    {
+      "estateId": "hockering-estate",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.54238, 51.31284]}, "readiness": "candidate", "anchorBasis": "named_locality_centroid", "derivation": {"method": "named_locality_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": {"entranceId": "heathfield-hockering-road", "role": "vehicular", "accessType": "open_private", "geometry": {"type": "Point", "coordinates": [-0.53902, 51.31397]}, "readiness": "candidate_low"}, "secondary": [], "notes": "Four entrances require exact placement."},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain/digitise the association boundary and all four entrance points."]
+    },
+    {
+      "estateId": "esher-place-estate",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.37380, 51.37192]}, "readiness": "candidate", "anchorBasis": "postcode_cluster_centroid", "derivation": {"method": "mean_of_candidate_road_postcodes"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": {"entranceId": "lammas-lane-pelhams-walk", "role": "vehicular", "accessType": "gated", "geometry": {"type": "Point", "coordinates": [-0.36531, 51.36958]}, "readiness": "candidate"}, "secondary": []},
+      "displayBoundary": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain EPRL's current road/property schedule and second entrance geometry."]
+    },
+    {
+      "estateId": "knott-park",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.35985, 51.32406]}, "readiness": "candidate", "anchorBasis": "postcode_cluster_centroid", "derivation": {"method": "mean_of_included_road_postcodes"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": {"entranceId": "the-chase-wrens-hill", "role": "vehicular", "accessType": "open_private", "geometry": {"type": "Point", "coordinates": [-0.35869, 51.32554]}, "readiness": "candidate_low"}, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain association boundary and survey the entrance/fork."]
+    },
+    {
+      "estateId": "ruxley-heights",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.32361, 51.35803]}, "readiness": "candidate", "anchorBasis": "verified_internal_road", "derivation": {"method": "included_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain or digitise a current association perimeter."]
+    },
+    {
+      "estateId": "great-park-warlingham",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.02924256, 51.31818644]}, "readiness": "candidate", "anchorBasis": "postcode_cluster_centroid", "derivation": {"method": "mean_of_included_postcodes"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain a current management perimeter and entrances."]
+    },
+    {
+      "estateId": "ridgeway-oxshott",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.361256, 51.329327]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "anchorReference": {"canonicalRoad": "The Ridgeway", "postcode": "KT22 0LG"}, "derivation": {"method": "postcode_centroid", "provider": "Postcodes.io"}, "sourceRefs": ["postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Replace single-postcode centroid with a reviewed internal-feature point and obtain perimeter geometry."]
+    },
+    {
+      "estateId": "blackhills",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.37779, 51.35281]}, "readiness": "candidate", "anchorBasis": "postcode_cluster_centroid", "derivation": {"method": "included_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Resolve Albany Close against the current association/property schedule, then digitise the exact perimeter and entrance."]
+    },
+    {
+      "estateId": "pachesham-park",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.33457, 51.32036]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "included_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Digitise exact road geometry and entrance."]
+    },
+    {
+      "estateId": "eaton-park",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.38591, 51.33202]}, "readiness": "candidate", "anchorBasis": "included_road_postcode_footprint", "derivation": {"method": "mean_of_included_road_postcode_centroids"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": true, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain an authoritative georeferenced plan to document the estate's legal extent."]
+    },
+    {
+      "estateId": "eaton-park-road",
+      "registryDisposition": "reclassify",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.38525, 51.33115]}, "readiness": "candidate", "anchorBasis": "postcode_cluster_centroid", "derivation": {"method": "included_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Confirm exact road perimeter and entrance independently from Eaton Park."]
+    },
+    {
+      "estateId": "claremont-park-estate",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.36797, 51.36238]}, "readiness": "candidate", "anchorBasis": "named_locality_centroid", "derivation": {"method": "estate_area_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain the umbrella estate's current member/title schedule and perimeter."]
+    },
+    {
+      "estateId": "ewell-downs-estate",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.24653025, 51.33788365]}, "readiness": "candidate", "anchorBasis": "two_road_estate_navigation_center", "derivation": {"method": "mean_of_verified_internal_road_midpoints"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": true, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Georeference the council conservation-area/private-estate plan for internal boundary research."]
+    },
+    {
+      "estateId": "the-green-ewell",
+      "registryDisposition": "reclassify",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.246985, 51.3370936]}, "readiness": "candidate", "anchorBasis": "verified_internal_road", "derivation": {"method": "road_midpoint_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Digitise exact road/property perimeter with Ewell locality constraint."]
+    },
+    {
+      "estateId": "lynwood",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.336652, 51.382099]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "included_address_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Digitise the 7-84 Lynwood Road segment plus Bourne Close and Wessex Close perimeter."]
+    },
+    {
+      "estateId": "weymede",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.4678172, 51.3416606]}, "readiness": "candidate", "anchorBasis": "verified_internal_address", "derivation": {"method": "named_address_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Freeze the full address/UPRN perimeter and entrances."]
+    },
+    {
+      "estateId": "templemere",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.4379947, 51.3761111]}, "readiness": "candidate", "anchorBasis": "verified_internal_address", "derivation": {"method": "named_address_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Freeze the full address/UPRN perimeter and entrances."]
+    },
+    {
+      "estateId": "westfield-ashtead",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.297262, 51.311957]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "included_address_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Freeze the 40-home address/UPRN perimeter and entrances."]
+    },
+    {
+      "estateId": "givons-grove",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.32203, 51.28022]}, "readiness": "candidate", "anchorBasis": "official_map_named_feature", "derivation": {"method": "locality_anchor_cross_checked_to_official_map"}, "sourceRefs": ["coordinate-audit-2026-07-18", "givons-official-map"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": {"entranceId": "a24-givons-grove", "role": "vehicular", "accessType": "open_private", "geometry": {"type": "Point", "coordinates": [-0.324100, 51.279299]}, "readiness": "candidate_low"}, "secondary": []},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": ["givons-official-map"], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Georeference the official map and verify every edge/entrance."]
+    },
+    {
+      "estateId": "virginia-park",
+      "registryDisposition": "partial_ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.559142, 51.403427]}, "readiness": "candidate", "anchorBasis": "verified_internal_road", "derivation": {"method": "development_address_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": [], "notes": "Access via Holloway Drive/Stroude Road; exact gate unresolved."},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Freeze complete UPRNs and georeference the approved-plan estate extent."]
+    },
+    {
+      "estateId": "st-anns-park",
+      "registryDisposition": "partial_ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.557031, 51.401521]}, "readiness": "candidate", "anchorBasis": "verified_internal_road", "derivation": {"method": "development_address_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": [], "notes": "Access via Sandy Lane from Sandhills Lane; exact gate unresolved."},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Resolve Sandy Lane segment, Ridge Way spelling/UPRNs and estate perimeter."]
+    },
+    {
+      "estateId": "hamm-court-estate",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.46671, 51.38039]}, "readiness": "candidate", "anchorBasis": "postcode_cluster_centroid", "derivation": {"method": "included_street_postcode_cluster"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Digitise road/property perimeter and A317 approach."]
+    },
+    {
+      "estateId": "manygate-lane-estate",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.443105, 51.394128]}, "readiness": "candidate", "anchorBasis": "verified_internal_address", "derivation": {"method": "address_range_centroid"}, "sourceRefs": ["coordinate-audit-2026-07-18", "manygate-council-map"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": [], "notes": "No single gated entrance."},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": ["manygate-council-map"], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Georeference the conservation map and validate address-range edges; do not imply private-road status."]
+    },
+    {
+      "estateId": "greenmeads",
+      "registryDisposition": "ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.544264, 51.242816]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "included_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Digitise Meads Road/Green Lane perimeter and entrances."]
+    },
+    {
+      "estateId": "blackdown-avenue",
+      "registryDisposition": "reclassify",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.521242, 51.328083]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "included_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Digitise road/property perimeter and entrance."]
+    },
+    {
+      "estateId": "redcourt",
+      "registryDisposition": "reclassify",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.522926, 51.327493]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "included_address_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Freeze the 14-home UPRN set and digitise the property perimeter."]
+    },
+    {
+      "estateId": "ridgway-pyrford",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.507193, 51.327563]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "candidate_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain current member/road schedule and perimeter."]
+    },
+    {
+      "estateId": "netherne-on-the-hill",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.14449, 51.29207]}, "readiness": "candidate", "anchorBasis": "official_map_named_feature", "derivation": {"method": "development_locality_anchor"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": [], "notes": "Main access via Netherne Lane; exact entrance unresolved."},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Separate roads from buildings/spaces, freeze UPRNs and georeference the management map."]
+    },
+    {
+      "estateId": "the-village-caterham",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.102797, 51.290560]}, "readiness": "candidate", "anchorBasis": "verified_internal_road", "derivation": {"method": "development_address_anchor"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Freeze current UPRNs and distinguish adopted from private/shared roads before georeferencing."]
+    },
+    {
+      "estateId": "holloway-estate-dorking",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.334307, 51.218489]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "candidate_internal_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Confirm current HERA limits and whether Roman Road remains included."]
+    },
+    {
+      "estateId": "danes-court-estate",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.352299, 51.328922]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "candidate_internal_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Confirm Briars Court and obtain the current five-road/property schedule."]
+    },
+    {
+      "estateId": "pyrford-woods-private-cluster",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.516075, 51.328539]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "candidate_internal_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain current association road/house plan or title/member schedule."]
+    },
+    {
+      "estateId": "watercolour-estate",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.153182, 51.252346]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "development_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain management transfer plan and complete UPRN schedule; distinguish adopted/private roads."]
+    },
+    {
+      "estateId": "enton-hall",
+      "registryDisposition": "hold",
+      "labelPoint": null,
+      "pinBlocker": "No defensible internal-feature coordinate frozen; entity scope unresolved.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "no_boundary_evidence", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "no_boundary_evidence", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain exact management/address scope and internal-feature coordinate."]
+    },
+    {
+      "estateId": "water-meadow-place",
+      "registryDisposition": "hold",
+      "labelPoint": null,
+      "pinBlocker": "Exact title/UPRN scope and internal anchor not frozen.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain exact title/UPRN schedule and internal-feature coordinate."]
+    },
+    {
+      "estateId": "river-ash-estates",
+      "registryDisposition": "hold",
+      "labelPoint": null,
+      "pinBlocker": "Combined entity is ambiguous; no single representative pin is allowed.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Split/reconcile River Ash and Ash Estates governance, roads, authority and title limits."]
+    },
+    {
+      "estateId": "las-palmas-estate",
+      "registryDisposition": "hold",
+      "labelPoint": null,
+      "pinBlocker": "Entity/title schedule not proved; postcode centroid must not stand in for the estate.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain association/title schedule and boundary."]
+    },
+    {
+      "estateId": "sandhills-meadow",
+      "registryDisposition": "hold",
+      "labelPoint": null,
+      "pinBlocker": "Entity/title schedule not proved; postcode centroid must not stand in for the estate.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain association/title schedule and boundary."]
+    },
+    {
+      "estateId": "wheatleys-eyot-cluster",
+      "registryDisposition": "reclassify",
+      "labelPoint": null,
+      "pinBlocker": "Separate roads/island typology; no single estate pin.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Model individual roads/governance separately if a context layer is required."]
+    },
+    {
+      "estateId": "virginia-beeches",
+      "registryDisposition": "reclassify",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.57782, 51.410318]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "anchorReference": {"postcode": "GU25 4LT"}, "derivation": {"method": "postcode_centroid", "provider": "Postcodes.io"}, "sourceRefs": ["postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Freeze units 1-47 as UPRNs and digitise the managed-development perimeter."]
+    },
+    {
+      "estateId": "queensgate-cobham",
+      "registryDisposition": "hold",
+      "labelPoint": null,
+      "pinBlocker": "Current schedule/evidence not obtained; postcode centroid is insufficient.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "no_boundary_evidence", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "no_boundary_evidence", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain management/title schedule and internal-feature coordinate."]
+    },
+    {
+      "estateId": "historic-pyrford-woods-estate",
+      "registryDisposition": "reclassify",
+      "labelPoint": null,
+      "pinBlocker": "Historic character estate, not a live private-estate pin.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": []
+    },
+    {
+      "estateId": "east-horsley-private-road-network",
+      "registryDisposition": "reclassify",
+      "labelPoint": null,
+      "pinBlocker": "Multiple road companies; no single estate pin or polygon.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Model individual road companies separately if required."]
+    },
+    {
+      "estateId": "abbotswood-guildford",
+      "registryDisposition": "reclassify",
+      "labelPoint": null,
+      "pinBlocker": "Historic character area with separate associations; no live estate pin.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": []
+    },
+    {
+      "estateId": "surrey-private-islands",
+      "registryDisposition": "reclassify",
+      "labelPoint": null,
+      "pinBlocker": "Multi-geography aggregate; a representative point would be misleading.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Create separate island/governance records before any context mapping."]
+    },
+    {
+      "estateId": "sunningdale-park-outside-surrey",
+      "registryDisposition": "exclude",
+      "labelPoint": null,
+      "pinBlocker": "Outside Surrey.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "excluded", "geometry": null, "sourceRefs": [], "reviewStatus": "rejected"},
+      "classificationGeometry": {"geometryStatus": "excluded", "geometry": null, "sourceRefs": [], "reviewStatus": "rejected"},
+      "blockers": []
+    },
+    {
+      "estateId": "dormans-park",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.00499, 51.1476]}, "readiness": "candidate", "anchorBasis": "named_locality_centroid", "derivation": {"method": "os_open_names_locality_point", "provider": "Ordnance Survey Open Names via indexed open-data result"}, "sourceRefs": ["coordinate-audit-2026-07-18", "dormans-roads-trust-map"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": [], "notes": "Official map marks gates on Swissland Hill and The Approach; exact coordinates not yet surveyed."},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": ["dormans-roads-trust-map"], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Reconcile 17 map roads to current UPRNs, confirm gate segments and georeference/edge-review the official map."]
+    },
+    {
+      "estateId": "crown-estate-oxshott",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.35142, 51.33825]}, "readiness": "candidate", "anchorBasis": "named_locality_centroid", "derivation": {"method": "named_locality_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": [{"entranceId": "stokesheath-south", "role": "vehicular", "accessType": "open_private", "geometry": {"type": "Point", "coordinates": [-0.35007, 51.34132]}, "readiness": "candidate"}, {"entranceId": "crown-sign-reference", "role": "reference_only", "accessType": "unknown", "geometry": {"type": "Point", "coordinates": [-0.36302, 51.34456]}, "readiness": "candidate"}]},
+      "displayBoundary": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain a current legal road/property schedule and definitive residential boundary plan."]
+    },
+    {
+      "estateId": "kingswood-north-estate",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.218, 51.2925]}, "readiness": "candidate_low", "anchorBasis": "legacy_app_seed", "derivation": {"method": "legacy_unverified"}, "sourceRefs": ["existing-app-seed"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": [], "notes": "Dispersed road-management entity; no single entrance."},
+      "displayBoundary": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Replace legacy pin and obtain exact KNECL road/property schedule."]
+    },
+    {
+      "estateId": "kingswood-private-road-network",
+      "registryDisposition": "reclassify",
+      "labelPoint": null,
+      "pinBlocker": "Multiple distinct governance bodies; no single network pin or boundary.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Create separate association records if private-road analytics are required."]
+    },
+    {
+      "estateId": "ottershaw-park",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.5468665, 51.3571063]}, "readiness": "candidate", "anchorBasis": "official_map_named_feature", "derivation": {"method": "historic_mansion_internal_feature_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "official_map_needs_georeferencing", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain current estate/member map and freeze the property-specific 80-interest allowlist."]
+    },
+    {
+      "estateId": "domewood",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.0787771, 51.1454964]}, "readiness": "candidate", "anchorBasis": "named_locality_centroid", "derivation": {"method": "named_locality_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Freeze the 66-property allowlist and exclude New Domewood/other separately managed enclaves."]
+    },
+    {
+      "estateId": "magna-carta-park",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.5704236, 51.4390939]}, "readiness": "candidate", "anchorBasis": "verified_internal_address", "derivation": {"method": "internal_square_address_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Freeze the complete 57-home UPRN set and management perimeter."]
+    },
+    {
+      "estateId": "esher-park-avenue",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.36014, 51.36700]}, "readiness": "candidate", "anchorBasis": "postcode_cluster_centroid", "derivation": {"method": "candidate_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain exact gated segment/property schedule and entrance coordinates."]
+    },
+    {
+      "estateId": "new-road-esher",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.35769, 51.37243]}, "readiness": "candidate", "anchorBasis": "postcode_centroid", "derivation": {"method": "candidate_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain exact gated segment/property schedule and entrance coordinates."]
+    },
+    {
+      "estateId": "meadway-esher",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.36796, 51.35466]}, "readiness": "candidate", "anchorBasis": "postcode_cluster_centroid", "derivation": {"method": "candidate_road_postcode_point"}, "sourceRefs": ["coordinate-audit-2026-07-18", "postcodes-io-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain exact address/member schedule and entrance coordinates."]
+    },
+    {
+      "estateId": "royal-earlswood-park",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.1674267, 51.2239309]}, "readiness": "candidate", "anchorBasis": "verified_internal_address", "derivation": {"method": "development_address_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain complete private-road plan/address schedule and separate parkland from residential extent."]
+    },
+    {
+      "estateId": "lakeside-oatlands",
+      "registryDisposition": "hold",
+      "labelPoint": null,
+      "pinBlocker": "Complete address/postcode list and entity perimeter not confirmed.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain Lakeside Residents Society schedule and distinguish Lakeside Grange."]
+    },
+    {
+      "estateId": "holme-chase",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.447892, 51.3629516]}, "readiness": "candidate", "anchorBasis": "verified_internal_address", "derivation": {"method": "named_address_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain exact road/address/postcode and member schedule."]
+    },
+    {
+      "estateId": "kingsmead-weybridge",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.43685, 51.36248]}, "readiness": "candidate", "anchorBasis": "verified_internal_address", "derivation": {"method": "enclave_address_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "title_or_member_allowlist_required", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Freeze the Kingsmead property/UPRN allowlist; never classify Gower Road wholesale."]
+    },
+    {
+      "estateId": "woodham-waye",
+      "registryDisposition": "hold",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.5397831, 51.3344914]}, "readiness": "candidate", "anchorBasis": "verified_internal_road", "derivation": {"method": "road_midpoint_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Obtain current road/property schedule, Woking locality/postcode constraints and entrance geometry."]
+    },
+    {
+      "estateId": "hook-heath",
+      "registryDisposition": "reclassify",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.586, 51.3015]}, "readiness": "candidate_low", "anchorBasis": "legacy_app_seed", "derivation": {"method": "legacy_unverified"}, "sourceRefs": ["existing-app-seed"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Remove from live private-estate pin layer; model only as context/private-road fragments."]
+    },
+    {
+      "estateId": "woldingham-road-network",
+      "registryDisposition": "reclassify",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.0479379, 51.2834652]}, "readiness": "candidate_context_only", "anchorBasis": "named_locality_centroid", "derivation": {"method": "administrative_locality_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "historic_context_only", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
+      "blockers": ["Do not install as one estate; model separate road/covenant records if required."]
+    },
+    {
+      "estateId": "downs-road-estate-epsom",
+      "registryDisposition": "exclude",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.2602596, 51.3254707]}, "readiness": "candidate_context_only", "anchorBasis": "named_locality_centroid", "derivation": {"method": "road_area_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "excluded", "geometry": null, "sourceRefs": [], "reviewStatus": "rejected"},
+      "classificationGeometry": {"geometryStatus": "excluded", "geometry": null, "sourceRefs": [], "reviewStatus": "rejected"},
+      "blockers": ["Exclude from private-road premium; roads are publicly adopted."]
+    },
+    {
+      "estateId": "willinghurst-estate",
+      "registryDisposition": "exclude",
+      "labelPoint": null,
+      "pinBlocker": "Country/landed estate outside residential-estate typology.",
+      "entrances": {"primary": null, "secondary": []},
+      "displayBoundary": {"geometryStatus": "excluded", "geometry": null, "sourceRefs": [], "reviewStatus": "rejected"},
+      "classificationGeometry": {"geometryStatus": "excluded", "geometry": null, "sourceRefs": [], "reviewStatus": "rejected"},
+      "blockers": []
+    }
+  ]
+}

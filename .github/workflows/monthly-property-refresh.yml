@@ -26,6 +26,9 @@ jobs:
           git fetch origin main
           git checkout -B main origin/main
 
+      - name: Build audited private-estate registry
+        run: python3 scripts/build_private_estates_asset.py
+
       - name: Run Land Registry sweeper
         run: python3 scripts/sweep_land_registry.py
 
@@ -71,7 +74,7 @@ jobs:
             exit 1
           fi
           PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==2'
-          git add outputs/surrey-transactions.js work/land-reg-surrey-3m-1995.csv work/land-reg-surrey-3m-1995-2009.csv work/land-reg-surrey-3m-2010.csv
+          git add outputs/surrey-transactions.js outputs/private-estates.js work/land-reg-surrey-3m-1995.csv work/land-reg-surrey-3m-1995-2009.csv work/land-reg-surrey-3m-2010.csv
           if [ -f work/epc-cache.json ]; then
             git add work/epc-cache.json
           fi

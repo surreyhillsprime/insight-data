@@ -14,5 +14,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Verify published private-estate asset
+        run: |
+          python3 scripts/build_private_estates_asset.py
+          git diff --exit-code -- outputs/private-estates.js
       - name: Check shared feed coverage
         run: python3 scripts/check_data_completeness.py --strict-metadata

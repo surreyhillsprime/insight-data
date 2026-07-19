@@ -8,6 +8,7 @@ regenerates outputs/surrey-transactions.js for the static app.
 
 import argparse
 import csv
+import hashlib
 import io
 import json
 import re
@@ -18,6 +19,8 @@ import urllib.request
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from private_estates import classify_estate, load_compiled_registry
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CSV = ROOT / "work" / "land-reg-surrey-3m-1995.csv"
@@ -27,16 +30,22 @@ DEFAULT_JS = ROOT / "outputs" / "surrey-transactions.js"
 START_DATE = "1995-01-01"
 CURRENT_START_DATE = "2010-01-01"
 PRICE_FLOOR = 3_000_000
+FEED_SCHEMA_VERSION = 2
 SPARQL_ENDPOINT = "https://landregistry.data.gov.uk/landregistry/query"
 FETCH_RETRIES = 2
 ARCHIVE_URL = "https://price-paid-data.publicdata.landregistry.gov.uk/pp-{year}.csv"
 BASE_TRANSACTION_FIELDS = {
-    "id", "market", "district", "address", "town", "postcode", "price", "priceText",
-    "date", "propertyType", "estate", "source", "kind", "category",
+    "id", "market", "district", "address", "paon", "saon", "street", "locality", "town",
+    "postcode", "price", "priceText", "date", "propertyType", "estateId", "estate",
+    "estateClassification", "estateType", "estateRuleId", "estateRegistryVersion",
+    "estateEvidenceStatus", "estateReviewStatus", "source", "kind", "category",
 }
 BASE_METADATA_FIELDS = {
-    "rawRows", "residentialRows", "mappedTransactions", "uniquePostcodes", "from", "to",
-    "priceFloor", "source", "propertyTypes", "updateCadence", "officialSearch", "estateSummary",
+    "schemaVersion", "rawRows", "residentialRows", "mappedTransactions", "uniquePostcodes", "from", "to",
+    "priceFloor", "source", "propertyTypes", "updateCadence", "officialSearch", "estateSummary", "estateIdSummary",
+    "estateTypeSummary", "estateRegistryVersion", "estateClassifierMode",
+    "estateClassificationMode", "estateStructuredFieldCoverage",
+    "estateActiveDefinitionCount", "estateActiveRuleCount",
 }
 
 CANONICAL_DISTRICTS = {
@@ -75,19 +84,6 @@ PROPERTY_TYPES = {
 }
 PROPERTY_TYPE_CODES = {"d": "Detached", "s": "Semi Detached", "t": "Terraced", "f": "Flat Maisonette"}
 
-ESTATE_RULES = [
-    ("Wentworth", ["WENTWORTH", "ABBOTS DRIVE", "NORTH DRIVE", "SOUTH DRIVE", "WEST DRIVE", "PINEWOOD ROAD", "VIRGINIA AVENUE", "GORSE HILL ROAD", "WOODLANDS ROAD WEST"]),
-    ("St George's Hill", ["ST GEORGE", "OLD AVENUE", "EAST ROAD", "WEST ROAD", "CAMP END ROAD", "GODOLPHIN ROAD", "BOWATER RIDGE", "SOUTH ROAD"]),
-    ("Crown Estate / Oxshott", ["CROWN ESTATE", "CROWN DRIVE", "LEYS ROAD", "PRINCES DRIVE", "QUEENS DRIVE", "STOKESHEATH ROAD", "MOLES HILL", "BIRDS HILL DRIVE", "GOLDRINGS ROAD"]),
-    ("Burwood Park", ["BURWOOD PARK", "CRANLEY ROAD", "INCE ROAD", "ONSLOW ROAD", "CHARGATE CLOSE", "FRIARS CLOSE", "ERISWELL CRESCENT"]),
-    ("Blackhills", ["BLACKHILLS", "BLACK HILLS"]),
-    ("Fairmile", ["FAIRMILE AVENUE", "FAIRMILE LANE", "FAIRMILE PARK"]),
-    ("Ashley Park", ["ASHLEY PARK AVENUE", "ASHLEY RISE", "ASHLEY PARK"]),
-    ("Pachesham Park", ["PACHESHAM PARK"]),
-    ("Eaton Park", ["EATON PARK", "EATON PARK ROAD"]),
-]
-
-
 def clean(value):
     return " ".join(str(value or "").replace("\xa0", " ").split()).strip()
 
@@ -118,31 +114,34 @@ def price_text(price):
     return "GBP " + f"{price:,.0f}"
 
 
-def estate_for(address, existing=""):
-    if clean(existing):
-        return clean(existing)
-    upper_address = clean(address).upper()
-    for estate, terms in ESTATE_RULES:
-        if any(term in upper_address for term in terms):
-            return estate
-    return ""
+def estate_for(record, existing=""):
+    """Return a derived estate name; legacy values and address strings are ignored."""
+
+    if not isinstance(record, dict):
+        return ""
+    return classify_estate(record).get("estate", "")
 
 
 def build_address(row):
-    if clean(row.get("address")):
-        return clean(row.get("address"))
+    # HMLR's secondary addressable object (for example a flat number) precedes
+    # the primary object in a display address. Prefer the structured source
+    # fields whenever they exist so a legacy flattened address cannot override
+    # the authoritative components retained for estate classification.
     parts = [
-        clean(row.get("paon")),
         clean(row.get("saon")),
+        clean(row.get("paon")),
         clean(row.get("street")),
         clean(row.get("locality")),
         clean(row.get("town")),
         clean(row.get("postcode")),
     ]
-    return ", ".join(part for part in parts if part)
+    if any(parts[:4]):
+        return ", ".join(part for part in parts if part)
+    return clean(row.get("address"))
 
 
-def sparql_query(start_date=CURRENT_START_DATE):
+def sparql_query(start_date=CURRENT_START_DATE, end_date=""):
+    end_filter = f'FILTER(?date < "{end_date}"^^xsd:date)' if end_date else ""
     return f"""
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX lrppi: <http://landregistry.data.gov.uk/def/ppi/>
@@ -165,6 +164,7 @@ WHERE {{
   OPTIONAL {{ ?addr lrcommon:postcode ?postcode . }}
   FILTER(?price >= {PRICE_FLOOR})
   FILTER(?date >= "{start_date}"^^xsd:date)
+  {end_filter}
   FILTER(?propertyType IN (
     lrcommon:detached,
     lrcommon:semi-detached,
@@ -176,9 +176,9 @@ ORDER BY DESC(?date)
 """.strip()
 
 
-def fetch_current_rows():
+def fetch_sparql_rows(start_date=CURRENT_START_DATE, end_date=""):
     body = urllib.parse.urlencode({
-        "query": sparql_query(),
+        "query": sparql_query(start_date, end_date),
         "format": "application/sparql-results+json",
     }).encode("utf-8")
     request = urllib.request.Request(
@@ -209,6 +209,10 @@ def fetch_current_rows():
     for binding in payload.get("results", {}).get("bindings", []):
         rows.append({key: value.get("value", "") for key, value in binding.items()})
     return rows
+
+
+def fetch_current_rows():
+    return fetch_sparql_rows(CURRENT_START_DATE)
 
 
 def archive_row(values):
@@ -267,11 +271,27 @@ def fetch_archive_year(year):
     raise last_error
 
 
-def historical_rows():
-    if HISTORICAL_CSV.exists():
+def csv_has_structured_address_schema(path):
+    path = Path(path)
+    if not path.exists():
+        return False
+    with path.open(newline="", encoding="utf-8") as handle:
+        fields = set(csv.DictReader(handle).fieldnames or [])
+    return {"paon", "saon", "street", "locality", "town", "postcode", "district"}.issubset(fields)
+
+
+def rows_have_structured_address_schema(rows):
+    required = {"paon", "saon", "street", "locality", "town", "postcode", "district"}
+    return bool(rows) and all(required.issubset(row) for row in rows)
+
+
+def historical_rows(refresh=False):
+    if HISTORICAL_CSV.exists() and not refresh and csv_has_structured_address_schema(HISTORICAL_CSV):
         rows = read_csv(HISTORICAL_CSV)
         print(f"Historical cache: {len(rows):,} rows", flush=True)
         return rows
+    if HISTORICAL_CSV.exists() and not csv_has_structured_address_schema(HISTORICAL_CSV):
+        print("Historical cache rejected: structured HMLR address fields are missing", flush=True)
     raw = []
     for year in range(1995, 2010):
         raw.extend(fetch_archive_year(year))
@@ -281,22 +301,27 @@ def historical_rows():
     return transactions
 
 
-def fetch_rows(use_current_cache=False, existing_transactions=None):
-    history = historical_rows()
+def fetch_rows(use_current_cache=False, existing_transactions=None, refresh_history=False):
+    history = historical_rows(refresh=refresh_history)
     if use_current_cache:
         current = [item for item in (existing_transactions or []) if clean(item.get("date")) >= CURRENT_START_DATE]
-        if not current:
+        if not rows_have_structured_address_schema(current):
+            current = []
+        if not current and csv_has_structured_address_schema(CURRENT_CSV):
             current = read_csv(CURRENT_CSV)
+        if not current:
+            raise RuntimeError("The 2010+ cache lacks structured HMLR address fields; a live refresh is required")
         print(f"Current cache: {len(current):,} rows", flush=True)
     else:
         try:
             current = fetch_current_rows()
+            _raw_count, current_transactions = normalise_rows(current)
+            write_processed_csv(CURRENT_CSV, current_transactions)
+            print(f"Refreshed current cache: {len(current_transactions):,} rows", flush=True)
         except Exception as error:
-            current = [item for item in (existing_transactions or []) if clean(item.get("date")) >= CURRENT_START_DATE]
-            if not current:
-                if not CURRENT_CSV.exists():
-                    raise
-                current = read_csv(CURRENT_CSV)
+            if not csv_has_structured_address_schema(CURRENT_CSV):
+                raise
+            current = read_csv(CURRENT_CSV)
             print(f"WARNING current query failed; using {len(current):,} cached rows: {error}", flush=True)
     return history + current
 
@@ -338,8 +363,34 @@ def stable_property_key(item):
     ])
 
 
+def source_transaction_key(item):
+    """Address-independent HMLR tuple used only when it is unique on both sides."""
+
+    return "|".join([
+        re.sub(r"[^A-Z0-9]", "", clean(item.get("postcode")).upper()),
+        str(item.get("price", "")),
+        clean(item.get("date"))[:10],
+        clean(item.get("propertyType")).upper(),
+        clean(item.get("category")).upper(),
+    ])
+
+
+def order_insensitive_address_key(item):
+    """Match the same HMLR address when PAON and SAON display order changed."""
+
+    tokens = sorted(re.findall(r"[A-Z0-9]+", clean(item.get("address")).upper()))
+    return "|".join([" ".join(tokens), source_transaction_key(item)])
+
+
 def preserve_existing_enrichments(transactions, metadata, existing_transactions, existing_metadata):
     existing_by_key = {stable_transaction_key(item): item for item in existing_transactions}
+    existing_by_source_key = defaultdict(list)
+    existing_by_address_tokens = defaultdict(list)
+    transaction_source_counts = Counter(source_transaction_key(item) for item in transactions)
+    transaction_address_token_counts = Counter(order_insensitive_address_key(item) for item in transactions)
+    for item in existing_transactions:
+        existing_by_source_key[source_transaction_key(item)].append(item)
+        existing_by_address_tokens[order_insensitive_address_key(item)].append(item)
     existing_by_property = {}
     for item in existing_transactions:
         if any(key not in BASE_TRANSACTION_FIELDS for key in item):
@@ -349,6 +400,16 @@ def preserve_existing_enrichments(transactions, metadata, existing_transactions,
     enriched = []
     for item in transactions:
         exact = existing_by_key.get(stable_transaction_key(item), {})
+        if not exact:
+            source_key = source_transaction_key(item)
+            candidates = existing_by_source_key.get(source_key, [])
+            if len(candidates) == 1 and transaction_source_counts[source_key] == 1:
+                exact = candidates[0]
+        if not exact:
+            address_token_key = order_insensitive_address_key(item)
+            candidates = existing_by_address_tokens.get(address_token_key, [])
+            if len(candidates) == 1 and transaction_address_token_counts[address_token_key] == 1:
+                exact = candidates[0]
         property_donor = existing_by_property.get(stable_property_key(item), {})
         previous = {**property_donor, **exact}
         donor_extra_keys = {key for key in property_donor if key not in BASE_TRANSACTION_FIELDS}
@@ -375,27 +436,66 @@ def parse_price(value):
     return int(float(str(value).replace(",", "").replace("GBP", "").strip()))
 
 
+def stable_transaction_id(address, postcode, price, date, property_type, category):
+    identity = "|".join([
+        clean(address).upper(),
+        clean(postcode).upper().replace(" ", ""),
+        str(price),
+        clean(date),
+        clean(property_type).upper(),
+        clean(category).upper(),
+    ])
+    return "lr-" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
+
+
 def normalise_rows(rows):
     transactions = []
     seen = set()
     raw_count = len(rows)
+    estate_registry_version = load_compiled_registry()["registryVersion"]
     for row in rows:
-        price = parse_price(row.get("price", 0))
+        price = parse_price(row.get("price") or row.get("price_paid") or 0)
         if price < PRICE_FLOOR:
             continue
-        date = clean(row.get("date"))
+        date = clean(row.get("date") or row.get("deed_date"))[:10]
         if date < START_DATE:
             continue
         district = canonical_district(row.get("district"))
         market = clean(row.get("market")) or MARKET_BY_DISTRICT.get(district, "")
         if not market:
             continue
-        address = build_address(row)
+        paon = clean(row.get("paon")).upper()
+        saon = clean(row.get("saon")).upper()
+        street = clean(row.get("street")).upper()
+        locality = clean(row.get("locality")).upper()
         town = clean(row.get("town")).upper()
         postcode = clean(row.get("postcode")).upper()
-        property_type = property_label(row.get("propertyType"))
-        estate = estate_for(address, row.get("estate"))
-        category = category_label(row.get("category"))
+        # HMLR omits the postcode on this one transaction. Elmbridge's planning
+        # record repeatedly identifies the exact site as KT11 2JJ, so apply the
+        # sourced correction without weakening postcode-gated estate rules.
+        if (
+            not postcode
+            and paon == "MANSFIELD HOUSE, 11"
+            and street == "EATON PARK ROAD"
+            and town == "COBHAM"
+            and district == "Elmbridge"
+            and date == "2012-06-13"
+            and price == 3_300_000
+        ):
+            postcode = "KT11 2JJ"
+        address_row = {**row, "paon": paon, "saon": saon, "street": street, "locality": locality, "town": town, "postcode": postcode}
+        address = build_address(address_row)
+        property_type = property_label(row.get("propertyType") or row.get("property_type"))
+        estate_metadata = classify_estate({
+            "paon": paon,
+            "saon": saon,
+            "street": street,
+            "district": district,
+            "locality": locality,
+            "town": town,
+            "postcode": postcode,
+        })
+        category = category_label(row.get("category") or row.get("transaction_category"))
         key = (address.upper(), postcode, price, date, property_type, category)
         if key in seen:
             continue
@@ -404,20 +504,33 @@ def normalise_rows(rows):
             "market": market,
             "district": district,
             "address": address.upper(),
+            "paon": paon,
+            "saon": saon,
+            "street": street,
+            "locality": locality,
             "town": town,
             "postcode": postcode,
             "price": price,
             "priceText": price_text(price),
             "date": date,
             "propertyType": property_type,
-            "estate": estate,
+            "estateId": estate_metadata.get("estateId", ""),
+            "estate": estate_metadata.get("estate", ""),
+            "estateClassification": estate_metadata.get("estateClassification", ""),
+            "estateType": estate_metadata.get("estateType", ""),
+            "estateRuleId": estate_metadata.get("estateRuleId", ""),
+            "estateRegistryVersion": estate_metadata.get("estateRegistryVersion", estate_registry_version),
+            "estateEvidenceStatus": estate_metadata.get("estateEvidenceStatus", ""),
+            "estateReviewStatus": estate_metadata.get("estateReviewStatus", ""),
             "source": "HM Land Registry",
             "kind": "transaction",
             "category": category,
         })
     transactions.sort(key=lambda item: (item["date"], item["price"], item["address"]), reverse=True)
-    for index, item in enumerate(transactions, start=1):
-        item["id"] = f"lr-{index}"
+    for item in transactions:
+        item["id"] = stable_transaction_id(
+            item["address"], item["postcode"], item["price"], item["date"], item["propertyType"], item["category"]
+        )
     ordered = []
     for item in transactions:
         ordered.append({
@@ -425,13 +538,24 @@ def normalise_rows(rows):
             "market": item["market"],
             "district": item["district"],
             "address": item["address"],
+            "paon": item["paon"],
+            "saon": item["saon"],
+            "street": item["street"],
+            "locality": item["locality"],
             "town": item["town"],
             "postcode": item["postcode"],
             "price": item["price"],
             "priceText": item["priceText"],
             "date": item["date"],
             "propertyType": item["propertyType"],
+            "estateId": item["estateId"],
             "estate": item["estate"],
+            "estateClassification": item["estateClassification"],
+            "estateType": item["estateType"],
+            "estateRuleId": item["estateRuleId"],
+            "estateRegistryVersion": item["estateRegistryVersion"],
+            "estateEvidenceStatus": item["estateEvidenceStatus"],
+            "estateReviewStatus": item["estateReviewStatus"],
             "source": item["source"],
             "kind": item["kind"],
             "category": item["category"],
@@ -456,7 +580,11 @@ def summary_by_market(transactions):
 
 def metadata(raw_count, transactions):
     estates = Counter(item["estate"] for item in transactions if item["estate"])
+    estate_ids = Counter(item["estateId"] for item in transactions if item["estateId"])
+    estate_types = Counter(item["estateType"] for item in transactions if item["estateType"])
+    estate_registry = load_compiled_registry()
     return {
+        "schemaVersion": FEED_SCHEMA_VERSION,
         "rawRows": raw_count,
         "residentialRows": len(transactions),
         "mappedTransactions": len(transactions),
@@ -469,14 +597,32 @@ def metadata(raw_count, transactions):
         "updateCadence": "monthly",
         "officialSearch": "county=Surrey; price >= GBP 3,000,000; date >= 1995-01-01; residential property types",
         "estateSummary": dict(estates),
+        "estateIdSummary": dict(estate_ids),
+        "estateTypeSummary": dict(estate_types),
+        "estateRegistryVersion": estate_registry["registryVersion"],
+        "estateClassifierMode": "structured-exact-fail-closed",
+        "estateClassificationMode": "audited-road-matrix",
+        "estateStructuredFieldCoverage": {
+            "rows": len(transactions),
+            "rowsWithStreet": sum(1 for item in transactions if item.get("street")),
+            "rowsWithPaon": sum(1 for item in transactions if item.get("paon")),
+            "rowsEvaluatedAgainstRegistry": len(transactions),
+        },
+        "estateActiveDefinitionCount": estate_registry["metadata"]["activeDefinitionCount"],
+        "estateActiveRuleCount": estate_registry["metadata"]["activeRuleCount"],
     }
 
 
 def write_processed_csv(path, transactions):
     path.parent.mkdir(parents=True, exist_ok=True)
-    fields = ["address", "town", "postcode", "district", "propertyType", "estate", "price", "date", "market", "category"]
+    fields = [
+        "address", "paon", "saon", "street", "locality", "town", "postcode", "district",
+        "propertyType", "estateId", "estate", "estateClassification", "estateType", "estateRuleId",
+        "estateRegistryVersion", "estateEvidenceStatus", "estateReviewStatus",
+        "price", "date", "market", "category",
+    ]
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         for item in transactions:
             writer.writerow({field: item[field] for field in fields})
@@ -501,6 +647,7 @@ def parse_args():
     parser.add_argument("--preserve-from-js", default="", help="Optional prior enriched feed used to preserve matching context fields.")
     parser.add_argument("--no-fetch", action="store_true", help="Skip the official SPARQL fetch and rebuild from CSV.")
     parser.add_argument("--use-current-cache", action="store_true", help="Download/build 1995-2009 history but reuse the checked-in 2010+ cache.")
+    parser.add_argument("--refresh-history", action="store_true", help="Rebuild 1995-2009 from official structured HMLR sources.")
     parser.add_argument("--dry-run", action="store_true", help="Validate and print a summary without writing files.")
     return parser.parse_args()
 
@@ -513,14 +660,20 @@ def main():
     if args.no_fetch:
         source = "local CSV"
         rows = read_csv(args.from_csv)
+        if not rows_have_structured_address_schema(rows):
+            raise RuntimeError("Local CSV lacks the structured HMLR address fields required for estate classification")
     else:
         try:
-            rows = fetch_rows(args.use_current_cache, existing_transactions)
+            rows = fetch_rows(args.use_current_cache, existing_transactions, args.refresh_history)
             if args.use_current_cache:
                 source = "official HMLR yearly archive + checked-in 2010+ cache"
         except Exception as exc:
             source = f"local CSV fallback after fetch error: {exc}"
             rows = read_csv(args.from_csv)
+            if not rows_have_structured_address_schema(rows):
+                raise RuntimeError(
+                    "Official refresh failed and the fallback CSV lacks structured HMLR address fields"
+                ) from exc
 
     raw_count, transactions = normalise_rows(rows)
     meta = metadata(raw_count, transactions)
@@ -534,7 +687,6 @@ def main():
         return 0
 
     write_processed_csv(Path(args.write_csv), transactions)
-    write_processed_csv(CURRENT_CSV, [item for item in transactions if item.get("date", "") >= CURRENT_START_DATE])
     write_js(Path(args.write_js), transactions, meta)
     print(f"Updated {args.write_csv}")
     print(f"Updated {args.write_js}")

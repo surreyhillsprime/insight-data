@@ -2,24 +2,31 @@ name: Sales history feed
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "30 6 2 * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: sales-history-feed
+  group: insight-data-refresh
   cancel-in-progress: false
 
 jobs:
   build:
-    # Deliberately dormant until commercial publication is approved.
-    if: ${{ vars.SALES_HISTORY_COMMERCIAL_ENABLED == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+      - name: Synchronise latest main
+        run: |
+          git fetch origin main
+          git checkout -B main origin/main
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Check estate-aware base feed
+        run: python3 scripts/check_data_completeness.py --strict-metadata
       - name: Restore resumable postcode cache
         uses: actions/cache/restore@v4
         with:
@@ -48,6 +55,7 @@ jobs:
           if git diff --quiet -- outputs/sales-history.js; then exit 0; fi
           git config user.name "insight-data-bot"
           git config user.email "actions@users.noreply.github.com"
+          git pull --rebase --autostash origin main
           git add outputs/sales-history.js
           git commit -m "Update complete sales history feed"
           git push

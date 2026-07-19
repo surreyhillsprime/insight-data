@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://insight.local/schema/private-estates.map-geometry.schema.json",
+  "title": "INSIGHT private-estate map geometry manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "registryVersion",
+    "sourceRegistrySha256",
+    "geometryVersion",
+    "asOf",
+    "status",
+    "crs",
+    "coordinateOrder",
+    "sourceRefs",
+    "pinPolicy",
+    "boundaryPolicy",
+    "approvalSummary",
+    "entities"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "registryVersion": {"type": "string", "minLength": 1},
+    "sourceRegistrySha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "geometryVersion": {"type": "string", "minLength": 1},
+    "asOf": {"type": "string", "format": "date"},
+    "status": {
+      "enum": [
+        "research_only_not_installed",
+        "installed_navigation_anchors_only"
+      ]
+    },
+    "crs": {"const": "OGC:CRS84"},
+    "coordinateOrder": {"const": "longitude_latitude"},
+    "purpose": {"type": "string"},
+    "accuracyNotice": {"type": "string"},
+    "sourceRefs": {
+      "type": "object",
+      "additionalProperties": {"type": "object"}
+    },
+    "pinPolicy": {"type": "object"},
+    "boundaryPolicy": {"type": "object"},
+    "approvalSummary": {
+      "type": "object",
+      "required": [
+        "registryEntityCount",
+        "productionCandidateRecordCount",
+        "productionCandidateWithLabelPointCount",
+        "candidateLabelPointCount",
+        "approvedLabelPointCount",
+        "authoritativeGeoreferencedBoundaryCount"
+      ],
+      "properties": {
+        "registryEntityCount": {"type": "integer", "minimum": 0},
+        "productionCandidateRecordCount": {"type": "integer", "minimum": 0},
+        "productionCandidateWithLabelPointCount": {"type": "integer", "minimum": 0},
+        "candidateLabelPointCount": {"type": "integer", "minimum": 0},
+        "approvedLabelPointCount": {"type": "integer", "minimum": 0},
+        "authoritativeGeoreferencedBoundaryCount": {"type": "integer", "minimum": 0},
+        "notes": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "entities": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/entity"}
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number", "minimum": -180, "maximum": 180},
+        {"type": "number", "minimum": -90, "maximum": 90}
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "coordinates"],
+      "properties": {
+        "type": {"const": "Point"},
+        "coordinates": {"$ref": "#/$defs/position"}
+      }
+    },
+    "polygon": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "coordinates"],
+          "properties": {
+            "type": {"const": "Polygon"},
+            "coordinates": {"type": "array"}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "coordinates"],
+          "properties": {
+            "type": {"const": "MultiPolygon"},
+            "coordinates": {"type": "array"}
+          }
+        }
+      ]
+    },
+    "labelPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "geometry",
+        "readiness",
+        "anchorBasis",
+        "derivation",
+        "sourceRefs",
+        "validation",
+        "approvedForInstall"
+      ],
+      "properties": {
+        "geometry": {"$ref": "#/$defs/point"},
+        "readiness": {
+          "enum": ["candidate", "candidate_low", "candidate_context_only", "approved"]
+        },
+        "anchorBasis": {
+          "enum": [
+            "inside_authoritative_boundary",
+            "verified_internal_address",
+            "verified_internal_road",
+            "official_map_named_feature",
+            "postcode_centroid",
+            "postcode_cluster_centroid",
+            "named_locality_centroid",
+            "legacy_app_seed"
+          ]
+        },
+        "anchorReference": {"type": "object"},
+        "derivation": {"type": "object"},
+        "sourceRefs": {"type": "array", "items": {"type": "string"}},
+        "validation": {"type": "object"},
+        "approvedForInstall": {"type": "boolean"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"approvedForInstall": {"const": true}}},
+          "then": {"properties": {"readiness": {"const": "approved"}}}
+        }
+      ]
+    },
+    "entrances": {
+      "type": "object",
+      "required": ["primary", "secondary"],
+      "properties": {
+        "primary": {"type": ["object", "null"]},
+        "secondary": {"type": "array", "items": {"type": "object"}},
+        "notes": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["geometryStatus", "geometry", "sourceRefs", "reviewStatus"],
+      "properties": {
+        "geometryStatus": {
+          "enum": [
+            "authoritative_georeferenced",
+            "official_map_needs_georeferencing",
+            "authoritative_plan_not_obtained",
+            "road_schedule_only",
+            "title_or_member_allowlist_required",
+            "historic_context_only",
+            "no_boundary_evidence",
+            "excluded"
+          ]
+        },
+        "geometry": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/polygon"}
+          ]
+        },
+        "sourceRefs": {"type": "array", "items": {"type": "string"}},
+        "reviewStatus": {
+          "enum": ["not_started", "draft", "peer_reviewed", "approved", "rejected"]
+        }
+      }
+    },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "estateId",
+        "registryDisposition",
+        "labelPoint",
+        "entrances",
+        "displayBoundary",
+        "classificationGeometry",
+        "blockers"
+      ],
+      "properties": {
+        "estateId": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "registryDisposition": {
+          "enum": ["ready", "partial_ready", "hold", "reclassify", "exclude"]
+        },
+        "labelPoint": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/labelPoint"}
+          ]
+        },
+        "pinBlocker": {"type": "string"},
+        "entrances": {"$ref": "#/$defs/entrances"},
+        "displayBoundary": {"$ref": "#/$defs/boundary"},
+        "classificationGeometry": {"$ref": "#/$defs/boundary"},
+        "blockers": {"type": "array", "items": {"type": "string"}}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "registryDisposition": {"enum": ["hold", "reclassify", "exclude"]},
+              "labelPoint": {"type": "object"}
+            }
+          },
+          "then": {
+            "properties": {
+              "labelPoint": {
+                "properties": {"approvedForInstall": {"const": false}}
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,1552 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": "surrey-private-estates-2026-07-19-corrected-4",
+  "asOf": "2026-07-18",
+  "status": "installed_source_registry",
+  "purpose": "Versioned, evidence-reviewed source registry compiled into INSIGHT's private-estate runtime. Road-only, historic-area and non-estate management records remain here for audit context but are not installed as estates.",
+  "accuracyDefinition": "No known false positives or false negatives within a versioned, manually reviewed fixture set; unresolved properties remain unclassified. This is not proof of exhaustive Surrey coverage, title ownership or legal-boundary exactness.",
+  "sourceLimitations": [
+    "HM Land Registry Price Paid Data does not contain a private-estate classification.",
+    "HM Land Registry title plans normally show general rather than exact legal boundaries.",
+    "Unadopted, privately maintained, privately owned, gated, historic and resident-managed are not interchangeable concepts.",
+    "Marketing descriptions are discovery evidence only and cannot activate a classification without corroboration.",
+    "A map navigation anchor locates an estate for interaction; it is not a legal centroid or boundary."
+  ],
+  "classifications": {
+    "A": "Named private residential-estate entity",
+    "B": "Single private road or small road-management entity",
+    "C": "Historic estate, character area or multi-association private-road network",
+    "D": "Modern gated, managed or design-led residential development",
+    "E": "Country or landed estate rather than a resident estate",
+    "Q": "Unresolved or marketing-only candidate"
+  },
+  "productCohorts": {
+    "traditionalPrivateEstateIds": [
+      "wentworth-estate",
+      "st-georges-hill",
+      "burwood-park",
+      "oxshott-way-estate",
+      "fairmile-section-one",
+      "weybridge-park",
+      "hockering-estate",
+      "knott-park",
+      "ruxley-heights",
+      "ridgeway-oxshott",
+      "blackhills",
+      "pachesham-park",
+      "eaton-park",
+      "ewell-downs-estate",
+      "lynwood",
+      "givons-grove",
+      "hamm-court-estate",
+      "greenmeads"
+    ],
+    "managedDesignEstateIds": [
+      "great-park-warlingham",
+      "weymede",
+      "templemere",
+      "westfield-ashtead",
+      "virginia-park",
+      "st-anns-park"
+    ],
+    "contextOnlyIds": [
+      "eaton-park-road",
+      "the-green-ewell",
+      "manygate-lane-estate",
+      "blackdown-avenue",
+      "redcourt",
+      "virginia-beeches"
+    ],
+    "notes": "Product cohort lists the identities approved for the current product edition. Runtime activation additionally requires a ready or partial_ready install status; research classification and road governance do not activate an entity. A residents company or private road cannot create an estate entity by itself."
+  },
+  "installStatuses": {
+    "ready": "Evidence supports encoding and testing; approved-cohort records with this status compile into the installed runtime",
+    "partial_ready": "The verified core may be encoded and tested while every listed fringe or partial-road rule remains unclassified",
+    "hold": "Do not classify until the listed blocker is resolved",
+    "reclassify": "Retain only in a non-estate contextual category",
+    "exclude": "Exclude from the private residential estate registry"
+  },
+  "classifierRequirements": [
+    "Use one canonical registry for collection, display, filtering and Ask INSIGHT.",
+    "Parse and match structured address fields; never use unrestricted substring matching.",
+    "Apply explicit property exclusions before inclusions.",
+    "Use exact canonical street plus locality and postcode for whole-road rules.",
+    "Use house number, UPRN or an authoritative polygon for partial roads.",
+    "Recompute every transaction from an empty derived estate field.",
+    "Persist rule version, matched rule id, evidence status and review status on every classified row.",
+    "Use the registry labelPoint for estate pins; never replace it with the median of matched transactions.",
+    "Keep displayBoundary and classificationGeometry separate and provenance-controlled.",
+    "Held entities must produce zero automatic classifications."
+  ],
+  "entities": [
+    {
+      "id": "wentworth-estate",
+      "name": "Wentworth Estate",
+      "classification": "A",
+      "installStatus": "partial_ready",
+      "localAuthorities": ["Runnymede"],
+      "towns": ["Virginia Water"],
+      "matchStrategy": "structured_exact_street_locality_and_membership_status",
+      "roads": [
+        {"canonical": "Abbots Drive", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Beechwood Road", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Bourneside", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Chestnut Avenue", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "East Drive", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Firwood Road", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Heatherside Drive", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Lake Road", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Lindale Close", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Meadow Road", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "North Drive", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Pinewood Road", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Portnall Drive", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Portnall Rise", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Quentin Way", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "South Drive", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Spring Woods", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Stayne End", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Stuart Way", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Virginia Drive", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Waverley Drive", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Wentworth Drive", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "West Drive", "scope": "whole", "membershipStatus": "verified", "roadStatus": "private"},
+        {"canonical": "Waterfall Close", "scope": "whole", "membershipStatus": "verified", "roadStatus": "adopted"},
+        {"canonical": "Morella Close", "scope": "whole", "membershipStatus": "verified_title_restrictions", "roadStatus": "adopted_road_rate_exempt"},
+        {"canonical": "Trotsworth Avenue", "scope": "whole", "membershipStatus": "verified_title_restrictions", "roadStatus": "adopted_road_rate_exempt"},
+        {"canonical": "Woodlands Road East", "scope": "whole", "membershipStatus": "verified", "roadStatus": "unknown"},
+        {"canonical": "Woodlands Road West", "scope": "whole", "membershipStatus": "verified", "roadStatus": "unknown"},
+        {"canonical": "Virginia Avenue", "scope": "whole", "membershipStatus": "verified", "roadStatus": "unknown"},
+        {"canonical": "Badgers Hill", "scope": "whole", "membershipStatus": "verified", "roadStatus": "unknown"},
+        {"canonical": "Monks Road", "scope": "whole", "membershipStatus": "verified", "roadStatus": "unknown", "notes": "Do not replace with the neighbourhood-plan wording Monks Walk without address-level evidence."},
+        {"canonical": "Friars Road", "scope": "whole", "membershipStatus": "verified", "roadStatus": "unknown"}
+      ],
+      "heldBoundaryRoads": [
+        {"canonical": "Christchurch Road", "scope": "property_specific"},
+        {"canonical": "Wellington Avenue", "scope": "property_specific"},
+        {"canonical": "Gorse Hill Road", "aliases": ["Gorse Hill"], "scope": "property_specific"},
+        {"canonical": "Abbey Road", "scope": "property_specific"},
+        {"canonical": "London Road", "scope": "property_specific"},
+        {"canonical": "Crown Road", "scope": "property_specific"},
+        {"canonical": "Shrubbs Hill", "scope": "property_specific"}
+      ],
+      "heldSubareas": [
+        {"name": "Trumps Green Wentworth-covenanted adopted-road area", "roads": ["Harpesford Avenue", "Cabrera Avenue", "Cabrera Close", "Bourne Road", "Trumps Green Avenue", "property-specific Crown Road", "property-specific Wellington Avenue"]}
+      ],
+      "heldCandidates": ["Fairway", "Nuns Walk"],
+      "exclusions": ["Woodside Way", "Woodlee Close", "Oakwood Road", "Heath Rise", "Callow Hill", "Portnall Road", "Christchurch village and retail parades", "London Road outside verified plots", "Kingsbourne as a road", "Kings Bourne as a road"],
+      "evidence": [
+        {"type": "official_estate_map", "url": "https://www.wentworthestate.org.uk/copy-of-information-for-residents"},
+        {"type": "estate_roads_committee_fees", "url": "https://www.wentworthestate.org.uk/planning-and-building-fees"},
+        {"type": "approved_neighbourhood_plan", "url": "https://runnymede.moderngov.co.uk/documents/s17682/VWNP%20May%202026%20FINAL.pdf"},
+        {"type": "wentworth_estate_act_1964", "url": "https://www.runnymede.gov.uk/downloads/file/379/wentworth-estate-act-1964"},
+        {"type": "surrey_history_centre_road_groups", "url": "https://www.exploringsurreyspast.org.uk/collections/getrecord/SHCOL_7688_3_1_1_6"}
+      ],
+      "blockers": ["Georeference the official estate map or obtain WERC's title/address schedule for the seven boundary roads and Trumps Green title plots."]
+    },
+    {
+      "id": "st-georges-hill",
+      "name": "St George's Hill",
+      "classification": "A",
+      "installStatus": "partial_ready",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Weybridge"],
+      "matchStrategy": "structured_exact_street_locality_and_gate_segment",
+      "roads": [
+        {"canonical": "Abbotswood Drive", "scope": "whole"},
+        {"canonical": "Bowater Ridge", "scope": "whole"},
+        {"canonical": "Brooks Close", "scope": "whole"},
+        {"canonical": "Camp End Road", "scope": "whole"},
+        {"canonical": "Cavendish Road", "scope": "whole"},
+        {"canonical": "Chestnut Avenue", "scope": "whole"},
+        {"canonical": "Dragon Lane", "scope": "whole"},
+        {"canonical": "East Road", "scope": "whole"},
+        {"canonical": "Egerton Place", "scope": "whole"},
+        {"canonical": "Egerton Road", "scope": "whole"},
+        {"canonical": "Godolphin Road", "scope": "whole"},
+        {"canonical": "Golf Club Road", "scope": "whole"},
+        {"canonical": "Granville Close", "scope": "whole"},
+        {"canonical": "Granville Road", "scope": "whole"},
+        {"canonical": "Hill House Drive", "scope": "whole"},
+        {"canonical": "Linden Road", "scope": "whole"},
+        {"canonical": "Ravenscroft Road", "scope": "whole"},
+        {"canonical": "Rodona Road", "scope": "whole"},
+        {"canonical": "South Ridge", "scope": "whole"},
+        {"canonical": "South Road", "scope": "whole"},
+        {"canonical": "Tor Lane", "scope": "whole"},
+        {"canonical": "Warreners Lane", "scope": "whole"},
+        {"canonical": "West Road", "scope": "whole"},
+        {"canonical": "White Knights Road", "scope": "whole"},
+        {"canonical": "Wood Lane", "scope": "whole", "historicalName": "Cavendish Road"},
+        {"canonical": "Yaffle Road", "scope": "whole", "historicalName": "part of Old Avenue"}
+      ],
+      "heldBoundaryRoads": [
+        {"canonical": "Old Avenue", "scope": "gate_segment", "notes": "The public approach from Queens Road to the gate is outside; only the continuation south/beyond the gate is estate."},
+        {"canonical": "Blue Barn Lane", "scope": "whole_unverified"}
+      ],
+      "exclusions": ["Brooklands Road", "Queens Road", "St George's Avenue", "Gower Road", "Ellesmere Road", "Bridgewater Road", "Warren Way", "Byfleet Road", "Seven Hills Road", "Every unrestricted ST GEORGE or ST GEORGES substring"],
+      "evidence": [
+        {"type": "residents_association", "url": "https://stgeorgesra.tbcserver11.com/"},
+        {"type": "residents_association_history", "url": "https://stgeorgesra.tbcserver11.com/history/"},
+        {"type": "golf_club_gate_instructions", "url": "https://stgeorgeshill.intelligentgolf.co.uk/visitors_information"},
+        {"type": "estate_act_1990", "url": "https://upload.wikimedia.org/wikipedia/commons/c/c5/St._George%27s_Hill%2C_Weybridge%2C_Estate_Act_1990_%28UKLA_1990-1%29.pdf"},
+        {"type": "surrey_history_centre_road_records", "url": "https://www.exploringsurreyspast.org.uk/collections/getrecord/SHCOL_7688_1_1_1_6"}
+      ],
+      "blockers": ["Obtain or georeference the substituted deposited plan referenced by the 1990 Act, or obtain SGHRA's current road/address schedule, before activating Old Avenue or Blue Barn Lane."]
+    },
+    {
+      "id": "burwood-park",
+      "name": "Burwood Park",
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Hersham", "Walton-on-Thames"],
+      "matchStrategy": "structured_exact_street_and_locality",
+      "roads": [
+        {"canonical": "Albury Road", "scope": "whole"},
+        {"canonical": "Broadwater Close", "scope": "whole"},
+        {"canonical": "Broadwater Road North", "scope": "whole"},
+        {"canonical": "Broadwater Road South", "scope": "whole"},
+        {"canonical": "Chargate Close", "scope": "whole"},
+        {"canonical": "Cranley Road", "scope": "whole"},
+        {"canonical": "Eriswell Crescent", "aliases": ["Eriswell Cresent"], "scope": "whole"},
+        {"canonical": "Eriswell Road", "scope": "whole"},
+        {"canonical": "Farmleigh Grove", "scope": "whole"},
+        {"canonical": "Ince Road", "scope": "whole"},
+        {"canonical": "Kelvedon Avenue", "scope": "whole"},
+        {"canonical": "Kilrue Lane", "scope": "whole"},
+        {"canonical": "Manor House Drive", "aliases": ["Manor Park Drive"], "scope": "whole", "notes": "The graphic-map label is a typo; postal, planning and company records use Manor House Drive."},
+        {"canonical": "Onslow Road", "scope": "whole"},
+        {"canonical": "Patmore Lane", "scope": "whole"},
+        {"canonical": "Pond Close", "scope": "whole"},
+        {"canonical": "The Quillot", "scope": "whole"}
+      ],
+      "exclusions": ["Eastwick Road", "Kenwood Drive", "The Heronry", "Queens Road", "Seven Hills Road", "Burwood Road", "Burwood Park Road", "Fox Wood", "Rabbit Lane", "Burhill", "Old Nursery Gardens", "Friars Close"],
+      "evidence": [
+        {"type": "resident_company_map", "url": "https://burwoodpark.co.uk/map"},
+        {"type": "resident_company_history", "url": "https://burwoodpark.co.uk/history"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "oxshott-way-estate",
+      "name": "Oxshott Way Estate",
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Cobham"],
+      "matchStrategy": "structured_exact_street_and_locality",
+      "roads": [
+        {"canonical": "Broad Highway", "aliases": ["Broad High Way"], "scope": "whole"},
+        {"canonical": "Harebell Hill", "scope": "whole"},
+        {"canonical": "Mizen Close", "scope": "whole"},
+        {"canonical": "Mizen Way", "scope": "whole"},
+        {"canonical": "Oxshott Rise", "scope": "whole"},
+        {"canonical": "Oxshott Way", "scope": "whole"},
+        {"canonical": "Spinnaker Close", "scope": "whole"},
+        {"canonical": "The Bowsprit", "scope": "whole"}
+      ],
+      "exclusions": [],
+      "evidence": [
+        {"type": "residents_association", "url": "https://www.owra.co.uk/"},
+        {"type": "association_road_schedule", "url": "https://static1.squarespace.com/static/5731bad7f85082142b10e291/t/62b30781b649e57fc53ba04b/1655900034060/Guidelines%2Bfor%2BResidents.pdf"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "ashley-park",
+      "name": "Ashley Park",
+      "classification": "A",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Walton-on-Thames"],
+      "matchStrategy": "estate_plot_to_uprn_allowlist",
+      "roads": [
+        {"canonical": "Ashley Park Crescent", "scope": "estate_plots", "estatePlotRanges": ["1-20"]},
+        {"canonical": "Ashley Park Avenue", "scope": "estate_plots_and_segment", "estatePlotRanges": ["21-33", "46-68", "187-196"], "notes": "Only between Ashley Road and the estate gate by the recreation ground."},
+        {"canonical": "Linden Grove", "scope": "estate_plots", "estatePlotRanges": ["34-45"]},
+        {"canonical": "Silverdale Avenue", "scope": "estate_plots", "estatePlotRanges": ["69-129A", "175-186"]},
+        {"canonical": "Ireton Avenue", "scope": "estate_plots", "estatePlotRanges": ["130-151"]},
+        {"canonical": "Park Close", "scope": "estate_plots", "estatePlotRanges": ["152-174"]}
+      ],
+      "exclusions": ["197 Ashley Park Avenue", "Ashley Rise", "Ashley Park Road", "Ashley Drive"],
+      "evidence": [
+        {"type": "residents_association_map", "url": "https://www.apraltd.com/uploads/8/2/8/2/82821254/ashley_park_estate_map.pdf"},
+        {"type": "residents_association", "url": "https://www.apraltd.com/roads-map.html"}
+      ],
+      "blockers": ["Reconcile the association map's estate plot identifiers and Ashley Park Avenue gate segment to current postal addresses/UPRNs before activating any match rule."]
+    },
+    {
+      "id": "fairmile-section-one",
+      "name": "Fairmile Estate (Section One)",
+      "displayAliases": ["Fairmile Estate"],
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Cobham"],
+      "matchStrategy": "structured_exact_street_and_segment",
+      "roads": [
+        {"canonical": "Icklingham Road", "scope": "segment", "notes": "Between A307 Portsmouth Road and Leigh Hill Road."}
+      ],
+      "exclusions": ["Fairmile Avenue", "Fairmile Lane", "Fairmile Park", "Fairmile Copse", "Fairmile Court", "Fairmile Road"],
+      "heldCandidates": ["The Barton", "Burstead Close"],
+      "evidence": [
+        {"type": "upper_tribunal_judgment", "url": "https://landschamber.decisions.tribunals.gov.uk/judgmentfiles/j1941/LC-2022-495%20and%20496%20final%2023.10.23.pdf"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "weybridge-park",
+      "name": "Weybridge Park",
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Weybridge"],
+      "matchStrategy": "structured_exact_street_and_locality",
+      "roads": [
+        {"canonical": "Manor Chase", "scope": "whole"},
+        {"canonical": "Manor Walk", "scope": "whole"},
+        {"canonical": "Park Drive", "scope": "whole"},
+        {"canonical": "Weybridge Park", "scope": "whole", "notes": "Nos. 45-53 remain within the estate despite access via Melrose Road."}
+      ],
+      "exclusions": ["Hanger Hill", "Melrose Road"],
+      "evidence": [
+        {"type": "residents_association_map", "url": "https://www.weybridgepark.com/location-map-2"},
+        {"type": "residents_association", "url": "https://www.weybridgepark.com/"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "hockering-estate",
+      "name": "Hockering Estate",
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Woking"],
+      "towns": ["Woking"],
+      "matchStrategy": "structured_exact_street_and_locality",
+      "roads": [
+        {"canonical": "Cleardown", "scope": "whole"},
+        {"canonical": "Daneshill", "scope": "whole"},
+        {"canonical": "Hockering Road", "scope": "whole"},
+        {"canonical": "Knowl Hill", "scope": "whole"}
+      ],
+      "exclusions": [],
+      "evidence": [
+        {"type": "residents_association", "url": "https://www.hockeringestate.org.uk/"},
+        {"type": "council_heritage_evidence", "url": "https://www.woking.gov.uk/sites/default/files/documents/planning-and-building-control/heritage/planningheritage.pdf"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "esher-place-estate",
+      "name": "Esher Place Estate",
+      "classification": "A",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Esher"],
+      "matchStrategy": "structured_exact_street_and_locality",
+      "roads": [
+        {"canonical": "D'Abernon Close", "aliases": ["D’Abernon Close"], "scope": "whole"},
+        {"canonical": "Esher Place Avenue", "scope": "whole"},
+        {"canonical": "Pelhams Close", "scope": "whole"},
+        {"canonical": "Pelhams Walk", "scope": "whole"},
+        {"canonical": "The Gardens", "scope": "whole"},
+        {"canonical": "Wayneflete Tower Avenue", "scope": "whole"},
+        {"canonical": "Winchester Close", "scope": "whole"}
+      ],
+      "exclusions": ["Riverside Drive", "Drakes Close", "Wayneflete Place"],
+      "evidence": [
+        {"type": "residents_association_history", "url": "https://eprl.uk/history/"},
+        {"type": "residents_association_newsletter", "url": "https://eprl.uk/wp-content/uploads/2024/03/Esher-Place-Residents-Limited-Newsletter-3.pdf"}
+      ],
+      "blockers": ["Obtain a current seven-road schedule or plan directly from Esher Place Residents Limited before production activation."]
+    },
+    {
+      "id": "knott-park",
+      "name": "Knott Park",
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Oxshott"],
+      "matchStrategy": "structured_street_postcode_and_segment",
+      "roads": [
+        {"canonical": "The Chase", "scope": "segment", "postcodes": ["KT22 0HR", "KT22 0HY"], "notes": "Only from the Wrens Hill entrance/fork."},
+        {"canonical": "Manor Way", "scope": "whole", "postcodes": ["KT22 0HS", "KT22 0HU"]},
+        {"canonical": "Hardwick Close", "scope": "whole", "postcodes": ["KT22 0HZ"]}
+      ],
+      "exclusions": ["Wrens Hill"],
+      "evidence": [
+        {"type": "management_company", "url": "https://find-and-update.company-information.service.gov.uk/company/04308243/officers"},
+        {"type": "council_consultation", "url": "https://www.elmbridge.gov.uk/sites/default/files/2023-03/Development%20management%20plan%20-%20Consultation%20statement.pdf"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "ruxley-heights",
+      "name": "Ruxley Heights",
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Claygate"],
+      "matchStrategy": "structured_exact_street_and_postcode",
+      "roads": [
+        {"canonical": "Hillview Road", "aliases": ["Hill View Road"], "scope": "whole", "postcodes": ["KT10 0TU"]},
+        {"canonical": "Mountview Road", "aliases": ["Mount View Road"], "scope": "whole", "postcodes": ["KT10 0UB", "KT10 0UD"]},
+        {"canonical": "Ruxley Crescent", "scope": "whole", "postcodes": ["KT10 0TX", "KT10 0TY", "KT10 0TZ", "KT10 0UA"]}
+      ],
+      "exclusions": ["Ruxley Ridge", "Ruxley Rise"],
+      "evidence": [
+        {"type": "residents_association", "url": "https://find-and-update.company-information.service.gov.uk/company/01387140/officers"},
+        {"type": "council_character_guide", "url": "https://www.elmbridge.gov.uk/sites/default/files/2023-05/Companion%20guide%20-%20Claygate.pdf"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "great-park-warlingham",
+      "name": "Great Park, Warlingham",
+      "classification": "D",
+      "installStatus": "ready",
+      "localAuthorities": ["Tandridge"],
+      "towns": ["Warlingham"],
+      "matchStrategy": "structured_exact_street_and_postcode",
+      "roads": [
+        {"canonical": "Lodge Walk", "scope": "whole", "postcodes": ["CR6 9PS"]},
+        {"canonical": "West Parkside", "scope": "whole", "postcodes": ["CR6 9PT"]},
+        {"canonical": "Parkside Mews", "scope": "whole", "postcodes": ["CR6 9PU"]},
+        {"canonical": "Tower Place", "scope": "whole", "postcodes": ["CR6 9PW"]},
+        {"canonical": "East Parkside", "scope": "whole", "postcodes": ["CR6 9PZ", "CR6 9PY", "CR6 9QS", "CR6 9QT", "CR6 9QU"]}
+      ],
+      "exclusions": ["Chelsham Common Road", "Harrow Road", "Farleigh Road", "Farleigh Court Road", "Great Park"],
+      "evidence": [
+        {"type": "council_green_belt_assessment", "url": "https://www.tandridge.gov.uk/Portals/0/Documents/Planning%20and%20building/Planning%20strategies%20and%20policies/Local%20plan/Evidence%20base%20and%20technical%20studies/GBA-Part-2-Appendix-2.pdf"},
+        {"type": "management_company", "url": "https://find-and-update.company-information.service.gov.uk/company/04098878"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "ridgeway-oxshott",
+      "name": "The Ridgeway Estate, Oxshott",
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Oxshott"],
+      "matchStrategy": "structured_exact_street_postcode_and_locality",
+      "roads": [
+        {"canonical": "The Ridgeway", "scope": "whole", "postcodes": ["KT22 0LG", "KT22 0LJ"]},
+        {"canonical": "Ridgeway Close", "scope": "whole", "postcodes": ["KT22 0LQ"]},
+        {"canonical": "Danes Close", "scope": "whole", "postcodes": ["KT22 0LL"]}
+      ],
+      "exclusions": ["Oakshade Road", "Danes Way", "Waverley Road", "The Ridgeway outside KT22 0LG/0LJ"],
+      "evidence": [
+        {"type": "management_company", "url": "https://find-and-update.company-information.service.gov.uk/company/02089819"},
+        {"type": "court_case_summary", "url": "https://www.trowers.com/insights/2024/january/the-ridgeway-oxshott-management-ltd-v-terence-desmond-mcguinness-and-another-2023-ew-misc-9-cc"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "blackhills",
+      "name": "Blackhills Estate",
+      "displayAliases": ["Blackhills"],
+      "classification": "A",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Esher"],
+      "matchStrategy": "structured_exact_street_and_postcode",
+      "roads": [{"canonical": "Blackhills", "aliases": ["Black Hills"], "scope": "whole", "postcodes": ["KT10 9JP", "KT10 9JW"]}],
+      "heldCandidates": ["Albany Close"],
+      "exclusions": ["Meadway", "Claremont Park", "Claremont Drive"],
+      "evidence": [
+        {"type": "residents_association", "url": "https://find-and-update.company-information.service.gov.uk/company/01410715"},
+        {"type": "estate_identity_filing", "url": "https://find-and-update.company-information.service.gov.uk/company/11165032/filing-history"}
+      ],
+      "blockers": ["Obtain the current Blackhills association/property schedule and resolve positive evidence placing Albany Close within Blackhills Private Estate before reactivation."]
+    },
+    {
+      "id": "pachesham-park",
+      "name": "Pachesham Park",
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Mole Valley"],
+      "towns": ["Leatherhead"],
+      "matchStrategy": "structured_exact_address_and_postcode",
+      "roads": [{"canonical": "Pachesham Park", "scope": "whole", "postcodes": ["KT22 0DJ"]}],
+      "exclusions": ["Oaklawn Road", "Pachesham Golf Centre"],
+      "evidence": [{"type": "management_company", "url": "https://find-and-update.company-information.service.gov.uk/company/08471970"}],
+      "blockers": []
+    },
+    {
+      "id": "eaton-park",
+      "name": "Eaton Park",
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Cobham"],
+      "matchStrategy": "structured_exact_street_and_postcode",
+      "roads": [
+        {"canonical": "Eaton Park", "scope": "whole", "postcodes": ["KT11 2JE", "KT11 2JF"]},
+        {"canonical": "Eaton Park Road", "scope": "whole", "postcodes": ["KT11 2JE", "KT11 2JG", "KT11 2JH", "KT11 2JJ"]},
+        {"canonical": "Fairmile Avenue", "scope": "whole", "postcodes": ["KT11 2JA", "KT11 2JB"]},
+        {"canonical": "The Drive", "scope": "whole", "postcodes": ["KT11 2JQ"]},
+        {"canonical": "Fairmeads", "scope": "whole", "postcodes": ["KT11 2JD"]}
+      ],
+      "exclusions": ["Fairmile Lane", "Ashlyns Park", "Fairacres", "Grenville Close", "Miles Lane", "Knipp Hill", "Water Lane"],
+      "evidence": [
+        {"type": "management_company", "url": "https://find-and-update.company-information.service.gov.uk/company/01841891"},
+        {"type": "estate_road_evidence", "url": "https://www.onthemarket.com/details/16574650/"},
+        {"type": "estate_road_evidence", "url": "https://search.savills.com/com/en/property-detail/gbcorscbs250043"},
+        {"type": "estate_road_evidence", "url": "https://www.onthemarket.com/details/14788549/"},
+        {"type": "estate_road_evidence", "url": "https://curchods.com/display/CCM160002/"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "eaton-park-road",
+      "name": "Eaton Park Road",
+      "classification": "B",
+      "installStatus": "reclassify",
+      "mergedIntoEstateId": "eaton-park",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Cobham"],
+      "matchStrategy": "structured_exact_street_and_postcode",
+      "roads": [{"canonical": "Eaton Park Road", "scope": "whole", "postcodes": ["KT11 2JG", "KT11 2JH", "KT11 2JJ"]}],
+      "exclusions": ["A separate user-facing estate entity; this road is classified under Eaton Park"],
+      "evidence": [{"type": "residents_association", "url": "https://find-and-update.company-information.service.gov.uk/company/10320726"}],
+      "blockers": [],
+      "notes": "The road has separate residents-association governance, but credible estate evidence places it within the wider Eaton Park Estate. Governance metadata must not create a second estate."
+    },
+    {
+      "id": "claremont-park-estate",
+      "name": "Claremont Park Estate",
+      "classification": "A",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Esher"],
+      "matchStrategy": "property_or_title_allowlist",
+      "roads": [
+        {"canonical": "Clare Hill", "scope": "candidate_whole", "postcodes": ["KT10 9NA", "KT10 9NB"]},
+        {"canonical": "Claremont Drive", "scope": "candidate_whole"},
+        {"canonical": "Claremont End", "scope": "candidate_whole"},
+        {"canonical": "Old Chestnut Avenue", "scope": "candidate_whole"}
+      ],
+      "heldCandidates": ["Claremont Park Road"],
+      "exclusions": ["A standalone Clare Hill cohort until the umbrella estate schedule is resolved", "Claremont Lane", "Claremont Park as unrestricted text"],
+      "evidence": [
+        {"type": "resident_property_management_company", "url": "https://find-and-update.company-information.service.gov.uk/company/00426122/officers"},
+        {"type": "council_local_green_space_study", "url": "https://www.elmbridge.gov.uk/sites/default/files/2023-05/Local%20Green%20Space%20Designation%20Study%202022.pdf"},
+        {"type": "local_residents_association", "url": "https://www.chea.co.uk/"}
+      ],
+      "blockers": ["Obtain the Clare Hill (Esher) Association/Claremont Park current member-property and title schedule before deciding whether every named road is wholly within the umbrella estate."]
+    },
+    {
+      "id": "ewell-downs-estate",
+      "name": "Ewell Downs Road & The Green",
+      "displayAliases": ["Ewell Downs Road and The Green"],
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Epsom and Ewell"],
+      "towns": ["Ewell"],
+      "matchStrategy": "structured_exact_street_and_locality",
+      "roads": [
+        {"canonical": "Ewell Downs Road", "scope": "whole"},
+        {"canonical": "The Green", "scope": "whole"}
+      ],
+      "exclusions": ["Longdown Lane North", "Higher Green", "Every other road named The Green outside Ewell"],
+      "evidence": [
+        {"type": "council_character_appraisal", "url": "https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/historic-environment/EwellDownsRdCAFinal.pdf"},
+        {"type": "resident_company_history", "url": "https://www.thegreenewell.co.uk/wp-content/uploads/2018/12/History-of-The-Green.pdf"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "the-green-ewell",
+      "name": "The Green, Ewell",
+      "classification": "B",
+      "installStatus": "reclassify",
+      "mergedIntoEstateId": "ewell-downs-estate",
+      "localAuthorities": ["Epsom and Ewell"],
+      "towns": ["Ewell"],
+      "matchStrategy": "structured_exact_street_and_locality",
+      "roads": [{"canonical": "The Green", "scope": "whole"}],
+      "exclusions": ["A separate user-facing estate entity; this road is classified under Ewell Downs Road & The Green", "Every other road named The Green outside Ewell"],
+      "evidence": [
+        {"type": "council_character_appraisal", "url": "https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/historic-environment/EwellDownsRdCAFinal.pdf"},
+        {"type": "resident_company_history", "url": "https://www.thegreenewell.co.uk/wp-content/uploads/2018/12/History-of-The-Green.pdf"}
+      ],
+      "blockers": [],
+      "notes": "The council describes Ewell Downs Road and The Green as two streets forming part of one private estate; separate road governance must not create two estate entities."
+    },
+    {
+      "id": "lynwood",
+      "name": "Lynwood Estate",
+      "displayAliases": ["Lynwood"],
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Thames Ditton"],
+      "matchStrategy": "structured_street_house_range_and_locality",
+      "roads": [
+        {"canonical": "Lynwood Road", "scope": "house_range", "houseRanges": ["7-84"]},
+        {"canonical": "Bourne Close", "scope": "whole"},
+        {"canonical": "Wessex Close", "scope": "whole"}
+      ],
+      "exclusions": ["Lynwood Road nos. 1-6", "Every other Bourne Close or Wessex Close outside Thames Ditton"],
+      "evidence": [
+        {"type": "residents_association", "url": "https://www.lynwoodroad.info/"},
+        {"type": "association_road_schedule", "url": "https://res.lynwoodroad.info/Finance%20and%20Legal/LRRA%20Welcome%20Dec%202023.pdf"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "weymede",
+      "name": "Weymede",
+      "classification": "D",
+      "installStatus": "ready",
+      "localAuthorities": ["Woking"],
+      "towns": ["Byfleet"],
+      "matchStrategy": "structured_exact_address_and_locality",
+      "roads": [{"canonical": "Weymede", "scope": "whole"}],
+      "exclusions": [],
+      "evidence": [{"type": "residents_society", "url": "https://www.weymede.co.uk/"}],
+      "blockers": []
+    },
+    {
+      "id": "templemere",
+      "name": "Templemere",
+      "classification": "D",
+      "installStatus": "ready",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Weybridge", "Oatlands"],
+      "matchStrategy": "structured_exact_address_and_locality",
+      "roads": [{"canonical": "Templemere", "scope": "whole"}],
+      "exclusions": [],
+      "evidence": [
+        {"type": "residents_society", "url": "https://www.templemere.co.uk/"},
+        {"type": "management_guide", "url": "https://www.templemere.co.uk/s/Templemere-Management-Guide-November-2024-khej.pdf"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "westfield-ashtead",
+      "name": "Westfield (Span Estate), Ashtead",
+      "displayAliases": ["Westfield"],
+      "classification": "D",
+      "installStatus": "ready",
+      "localAuthorities": ["Mole Valley"],
+      "towns": ["Ashtead"],
+      "matchStrategy": "structured_exact_address_and_postcode",
+      "roads": [{"canonical": "Westfield", "scope": "whole", "postcodes": ["KT21 1RH"]}],
+      "exclusions": ["Every other Westfield address outside KT21 1RH"],
+      "evidence": [{"type": "residents_society", "url": "https://www.span-westfield.co.uk/"}],
+      "blockers": []
+    },
+    {
+      "id": "givons-grove",
+      "name": "Givons Grove Estate",
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Mole Valley"],
+      "towns": ["Leatherhead"],
+      "matchStrategy": "structured_exact_street_and_locality",
+      "roads": [
+        {"canonical": "Givons Grove", "scope": "whole", "notes": "Coronation Glen is an estate-area label on the official map, not a replacement postal road name."},
+        {"canonical": "The Downs", "scope": "whole"},
+        {"canonical": "Garden Close", "scope": "whole"},
+        {"canonical": "Crabtree Drive", "scope": "whole"},
+        {"canonical": "Woodend", "scope": "whole"},
+        {"canonical": "Mickleham Drive", "scope": "whole"},
+        {"canonical": "Cherkley Hill", "scope": "whole"}
+      ],
+      "exclusions": ["Dorking Road", "Young Street", "A24 Leatherhead Bypass", "Coronation Glen as a global text alias"],
+      "evidence": [
+        {"type": "resident_owned_estate", "url": "https://www.givonsgrove.com/"},
+        {"type": "current_official_estate_map", "url": "https://www.givonsgrove.com/map-of-the-estate-houses/"},
+        {"type": "estate_company_road_ownership", "url": "https://www.givonsgrove.com/ggel-roads-and-ggel-owned-verges/"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "virginia-park",
+      "name": "Virginia Park",
+      "classification": "D",
+      "installStatus": "partial_ready",
+      "localAuthorities": ["Runnymede"],
+      "towns": ["Virginia Water"],
+      "matchStrategy": "structured_exact_street_and_uprn_membership",
+      "roads": [
+        {"canonical": "Holloway Drive", "scope": "whole"},
+        {"canonical": "Lime Tree Walk", "scope": "whole"},
+        {"canonical": "Pinel Close", "scope": "whole"},
+        {"canonical": "Chapel Square", "scope": "whole"},
+        {"canonical": "Upper Walk", "scope": "whole"}
+      ],
+      "includedSubaddresses": ["Crossland House", "The Grange", "Gillespie House", "Connolly Court"],
+      "exclusions": ["Christchurch Road as a whole", "Stroude Road as a whole"],
+      "evidence": [
+        {"type": "approved_neighbourhood_plan", "url": "https://runnymede.moderngov.co.uk/documents/s17682/VWNP%20May%202026%20FINAL.pdf"},
+        {"type": "management_company", "url": "https://find-and-update.company-information.service.gov.uk/company/02970195"}
+      ],
+      "blockers": ["Freeze the complete member UPRN list for buildings and subordinate addresses before claiming full-property coverage."]
+    },
+    {
+      "id": "st-anns-park",
+      "name": "St Ann's Park",
+      "classification": "D",
+      "installStatus": "partial_ready",
+      "localAuthorities": ["Runnymede"],
+      "towns": ["Virginia Water"],
+      "matchStrategy": "structured_rule_status_and_uprn",
+      "roads": [
+        {"canonical": "Sandy Lane", "scope": "estate_segment_or_uprn", "ruleStatus": "hold"},
+        {"canonical": "Aspen Court", "scope": "whole", "ruleStatus": "ready"},
+        {"canonical": "Cypress Court", "scope": "whole", "ruleStatus": "ready"},
+        {"canonical": "Palmerstone Court", "scope": "whole", "ruleStatus": "ready"},
+        {"canonical": "Ridge Way", "aliases": ["Ridgeway"], "scope": "whole", "ruleStatus": "hold", "notes": "Resolve canonical AddressBase spelling before activation."}
+      ],
+      "exclusions": ["Sandhills Lane as a whole"],
+      "evidence": [
+        {"type": "approved_neighbourhood_plan", "url": "https://runnymede.moderngov.co.uk/documents/s17682/VWNP%20May%202026%20FINAL.pdf"},
+        {"type": "residents_company", "url": "https://find-and-update.company-information.service.gov.uk/company/03604816/officers"}
+      ],
+      "blockers": ["Resolve Ridge Way/Ridgeway against AddressBase and freeze the member UPRNs, including the exact Sandy Lane segment."]
+    },
+    {
+      "id": "hamm-court-estate",
+      "name": "Hamm Court Estate",
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Runnymede"],
+      "towns": ["Weybridge", "Addlestone"],
+      "matchStrategy": "structured_exact_street_and_postcode",
+      "roads": [{"canonical": "Hamm Court", "scope": "whole", "postcodes": ["KT13 8YA", "KT13 8YB", "KT13 8YD", "KT13 8YE", "KT13 8YF", "KT13 8YG"]}],
+      "exclusions": ["Hamm Court Farm KT13 8XZ", "Meadowlands Park", "A317"],
+      "evidence": [
+        {"type": "county_council_evidence", "url": "https://www.surreycc.gov.uk/__data/assets/pdf_file/0005/423950/AnnexCChertsey.pdf"},
+        {"type": "management_company", "url": "https://find-and-update.company-information.service.gov.uk/company/00560165"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "manygate-lane-estate",
+      "name": "Manygate Lane Estate",
+      "classification": "D",
+      "installStatus": "ready",
+      "localAuthorities": ["Spelthorne"],
+      "towns": ["Shepperton"],
+      "matchStrategy": "structured_street_house_range_and_locality",
+      "roads": [
+        {"canonical": "Manygate Lane", "scope": "odd_house_range", "houseRanges": ["97-207 odd"]},
+        {"canonical": "Grove Road", "scope": "even_house_range", "houseRanges": ["2-48 even"]}
+      ],
+      "exclusions": ["Every other Manygate Lane address", "Every other Grove Road address"],
+      "evidence": [
+        {"type": "council_conservation_area_map", "url": "https://www.spelthorne.gov.uk/sites/default/files/migration/media/1846/Manygate-Lane-Estate-conservation-area-map/pdf/ManygateLaneEstateCAA_29January2025_Copy.pdf"},
+        {"type": "gazette_notice", "url": "https://www.thegazette.co.uk/London/issue/56725"}
+      ],
+      "blockers": [],
+      "notes": "Verified named design/conservation estate, but private-road or collective private-estate ownership was not established. Keep outside the user-facing Private Estates cohort."
+    },
+    {
+      "id": "greenmeads",
+      "name": "GreenMeads",
+      "displayAliases": ["Green Meads"],
+      "classification": "A",
+      "installStatus": "ready",
+      "localAuthorities": ["Guildford"],
+      "towns": ["Guildford"],
+      "matchStrategy": "structured_exact_street_and_postcode",
+      "roads": [
+        {"canonical": "Meads Road", "scope": "whole", "postcodes": ["GU1 2NA", "GU1 2NB"]},
+        {"canonical": "Green Lane", "scope": "whole", "postcodes": ["GU1 2LZ"]}
+      ],
+      "exclusions": ["Boxgrove Road", "Epsom Road", "Greencroft", "Orchard Close", "Parklands Place", "Pedestrian alleys"],
+      "evidence": [
+        {"type": "county_council_legal_report", "url": "https://mycouncil.surreycc.gov.uk/documents/s12271/12%2003%202014%20Item%20Boxgrove%20alleged.pdf"},
+        {"type": "residents_association", "url": "https://www.greenmeads.org/news/new-20mph-road-signs"}
+      ],
+      "blockers": [],
+      "notes": "Surrey County Council legal evidence describes Meads Road and Green Lane collectively as the whole estate, with title covenants and private-road context, and names GreenMeads Residents Association."
+    },
+    {
+      "id": "blackdown-avenue",
+      "name": "Blackdown Avenue",
+      "classification": "B",
+      "installStatus": "reclassify",
+      "localAuthorities": ["Woking"],
+      "towns": ["Pyrford", "Woking"],
+      "matchStrategy": "structured_exact_street_and_postcode",
+      "roads": [{"canonical": "Blackdown Avenue", "scope": "whole", "postcodes": ["GU22 8QG", "GU22 8QH"]}],
+      "exclusions": ["Historic Pyrford Woods Estate"],
+      "evidence": [
+        {"type": "neighbourhood_plan", "url": "https://pyrfordforum.org/wp-content/uploads/2014/12/Final-PNP-for-the-website.pdf"},
+        {"type": "residents_company", "url": "https://find-and-update.company-information.service.gov.uk/company/10612549/officers"}
+      ],
+      "blockers": [],
+      "notes": "Official neighbourhood evidence identifies Blackdown Avenue as a private road, not a separate private estate."
+    },
+    {
+      "id": "redcourt",
+      "name": "Redcourt",
+      "classification": "B",
+      "installStatus": "reclassify",
+      "localAuthorities": ["Woking"],
+      "towns": ["Pyrford", "Woking"],
+      "matchStrategy": "structured_street_house_allowlist_and_postcode",
+      "roads": [{"canonical": "Redcourt", "scope": "house_allowlist", "houseRanges": ["1-9 odd", "2-18 even"], "postcodes": ["GU22 8RA"], "notes": "No 11-17 odd properties."}],
+      "exclusions": ["11 Redcourt", "13 Redcourt", "15 Redcourt", "17 Redcourt", "Every Redcourt outside GU22 8RA"],
+      "evidence": [{"type": "neighbourhood_plan_evidence", "url": "https://pyrfordforum.org/wp-content/uploads/2015/09/Appendix-4-Centre-West.pdf"}],
+      "blockers": [],
+      "notes": "Official neighbourhood evidence identifies Redcourt as a fourteen-house private road, not a separate private estate."
+    },
+    {
+      "id": "ridgway-pyrford",
+      "name": "Ridgway, Pyrford",
+      "classification": "B",
+      "installStatus": "hold",
+      "localAuthorities": ["Woking"],
+      "towns": ["Pyrford", "Woking"],
+      "matchStrategy": "structured_exact_street_and_postcode",
+      "roads": [
+        {"canonical": "Ridgway", "scope": "candidate_whole", "postcodes": ["GU22 8PN", "GU22 8PW"]},
+        {"canonical": "Ridgway Road", "scope": "candidate_whole", "postcodes": ["GU22 8PR"]}
+      ],
+      "exclusions": ["The Ridgeway, Oxshott", "Ridgeway Road and Ridgeway Drive, Dorking"],
+      "evidence": [{"type": "residents_company", "url": "https://find-and-update.company-information.service.gov.uk/company/01200126/officers"}],
+      "blockers": ["Obtain the current member/property schedule before activation."]
+    },
+    {
+      "id": "netherne-on-the-hill",
+      "name": "Netherne-on-the-Hill",
+      "classification": "D",
+      "installStatus": "hold",
+      "localAuthorities": ["Reigate and Banstead"],
+      "towns": ["Netherne-on-the-Hill", "Coulsdon"],
+      "matchStrategy": "uprn_allowlist",
+      "roads": [
+        {"canonical": "Netherne Lane", "scope": "estate_segment_or_uprn"},
+        {"canonical": "Rookery Mead", "scope": "whole"},
+        {"canonical": "Netherne Drive", "scope": "whole"},
+        {"canonical": "Figgswood", "scope": "whole"},
+        {"canonical": "Bowen Way", "scope": "whole"},
+        {"canonical": "Broadwood Road", "scope": "whole"},
+        {"canonical": "Tugwood Close", "scope": "whole"},
+        {"canonical": "Park Lane", "scope": "estate_segment_or_uprn"},
+        {"canonical": "Gawton Crescent", "scope": "whole"},
+        {"canonical": "Little East Field", "scope": "whole"},
+        {"canonical": "Beckett Road", "scope": "whole"},
+        {"canonical": "Thistley Close", "scope": "whole"},
+        {"canonical": "Cherry Trees", "scope": "whole"},
+        {"canonical": "Blue Leaves Avenue", "scope": "whole"},
+        {"canonical": "Cayton Road", "scope": "whole"},
+        {"canonical": "Jennys Way", "scope": "whole"},
+        {"canonical": "Stoney Croft", "scope": "whole"},
+        {"canonical": "Hine Close", "scope": "whole"},
+        {"canonical": "Wallace Square", "scope": "whole_or_space"},
+        {"canonical": "Upper Lodge Way", "scope": "whole"},
+        {"canonical": "Harden Farm Close", "scope": "whole"},
+        {"canonical": "Harpswood Close", "scope": "whole"},
+        {"canonical": "Chapel Walk", "scope": "whole"}
+      ],
+      "nonRoadMapLabels": ["Village Square", "Italian Gardens"],
+      "exclusions": ["Every generic Park Lane or Netherne locality address outside the UPRN set"],
+      "evidence": [
+        {"type": "management_company", "url": "https://nmanltd.com/about-u/"},
+        {"type": "official_management_map", "url": "https://nmanltd.com/wp-content/uploads/2017/03/netherne-village-map-march-2017.pdf"}
+      ],
+      "blockers": ["Classify every official-map label as road, building or space and reconcile the current management boundary to UPRNs; some main roads are adopted."]
+    },
+    {
+      "id": "the-village-caterham",
+      "name": "The Village, Caterham Barracks",
+      "classification": "D",
+      "installStatus": "hold",
+      "localAuthorities": ["Tandridge"],
+      "towns": ["Caterham"],
+      "matchStrategy": "uprn_allowlist_and_road_status",
+      "roads": [
+        {"canonical": "Guards Avenue", "scope": "estate_segment_or_uprn"},
+        {"canonical": "Coldstream Road", "scope": "whole"},
+        {"canonical": "Sergeants Place", "scope": "whole"},
+        {"canonical": "Brigade Place", "scope": "whole"},
+        {"canonical": "Grenadier Place", "scope": "whole"},
+        {"canonical": "Weston Drive", "scope": "whole"},
+        {"canonical": "Alexander Crescent", "scope": "whole"},
+        {"canonical": "Anzio Gardens", "scope": "whole"},
+        {"canonical": "Adair Gardens", "scope": "whole"},
+        {"canonical": "The Grove", "scope": "estate_uprns"},
+        {"canonical": "Stirling Drive", "scope": "whole"}
+      ],
+      "exclusions": ["Nichols Close", "Nicholls Close", "Commercial addresses outside the management schedule"],
+      "evidence": [
+        {"type": "residents_association", "url": "https://www.thevillageassociation.org/"},
+        {"type": "council_evidence", "url": "https://www.tandridge.gov.uk/Portals/0/Documents/Planning%20and%20building/Planning%20strategies%20and%20policies/Parish-Council-%28neighbourhood%29-plans/CCW/LGS/14-Caterham-Barracks-Development.pdf"}
+      ],
+      "blockers": ["Freeze the current UPRN boundary and distinguish adopted main roads from private shared roads."]
+    },
+    {
+      "id": "holloway-estate-dorking",
+      "name": "Holloway Estate",
+      "classification": "A",
+      "installStatus": "hold",
+      "localAuthorities": ["Mole Valley"],
+      "towns": ["Dorking"],
+      "matchStrategy": "member_uprn_allowlist",
+      "roads": [
+        {"canonical": "Ridgeway Road", "scope": "unresolved_segment"},
+        {"canonical": "Ridgeway Drive", "scope": "candidate_whole", "postcodes": ["RH4 3AN"]}
+      ],
+      "heldCandidates": ["Roman Road"],
+      "exclusions": ["Every other Dorking Ridgeway road outside HERA membership"],
+      "evidence": [
+        {"type": "county_council_rights_of_way_case", "url": "https://www.surreycc.gov.uk/culture-and-leisure/countryside/management/footpaths-byways-and-bridleways/map-modification-applications/ridgeway-drive-dorking"},
+        {"type": "residents_company", "url": "https://find-and-update.company-information.service.gov.uk/company/03068636"}
+      ],
+      "blockers": ["Obtain HERA's current member/title schedule for Ridgeway Road limits and Roman Road status."]
+    },
+    {
+      "id": "danes-court-estate",
+      "name": "Danes Court Estate",
+      "classification": "A",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Oxshott"],
+      "matchStrategy": "structured_exact_street_postcode_and_member_schedule",
+      "roads": [
+        {"canonical": "Danes Way", "scope": "candidate_whole", "postcodes": ["KT22 0LU", "KT22 0LX"]},
+        {"canonical": "Meadway", "scope": "candidate_whole", "postcodes": ["KT22 0LZ"]},
+        {"canonical": "High Drive", "scope": "candidate_whole", "postcodes": ["KT22 0NG"]},
+        {"canonical": "Woodsway", "scope": "candidate_whole", "postcodes": ["KT22 0ND"]},
+        {"canonical": "Briars Court", "scope": "candidate_whole", "postcodes": ["KT22 0NH"]}
+      ],
+      "exclusions": ["Leatherhead Road", "High Street", "Danes Close", "Danes Hill School", "Fernhill", "Torland Drive"],
+      "evidence": [
+        {"type": "residents_association", "url": "https://find-and-update.company-information.service.gov.uk/company/02247432/officers"},
+        {"type": "local_government_boundary_report", "url": "https://www.lgbce.org.uk/sites/default/files/2024-01/surrey_-_fdr_-_report_0.pdf"}
+      ],
+      "blockers": ["Obtain the current association schedule, particularly direct proof for Briars Court."]
+    },
+    {
+      "id": "pyrford-woods-private-cluster",
+      "name": "Pyrford Woods private-road cluster",
+      "classification": "B",
+      "installStatus": "hold",
+      "localAuthorities": ["Woking"],
+      "towns": ["Pyrford", "Woking"],
+      "matchStrategy": "member_uprn_allowlist",
+      "roads": [
+        {"canonical": "Pyrford Woods", "aliases": ["Pyrford Woods Road"], "scope": "candidate_whole", "postcodes": ["GU22 8QL", "GU22 8QR", "GU22 8QT"]},
+        {"canonical": "Pyrford Woods Close", "scope": "candidate_whole", "postcodes": ["GU22 8QN"]},
+        {"canonical": "Crossacres", "scope": "candidate_whole", "postcodes": ["GU22 8QS"]},
+        {"canonical": "Wood Riding", "scope": "candidate_whole", "postcodes": ["GU22 8RH"]},
+        {"canonical": "Orchard Lea Close", "scope": "candidate_whole", "postcodes": ["GU22 8QW"]}
+      ],
+      "exclusions": ["Historic 11-road Pyrford Woods Estate", "Blackdown Avenue", "Redcourt"],
+      "evidence": [
+        {"type": "residents_company", "url": "https://find-and-update.company-information.service.gov.uk/company/00959684/officers"},
+        {"type": "surrey_history_centre", "url": "https://www.exploringsurreyspast.org.uk/collections/getrecord/SHCOL_7688_2_1_1_1"}
+      ],
+      "blockers": ["Obtain the current association road/house plan or title/member schedule."]
+    },
+    {
+      "id": "watercolour-estate",
+      "name": "Watercolour Estate",
+      "classification": "D",
+      "installStatus": "hold",
+      "localAuthorities": ["Reigate and Banstead"],
+      "towns": ["Redhill"],
+      "matchStrategy": "uprn_allowlist_and_road_status",
+      "roads": [],
+      "exclusions": ["An assumption that every road is private; adopted and unadopted roads coexist"],
+      "evidence": [
+        {"type": "management_company", "url": "https://www.watercolourmanagementcompany.co.uk/about"},
+        {"type": "management_company_faq", "url": "https://www.watercolourmanagementcompany.co.uk/faqs"}
+      ],
+      "blockers": ["Obtain the management-company transfer plan and reconcile it to UPRNs and road-adoption status."]
+    },
+    {
+      "id": "enton-hall",
+      "name": "Enton Hall",
+      "classification": "Q",
+      "installStatus": "hold",
+      "localAuthorities": ["Waverley"],
+      "towns": ["Witley", "Godalming"],
+      "matchStrategy": "uprn_allowlist",
+      "roads": [],
+      "exclusions": ["Enton locality or Hall name as unrestricted text"],
+      "evidence": [{"type": "county_council_walking_guide", "url": "https://www.surreycc.gov.uk/culture-and-leisure/countryside/what-can-you-do/walking/self-guided/west-surrey/witley"}],
+      "blockers": ["Identify the governing entity and exact management/address scope."]
+    },
+    {
+      "id": "water-meadow-place",
+      "name": "Water Meadow Place",
+      "classification": "D",
+      "installStatus": "hold",
+      "localAuthorities": ["Waverley"],
+      "towns": ["Elstead"],
+      "matchStrategy": "title_and_uprn_allowlist",
+      "roads": [],
+      "exclusions": [],
+      "evidence": [{"type": "management_company", "url": "https://www.watermeadowplace.uk/the-management-company"}],
+      "blockers": ["Obtain the exact shared-road, title and UPRN schedule."]
+    },
+    {
+      "id": "river-ash-estates",
+      "name": "River Ash / Ash Estates",
+      "classification": "B",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Shepperton"],
+      "matchStrategy": "address_and_member_uprn_allowlist",
+      "roads": [
+        {"canonical": "River Ash Estate", "scope": "safe_address_subset", "postcodes": ["TW17 8NG", "TW17 8NH", "TW17 8NL"]}
+      ],
+      "heldCandidates": ["Felix Lane", "The Crescent", "Lower Ash Estate"],
+      "exclusions": ["The River Ash locality as a whole"],
+      "evidence": [
+        {"type": "county_council_evidence", "url": "https://www.surreycc.gov.uk/__data/assets/pdf_file/0006/423942/AnnexDWalton.pdf"},
+        {"type": "council_flood_study", "url": "https://www.elmbridge.gov.uk/sites/default/files/2024-03/Draft%20Level%201%20SFRA%20Update%20Main%20Report%20-%20Mar%202024.pdf"}
+      ],
+      "blockers": ["Obtain the River Ash Residents Association road/property schedule."]
+    },
+    {
+      "id": "las-palmas-estate",
+      "name": "Las Palmas Estate",
+      "classification": "A",
+      "installStatus": "hold",
+      "localAuthorities": ["Spelthorne"],
+      "towns": ["Shepperton"],
+      "matchStrategy": "member_uprn_allowlist",
+      "roads": [{"canonical": "Las Palmas Estate", "aliases": ["Las Palmas Road"], "scope": "candidate", "postcodes": ["TW17 9HU", "TW17 9HQ"]}],
+      "exclusions": ["Sandhills Meadow unless separately classified"],
+      "evidence": [{"type": "county_council_evidence", "url": "https://www.surreycc.gov.uk/__data/assets/pdf_file/0006/423942/AnnexDWalton.pdf"}],
+      "blockers": ["Obtain the association/title schedule and decide whether TW17 9HQ is wholly included."]
+    },
+    {
+      "id": "sandhills-meadow",
+      "name": "Sandhills Meadow",
+      "classification": "B",
+      "installStatus": "hold",
+      "localAuthorities": ["Spelthorne"],
+      "towns": ["Shepperton"],
+      "matchStrategy": "member_uprn_allowlist",
+      "roads": [{"canonical": "Sandhills Meadow", "scope": "candidate_whole", "postcodes": ["TW17 9HY"]}],
+      "exclusions": ["Las Palmas Estate unless separately classified"],
+      "evidence": [{"type": "county_council_evidence", "url": "https://www.surreycc.gov.uk/__data/assets/pdf_file/0006/423942/AnnexDWalton.pdf"}],
+      "blockers": ["Obtain the association/title schedule."]
+    },
+    {
+      "id": "wheatleys-eyot-cluster",
+      "name": "Wheatley's Eyot private-road cluster",
+      "classification": "C",
+      "installStatus": "reclassify",
+      "localAuthorities": ["Spelthorne"],
+      "towns": ["Sunbury-on-Thames"],
+      "matchStrategy": "separate_private_road_entities",
+      "roads": [
+        {"canonical": "Wheatley's Eyot", "scope": "separate_private_road_or_island"},
+        {"canonical": "The Creek", "scope": "separate_private_road"},
+        {"canonical": "Willow Way", "scope": "separate_private_road"},
+        {"canonical": "Parke Road", "scope": "separate_private_road"}
+      ],
+      "exclusions": ["One combined estate unless a single governing schedule is proved"],
+      "evidence": [{"type": "county_council_evidence", "url": "https://www.surreycc.gov.uk/__data/assets/pdf_file/0006/423942/AnnexDWalton.pdf"}],
+      "blockers": ["Model each road/island governance entity separately."]
+    },
+    {
+      "id": "virginia-beeches",
+      "name": "Virginia Beeches",
+      "classification": "D",
+      "installStatus": "reclassify",
+      "localAuthorities": ["Runnymede"],
+      "towns": ["Virginia Water", "Callow Hill"],
+      "matchStrategy": "exact_unit_allowlist_and_postcode",
+      "roads": [{"canonical": "Virginia Beeches", "scope": "unit_range", "houseRanges": ["1-47"], "postcodes": ["GU25 4LT"]}],
+      "exclusions": ["Prime private-estate premium cohort"],
+      "evidence": [{"type": "management_company", "url": "https://find-and-update.company-information.service.gov.uk/company/01861961"}],
+      "blockers": [],
+      "notes": "Retirement/sheltered housing; retain outside the private-estate cohort as managed-development context."
+    },
+    {
+      "id": "queensgate-cobham",
+      "name": "Queensgate, Cobham",
+      "classification": "B",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Cobham"],
+      "matchStrategy": "uprn_allowlist",
+      "roads": [{"canonical": "Queensgate", "scope": "candidate_units", "houseRanges": ["1-9"], "postcodes": ["KT11 2TG"]}],
+      "exclusions": ["Fairmile Lane as a whole"],
+      "evidence": [],
+      "blockers": ["Obtain the current management/title schedule; planning evidence alone is insufficient."]
+    },
+    {
+      "id": "historic-pyrford-woods-estate",
+      "name": "Historic Pyrford Woods Estate",
+      "classification": "C",
+      "installStatus": "reclassify",
+      "localAuthorities": ["Woking"],
+      "towns": ["Pyrford", "Woking"],
+      "matchStrategy": "historic_context_only",
+      "roads": [
+        {"canonical": "Abbey Close", "scope": "historic_context"},
+        {"canonical": "Bray Gardens", "scope": "historic_context"},
+        {"canonical": "Donne Gardens", "scope": "historic_context"},
+        {"canonical": "Hamilton Avenue", "scope": "historic_context"},
+        {"canonical": "Lincoln Drive", "scope": "historic_context"},
+        {"canonical": "Lovelace Drive", "scope": "historic_context"},
+        {"canonical": "Manor Close", "scope": "historic_context"},
+        {"canonical": "Nicholas Gardens", "scope": "historic_context"},
+        {"canonical": "Onslow Way", "scope": "historic_context"},
+        {"canonical": "Weston Way", "scope": "historic_context"},
+        {"canonical": "Weston Gardens", "scope": "historic_context"}
+      ],
+      "exclusions": ["Private-road premium; the roads appear publicly maintained"],
+      "evidence": [
+        {"type": "neighbourhood_plan_evidence", "url": "https://pyrfordforum.org/wp-content/uploads/2015/09/Appendix-4-Centre-West.pdf"},
+        {"type": "county_council_petition", "url": "https://mycouncil.surreycc.gov.uk/mgEPetitionDisplay.aspx?Id=41"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "east-horsley-private-road-network",
+      "name": "East Horsley private-road network",
+      "classification": "C",
+      "installStatus": "reclassify",
+      "localAuthorities": ["Guildford"],
+      "towns": ["East Horsley"],
+      "matchStrategy": "separate_road_company_registries",
+      "roads": [],
+      "exclusions": ["One combined Lovelace/private estate"],
+      "evidence": [{"type": "adopted_neighbourhood_plan", "url": "https://www.easthorsley.info/images/Neighbourhood_Plan/EHNP-Neighbourhood-Plan-Adopted_Version_%28adopted_%2824072018%29.pdf"}],
+      "blockers": ["Model the individual road companies separately if private-road analytics are required."]
+    },
+    {
+      "id": "abbotswood-guildford",
+      "name": "Abbotswood, Guildford",
+      "classification": "C",
+      "installStatus": "reclassify",
+      "localAuthorities": ["Guildford"],
+      "towns": ["Guildford"],
+      "matchStrategy": "historic_context_only",
+      "roads": [{"canonical": "Abbotswood", "scope": "historic_context"}],
+      "heldCandidates": ["Abbotswood Close as an independent B spur", "Westwood Ho as an independent B spur"],
+      "exclusions": ["A single private estate; the main road is adopted and three associations exist"],
+      "evidence": [{"type": "council_character_appraisal", "url": "https://guildford.gov.uk/media/14798/Abbotswood-Character-Appraisal/pdf/Abbotswood.pdf?ccp=true&m=1471873527780"}],
+      "blockers": []
+    },
+    {
+      "id": "surrey-private-islands",
+      "name": "Surrey private-access islands",
+      "classification": "C",
+      "installStatus": "reclassify",
+      "localAuthorities": ["Elmbridge", "Spelthorne"],
+      "towns": ["Thames Ditton", "Shepperton", "Sunbury-on-Thames"],
+      "matchStrategy": "separate_governance_typologies",
+      "roads": [
+        {"canonical": "Pharaoh's Island", "scope": "separate_island"},
+        {"canonical": "Hamhaugh Island", "scope": "separate_island"},
+        {"canonical": "Wheatley's Eyot", "scope": "separate_island"},
+        {"canonical": "Swan Island", "scope": "separate_island"},
+        {"canonical": "Ditton Island", "scope": "separate_island"}
+      ],
+      "exclusions": ["Mainstream road-estate premium cohort"],
+      "evidence": [],
+      "blockers": ["Create separate governance and access rules before any island comparison cohort is activated."]
+    },
+    {
+      "id": "sunningdale-park-outside-surrey",
+      "name": "Sunningdale Park",
+      "classification": "D",
+      "installStatus": "exclude",
+      "localAuthorities": ["Royal Borough of Windsor and Maidenhead"],
+      "towns": ["Sunningdale"],
+      "matchStrategy": "outside_surrey",
+      "roads": [],
+      "exclusions": ["Entire entity from Surrey registry"],
+      "evidence": [
+        {"type": "estate_management", "url": "https://www.sunningdalepark.org.uk/estate-management"},
+        {"type": "historic_england", "url": "https://historicengland.org.uk/listing/the-list/list-entry/1001667"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "dormans-park",
+      "name": "Dormans Park",
+      "classification": "A",
+      "installStatus": "hold",
+      "localAuthorities": ["Tandridge"],
+      "towns": ["Dormans Park", "Dormansland", "East Grinstead"],
+      "matchStrategy": "official_map_roads_pending_uprn_and_gate_reconciliation",
+      "roads": [
+        {"canonical": "Bracklyn Avenue", "sourceMapLabel": "Bracklyn Av.", "scope": "official_map_candidate_whole"},
+        {"canonical": "Swissland Hill", "scope": "official_map_gate_segment_required"},
+        {"canonical": "Dormans Park Road", "scope": "official_map_candidate_whole"},
+        {"canonical": "Hillcrest", "sourceMapLabel": "Hill Crest", "scope": "official_map_candidate_whole"},
+        {"canonical": "The Approach", "scope": "official_map_gate_segment_required"},
+        {"canonical": "Park Road", "scope": "official_map_candidate_whole"},
+        {"canonical": "Osmunda Bank", "scope": "official_map_candidate_whole"},
+        {"canonical": "West Hill", "scope": "official_map_candidate_whole"},
+        {"canonical": "Furzefield Chase", "scope": "official_map_candidate_whole"},
+        {"canonical": "Eden Vale", "scope": "official_map_candidate_whole"},
+        {"canonical": "St Margaret's Avenue", "sourceMapLabel": "St Margaret's Av.", "scope": "official_map_candidate_whole"},
+        {"canonical": "East Hill", "scope": "official_map_candidate_whole"},
+        {"canonical": "Dormans Gardens", "scope": "official_map_candidate_whole"},
+        {"canonical": "Plas Newydd", "scope": "official_map_candidate_whole"},
+        {"canonical": "Lake View Road", "sourceMapLabel": "Lake View Road", "scope": "official_map_candidate_whole"},
+        {"canonical": "Wilderness Rise", "scope": "official_map_candidate_whole"},
+        {"canonical": "Crescent Hill", "scope": "official_map_candidate_whole"}
+      ],
+      "exclusions": [
+        "Dormans Park as unrestricted locality text",
+        "Felcourt Road",
+        "Dormans railway station",
+        "House names shown in the official map index as road aliases"
+      ],
+      "evidence": [
+        {"type": "official_roads_trust_map", "url": "https://dormanspark.co.uk/wp-content/uploads/2021/11/Dormans-Park-map-2020-hi-res-WEB.pdf", "mapDate": "2020-07"},
+        {"type": "official_roads_trust_site", "url": "https://dormanspark.co.uk/contact/"},
+        {"type": "district_council_green_belt_assessment", "url": "https://www.tandridgedc.gov.uk/Portals/0/Documents/Planning%20and%20building/Planning%20strategies%20and%20policies/Local%20plan/Local%20plan%202033/Examination%20library/GREEN%20BELT/GB5-Green-Belt-Assessment-%28Part-2%29-Appendix-2-Area-for-Further-Investigation-2016.pdf"}
+      ],
+      "blockers": [
+        "Reconcile all 17 Roads Trust map labels to current canonical postal streets and UPRNs.",
+        "Confirm the exact gate/estate segments of Swissland Hill and The Approach.",
+        "Georeference and independently edge-review the Roads Trust map before making any polygon-based classification claim."
+      ]
+    },
+    {
+      "id": "crown-estate-oxshott",
+      "name": "Crown Estate, Oxshott",
+      "classification": "A",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Oxshott"],
+      "matchStrategy": "structured_exact_street_postcode_and_locality",
+      "roads": [
+        {"canonical": "Leys Road", "scope": "whole"},
+        {"canonical": "Prince's Drive", "aliases": ["Princes Drive"], "scope": "whole"},
+        {"canonical": "Spicers Field", "aliases": ["Spicersfield"], "scope": "whole"},
+        {"canonical": "Broomfield Ride", "scope": "whole"},
+        {"canonical": "Furze Field", "scope": "whole"},
+        {"canonical": "Montrose Gardens", "scope": "whole"},
+        {"canonical": "Birds Hill Road", "aliases": ["Birdshill Road"], "scope": "whole"},
+        {"canonical": "Birds Hill Drive", "scope": "whole"},
+        {"canonical": "Birds Hill Rise", "scope": "whole"},
+        {"canonical": "Torland Drive", "scope": "whole"},
+        {"canonical": "Stokesheath Road", "aliases": ["Stoke Heath Road"], "scope": "whole"},
+        {"canonical": "Moles Hill", "scope": "whole"},
+        {"canonical": "Queens Drive", "scope": "whole"},
+        {"canonical": "Kings Warren", "scope": "whole"},
+        {"canonical": "The Spinney", "scope": "whole"},
+        {"canonical": "Copsen Wood", "aliases": ["Copsem Wood"], "scope": "whole"},
+        {"canonical": "Parkfields", "scope": "whole"},
+        {"canonical": "Fairoak Close", "scope": "whole"}
+      ],
+      "heldCandidates": ["Highfield Close KT22 0QA", "Queensmead KT22 0PQ", "Gunters Mead KT22 0PD"],
+      "exclusions": ["Goldrings Road", "Crown Drive", "Fairoak Lane", "The Warren", "The Gables", "High Drive", "Holtwood Road", "The Chase", "Pond Piece", "Percival Close", "The Starlings"],
+      "evidence": [
+        {"type": "crown_estate_os_map", "url": "https://www.windsorgreatpark.co.uk/wp-content/uploads/2023/03/Oxshott-horse-riding-map.pdf"},
+        {"type": "council_character_guide", "url": "https://elmbridge.gov.uk/sites/default/files/2023-03/Companion%20guide%20-%20Cobham%20Oxshott%20Stoke%20dAbernon%20and%20Downside.pdf"}
+      ],
+      "blockers": ["Obtain a current written residential road schedule or boundary plan from The Crown Estate or its managing agent."]
+    },
+    {
+      "id": "kingswood-north-estate",
+      "name": "Kingswood North Estate",
+      "classification": "A",
+      "installStatus": "hold",
+      "localAuthorities": ["Reigate and Banstead"],
+      "towns": ["Kingswood", "Tadworth"],
+      "matchStrategy": "property_allowlist_and_exact_spur",
+      "roads": [
+        {"canonical": "Forest Drive", "scope": "company_owned_network"},
+        {"canonical": "The Glade", "scope": "company_owned_network"},
+        {"canonical": "Beechwood Avenue", "scope": "company_owned_network"},
+        {"canonical": "Drive Spur", "scope": "named_spur"},
+        {"canonical": "Forest Drive Spur", "scope": "named_spur"},
+        {"canonical": "Glade Spur", "scope": "named_spur"}
+      ],
+      "exclusions": ["Wider Kingswood private roads without KNECL membership evidence"],
+      "evidence": [{"type": "estate_company", "url": "https://knecl.com/about-us/"}],
+      "blockers": ["Obtain KNECL's current property and spur schedule before activating any broad road rule."]
+    },
+    {
+      "id": "kingswood-private-road-network",
+      "name": "Kingswood private-road associations",
+      "classification": "C",
+      "installStatus": "reclassify",
+      "localAuthorities": ["Reigate and Banstead"],
+      "towns": ["Kingswood", "Tadworth"],
+      "matchStrategy": "separate_association_registries",
+      "roads": [
+        {"canonical": "Beech Drive", "scope": "association_group"},
+        {"canonical": "Bears Den", "scope": "association_group"},
+        {"canonical": "Eyhurst Close", "scope": "association_group"},
+        {"canonical": "Eyhurst Spur", "scope": "association_group"},
+        {"canonical": "Sandy Lane", "scope": "association_group"},
+        {"canonical": "The Chase", "scope": "association_group"},
+        {"canonical": "Warren Drive", "scope": "association_group"},
+        {"canonical": "The Warren", "scope": "association_group"},
+        {"canonical": "Woodland Way", "scope": "association_group"},
+        {"canonical": "Beeches Close", "scope": "association_group"}
+      ],
+      "exclusions": ["A single combined Kingswood Warren estate label"],
+      "evidence": [
+        {"type": "heritage_association", "url": "https://kingswoodheritage.co.uk/contact/"},
+        {"type": "village_frontage_associations", "url": "https://www.kingswoodvillage.org/village-community/frontages-associations/"}
+      ],
+      "blockers": ["Model each governing association separately and obtain its property schedule."]
+    },
+    {
+      "id": "ottershaw-park",
+      "name": "Ottershaw Park",
+      "classification": "D",
+      "installStatus": "hold",
+      "localAuthorities": ["Runnymede"],
+      "towns": ["Ottershaw"],
+      "matchStrategy": "uprn_and_title_allowlist",
+      "roads": [],
+      "knownIncluded": ["The Bothy properties", "24 Mansion leaseholds", "25 Tulk House leaseholds", "30 residential freeholds", "1 agricultural holding"],
+      "exclusions": ["Woodwind", "Otterbourne House", "Otterbourne Lodge", "Garden Court", "Garden Court Cottage", "Ottershaw Chase", "Runnymede Chase", "Chobham Road as a whole", "Pink Road as a postal street alias"],
+      "evidence": [
+        {"type": "estate_company_management", "url": "https://www.ottershawpark.co.uk/management"},
+        {"type": "estate_company_ownership", "url": "https://www.ottershawpark.co.uk/grounds"},
+        {"type": "estate_map", "url": "https://www.ottershawpark.co.uk/estate-map"},
+        {"type": "land_registry_map", "url": "https://www.ottershawpark.co.uk/land-registry-map"}
+      ],
+      "blockers": ["Freeze and reconcile OPEC's 80 current interests to UPRN and title number."]
+    },
+    {
+      "id": "domewood",
+      "name": "Domewood",
+      "classification": "A",
+      "installStatus": "hold",
+      "localAuthorities": ["Tandridge"],
+      "towns": ["Copthorne"],
+      "matchStrategy": "uprn_allowlist",
+      "roads": [{"canonical": "Domewood", "scope": "candidate_whole", "postcodes": ["RH10 3HD"]}],
+      "exclusions": ["New Domewood", "Herons Lea RH10 3HE", "Herons Close RH10 3HF", "Domewood used only as a locality"],
+      "evidence": [
+        {"type": "residents_association_management", "url": "https://domewood.co.uk/index.php/estate-management/"},
+        {"type": "estate_history", "url": "https://domewood.co.uk/index.php/history-of-domewood/"}
+      ],
+      "blockers": ["Reconcile DPRA's definitive 66 properties against the larger public address/UPRN counts and freeze a UPRN allowlist."]
+    },
+    {
+      "id": "magna-carta-park",
+      "name": "Magna Carta Park",
+      "classification": "D",
+      "installStatus": "hold",
+      "localAuthorities": ["Runnymede"],
+      "towns": ["Englefield Green"],
+      "matchStrategy": "uprn_and_address_allowlist",
+      "roads": [
+        {"canonical": "King John Square", "scope": "property_allowlist", "postcodes": ["TW20 0GS"]},
+        {"canonical": "The Barons", "scope": "property_allowlist", "postcodes": ["TW20 0GR", "TW20 0GT"]},
+        {"canonical": "De Vesci Court", "scope": "property_allowlist", "postcodes": ["TW20 0GT"]}
+      ],
+      "exclusions": ["Cooper's Hill Lane as a whole"],
+      "evidence": [
+        {"type": "official_estate", "url": "https://magnacartapark.com/estate/"},
+        {"type": "official_residences", "url": "https://magnacartapark.com/residences/"}
+      ],
+      "blockers": ["Reconcile all 57 homes to a management-confirmed UPRN/address allowlist."]
+    },
+    {
+      "id": "esher-park-avenue",
+      "name": "Esher Park Avenue",
+      "classification": "B",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Esher"],
+      "matchStrategy": "street_segment_or_uprn_allowlist",
+      "roads": [{"canonical": "Esher Park Avenue", "scope": "unresolved_segment"}],
+      "exclusions": ["Claremont Lane", "Claremont Park", "New Road", "Meadway"],
+      "evidence": [{"type": "county_council_minutes", "url": "https://mycouncil.surreycc.gov.uk/mgAi.aspx?ID=244"}],
+      "blockers": ["Obtain the current association property or segment schedule."]
+    },
+    {
+      "id": "new-road-esher",
+      "name": "New Road, Esher",
+      "classification": "B",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Esher"],
+      "matchStrategy": "street_segment_or_uprn_allowlist",
+      "roads": [{"canonical": "New Road", "scope": "unresolved_segment"}],
+      "exclusions": ["Every New Road outside the verified Esher segment", "Esher Park Avenue", "Meadway"],
+      "evidence": [{"type": "council_companion_guide", "url": "https://www.elmbridge.gov.uk/sites/default/files/2023-03/Companion%20guide%20-%20Esher.pdf"}],
+      "blockers": ["Obtain the current association property or segment schedule."]
+    },
+    {
+      "id": "meadway-esher",
+      "name": "Meadway, Esher",
+      "classification": "B",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Esher"],
+      "matchStrategy": "street_and_uprn_allowlist",
+      "roads": [{"canonical": "Meadway", "scope": "unresolved"}],
+      "exclusions": ["Every Meadway outside Esher", "Esher Park Avenue", "New Road"],
+      "evidence": [{"type": "residents_company", "url": "https://find-and-update.company-information.service.gov.uk/company/02332732/officers"}],
+      "blockers": ["Record the exact Companies House entity URL and obtain the current association property schedule."]
+    },
+    {
+      "id": "royal-earlswood-park",
+      "name": "Royal Earlswood Park",
+      "classification": "D",
+      "installStatus": "hold",
+      "localAuthorities": ["Reigate and Banstead"],
+      "towns": ["Redhill"],
+      "matchStrategy": "uprn_allowlist",
+      "roads": [{"canonical": "Princes Road", "scope": "estate_segment"}],
+      "exclusions": ["Princes Road outside the development"],
+      "evidence": [{"type": "county_council_report", "url": "https://mycouncil.surreycc.gov.uk/documents/b23723/Supplementary%20Agenda%20Monday%2002-Mar-2020%2014.00%20Reigate%20and%20Banstead%20Local%20Committee.pdf?T=9"}],
+      "blockers": ["Locate the complete current estate plan and address schedule."]
+    },
+    {
+      "id": "lakeside-oatlands",
+      "name": "Lakeside",
+      "classification": "D",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Oatlands", "Weybridge"],
+      "matchStrategy": "uprn_allowlist",
+      "roads": [{"canonical": "Lakeside", "scope": "unresolved", "candidatePostcodes": ["KT13 9JB"]}],
+      "exclusions": ["Lakeside Grange KT13 9ZE", "Oatlands Drive as a whole"],
+      "evidence": [{"type": "community_organisation_directory", "url": "https://www.weybridgesociety.org.uk/community-residents-organisations/"}],
+      "blockers": ["Obtain the Lakeside Residents Society property and postcode schedule."]
+    },
+    {
+      "id": "holme-chase",
+      "name": "Holme Chase",
+      "classification": "D",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Weybridge"],
+      "matchStrategy": "uprn_allowlist",
+      "roads": [],
+      "exclusions": [],
+      "evidence": [{"type": "residents_society", "url": "https://www.holme-chase.co.uk/"}],
+      "blockers": ["Obtain the just-over-60-home address, road and postcode schedule."]
+    },
+    {
+      "id": "kingsmead-weybridge",
+      "name": "Kingsmead Estate, Weybridge",
+      "classification": "D",
+      "installStatus": "hold",
+      "localAuthorities": ["Elmbridge"],
+      "towns": ["Weybridge"],
+      "matchStrategy": "uprn_allowlist",
+      "roads": [{"canonical": "Kingsmead", "scope": "property_allowlist", "candidatePostcodes": ["KT13 0HB"]}],
+      "exclusions": ["Gower Road as a whole", "Every other Kingsmead outside Weybridge"],
+      "evidence": [{"type": "residents_association", "url": "https://find-and-update.company-information.service.gov.uk/company/01185914"}],
+      "blockers": ["Confirm the complete numbered enclave and freeze its UPRNs."]
+    },
+    {
+      "id": "woodham-waye",
+      "name": "Woodham Waye",
+      "classification": "B",
+      "installStatus": "hold",
+      "localAuthorities": ["Woking"],
+      "towns": ["Woodham"],
+      "matchStrategy": "structured_exact_street_postcode_and_locality",
+      "roads": [{"canonical": "Woodham Waye", "scope": "candidate_whole"}],
+      "exclusions": [],
+      "evidence": [{"type": "residents_association", "url": "https://find-and-update.company-information.service.gov.uk/company/02057198"}],
+      "blockers": ["Obtain the current road/property schedule and confirm locality/postcode constraints."]
+    },
+    {
+      "id": "hook-heath",
+      "name": "Hook Heath",
+      "classification": "C",
+      "installStatus": "reclassify",
+      "localAuthorities": ["Woking"],
+      "towns": ["Woking"],
+      "matchStrategy": "context_only",
+      "roads": [
+        {"canonical": "Pond Road", "scope": "historic_context"},
+        {"canonical": "Golf Club Road", "scope": "small_historic_segment"}
+      ],
+      "exclusions": ["A single Hook Heath private-estate classification"],
+      "evidence": [
+        {"type": "residents_association_history", "url": "https://www.hhra.co.uk/the-history-of-hook-heath.htm"},
+        {"type": "council_heritage_evidence", "url": "https://www.woking.gov.uk/sites/default/files/documents/planning-and-building-control/heritage/planningheritage.pdf"}
+      ],
+      "blockers": []
+    },
+    {
+      "id": "woldingham-road-network",
+      "name": "Woldingham private-road network",
+      "classification": "C",
+      "installStatus": "reclassify",
+      "localAuthorities": ["Tandridge"],
+      "towns": ["Woldingham"],
+      "matchStrategy": "context_only_or_separate_road_entities",
+      "roads": [],
+      "exclusions": ["The whole village as one private estate"],
+      "evidence": [{"type": "village_association_history", "url": "https://woldinghamassociation.wordpress.com/about/history/woldingham-association-more/"}],
+      "blockers": ["Any future private-road metrics must use the association's separate road/property schedule rather than a village label."]
+    },
+    {
+      "id": "downs-road-estate-epsom",
+      "name": "Downs Road Estate",
+      "classification": "C",
+      "installStatus": "exclude",
+      "localAuthorities": ["Epsom and Ewell"],
+      "towns": ["Epsom"],
+      "matchStrategy": "context_only",
+      "roads": [
+        {"canonical": "The Ridings", "scope": "historic_context"},
+        {"canonical": "Walnut Close", "scope": "historic_context"},
+        {"canonical": "Milburn Walk", "scope": "historic_context"},
+        {"canonical": "Downs Road", "scope": "historic_segment"},
+        {"canonical": "Treadwell Road", "scope": "historic_segment"}
+      ],
+      "exclusions": ["Private-estate premium cohort because the roads are publicly adopted"],
+      "evidence": [{"type": "council_character_appraisal", "url": "https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/historic-environment/DownsRoadCAFinal.pdf"}],
+      "blockers": []
+    },
+    {
+      "id": "willinghurst-estate",
+      "name": "Willinghurst Estate",
+      "classification": "E",
+      "installStatus": "exclude",
+      "localAuthorities": ["Guildford"],
+      "towns": ["Shamley Green"],
+      "matchStrategy": "context_only",
+      "roads": [],
+      "exclusions": ["Resident-managed private-estate sales cohort"],
+      "evidence": [{"type": "official_landed_estate", "url": "https://www.willinghurstestate.co.uk/"}],
+      "blockers": []
+    }
+  ],
+  "currentRuleRemovals": [
+    {"entity": "Wentworth", "remove": ["Unrestricted WENTWORTH substring"], "reason": "Matches unrelated addresses such as Wentworth Court in Egham."},
+    {"entity": "St George's Hill", "remove": ["Unrestricted ST GEORGE substring"], "reason": "Matches unrelated addresses such as St George's Place in Esher."},
+    {"entity": "Crown Estate, Oxshott", "remove": ["CROWN ESTATE", "CROWN DRIVE", "GOLDRINGS ROAD"], "reason": "Marketing text/name collision and roads outside the verified operational core."},
+    {"entity": "Burwood Park", "remove": ["BURWOOD PARK substring", "FRIARS CLOSE"], "reason": "Use the complete 17-road schedule; Friars Close is not on the official map."},
+    {"entity": "Fairmile Estate (Section One)", "remove": ["FAIRMILE AVENUE", "FAIRMILE LANE", "FAIRMILE PARK"], "reason": "Section One is the evidenced Icklingham Road segment; Fairmile Avenue belongs to the wider Eaton Park Estate and the other similarly named roads remain outside both rules."},
+    {"entity": "Ashley Park", "remove": ["ASHLEY PARK substring", "ASHLEY RISE"], "reason": "Use the official six-road estate plot map and partial Ashley Park Avenue rule."},
+    {"entity": "Eaton Park", "remove": ["Separate EATON PARK ROAD estate entity"], "reason": "Separate road governance is metadata, not a second estate. Eaton Park Road, Fairmile Avenue, The Drive and Fairmeads are constituent roads of the wider Eaton Park Estate."},
+    {"entity": "Ewell Downs Road & The Green", "remove": ["Separate EWELL DOWNS ROAD and THE GREEN estate entities"], "reason": "Council evidence describes the two streets as forming part of one private estate."},
+    {"entity": "Non-estate private-road records", "remove": ["BLACKDOWN AVENUE", "REDCOURT", "VIRGINIA BEECHES as estate labels"], "reason": "Private road, residents association and private estate are not interchangeable product entities."},
+    {"entity": "Kingswood", "remove": ["Combined Kingswood Warren entity"], "reason": "Several separate road-management and frontage associations exist."},
+    {"entity": "Claremont Park Estate", "remove": ["Standalone CLARE HILL classification", "Unrestricted CLAREMONT PARK text"], "reason": "Clare Hill appears to sit within a wider private golf-course estate with several roads; the umbrella member/title schedule is required."},
+    {"entity": "Esher Park", "remove": ["CLAREMONT LANE", "CLAREMONT PARK", "Combined Esher Park label"], "reason": "Esher Park Avenue, New Road and Meadway require separate entities and schedules."},
+    {"entity": "Hook Heath", "remove": ["Private-estate classification"], "reason": "It is a historic neighbourhood, not one governed private estate."}
+  ],
+  "acceptanceTests": [
+    "Wentworth Court, Ridgemead Road, Egham must remain unclassified.",
+    "St George's Place, Esher must remain unclassified.",
+    "Goldrings Road must not classify as Crown Estate.",
+    "Friars Close must not classify as Burwood Park.",
+    "Ashley Rise and 197 Ashley Park Avenue must not classify as Ashley Park.",
+    "Fairmile Avenue KT11 2JA/2JB must classify as Eaton Park; Fairmile Lane and Fairmile Park must not.",
+    "Eaton Park Road, The Drive and Fairmeads must classify as Eaton Park and must never create separate estate entities.",
+    "Ewell Downs Road and The Green in Ewell must both classify as Ewell Downs Road & The Green.",
+    "GreenMeads must appear once as the estate containing Meads Road and Green Lane.",
+    "Blackdown Avenue, Redcourt and Virginia Beeches must not appear in the private-estate runtime.",
+    "Held entities must return no automatic match.",
+    "Every activated rule must have positive, adjacent-road negative and name-collision negative fixtures.",
+    "Changed historical rows must be exported and reviewed by estate, road and postcode before release."
+  ]
+}

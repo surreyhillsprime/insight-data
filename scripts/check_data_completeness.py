@@ -3,9 +3,11 @@
 
 import argparse
 import os
+from collections import Counter
 from pathlib import Path
 
 from insight_data_utils import DEFAULT_INPUT_JS, clean, read_js
+from private_estates import classify_estate, load_compiled_registry
 
 
 MINIMUM_COVERAGE = {
@@ -18,6 +20,17 @@ MINIMUM_COVERAGE = {
     "School lookups": 80.0,
     "Planning lookups": 95.0,
 }
+
+ESTATE_CLASSIFICATION_FIELDS = (
+    "estateId",
+    "estate",
+    "estateClassification",
+    "estateType",
+    "estateRuleId",
+    "estateEvidenceStatus",
+    "estateReviewStatus",
+)
+STRUCTURED_ADDRESS_FIELDS = ("paon", "saon", "street", "locality", "town", "district", "postcode")
 
 
 def present(value):
@@ -61,6 +74,92 @@ def coverage_rows(items):
     ]
 
 
+def estate_failures(items, meta):
+    """Replay the exact classifier over every transaction and verify feed metadata."""
+
+    failures = []
+    registry = load_compiled_registry()
+    registry_version = clean(registry.get("registryVersion"))
+    metadata_version = clean(meta.get("estateRegistryVersion"))
+    if metadata_version != registry_version:
+        failures.append(
+            f"Estate registry version: feed reports {metadata_version or 'missing'}, expected {registry_version}"
+        )
+
+    missing_structured = [
+        index for index, item in enumerate(items, start=1)
+        if any(field not in item for field in STRUCTURED_ADDRESS_FIELDS)
+    ]
+    if missing_structured:
+        failures.append(
+            f"Structured estate addresses: {len(missing_structured):,} rows lack required fields "
+            f"(first row {missing_structured[0]:,})"
+        )
+
+    stale_versions = [
+        item for item in items if clean(item.get("estateRegistryVersion")) != registry_version
+    ]
+    if stale_versions:
+        failures.append(
+            f"Estate row versions: {len(stale_versions):,} rows do not carry {registry_version}"
+        )
+
+    mismatches = []
+    for item in items:
+        expected = classify_estate(item, compiled=registry)
+        for field in ESTATE_CLASSIFICATION_FIELDS:
+            actual_value = clean(item.get(field))
+            expected_value = clean(expected.get(field))
+            if actual_value != expected_value:
+                mismatches.append((clean(item.get("id")) or clean(item.get("address")), field))
+                break
+    if mismatches:
+        first_id, first_field = mismatches[0]
+        failures.append(
+            f"Estate classifier replay: {len(mismatches):,} rows differ from the exact road matrix "
+            f"(first {first_id or 'unknown row'} at {first_field})"
+        )
+
+    estate_ids = Counter(clean(item.get("estateId")) for item in items if clean(item.get("estateId")))
+    estate_names = Counter(clean(item.get("estate")) for item in items if clean(item.get("estate")))
+    if meta.get("estateIdSummary") != dict(estate_ids):
+        failures.append("Estate ID summary: metadata does not match classified transaction rows")
+    if meta.get("estateSummary") != dict(estate_names):
+        failures.append("Estate name summary: metadata does not match classified transaction rows")
+
+    structured_meta = meta.get("estateStructuredFieldCoverage")
+    structured_meta = structured_meta if isinstance(structured_meta, dict) else {}
+    if structured_meta.get("rows") != len(items):
+        failures.append("Estate structured coverage: metadata row count does not match the feed")
+    if structured_meta.get("rowsEvaluatedAgainstRegistry") != len(items):
+        failures.append("Estate classifier coverage: not every row is recorded as evaluated")
+    if meta.get("estateClassifierMode") != "structured-exact-fail-closed":
+        failures.append("Estate classifier mode: expected structured-exact-fail-closed")
+    if meta.get("estateClassificationMode") != "audited-road-matrix":
+        failures.append("Estate classification mode: expected audited-road-matrix")
+    if meta.get("estateActiveDefinitionCount") != registry.get("metadata", {}).get("activeDefinitionCount"):
+        failures.append("Estate definition count: feed metadata differs from the active registry")
+    if meta.get("estateActiveRuleCount") != registry.get("metadata", {}).get("activeRuleCount"):
+        failures.append("Estate rule count: feed metadata differs from the active registry")
+
+    pre_2010 = [item for item in items if clean(item.get("date")) < "2010-01-01"]
+    from_2010 = [item for item in items if clean(item.get("date")) >= "2010-01-01"]
+    if not pre_2010 or not from_2010:
+        failures.append("Historic partition: expected both 1995-2009 and 2010+ transaction rows")
+    else:
+        if not any(clean(item.get("estateId")) for item in pre_2010):
+            failures.append("Historic estate classifications: 1995-2009 contains no estate IDs")
+        if not any(clean(item.get("estateId")) for item in from_2010):
+            failures.append("Current estate classifications: 2010+ contains no estate IDs")
+
+    identifiers = [clean(item.get("id")) for item in items]
+    if any(not value for value in identifiers):
+        failures.append("Transaction identifiers: one or more rows have no stable ID")
+    elif len(identifiers) != len(set(identifiers)):
+        failures.append("Transaction identifiers: duplicate stable IDs detected")
+    return failures
+
+
 def render(rows, failures, warnings, meta):
     lines = [
         "# INSIGHT data completeness",
@@ -87,7 +186,7 @@ def render(rows, failures, warnings, meta):
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", default=str(DEFAULT_INPUT_JS))
-    parser.add_argument("--minimum-records", type=int, default=1500)
+    parser.add_argument("--minimum-records", type=int, default=1544)
     parser.add_argument("--strict-metadata", action="store_true")
     return parser.parse_args()
 
@@ -101,10 +200,26 @@ def main():
 
     if len(items) < args.minimum_records:
         failures.append(f"Record count: {len(items):,} is below {args.minimum_records:,}")
-    if str(meta.get("from", "9999")) > "1995-01-01":
+    if str(meta.get("from", "")) != "1995-01-01":
         failures.append(f"Historic coverage: expected 1995-01-01, found {meta.get('from', 'missing')}")
     if meta.get("schemaVersion") != 2:
         failures.append(f"Schema version: expected 2, found {meta.get('schemaVersion', 'missing')}")
+
+    transaction_dates = sorted(clean(item.get("date")) for item in items if clean(item.get("date")))
+    if not transaction_dates or not transaction_dates[0].startswith("1995-"):
+        failures.append(
+            f"Historic rows: earliest transaction is {transaction_dates[0] if transaction_dates else 'missing'}, expected 1995"
+        )
+    for field in ("residentialRows", "mappedTransactions"):
+        if meta.get(field) != len(items):
+            failures.append(f"{field}: metadata reports {meta.get(field, 'missing')}, feed contains {len(items):,}")
+    historical_meta = meta.get("historicalExpansion")
+    historical_meta = historical_meta if isinstance(historical_meta, dict) else {}
+    actual_pre_2010 = sum(1 for item in items if clean(item.get("date")) < "2010-01-01")
+    if historical_meta.get("pre2010Transactions") != actual_pre_2010:
+        failures.append("Historical expansion: pre-2010 metadata does not match transaction rows")
+
+    failures.extend(estate_failures(items, meta))
 
     for row in rows:
         if row["coverage"] < row["minimum"]:
