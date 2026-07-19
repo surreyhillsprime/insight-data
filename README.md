@@ -15,11 +15,23 @@ classifier.
 
 ## Install INSIGHT
 
+Current audited release: **v1.5.1 (build 17)**, completed 19 July 2026 for
+internal investor demonstration. The release audit and machine-readable
+manifest are in [RELEASE-v1.5.1.md](RELEASE-v1.5.1.md) and
+[RELEASE-v1.5.1.json](RELEASE-v1.5.1.json).
+
 The current macOS package is published at:
 
 ```text
 https://raw.githubusercontent.com/surreyhillsprime/insight-data/main/downloads/INSIGHT-macOS.zip
 ```
+
+SHA-256: `e1d640bfac647c8741c552619c4b17c1b017a5323ccd3d012465227bd63a5d0a`
+
+This package is strictly ad-hoc signed for controlled internal use. It is not
+Developer ID signed or Apple-notarized and must not be represented as an
+external commercial distribution build. The remaining rights and repository
+history reviews are recorded in [NOTICE.md](NOTICE.md).
 
 The package contains the matching private-estate registry and app code. On
 first launch, INSIGHT downloads the current base feed from this repository.

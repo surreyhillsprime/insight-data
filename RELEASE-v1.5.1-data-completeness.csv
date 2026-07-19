@@ -1,0 +1,8 @@
+check,found,total,coverage_percent,minimum_percent,result
+Postcodes,1543,1544,99.9,99.0,PASS
+Coordinates,1542,1544,99.9,99.0,PASS
+EPC matches,1506,1544,97.5,75.0,PASS
+Fresh flood observations,1542,1544,99.9,90.0,PASS
+UPRN matches,58,1544,3.8,3.0,PASS
+School lookups,1541,1544,99.8,80.0,PASS
+Planning query responses,1542,1544,99.9,95.0,PASS
