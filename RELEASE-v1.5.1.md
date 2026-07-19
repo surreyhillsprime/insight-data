@@ -128,6 +128,10 @@ time-gated and polygon holes are preserved.
 - The native wrapper rejects cached or remote transaction feeds that fall below
   the v1.5.1 row-count, coverage-date or enrichment-completeness gates, and the
   four live feed URLs are pinned to `release-v1.5.1` for this candidate.
+- After publication, the remote release feed and ZIP matched their recorded
+  hashes. The wrapper's sanitised runtime cache was deep-compared with the
+  bundled feed: all three payloads and all 1,544 transaction objects matched;
+  only safe serialisation order differs.
 - The map uses an allowlisted OpenFreeMap vector endpoint with a custom
   non-symbol style. No upstream place/town labels are loaded; artificial town
   geometry, property halos, estate labels and estate glow/ring layers have been
