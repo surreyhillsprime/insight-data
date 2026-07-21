@@ -20,6 +20,7 @@ def assignment(text, name):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("path", nargs="?", default="outputs/planning-history.js")
+    parser.add_argument("--base-feed", default="")
     args = parser.parse_args()
     text = Path(args.path).read_text(encoding="utf-8")
     histories = assignment(text, "SURREY_PLANNING_HISTORY")
@@ -28,6 +29,16 @@ def main():
         raise ValueError("Commercial planning metadata is missing schemaVersion 1 or deploymentMode commercial")
     if len(histories) > 200_000:
         raise ValueError("Planning history exceeds the app safety limit")
+    if args.base_feed:
+        base_text = Path(args.base_feed).read_text(encoding="utf-8")
+        base_rows = json.loads(re.findall(r"^window\.SURREY_LAND_REG_TRANSACTIONS\s*=\s*(.*);$", base_text, flags=re.M)[0])
+        expected = {str(item.get("propertyRecordId") or "") for item in base_rows}
+        expected.discard("")
+        if metadata.get("propertiesChecked") != len(expected):
+            raise ValueError(
+                f"Planning history property coverage is stale: expected {len(expected):,}, "
+                f"found {metadata.get('propertiesChecked', 'missing')} checked"
+            )
     print(f"Valid commercial planning feed: {len(histories):,} lookup keys")
 
 

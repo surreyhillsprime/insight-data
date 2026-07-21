@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Refresh the Surrey GBP 3m+ Land Registry ledger for INSIGHT.
+"""Refresh the Surrey GBP 2m+ Land Registry ledger for INSIGHT.
 
-The script fetches HM Land Registry Price Paid Data via the official SPARQL
-endpoint, falls back to the last local CSV if the endpoint is unavailable, and
-regenerates outputs/surrey-transactions.js for the static app.
+The script fetches HM Land Registry Price Paid Data from the official annual
+archives and SPARQL endpoint. If the broad current query is unavailable, it
+refreshes a rolling two-year archive window before regenerating the static app
+feed; a full price-floor migration can force every annual archive.
 """
 
 import argparse
@@ -17,35 +18,45 @@ import time
 import urllib.parse
 import urllib.request
 from collections import Counter, defaultdict
+from datetime import date
 from pathlib import Path
 
 from private_estates import classify_estate, load_compiled_registry
+from insight_data_utils import (
+    FEED_SCHEMA_VERSION,
+    PROPERTY_RECORD_SCHEMA_VERSION,
+    property_record_id,
+    write_js as write_canonical_js,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CSV = ROOT / "work" / "land-reg-surrey-3m-1995.csv"
-HISTORICAL_CSV = ROOT / "work" / "land-reg-surrey-3m-1995-2009.csv"
-CURRENT_CSV = ROOT / "work" / "land-reg-surrey-3m-2010.csv"
+DEFAULT_CSV = ROOT / "work" / "land-reg-surrey-2m-1995.csv"
+HISTORICAL_CSV = ROOT / "work" / "land-reg-surrey-2m-1995-2009.csv"
+CURRENT_CSV = ROOT / "work" / "land-reg-surrey-2m-2010.csv"
 DEFAULT_JS = ROOT / "outputs" / "surrey-transactions.js"
 START_DATE = "1995-01-01"
 CURRENT_START_DATE = "2010-01-01"
-PRICE_FLOOR = 3_000_000
-FEED_SCHEMA_VERSION = 2
+PRICE_FLOOR = 2_000_000
+VELOCITY_MATURITY_LAG_MONTHS = 2
+VELOCITY_METHOD_VERSION = "hmlr-ppd-sale-maturity-v1"
 SPARQL_ENDPOINT = "https://landregistry.data.gov.uk/landregistry/query"
 FETCH_RETRIES = 2
 ARCHIVE_URL = "https://price-paid-data.publicdata.landregistry.gov.uk/pp-{year}.csv"
 BASE_TRANSACTION_FIELDS = {
-    "id", "market", "district", "address", "paon", "saon", "street", "locality", "town",
+    "id", "propertyRecordId", "market", "district", "address", "paon", "saon", "street", "locality", "town",
     "postcode", "price", "priceText", "date", "propertyType", "estateId", "estate",
     "estateClassification", "estateType", "estateRuleId", "estateRegistryVersion",
     "estateEvidenceStatus", "estateReviewStatus", "source", "kind", "category",
 }
 BASE_METADATA_FIELDS = {
     "schemaVersion", "rawRows", "residentialRows", "mappedTransactions", "uniquePostcodes", "from", "to",
+    "latestObservedSaleDate", "velocityMaturityLagMonths", "velocityCutoffDate", "velocityMethodVersion",
     "priceFloor", "source", "propertyTypes", "updateCadence", "officialSearch", "estateSummary", "estateIdSummary",
     "estateTypeSummary", "estateRegistryVersion", "estateClassifierMode",
     "estateClassificationMode", "estateStructuredFieldCoverage",
     "estateActiveDefinitionCount", "estateActiveRuleCount",
+    "propertyRecordSchemaVersion", "canonicalPropertyRecords", "propertyIdentityMode",
 }
 
 CANONICAL_DISTRICTS = {
@@ -259,7 +270,7 @@ def fetch_archive_year(year):
                     row = archive_row(values)
                     if row:
                         matches.append(row)
-            print(f"Archive {year}: {len(matches):,} Surrey GBP 3m+ rows from {scanned:,}", flush=True)
+            print(f"Archive {year}: {len(matches):,} Surrey GBP 2m+ rows from {scanned:,}", flush=True)
             return matches
         except Exception as error:
             last_error = error
@@ -301,8 +312,43 @@ def historical_rows(refresh=False):
     return transactions
 
 
-def fetch_rows(use_current_cache=False, existing_transactions=None, refresh_history=False):
-    history = historical_rows(refresh=refresh_history)
+def current_rows_from_archives(existing_transactions=None, full_history=False):
+    """Refresh the current partition from official annual archives.
+
+    A full rebuild scans every archive from 2010. Normal monthly fallback scans
+    the current and previous calendar years, replacing those years in the
+    checked-in £2m cache so the HMLR SPARQL endpoint cannot strand the feed at
+    an older price floor.
+    """
+
+    end_year = date.today().year
+    start_year = 2010 if full_history else max(2010, end_year - 1)
+    if full_history:
+        retained = []
+    else:
+        retained = [
+            item for item in (existing_transactions or [])
+            if CURRENT_START_DATE <= clean(item.get("date")) < f"{start_year}-01-01"
+        ]
+        if not retained and CURRENT_CSV.exists() and csv_has_structured_address_schema(CURRENT_CSV):
+            retained = [
+                item for item in read_csv(CURRENT_CSV)
+                if clean(item.get("date")) < f"{start_year}-01-01"
+            ]
+        if not retained:
+            raise RuntimeError("The 2010+ £2m cache is unavailable; use --archive-all-years")
+    raw = list(retained)
+    for year in range(start_year, end_year + 1):
+        raw.extend(fetch_archive_year(year))
+    _raw_count, transactions = normalise_rows(raw)
+    write_processed_csv(CURRENT_CSV, transactions)
+    mode = "full" if full_history else f"rolling {start_year}-{end_year}"
+    print(f"Refreshed current cache from annual archives ({mode}): {len(transactions):,} rows", flush=True)
+    return transactions
+
+
+def fetch_rows(use_current_cache=False, existing_transactions=None, refresh_history=False, archive_all_years=False):
+    history = historical_rows(refresh=refresh_history or archive_all_years)
     if use_current_cache:
         current = [item for item in (existing_transactions or []) if clean(item.get("date")) >= CURRENT_START_DATE]
         if not rows_have_structured_address_schema(current):
@@ -312,6 +358,8 @@ def fetch_rows(use_current_cache=False, existing_transactions=None, refresh_hist
         if not current:
             raise RuntimeError("The 2010+ cache lacks structured HMLR address fields; a live refresh is required")
         print(f"Current cache: {len(current):,} rows", flush=True)
+    elif archive_all_years:
+        current = current_rows_from_archives(existing_transactions, full_history=True)
     else:
         try:
             current = fetch_current_rows()
@@ -319,10 +367,8 @@ def fetch_rows(use_current_cache=False, existing_transactions=None, refresh_hist
             write_processed_csv(CURRENT_CSV, current_transactions)
             print(f"Refreshed current cache: {len(current_transactions):,} rows", flush=True)
         except Exception as error:
-            if not csv_has_structured_address_schema(CURRENT_CSV):
-                raise
-            current = read_csv(CURRENT_CSV)
-            print(f"WARNING current query failed; using {len(current):,} cached rows: {error}", flush=True)
+            print(f"WARNING current query failed; refreshing rolling annual archives: {error}", flush=True)
+            current = current_rows_from_archives(existing_transactions, full_history=False)
     return history + current
 
 
@@ -357,10 +403,7 @@ def stable_transaction_key(item):
 
 
 def stable_property_key(item):
-    return "|".join([
-        re.sub(r"[^A-Z0-9]+", " ", clean(item.get("address")).upper()).strip(),
-        re.sub(r"[^A-Z0-9]", "", clean(item.get("postcode")).upper()),
-    ])
+    return property_record_id(item)
 
 
 def source_transaction_key(item):
@@ -417,6 +460,11 @@ def preserve_existing_enrichments(transactions, metadata, existing_transactions,
         if donor_extra_keys - exact_extra_keys:
             property_reused += 1
         extras = {key: value for key, value in previous.items() if key not in BASE_TRANSACTION_FIELDS}
+        if not exact and extras.get("floorAreaSqft"):
+            try:
+                extras["pricePerSqft"] = round(item["price"] / float(extras["floorAreaSqft"]))
+            except (TypeError, ValueError, ZeroDivisionError):
+                extras.pop("pricePerSqft", None)
         if extras:
             preserved += 1
         enriched.append({**extras, **item})
@@ -531,10 +579,12 @@ def normalise_rows(rows):
         item["id"] = stable_transaction_id(
             item["address"], item["postcode"], item["price"], item["date"], item["propertyType"], item["category"]
         )
+        item["propertyRecordId"] = property_record_id(item)
     ordered = []
     for item in transactions:
         ordered.append({
             "id": item["id"],
+            "propertyRecordId": item["propertyRecordId"],
             "market": item["market"],
             "district": item["district"],
             "address": item["address"],
@@ -578,11 +628,27 @@ def summary_by_market(transactions):
     }
 
 
+def velocity_cutoff_date(latest_observed_sale_date, lag_months=VELOCITY_MATURITY_LAG_MONTHS):
+    """Return the last mature month before the HMLR registration lag."""
+
+    lag_months = int(lag_months)
+    if lag_months < 0:
+        raise ValueError("Velocity maturity lag months cannot be negative")
+    observed = date.fromisoformat(clean(latest_observed_sale_date)[:10])
+    cutoff_month_index = observed.year * 12 + observed.month - 1 - lag_months
+    cutoff_year, cutoff_month_zero = divmod(cutoff_month_index, 12)
+    following_month_index = cutoff_year * 12 + cutoff_month_zero + 1
+    following_year, following_month_zero = divmod(following_month_index, 12)
+    following_month = date(following_year, following_month_zero + 1, 1)
+    return date.fromordinal(following_month.toordinal() - 1).isoformat()
+
+
 def metadata(raw_count, transactions):
     estates = Counter(item["estate"] for item in transactions if item["estate"])
     estate_ids = Counter(item["estateId"] for item in transactions if item["estateId"])
     estate_types = Counter(item["estateType"] for item in transactions if item["estateType"])
     estate_registry = load_compiled_registry()
+    latest_observed_sale_date = max((item["date"] for item in transactions), default=START_DATE)
     return {
         "schemaVersion": FEED_SCHEMA_VERSION,
         "rawRows": raw_count,
@@ -590,12 +656,19 @@ def metadata(raw_count, transactions):
         "mappedTransactions": len(transactions),
         "uniquePostcodes": len({item["postcode"] for item in transactions if item["postcode"]}),
         "from": START_DATE,
-        "to": max((item["date"] for item in transactions), default=START_DATE),
+        "to": latest_observed_sale_date,
+        "latestObservedSaleDate": latest_observed_sale_date,
+        "velocityMaturityLagMonths": VELOCITY_MATURITY_LAG_MONTHS,
+        "velocityCutoffDate": velocity_cutoff_date(latest_observed_sale_date),
+        "velocityMethodVersion": VELOCITY_METHOD_VERSION,
         "priceFloor": PRICE_FLOOR,
         "source": "HM Land Registry Price Paid Data",
         "propertyTypes": list(PROPERTY_TYPES.keys()),
         "updateCadence": "monthly",
-        "officialSearch": "county=Surrey; price >= GBP 3,000,000; date >= 1995-01-01; residential property types",
+        "officialSearch": "county=Surrey; price >= GBP 2,000,000; date >= 1995-01-01; residential property types",
+        "propertyRecordSchemaVersion": PROPERTY_RECORD_SCHEMA_VERSION,
+        "canonicalPropertyRecords": len({item["propertyRecordId"] for item in transactions}),
+        "propertyIdentityMode": "full-normalised-address-plus-postcode-fail-closed",
         "estateSummary": dict(estates),
         "estateIdSummary": dict(estate_ids),
         "estateTypeSummary": dict(estate_types),
@@ -616,7 +689,7 @@ def metadata(raw_count, transactions):
 def write_processed_csv(path, transactions):
     path.parent.mkdir(parents=True, exist_ok=True)
     fields = [
-        "address", "paon", "saon", "street", "locality", "town", "postcode", "district",
+        "propertyRecordId", "address", "paon", "saon", "street", "locality", "town", "postcode", "district",
         "propertyType", "estateId", "estate", "estateClassification", "estateType", "estateRuleId",
         "estateRegistryVersion", "estateEvidenceStatus", "estateReviewStatus",
         "price", "date", "market", "category",
@@ -629,14 +702,7 @@ def write_processed_csv(path, transactions):
 
 
 def write_js(path, transactions, meta):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    content = "\n".join([
-        "window.SURREY_LAND_REG_TRANSACTIONS = " + json.dumps(transactions, separators=(",", ":")) + ";",
-        "window.SURREY_LAND_REG_SUMMARY = " + json.dumps(summary_by_market(transactions), separators=(",", ":")) + ";",
-        "window.SURREY_LAND_REG_META = " + json.dumps(meta, separators=(",", ":")) + ";",
-        "",
-    ])
-    path.write_text(content, encoding="utf-8")
+    write_canonical_js(path, transactions, meta)
 
 
 def parse_args():
@@ -648,12 +714,19 @@ def parse_args():
     parser.add_argument("--no-fetch", action="store_true", help="Skip the official SPARQL fetch and rebuild from CSV.")
     parser.add_argument("--use-current-cache", action="store_true", help="Download/build 1995-2009 history but reuse the checked-in 2010+ cache.")
     parser.add_argument("--refresh-history", action="store_true", help="Rebuild 1995-2009 from official structured HMLR sources.")
+    parser.add_argument(
+        "--archive-all-years",
+        action="store_true",
+        help="Rebuild every 1995-present partition from official annual HMLR archives.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Validate and print a summary without writing files.")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+    if args.use_current_cache and args.archive_all_years:
+        raise RuntimeError("--use-current-cache and --archive-all-years are mutually exclusive")
     existing_path = Path(args.preserve_from_js) if args.preserve_from_js else Path(args.write_js)
     existing_transactions, existing_metadata = read_existing_js(existing_path)
     source = "official HMLR yearly archive + current SPARQL"
@@ -664,10 +737,19 @@ def main():
             raise RuntimeError("Local CSV lacks the structured HMLR address fields required for estate classification")
     else:
         try:
-            rows = fetch_rows(args.use_current_cache, existing_transactions, args.refresh_history)
+            rows = fetch_rows(
+                args.use_current_cache,
+                existing_transactions,
+                args.refresh_history,
+                args.archive_all_years,
+            )
             if args.use_current_cache:
                 source = "official HMLR yearly archive + checked-in 2010+ cache"
+            elif args.archive_all_years:
+                source = "official HMLR annual archives, 1995-present"
         except Exception as exc:
+            if args.archive_all_years:
+                raise RuntimeError("Full £2m archive rebuild failed; refusing a narrower cache fallback") from exc
             source = f"local CSV fallback after fetch error: {exc}"
             rows = read_csv(args.from_csv)
             if not rows_have_structured_address_schema(rows):

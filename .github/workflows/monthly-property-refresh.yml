@@ -21,13 +21,16 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Synchronise latest main
+      - name: Synchronise selected branch
         run: |
-          git fetch origin main
-          git checkout -B main origin/main
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
 
       - name: Build audited private-estate registry
         run: python3 scripts/build_private_estates_asset.py
+
+      - name: Test £2m property-feed contract
+        run: PYTHONPATH=scripts python3 -m unittest discover -s tests
 
       - name: Run Land Registry sweeper
         run: python3 scripts/sweep_land_registry.py
@@ -62,19 +65,19 @@ jobs:
             --max-source-errors 25
 
       - name: Check base data completeness
-        run: python3 scripts/check_data_completeness.py
+        run: python3 scripts/check_data_completeness.py --base-only
 
       - name: Commit updated data
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
-          git pull --rebase --autostash origin main
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
           if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
             echo "::error::Refresh produced Git conflicts; refusing to commit."
             exit 1
           fi
-          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==2'
-          git add outputs/surrey-transactions.js outputs/private-estates.js work/land-reg-surrey-3m-1995.csv work/land-reg-surrey-3m-1995-2009.csv work/land-reg-surrey-3m-2010.csv
+          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import FEED_SCHEMA_VERSION,read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==FEED_SCHEMA_VERSION'
+          git add outputs/surrey-transactions.js outputs/private-estates.js work/land-reg-surrey-2m-1995.csv work/land-reg-surrey-2m-1995-2009.csv work/land-reg-surrey-2m-2010.csv
           if [ -f work/epc-cache.json ]; then
             git add work/epc-cache.json
           fi
@@ -85,7 +88,7 @@ jobs:
             echo "No monthly INSIGHT changes to commit."
           else
             git commit -m "Update INSIGHT monthly property data"
-            git push
+            git push origin "HEAD:$GITHUB_REF_NAME"
           fi
 
   align-expanded-context:
@@ -97,7 +100,7 @@ jobs:
       - name: Check out refreshed main feed
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.ref_name }}
 
       - name: Install coordinate transformer
         run: python3 -m pip install --user pyproj
@@ -135,12 +138,12 @@ jobs:
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
-          git pull --rebase --autostash origin main
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
           if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
             echo "::error::Context alignment produced Git conflicts; refusing to commit."
             exit 1
           fi
-          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==2'
+          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import FEED_SCHEMA_VERSION,read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==FEED_SCHEMA_VERSION'
           git add outputs/surrey-transactions.js
           for cache in work/weekly-context-cache.json work/daily-intelligence-cache.json work/os-uprn-cache.json work/schools.csv; do
             if [ -f "$cache" ]; then git add "$cache"; fi
@@ -149,5 +152,5 @@ jobs:
             echo "No expanded context changes to commit."
           else
             git commit -m "Align context with expanded Land Registry history"
-            git push
+            git push origin "HEAD:$GITHUB_REF_NAME"
           fi

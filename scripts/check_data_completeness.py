@@ -6,16 +6,24 @@ import os
 from collections import Counter
 from pathlib import Path
 
-from insight_data_utils import DEFAULT_INPUT_JS, clean, read_js
+from insight_data_utils import (
+    DEFAULT_INPUT_JS,
+    FEED_SCHEMA_VERSION,
+    PROPERTY_RECORD_SCHEMA_VERSION,
+    clean,
+    property_record_id,
+    publication_contract_failures,
+    read_js,
+)
 from private_estates import classify_estate, load_compiled_registry
 
 
+EXPECTED_PRICE_FLOOR = 2_000_000
 MINIMUM_COVERAGE = {
     "Postcodes": 99.0,
     "Coordinates": 99.0,
     "EPC matches": 75.0,
     "Flood lookups": 90.0,
-    "OSM amenities": 10.0,
     "UPRN matches": 3.0,
     "School lookups": 80.0,
     "Planning lookups": 95.0,
@@ -57,7 +65,6 @@ def coverage_rows(items):
         "Coordinates": lambda x: isinstance(x.get("latitude"), (int, float)) and isinstance(x.get("longitude"), (int, float)),
         "EPC matches": lambda x: x.get("epcMatched") is True,
         "Flood lookups": lambda x: present(x.get("environmentAgency")),
-        "OSM amenities": lambda x: present(x.get("openStreetMap")),
         "UPRN matches": lambda x: present(x.get("uprn")) or present(nested(x, "ordnanceSurvey", "uprn")),
         "School lookups": lambda x: present(x.get("ofsted")),
         "Planning lookups": lambda x: present(x.get("planning")),
@@ -186,8 +193,13 @@ def render(rows, failures, warnings, meta):
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", default=str(DEFAULT_INPUT_JS))
-    parser.add_argument("--minimum-records", type=int, default=1544)
+    parser.add_argument("--minimum-records", type=int, default=4500)
     parser.add_argument("--strict-metadata", action="store_true")
+    parser.add_argument(
+        "--base-only",
+        action="store_true",
+        help="Validate the expanded HMLR/property/estate contract before dependent enrichment completes.",
+    )
     return parser.parse_args()
 
 
@@ -202,8 +214,32 @@ def main():
         failures.append(f"Record count: {len(items):,} is below {args.minimum_records:,}")
     if str(meta.get("from", "")) != "1995-01-01":
         failures.append(f"Historic coverage: expected 1995-01-01, found {meta.get('from', 'missing')}")
-    if meta.get("schemaVersion") != 2:
-        failures.append(f"Schema version: expected 2, found {meta.get('schemaVersion', 'missing')}")
+    if meta.get("schemaVersion") != FEED_SCHEMA_VERSION:
+        failures.append(
+            f"Schema version: expected {FEED_SCHEMA_VERSION}, found {meta.get('schemaVersion', 'missing')}"
+        )
+    if meta.get("priceFloor") != EXPECTED_PRICE_FLOOR:
+        failures.append(
+            f"Price floor: expected {EXPECTED_PRICE_FLOOR:,}, found {meta.get('priceFloor', 'missing')}"
+        )
+    below_floor = [item for item in items if not isinstance(item.get("price"), (int, float)) or item["price"] < EXPECTED_PRICE_FLOOR]
+    if below_floor:
+        failures.append(f"Price floor rows: {len(below_floor):,} records are invalid or below £2m")
+    if items and not any(EXPECTED_PRICE_FLOOR <= item.get("price", 0) < 3_000_000 for item in items):
+        failures.append("Price cohort: feed contains no £2m-£3m transactions")
+
+    if meta.get("propertyRecordSchemaVersion") != PROPERTY_RECORD_SCHEMA_VERSION:
+        failures.append("Property identity: schema version is missing or unsupported")
+    canonical_property_ids = [property_record_id(item) for item in items]
+    if any(
+        item.get("propertyRecordId") != expected
+        for item, expected in zip(items, canonical_property_ids)
+    ):
+        failures.append("Property identity: one or more rows do not use the canonical full-address ID")
+    if meta.get("canonicalPropertyRecords") != len(set(canonical_property_ids)):
+        failures.append("Property identity: canonical property count is stale")
+    if meta.get("propertyIdentityMode") != "full-normalised-address-plus-postcode-fail-closed":
+        failures.append("Property identity: feed does not declare the fail-closed identity mode")
 
     transaction_dates = sorted(clean(item.get("date")) for item in items if clean(item.get("date")))
     if not transaction_dates or not transaction_dates[0].startswith("1995-"):
@@ -220,9 +256,10 @@ def main():
         failures.append("Historical expansion: pre-2010 metadata does not match transaction rows")
 
     failures.extend(estate_failures(items, meta))
+    failures.extend(publication_contract_failures(items))
 
     for row in rows:
-        if row["coverage"] < row["minimum"]:
+        if not args.base_only and row["coverage"] < row["minimum"]:
             failures.append(
                 f"{row['name']}: {row['coverage']:.1f}% is below {row['minimum']:.1f}%"
             )

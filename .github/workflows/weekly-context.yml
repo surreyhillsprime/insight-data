@@ -21,10 +21,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Synchronise latest main
+      - name: Synchronise selected branch
         run: |
-          git fetch origin main
-          git checkout -B main origin/main
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
 
       - name: Install coordinate transformer
         run: python3 -m pip install --user pyproj
@@ -45,7 +45,7 @@ jobs:
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
-          git pull --rebase --autostash origin main
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
           if git diff --name-only --diff-filter=U | grep -q .; then
             echo "::error::Refresh produced unresolved Git conflicts; refusing to commit."
             exit 1
@@ -56,14 +56,14 @@ jobs:
           fi
           PYTHONPATH=scripts python3 - <<'PY'
           from pathlib import Path
-          from insight_data_utils import read_js
+          from insight_data_utils import FEED_SCHEMA_VERSION, read_js
 
           path = Path("outputs/surrey-transactions.js")
           text = path.read_text(encoding="utf-8")
           transactions, summary, meta = read_js(path)
           assert text.count("window.SURREY_LAND_REG_") == 3, "feed must contain exactly three assignments"
           assert transactions and isinstance(summary, dict), "feed data is incomplete"
-          assert meta.get("schemaVersion") == 2, "feed schemaVersion must be 2"
+          assert meta.get("schemaVersion") == FEED_SCHEMA_VERSION, "feed schemaVersion is stale"
           PY
           git add outputs/surrey-transactions.js
           if [ -f work/weekly-context-cache.json ]; then
@@ -76,5 +76,5 @@ jobs:
             echo "No weekly INSIGHT changes to commit."
           else
             git commit -m "Update INSIGHT weekly context"
-            git push
+            git push origin "HEAD:$GITHUB_REF_NAME"
           fi

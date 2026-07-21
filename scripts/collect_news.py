@@ -239,7 +239,7 @@ def score_article(article: dict, source: dict, catalog: dict[str, list[str]], no
     topics = [name for name, keywords in TOPIC_KEYWORDS.items() if any(term in lower for term in keywords)]
     value = money_value(combined)
     material_hits = sum(1 for term in MATERIAL_KEYWORDS if term in lower)
-    materiality = min(15, material_hits * 2 + (7 if value >= 10_000_000 else 5 if value >= 3_000_000 else 3 if value >= 1_000_000 else 0))
+    materiality = min(15, material_hits * 2 + (7 if value >= 10_000_000 else 5 if value >= 2_000_000 else 3 if value >= 1_000_000 else 0))
     if "Planning" in topics and ("approved" in lower or "refused" in lower or "appeal" in lower):
         materiality = min(15, materiality + 3)
 

@@ -20,6 +20,8 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+from insight_data_utils import write_js as write_canonical_js
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT_JS = ROOT / "outputs" / "surrey-transactions.js"
@@ -31,6 +33,19 @@ DEFAULT_MIN_SCORE = 0.55
 CACHE_VERSION = 3
 REQUEST_TIMEOUT = 12
 REQUEST_RETRIES = 1
+
+# Only these derived, non-address EPC values may cross into the public ledger.
+# Certificate identifiers, certificate addresses and match diagnostics remain
+# in the private resumable cache.
+PUBLIC_EPC_FIELDS = frozenset({
+    "epcMatched",
+    "floorAreaSqm",
+    "floorAreaSqft",
+    "pricePerSqft",
+    "epcRating",
+    "epcRegistrationDate",
+    "epcSource",
+})
 
 NOISE_TOKENS = {
     "A",
@@ -135,16 +150,9 @@ def summary_by_market(transactions):
 
 
 def write_js(path, transactions, meta):
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
-    content = "\n".join(
-        [
-            "window.SURREY_LAND_REG_TRANSACTIONS = " + json.dumps(transactions, separators=(",", ":")) + ";",
-            "window.SURREY_LAND_REG_SUMMARY = " + json.dumps(summary_by_market(transactions), separators=(",", ":")) + ";",
-            "window.SURREY_LAND_REG_META = " + json.dumps(meta, separators=(",", ":")) + ";",
-            "",
-        ]
-    )
-    Path(path).write_text(content, encoding="utf-8")
+    """Compatibility wrapper; all publication goes through the canonical writer."""
+
+    write_canonical_js(path, transactions, meta)
 
 
 def load_cache(path):
@@ -182,6 +190,12 @@ def stable_transaction_key(item):
 
 def numeric(value):
     return isinstance(value, (int, float)) and math.isfinite(value) and value > 0
+
+
+def publishable_epc_fields(epc):
+    """Minimise a cached EPC match before attaching it to a public row."""
+
+    return {key: value for key, value in (epc or {}).items() if key in PUBLIC_EPC_FIELDS}
 
 
 def parse_float(value):
@@ -507,19 +521,19 @@ def cache_record_is_fresh(record, refresh_days):
     return age.days < refresh_days
 
 
-def clear_epc_fields(item):
+def public_epc_record(item):
+    """Remove legacy EPC identifiers while preserving approved derived facts."""
+
     cleaned = dict(item)
     for key in (
-        "epcMatched",
-        "floorAreaSqm",
-        "floorAreaSqft",
-        "pricePerSqft",
-        "epcRating",
         "epcCertificateNumber",
-        "epcRegistrationDate",
         "epcAddress",
         "epcMatchScore",
-        "epcSource",
+        "epcHistory",
+        "epcSearch",
+        "epcSearchDiagnostics",
+        "epcMatchDiagnostics",
+        "epcSourceAddress",
     ):
         cleaned.pop(key, None)
     return cleaned
@@ -548,7 +562,7 @@ def enrich_transactions(transactions, cache, token, args):
             break
 
         if limit and index > limit:
-            enriched.append(clear_epc_fields(item))
+            enriched.append(public_epc_record(item))
             continue
 
         key = stable_transaction_key(item)
@@ -583,9 +597,11 @@ def enrich_transactions(transactions, cache, token, args):
             stats["skipped"] += 1
             result = cached
 
-        output = clear_epc_fields(item)
+        output = public_epc_record(item)
         if result and result.get("status") == "matched" and result.get("epc"):
-            output.update(result["epc"])
+            for key in PUBLIC_EPC_FIELDS:
+                output.pop(key, None)
+            output.update(publishable_epc_fields(result["epc"]))
             stats["matched"] += 1
         elif result and result.get("status") == "no_match":
             stats["noMatch"] += 1
@@ -607,7 +623,7 @@ def enrich_transactions(transactions, cache, token, args):
             print(f"Processed {index}/{len(transactions)} transactions; EPC matches so far: {stats['matched']}")
 
     if aborted_reason and len(enriched) < len(transactions):
-        enriched.extend(transactions[len(enriched):])
+        enriched.extend(public_epc_record(item) for item in transactions[len(enriched):])
 
     return enriched, stats, reasons, aborted_reason
 
@@ -692,7 +708,7 @@ def main():
     if aborted_reason:
         meta["epcEnrichment"]["note"] = aborted_reason
     write_cache(args.cache, cache)
-    write_js(args.write_js, enriched, meta)
+    write_canonical_js(args.write_js, enriched, meta)
     print(f"Updated {args.write_js}")
     print(f"Updated {args.cache}")
     if aborted_reason:

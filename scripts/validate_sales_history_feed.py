@@ -21,6 +21,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("path", nargs="?", default="outputs/sales-history.js")
     parser.add_argument("--allow-local", action="store_true")
+    parser.add_argument("--base-feed", default="")
     args = parser.parse_args()
     text = Path(args.path).read_text(encoding="utf-8")
     histories = assignment(text, "SURREY_SALES_HISTORY")
@@ -30,6 +31,17 @@ def main():
         raise ValueError("Sales history metadata has an invalid schemaVersion or deploymentMode")
     if len(histories) > 200_000:
         raise ValueError("Sales history exceeds the app safety limit")
+    if args.base_feed:
+        base_text = Path(args.base_feed).read_text(encoding="utf-8")
+        base_rows = json.loads(re.findall(r"^window\.SURREY_LAND_REG_TRANSACTIONS\s*=\s*(.*);$", base_text, flags=re.M)[0])
+        expected = {str(item.get("propertyRecordId") or "") for item in base_rows}
+        expected.discard("")
+        actual = {key for key in histories if key.startswith("property:")}
+        if actual != expected or metadata.get("propertiesChecked") != len(expected):
+            raise ValueError(
+                f"Sales history property coverage is stale: expected {len(expected):,}, "
+                f"found {len(actual):,} keys / {metadata.get('propertiesChecked', 'missing')} checked"
+            )
     print(f"Valid sales history feed: {len(histories):,} lookup keys")
 
 

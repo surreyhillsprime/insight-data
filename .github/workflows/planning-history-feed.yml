@@ -17,6 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Synchronise selected branch
+        run: |
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -33,12 +37,16 @@ jobs:
           --input-js outputs/surrey-transactions.js
           --write-js outputs/planning-history.js
       - name: Validate project and feed
-        run: python3 scripts/validate_planning_feed.py outputs/planning-history.js
+        run: >-
+          python3 scripts/validate_planning_feed.py
+          outputs/planning-history.js
+          --base-feed outputs/surrey-transactions.js
       - name: Commit changed feed
         run: |
           if git diff --quiet -- outputs/planning-history.js; then exit 0; fi
           git config user.name "insight-data-bot"
           git config user.email "actions@users.noreply.github.com"
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
           git add outputs/planning-history.js
           git commit -m "Update planning history feed"
-          git push
+          git push origin "HEAD:$GITHUB_REF_NAME"

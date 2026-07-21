@@ -19,6 +19,8 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+from insight_data_utils import write_js as write_canonical_js
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT_JS = ROOT / "outputs" / "surrey-transactions.js"
@@ -85,16 +87,9 @@ def summary_by_market(transactions):
 
 
 def write_js(path, transactions, meta):
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
-    content = "\n".join(
-        [
-            "window.SURREY_LAND_REG_TRANSACTIONS = " + json.dumps(transactions, separators=(",", ":")) + ";",
-            "window.SURREY_LAND_REG_SUMMARY = " + json.dumps(summary_by_market(transactions), separators=(",", ":")) + ";",
-            "window.SURREY_LAND_REG_META = " + json.dumps(meta, separators=(",", ":")) + ";",
-            "",
-        ]
-    )
-    Path(path).write_text(content, encoding="utf-8")
+    """Compatibility wrapper; all publication goes through the canonical writer."""
+
+    write_canonical_js(path, transactions, meta)
 
 
 def load_cache(path):
@@ -502,7 +497,7 @@ def main():
         },
     }
     write_cache(args.cache, cache)
-    write_js(args.write_js, enriched, meta)
+    write_canonical_js(args.write_js, enriched, meta)
     print(f"Updated {args.write_js}")
     print(f"Updated {args.cache}")
     return 0

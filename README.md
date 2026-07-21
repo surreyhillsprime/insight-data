@@ -8,10 +8,19 @@ The Mac app uses this canonical base-feed URL:
 https://raw.githubusercontent.com/surreyhillsprime/insight-data/main/outputs/surrey-transactions.js
 ```
 
-The feed is one transaction ledger from 1995 onwards. Pre-2010 and 2010+
+The feed is the canonical Surrey £2m+ property and transaction universe from
+1995 onwards. Pre-2010 and 2010+
 transactions are not separate product datasets. Each row retains the structured
 HM Land Registry address fields used by the exact, fail-closed private-estate
 classifier.
+
+The transaction feed uses schema 3. Every row carries a canonical
+`propertyRecordId` derived from its full normalised address and postcode; an
+unavailable postcode remains the explicit `NOPOSTCODE` identity and approximate
+UPRNs never control property identity. Publication is fail closed against a
+reviewed field allowlist. EPC certificate identifiers and matched addresses,
+match diagnostics, OpenStreetMap payloads, Companies House payloads, and
+property-level planning history remain outside the public transaction ledger.
 
 ## Install INSIGHT
 
@@ -152,7 +161,7 @@ Do not overwrite these live data files unless you deliberately want to reset the
 outputs/surrey-transactions.js
 work/epc-cache.json
 work/property-context-cache.json
-work/land-reg-surrey-3m-1995.csv
+work/land-reg-surrey-2m-1995.csv
 ```
 
 The new workflows will update the live data files themselves.
@@ -169,9 +178,9 @@ outputs/private-estates.js
 outputs/sales-history.js
 config/
 downloads/INSIGHT-macOS.zip
-work/land-reg-surrey-3m-1995.csv
-work/land-reg-surrey-3m-1995-2009.csv
-work/land-reg-surrey-3m-2010.csv
+work/land-reg-surrey-2m-1995.csv
+work/land-reg-surrey-2m-1995-2009.csv
+work/land-reg-surrey-2m-2010.csv
 .nojekyll
 README.md
 ```
@@ -193,10 +202,11 @@ Contains HM Land Registry data © Crown copyright and database right 2021.
 This data is licensed under the Open Government Licence v3.0.
 
 - Surrey Land Registry sales
-- GBP 3m+
+- GBP 2m+
 - Residential property types
 - From 1995-01-01 (the beginning of HM Land Registry Price Paid Data)
-- One unified 1995+ transaction database, with stable transaction IDs
+- One unified 1995+ property and transaction database, with stable transaction and canonical property IDs
+- Velocity maturity metadata derived from the latest observed Land Registry sale month
 - Audited exact-road private-estate classification replayed across every row
 - Estate registry version recorded on every matched and unmatched transaction
 - Domestic EPC floor area where a confident address match is found

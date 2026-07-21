@@ -18,10 +18,10 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
-      - name: Synchronise latest main
+      - name: Synchronise selected branch
         run: |
-          git fetch origin main
-          git checkout -B main origin/main
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -43,7 +43,10 @@ jobs:
           --workers 3
           --batch-size 8
       - name: Validate commercial feed
-        run: python3 scripts/validate_sales_history_feed.py outputs/sales-history.js
+        run: >-
+          python3 scripts/validate_sales_history_feed.py
+          outputs/sales-history.js
+          --base-feed outputs/surrey-transactions.js
       - name: Save resumable postcode cache
         if: always()
         uses: actions/cache/save@v4
@@ -55,7 +58,7 @@ jobs:
           if git diff --quiet -- outputs/sales-history.js; then exit 0; fi
           git config user.name "insight-data-bot"
           git config user.email "actions@users.noreply.github.com"
-          git pull --rebase --autostash origin main
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
           git add outputs/sales-history.js
           git commit -m "Update complete sales history feed"
-          git push
+          git push origin "HEAD:$GITHUB_REF_NAME"
