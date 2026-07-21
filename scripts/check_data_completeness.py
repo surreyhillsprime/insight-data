@@ -4,6 +4,7 @@
 import argparse
 import os
 from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 
 from insight_data_utils import (
@@ -23,11 +24,14 @@ MINIMUM_COVERAGE = {
     "Postcodes": 99.0,
     "Coordinates": 99.0,
     "EPC matches": 75.0,
-    "Flood lookups": 90.0,
+    "Fresh flood status": 90.0,
     "UPRN matches": 3.0,
     "School lookups": 80.0,
-    "Planning lookups": 95.0,
+    "Planning query responses": 95.0,
 }
+
+MAX_DYNAMIC_AGE_HOURS = 30
+PLANNING_COVERAGE_STATUSES = {"observed", "unknown", "unavailable"}
 
 ESTATE_CLASSIFICATION_FIELDS = (
     "estateId",
@@ -58,16 +62,71 @@ def nested(item, *keys):
     return value
 
 
-def coverage_rows(items):
+def timestamp_is_fresh(value, max_age_hours=MAX_DYNAMIC_AGE_HOURS, now=None):
+    try:
+        observed = datetime.fromisoformat(str(value or "").replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return False
+    if observed.tzinfo is None:
+        observed = observed.replace(tzinfo=timezone.utc)
+    checked_at = now or datetime.now(timezone.utc)
+    age_hours = (checked_at - observed).total_seconds() / 3600
+    return 0 <= age_hours <= max_age_hours
+
+
+def flood_status_is_fresh(item, now=None):
+    context = item.get("environmentAgency")
+    if not isinstance(context, dict):
+        return False
+    return timestamp_is_fresh(
+        context.get("observedAt") or context.get("updatedAt"),
+        now=now,
+    )
+
+
+def planning_context_is_truthful(context):
+    if not isinstance(context, dict):
+        return False
+    status = clean(context.get("coverageStatus")).lower()
+    applications = context.get("recentApplications")
+    applications = applications if isinstance(applications, list) else []
+    latest = clean(context.get("latestApplication"))
+    if status == "observed":
+        return (
+            context.get("coverageMode") == "positive-results-only"
+            and bool(applications)
+            and bool(latest)
+            and not latest.lower().startswith("no recent")
+        )
+    if status in PLANNING_COVERAGE_STATUSES - {"observed"}:
+        return (
+            context.get("coverageMode") == "no-authoritative-negative-coverage"
+            and not applications
+            and not latest
+            and "recentApplicationCount" not in context
+        )
+    return False
+
+
+def planning_response_is_current(item, now=None):
+    context = item.get("planning")
+    status = clean(context.get("coverageStatus")).lower() if isinstance(context, dict) else ""
+    return status in {"observed", "unknown"} and planning_context_is_truthful(context) and timestamp_is_fresh(
+        context.get("updatedAt"),
+        now=now,
+    )
+
+
+def coverage_rows(items, now=None):
     total = len(items)
     checks = {
         "Postcodes": lambda x: present(x.get("postcode")),
         "Coordinates": lambda x: isinstance(x.get("latitude"), (int, float)) and isinstance(x.get("longitude"), (int, float)),
         "EPC matches": lambda x: x.get("epcMatched") is True,
-        "Flood lookups": lambda x: present(x.get("environmentAgency")),
+        "Fresh flood status": lambda x: flood_status_is_fresh(x, now=now),
         "UPRN matches": lambda x: present(x.get("uprn")) or present(nested(x, "ordnanceSurvey", "uprn")),
         "School lookups": lambda x: present(x.get("ofsted")),
-        "Planning lookups": lambda x: present(x.get("planning")),
+        "Planning query responses": lambda x: planning_response_is_current(x, now=now),
     }
     return [
         {
@@ -79,6 +138,64 @@ def coverage_rows(items):
         }
         for name, predicate in checks.items()
     ]
+
+
+def dynamic_context_failures(items, meta, now=None):
+    failures = []
+    flood_meta = nested(meta, "propertyContext", "environmentAgency")
+    flood_meta = flood_meta if isinstance(flood_meta, dict) else {}
+    flood_counts = Counter()
+    for item in items:
+        context = item.get("environmentAgency")
+        if not isinstance(context, dict):
+            flood_counts["missing"] += 1
+        elif flood_status_is_fresh(item, now=now):
+            flood_counts["fresh"] += 1
+        else:
+            flood_counts["stale"] += 1
+    expected_flood_meta = {
+        "freshRecords": flood_counts["fresh"],
+        "staleRecords": flood_counts["stale"],
+        "missingRecords": flood_counts["missing"],
+    }
+    for field, expected in expected_flood_meta.items():
+        if flood_meta.get(field) != expected:
+            failures.append(
+                f"Flood freshness metadata: {field} reports {flood_meta.get(field, 'missing')}, expected {expected}"
+            )
+    if flood_meta.get("maximumAgeHours") != MAX_DYNAMIC_AGE_HOURS:
+        failures.append(
+            f"Flood freshness metadata: maximumAgeHours must be {MAX_DYNAMIC_AGE_HOURS}"
+        )
+
+    planning_rows = [item.get("planning") for item in items if item.get("planning") is not None]
+    invalid_planning = [context for context in planning_rows if not planning_context_is_truthful(context)]
+    if invalid_planning:
+        failures.append(
+            f"Planning truthfulness: {len(invalid_planning):,} rows have unproved or contradictory coverage claims"
+        )
+
+    planning_meta = nested(meta, "dailyIntelligence", "planning")
+    planning_meta = planning_meta if isinstance(planning_meta, dict) else {}
+    truthful_planning = [context for context in planning_rows if planning_context_is_truthful(context)]
+    observed = sum(1 for context in truthful_planning if context.get("coverageStatus") == "observed")
+    unknown = sum(1 for context in truthful_planning if context.get("coverageStatus") == "unknown")
+    unavailable = sum(1 for context in truthful_planning if context.get("coverageStatus") == "unavailable")
+    expected_planning_meta = {
+        "records": len(truthful_planning),
+        "observedRecords": observed,
+        "unknownRecords": unknown,
+        "unavailableRecords": unavailable,
+        "successfulResponses": observed + unknown,
+    }
+    for field, expected in expected_planning_meta.items():
+        if planning_meta.get(field) != expected:
+            failures.append(
+                f"Planning coverage metadata: {field} reports {planning_meta.get(field, 'missing')}, expected {expected}"
+            )
+    if planning_meta.get("coverageMode") != "positive-observations-only":
+        failures.append("Planning coverage metadata: expected positive-observations-only mode")
+    return failures
 
 
 def estate_failures(items, meta):
@@ -222,19 +339,23 @@ def main():
         failures.append(
             f"Price floor: expected {EXPECTED_PRICE_FLOOR:,}, found {meta.get('priceFloor', 'missing')}"
         )
-    below_floor = [item for item in items if not isinstance(item.get("price"), (int, float)) or item["price"] < EXPECTED_PRICE_FLOOR]
+    below_floor = [
+        item
+        for item in items
+        if not isinstance(item.get("price"), (int, float))
+        or item["price"] < EXPECTED_PRICE_FLOOR
+    ]
     if below_floor:
         failures.append(f"Price floor rows: {len(below_floor):,} records are invalid or below £2m")
-    if items and not any(EXPECTED_PRICE_FLOOR <= item.get("price", 0) < 3_000_000 for item in items):
+    if items and not any(
+        EXPECTED_PRICE_FLOOR <= item.get("price", 0) < 3_000_000
+        for item in items
+    ):
         failures.append("Price cohort: feed contains no £2m-£3m transactions")
-
     if meta.get("propertyRecordSchemaVersion") != PROPERTY_RECORD_SCHEMA_VERSION:
         failures.append("Property identity: schema version is missing or unsupported")
     canonical_property_ids = [property_record_id(item) for item in items]
-    if any(
-        item.get("propertyRecordId") != expected
-        for item, expected in zip(items, canonical_property_ids)
-    ):
+    if any(item.get("propertyRecordId") != expected for item, expected in zip(items, canonical_property_ids)):
         failures.append("Property identity: one or more rows do not use the canonical full-address ID")
     if meta.get("canonicalPropertyRecords") != len(set(canonical_property_ids)):
         failures.append("Property identity: canonical property count is stale")
@@ -256,6 +377,8 @@ def main():
         failures.append("Historical expansion: pre-2010 metadata does not match transaction rows")
 
     failures.extend(estate_failures(items, meta))
+    if not args.base_only:
+        failures.extend(dynamic_context_failures(items, meta))
     failures.extend(publication_contract_failures(items))
 
     for row in rows:

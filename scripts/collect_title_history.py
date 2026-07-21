@@ -36,6 +36,8 @@ def address_key(value):
 
 
 def property_key(item):
+    if clean(item.get("propertyRecordId")):
+        return clean(item.get("propertyRecordId"))
     return f"property:{address_key(item.get('address'))}|{normalise_postcode(item.get('postcode'))}"
 
 
@@ -205,12 +207,33 @@ def main():
 
     history = {}
     matched_transactions = 0
+    properties_checked = 0
+    properties_unavailable = 0
+    properties_not_checked = 0
     for key, item in properties.items():
         postcode = normalise_postcode(item.get("postcode"))
-        if postcode not in selected:
-            continue
         target = address_key(item.get("address"))
-        rows = store.get(postcode, {}).get("rows", [])
+        cache_record = store.get(postcode, {}) if postcode else {}
+        rows = cache_record.get("rows", [])
+        coverage_reason = ""
+        if not postcode:
+            coverage_status = "unavailable"
+            coverage_reason = "No postcode in the source Price Paid record"
+            rows = []
+            properties_unavailable += 1
+        elif postcode not in selected:
+            coverage_status = "not_checked"
+            coverage_reason = "Excluded by the requested postcode or limit filter"
+            rows = []
+            properties_not_checked += 1
+        elif not cache_record.get("updatedAt") or not isinstance(rows, list):
+            coverage_status = "unavailable"
+            coverage_reason = clean(cache_record.get("lastError")) or "Price Paid postcode lookup unavailable"
+            rows = []
+            properties_unavailable += 1
+        else:
+            coverage_status = "complete"
+            properties_checked += 1
         canonical = target
         match_method = "exact-address"
         exact_rows = [row for row in rows if address_key(build_address(row)) == target]
@@ -232,8 +255,10 @@ def main():
         unique = {sale["id"]: sale for sale in sales}
         sales = sorted(unique.values(), key=lambda sale: sale["date"], reverse=True)
         record = {
+            "propertyRecordId": key,
             "address": item.get("address", ""),
             "postcode": item.get("postcode", ""),
+            "coverageStatus": coverage_status,
             "totalTransactions": len(sales),
             "latestTransaction": sales[0] if sales else None,
             "transactions": sales,
@@ -241,6 +266,8 @@ def main():
             "source": "HM Land Registry Price Paid Data",
             "updatedAt": utc_now(),
         }
+        if coverage_reason:
+            record["coverageReason"] = coverage_reason
         history[key] = record
         for transaction_id in transaction_ids[key]:
             if transaction_id:
@@ -254,7 +281,10 @@ def main():
         "coverageFrom": "1995",
         "deploymentMode": args.deployment_mode,
         "updatedAt": utc_now(),
-        "propertiesChecked": len([key for key in properties if normalise_postcode(properties[key].get("postcode")) in selected]),
+        "propertiesRequested": len(properties),
+        "propertiesChecked": properties_checked,
+        "propertiesUnavailable": properties_unavailable,
+        "propertiesNotChecked": properties_not_checked,
         "propertiesWithHistory": properties_with_history,
         "transactionsFound": matched_transactions,
         "note": "Price Paid transaction history only; not the legal title register, ownership, deeds or charges.",

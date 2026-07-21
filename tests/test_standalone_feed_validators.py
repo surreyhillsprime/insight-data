@@ -105,6 +105,30 @@ class StandaloneFeedValidatorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "coverage is stale"):
             self.run_validator(validate_sales_history_feed, sales, "--base-feed", self.base)
 
+    def test_sales_accepts_explicitly_accounted_unavailable_property(self):
+        sales = self.root / "sales-unavailable.js"
+        write_assignments(
+            sales,
+            {
+                "SURREY_SALES_HISTORY": {
+                    self.property_id: {
+                        "propertyRecordId": self.property_id,
+                        "coverageStatus": "unavailable",
+                        "transactions": [],
+                    }
+                },
+                "SURREY_SALES_HISTORY_META": {
+                    "schemaVersion": 1,
+                    "deploymentMode": "commercial",
+                    "propertiesRequested": 1,
+                    "propertiesChecked": 0,
+                    "propertiesUnavailable": 1,
+                    "propertiesNotChecked": 0,
+                },
+            },
+        )
+        self.run_validator(validate_sales_history_feed, sales, "--base-feed", self.base)
+
 
 if __name__ == "__main__":
     unittest.main()
