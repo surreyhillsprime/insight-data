@@ -34,10 +34,28 @@ def main():
         base_rows = json.loads(re.findall(r"^window\.SURREY_LAND_REG_TRANSACTIONS\s*=\s*(.*);$", base_text, flags=re.M)[0])
         expected = {str(item.get("propertyRecordId") or "") for item in base_rows}
         expected.discard("")
+        expected_transactions = {str(item.get("id") or "") for item in base_rows}
+        expected_transactions.discard("")
+        actual_properties = {key for key in histories if key.startswith("property:")}
+        actual_transactions = set(histories) - actual_properties
+        unexpected_properties = actual_properties - expected
+        unexpected_transactions = actual_transactions - expected_transactions
         if metadata.get("propertiesChecked") != len(expected):
             raise ValueError(
                 f"Planning history property coverage is stale: expected {len(expected):,}, "
                 f"found {metadata.get('propertiesChecked', 'missing')} checked"
+            )
+        if unexpected_properties or unexpected_transactions:
+            raise ValueError(
+                "Planning history contains lookup keys outside the canonical base feed: "
+                f"{len(unexpected_properties):,} property keys / "
+                f"{len(unexpected_transactions):,} transaction keys"
+            )
+        if metadata.get("propertiesWithHistory") != len(actual_properties):
+            raise ValueError(
+                "Planning history metadata disagrees with emitted canonical property keys: "
+                f"declared {metadata.get('propertiesWithHistory', 'missing')}, "
+                f"found {len(actual_properties):,}"
             )
     print(f"Valid commercial planning feed: {len(histories):,} lookup keys")
 

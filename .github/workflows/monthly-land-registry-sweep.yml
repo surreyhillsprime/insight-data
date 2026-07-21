@@ -59,8 +59,11 @@ jobs:
             --progress-every 25 \
             --max-source-errors 20
 
-      - name: Check complete estate-aware feed
-        run: python3 scripts/check_data_completeness.py --strict-metadata
+      - name: Check base estate-aware feed
+        # This legacy job refreshes the ledger, EPC and monthly context only.
+        # The combined Monthly INSIGHT Property Refresh owns the strict
+        # weekly/daily/OS alignment gate for an expanded property universe.
+        run: python3 scripts/check_data_completeness.py --base-only
 
       - name: Commit updated data
         run: |
