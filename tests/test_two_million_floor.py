@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 
 from sweep_land_registry import (
@@ -78,6 +79,11 @@ class TwoMillionFloorTests(unittest.TestCase):
 
     def test_velocity_cutoff_uses_two_month_maturity_lag(self):
         self.assertEqual(velocity_cutoff_date("2026-05-06"), "2026-03-31")
+
+    def test_strict_gate_requires_the_epc_pass_to_finish(self):
+        source = (Path(__file__).resolve().parents[1] / "scripts" / "check_data_completeness.py").read_text(encoding="utf-8")
+        self.assertIn('epc_meta.get("status")', source)
+        self.assertIn("enrichment has not completed across the full transaction universe", source)
 
 
 if __name__ == "__main__":

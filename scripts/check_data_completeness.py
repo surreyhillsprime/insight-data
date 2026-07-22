@@ -389,6 +389,8 @@ def main():
 
     epc_meta = meta.get("epcEnrichment") if isinstance(meta.get("epcEnrichment"), dict) else {}
     epc_actual = next(row["coverage"] for row in rows if row["name"] == "EPC matches")
+    if args.strict_metadata and clean(epc_meta.get("status")).lower() != "complete":
+        failures.append("EPC metadata: enrichment has not completed across the full transaction universe")
     epc_reported = epc_meta.get("coveragePercent")
     if isinstance(epc_reported, (int, float)) and abs(epc_reported - epc_actual) > 2.0:
         message = f"EPC metadata: reports {epc_reported:.1f}% but actual coverage is {epc_actual:.1f}%"
