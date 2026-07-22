@@ -12,6 +12,8 @@ from insight_data_utils import (
     FEED_SCHEMA_VERSION,
     PROPERTY_RECORD_SCHEMA_VERSION,
     clean,
+    planning_constraint_coverage_counts,
+    planning_constraint_lookup_succeeded,
     property_record_id,
     publication_contract_failures,
     read_js,
@@ -27,8 +29,11 @@ MINIMUM_COVERAGE = {
     "Fresh flood status": 90.0,
     "UPRN matches": 3.0,
     "School lookups": 80.0,
+    "Planning constraint lookups": 99.0,
     "Planning query responses": 95.0,
 }
+
+STRICT_ONLY_COVERAGE = frozenset({"Planning constraint lookups"})
 
 MAX_DYNAMIC_AGE_HOURS = 30
 PLANNING_COVERAGE_STATUSES = {"observed", "unknown", "unavailable"}
@@ -126,6 +131,7 @@ def coverage_rows(items, now=None):
         "Fresh flood status": lambda x: flood_status_is_fresh(x, now=now),
         "UPRN matches": lambda x: present(x.get("uprn")) or present(nested(x, "ordnanceSurvey", "uprn")),
         "School lookups": lambda x: present(x.get("ofsted")),
+        "Planning constraint lookups": planning_constraint_lookup_succeeded,
         "Planning query responses": lambda x: planning_response_is_current(x, now=now),
     }
     return [
@@ -195,6 +201,43 @@ def dynamic_context_failures(items, meta, now=None):
             )
     if planning_meta.get("coverageMode") != "positive-observations-only":
         failures.append("Planning coverage metadata: expected positive-observations-only mode")
+    return failures
+
+
+def static_context_failures(items, meta):
+    """Reconcile durable static planning-constraint coverage to feed metadata."""
+
+    failures = []
+    planning_meta = nested(meta, "weeklyContext", "planningConstraints")
+    planning_meta = planning_meta if isinstance(planning_meta, dict) else {}
+    expected = planning_constraint_coverage_counts(items)
+    expected["records"] = expected["successfulResponses"]
+    for field, value in expected.items():
+        if planning_meta.get(field) != value:
+            failures.append(
+                f"Planning constraint coverage metadata: {field} reports "
+                f"{planning_meta.get(field, 'missing')}, expected {value}"
+            )
+    if planning_meta.get("coverageMode") != "explicit-per-row-success":
+        failures.append(
+            "Planning constraint coverage metadata: expected explicit-per-row-success mode"
+        )
+    return failures
+
+
+def coverage_threshold_failures(rows, *, strict_metadata=False, base_only=False):
+    """Apply dependent coverage gates only at the appropriate pipeline stage."""
+
+    failures = []
+    if base_only:
+        return failures
+    for row in rows:
+        if row["name"] in STRICT_ONLY_COVERAGE and not strict_metadata:
+            continue
+        if row["coverage"] < row["minimum"]:
+            failures.append(
+                f"{row['name']}: {row['coverage']:.1f}% is below {row['minimum']:.1f}%"
+            )
     return failures
 
 
@@ -379,13 +422,14 @@ def main():
     failures.extend(estate_failures(items, meta))
     if not args.base_only:
         failures.extend(dynamic_context_failures(items, meta))
+    if args.strict_metadata and not args.base_only:
+        failures.extend(static_context_failures(items, meta))
     failures.extend(publication_contract_failures(items))
-
-    for row in rows:
-        if not args.base_only and row["coverage"] < row["minimum"]:
-            failures.append(
-                f"{row['name']}: {row['coverage']:.1f}% is below {row['minimum']:.1f}%"
-            )
+    failures.extend(coverage_threshold_failures(
+        rows,
+        strict_metadata=args.strict_metadata,
+        base_only=args.base_only,
+    ))
 
     epc_meta = meta.get("epcEnrichment") if isinstance(meta.get("epcEnrichment"), dict) else {}
     epc_actual = next(row["coverage"] for row in rows if row["name"] == "EPC matches")

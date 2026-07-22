@@ -22,6 +22,9 @@ from insight_data_utils import (
     load_cache,
     normalise_postcode,
     parse_float,
+    planning_constraint_coverage_counts,
+    planning_constraint_has_positive_result,
+    planning_constraint_lookup_succeeded,
     postcode_lookup,
     read_js,
     request_json,
@@ -112,12 +115,54 @@ def constraints_cache_key(item):
     return uprn or postcode or clean(item.get("id"))
 
 
+def normalise_cached_constraint_result(cached):
+    """Upgrade a fresh legacy matched/no-match cache record to explicit coverage."""
+
+    if not isinstance(cached, dict):
+        return None
+    status = clean(cached.get("status")).lower()
+    if status not in {"matched", "no_match"}:
+        return None
+
+    raw_data = cached.get("data")
+    data = dict(raw_data) if isinstance(raw_data, dict) else {}
+    if status == "no_match":
+        data = {}
+        constraint_count = 0
+    else:
+        existing = data.get("planningConstraints")
+        existing = existing if isinstance(existing, dict) else {}
+        parsed_count = parse_float(existing.get("constraintCount"))
+        constraint_count = max(1, int(parsed_count)) if parsed_count is not None else 1
+
+    existing = data.get("planningConstraints")
+    constraints = dict(existing) if isinstance(existing, dict) else {}
+    historic = data.get("historicEngland")
+    historic = historic if isinstance(historic, dict) else {}
+    observed_at = clean(
+        constraints.get("updatedAt")
+        or cached.get("updatedAt")
+        or historic.get("updatedAt")
+    ) or utc_now()
+    constraints.update({
+        "source": clean(constraints.get("source")) or "Planning Data API",
+        "updatedAt": observed_at,
+        "lookupStatus": "successful",
+        "constraintCount": constraint_count,
+    })
+    data["planningConstraints"] = constraints
+    cached["data"] = data
+    return data
+
+
 def constraints_for_item(item, lat, lon, cache, args):
     key = constraints_cache_key(item)
     store = cache.setdefault("planningConstraints", {})
     cached = store.get(key)
     if cache_fresh(cached, args.refresh_days * 24 * 60 * 60):
-        return cached.get("data")
+        normalised = normalise_cached_constraint_result(cached)
+        if normalised is not None:
+            return normalised
     params = {
         "latitude": f"{lat:.7f}",
         "longitude": f"{lon:.7f}",
@@ -137,9 +182,11 @@ def constraints_for_item(item, lat, lon, cache, args):
         if dataset:
             by_dataset.setdefault(dataset, []).append(entity)
 
+    observed_at = utc_now()
     constraints = {
         "source": "Planning Data API",
-        "updatedAt": utc_now(),
+        "updatedAt": observed_at,
+        "lookupStatus": "successful",
         "constraintCount": sum(len(value) for value in by_dataset.values()),
     }
     for dataset, (field, label) in CONSTRAINT_FIELDS.items():
@@ -148,10 +195,7 @@ def constraints_for_item(item, lat, lon, cache, args):
             names = short_names(items)
             constraints[field] = f"{label}: {names}" if names else label
 
-    data = {}
-    useful_constraints = {key: value for key, value in constraints.items() if key not in ("source", "updatedAt", "constraintCount") and value}
-    if useful_constraints:
-        data["planningConstraints"] = constraints
+    data = {"planningConstraints": constraints}
 
     listed = by_dataset.get("listed-building", [])
     if listed:
@@ -161,14 +205,18 @@ def constraints_for_item(item, lat, lon, cache, args):
         name = clean(entity_value(first, ["name", "description"]))
         data["historicEngland"] = {
             "source": "Planning Data API listed-building dataset",
-            "updatedAt": utc_now(),
+            "updatedAt": observed_at,
             "listedStatus": "Listed building match",
             "grade": grade,
             "listEntryNumber": reference,
             "nearestListedBuilding": name,
         }
 
-    store[key] = {"status": "matched" if data else "no_match", "updatedAt": utc_now(), "data": data}
+    store[key] = {
+        "status": "matched" if constraints["constraintCount"] > 0 else "no_match",
+        "updatedAt": observed_at,
+        "data": data,
+    }
     return data
 
 
@@ -337,7 +385,9 @@ def enrich_transactions(transactions, cache, args):
                 constraints = constraints_for_item(item, lat, lon, cache, args)
                 if constraints:
                     output.update(constraints)
-                    if constraints.get("planningConstraints"):
+                    if planning_constraint_lookup_succeeded(constraints):
+                        stats["planningConstraintResponses"] += 1
+                    if planning_constraint_has_positive_result(constraints):
                         stats["planningConstraints"] += 1
                     if constraints.get("historicEngland"):
                         stats["historicEngland"] += 1
@@ -394,11 +444,14 @@ def main():
     if args.dry_run:
         return 0
 
+    planning_constraint_coverage = planning_constraint_coverage_counts(enriched)
     meta["weeklyContext"] = {
         "updatedAt": utc_now(),
         "planningConstraints": {
             "source": "Planning Data API",
-            "records": sum(1 for item in enriched if item.get("planningConstraints")),
+            "records": planning_constraint_coverage["successfulResponses"],
+            **planning_constraint_coverage,
+            "coverageMode": "explicit-per-row-success",
         },
         "historicEngland": {
             "source": "Planning Data API listed-building dataset",

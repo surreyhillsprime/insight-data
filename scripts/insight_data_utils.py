@@ -185,6 +185,37 @@ def parse_float(value):
     return float(match.group(0)) if match else None
 
 
+def planning_constraint_lookup_succeeded(item):
+    """Return whether a row carries explicit evidence of a completed lookup."""
+
+    context = item.get("planningConstraints") if isinstance(item, dict) else None
+    if not isinstance(context, dict):
+        return False
+    return clean(context.get("lookupStatus")).lower() in {"success", "successful"}
+
+
+def planning_constraint_has_positive_result(item):
+    """Return whether the static lookup found one or more mapped constraints."""
+
+    context = item.get("planningConstraints") if isinstance(item, dict) else None
+    if not isinstance(context, dict):
+        return False
+    count = parse_float(context.get("constraintCount"))
+    return count is not None and count > 0
+
+
+def planning_constraint_coverage_counts(transactions):
+    """Reconcile static Planning Data lookup outcomes to transaction rows."""
+
+    successful = sum(1 for item in transactions if planning_constraint_lookup_succeeded(item))
+    positive = sum(1 for item in transactions if planning_constraint_has_positive_result(item))
+    return {
+        "successfulResponses": successful,
+        "positiveRecords": positive,
+        "missingResponses": len(transactions) - successful,
+    }
+
+
 def numeric(value):
     return isinstance(value, (int, float)) and math.isfinite(value) and value > 0
 
@@ -268,7 +299,10 @@ def recompute_coverage_metadata(transactions, meta):
     if weekly:
         constraints = dict(weekly.get("planningConstraints") or {})
         if constraints:
-            constraints["records"] = populated("planningConstraints")
+            coverage = planning_constraint_coverage_counts(transactions)
+            constraints.update(coverage)
+            constraints["records"] = coverage["successfulResponses"]
+            constraints["coverageMode"] = "explicit-per-row-success"
             weekly["planningConstraints"] = constraints
         historic = dict(weekly.get("historicEngland") or {})
         if historic:
