@@ -41,14 +41,19 @@ INSIGHT now uses separate refresh jobs so high-change sources stay fresh without
 
 | Workflow | Runs | What it refreshes |
 | --- | --- | --- |
-| `daily-intelligence.yml` | Daily at 05:15 UTC | Recent planning applications near tracked properties, plus Companies House where a company number already exists |
-| `weekly-context.yml` | Mondays at 05:35 UTC | Planning constraints, listed-building matches, conservation/heritage overlays, and schools if a school CSV feed is supplied |
-| `monthly-property-refresh.yml` | 1st of each month at 06:00 UTC | Land Registry, EPC floor areas, GBP/sq ft, live flood-alert context, and OSM amenities |
+| `daily-intelligence.yml` | Daily at 05:15 UTC | Recent planning applications near tracked properties; Companies House publication remains disabled |
+| `weekly-context.yml` | Mondays at 07:15 UTC | Planning constraints, listed-building matches, conservation/heritage overlays, and schools if a school CSV feed is supplied |
+| `monthly-property-refresh.yml` | 1st of each month at 06:00 UTC | Land Registry, EPC floor areas, GBP/sq ft, and live flood-alert context; OSM amenity publication remains disabled |
 | `sales-history-feed.yml` | 2nd of each month at 06:30 UTC | Complete HM Land Registry Price Paid history for properties in the base feed |
 | `six-week-os-refresh.yml` | Guarded Sunday schedule | OS Open UPRN matching and geometry/linkage improvement when an OS CSV is supplied |
 | `data-completeness.yml` | Daily at 11:00 UTC | Validates historic coverage, source-level minimums and enrichment metadata |
 
 `monthly-land-registry-sweep.yml` has been left as a manual legacy fallback only. The scheduled monthly job is now `monthly-property-refresh.yml`.
+
+OpenStreetMap amenity payloads and Companies House payloads are deliberately
+disabled in public producer workflows pending an approved redistribution basis.
+This rights boundary does not reduce the £2m+ property universe processed by
+the active Land Registry, EPC, flood, planning, school, UPRN and estate streams.
 
 Every active producer workflow runs `scripts/check_data_completeness.py` before
 committing its result. A separate daily audit runs the stricter metadata check
