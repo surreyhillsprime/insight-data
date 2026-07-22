@@ -228,6 +228,14 @@ def valid_floor_area_sqm(value):
     return None
 
 
+def retry_wait_seconds(retry_after, attempt):
+    """Bound one API backoff so a resumable checkpoint can still be persisted."""
+
+    requested = parse_float(retry_after)
+    fallback = 25 * (attempt + 1)
+    return min(90, max(1, requested if requested is not None else fallback))
+
+
 def candidate_address(record):
     parts = []
     for key in ADDRESS_KEYS:
@@ -392,7 +400,7 @@ def request_json(path, token, params=None, retries=None, timeout=None):
             if exc.code == 404:
                 return {"data": []}
             if exc.code == 429 and attempt < retries:
-                wait = parse_float(exc.headers.get("Retry-After")) or min(90, 25 * (attempt + 1))
+                wait = retry_wait_seconds(exc.headers.get("Retry-After"), attempt)
                 print(f"EPC API rate limit reached; waiting {wait:.0f}s before retry {attempt + 1}/{retries}.", flush=True)
                 time.sleep(wait)
                 continue

@@ -13,6 +13,7 @@ from enrich_epc_data import (  # noqa: E402
     fetch_certificate,
     publishable_epc_fields,
     public_epc_record,
+    retry_wait_seconds,
     search_candidates,
     stable_transaction_key,
     terminal_cache_accounting,
@@ -102,6 +103,10 @@ class PublicationContractTests(unittest.TestCase):
         self.assertIs(first_candidates, second_candidates)
         self.assertIs(first_certificate, second_certificate)
         self.assertEqual(request.call_count, 2)
+
+    def test_epc_retry_after_cannot_consume_the_checkpoint_commit_window(self):
+        self.assertEqual(retry_wait_seconds("3600", 0), 90)
+        self.assertEqual(retry_wait_seconds(None, 1), 50)
 
     def test_writer_strips_known_private_or_legacy_fields(self):
         row = transaction(

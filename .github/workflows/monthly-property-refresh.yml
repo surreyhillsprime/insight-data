@@ -89,7 +89,7 @@ jobs:
             --refresh-days 30 \
             --fail-under-matches 1 \
             --fail-if-no-matches-after 150 \
-            --max-run-minutes 50 \
+            --max-run-minutes 35 \
             --max-errors 40 \
             --request-timeout 15 \
             --request-retries 6 \
@@ -138,7 +138,8 @@ jobs:
           epc=meta.get("epcEnrichment") or {};
           assert epc.get("status")=="complete" and epc.get("requested")==len(rows)
           and epc.get("resolved")==len(rows) and epc.get("pending")==0
-          and epc.get("errors")==0, epc'
+          and epc.get("errors")==0
+          and sum(row.get("epcMatched") is True for row in rows)/len(rows)>=0.75, epc'
 
   refresh-monthly-context:
     needs: verify-epc-complete
