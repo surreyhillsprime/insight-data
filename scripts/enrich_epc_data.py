@@ -510,6 +510,11 @@ def cache_record_is_fresh(record, refresh_days):
         return False
     if record.get("status") == "matched":
         return True
+    # A transport/API failure is not evidence about the property. Always
+    # retry it on the next checkpointed run instead of suppressing recovery
+    # for the normal no-match refresh window.
+    if record.get("status") == "error":
+        return False
     searched = record.get("searchedAt", "")
     if not searched:
         return False

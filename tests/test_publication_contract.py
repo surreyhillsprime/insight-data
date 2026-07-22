@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from enrich_epc_data import publishable_epc_fields, public_epc_record  # noqa: E402
+from enrich_epc_data import cache_record_is_fresh, publishable_epc_fields, public_epc_record  # noqa: E402
 from insight_data_utils import (  # noqa: E402
     RESTRICTED_PUBLIC_TRANSACTION_FIELDS,
     publication_contract_failures,
@@ -31,6 +31,12 @@ def transaction(**overrides):
 
 
 class PublicationContractTests(unittest.TestCase):
+    def test_transient_epc_errors_are_retried_on_the_next_checkpoint(self):
+        self.assertFalse(cache_record_is_fresh({
+            "status": "error",
+            "searchedAt": "2099-01-01T00:00:00Z",
+        }, 30))
+
     def test_writer_strips_known_private_or_legacy_fields(self):
         row = transaction(
             epcMatched=True,
