@@ -68,6 +68,20 @@ class PublicationContractTests(unittest.TestCase):
         self.assertEqual(accounting["pending"], 2)
         self.assertEqual(accounting["errors"], 1)
 
+    def test_epc_accounting_counts_distinct_rows_that_share_lookup_evidence(self):
+        category_a = transaction(id="a", category="A")
+        category_b = transaction(id="b", category="B")
+        cache = {"records": {
+            stable_transaction_key(category_a): {
+                "status": "matched",
+                "epc": {"floorAreaSqft": 2000},
+            }
+        }}
+        accounting = terminal_cache_accounting([category_a, category_b], cache, 30)
+        self.assertEqual(accounting["requested"], 2)
+        self.assertEqual(accounting["resolved"], 2)
+        self.assertEqual(accounting["pending"], 0)
+
     def test_epc_run_deduplicates_identical_postcode_and_certificate_requests(self):
         candidate_cache = {}
         certificate_cache = {}

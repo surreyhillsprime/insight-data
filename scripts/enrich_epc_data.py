@@ -581,11 +581,11 @@ def terminal_cache_accounting(transactions, cache, refresh_days):
     """Reconcile every current transaction key to fresh terminal evidence."""
 
     records = cache.get("records", {})
-    requested_keys = {stable_transaction_key(item) for item in transactions}
     matched = 0
     no_match = 0
     errors = 0
-    for key in requested_keys:
+    for item in transactions:
+        key = stable_transaction_key(item)
         record = records.get(key)
         if not record:
             continue
@@ -598,9 +598,9 @@ def terminal_cache_accounting(transactions, cache, refresh_days):
             no_match += 1
     resolved = matched + no_match
     return {
-        "requested": len(requested_keys),
+        "requested": len(transactions),
         "resolved": resolved,
-        "pending": len(requested_keys) - resolved,
+        "pending": len(transactions) - resolved,
         "errors": errors,
         "matchedCacheRecords": matched,
         "noMatchCacheRecords": no_match,
