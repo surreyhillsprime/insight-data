@@ -327,6 +327,48 @@ def estate_failures(items, meta):
     return failures
 
 
+def historical_expansion_failures(items, meta, *, strict_metadata=False):
+    """Reconcile the immutable sweep cohort with its current pipeline state."""
+
+    failures = []
+    historical = meta.get("historicalExpansion")
+    if not isinstance(historical, dict):
+        return ["Historical expansion: metadata is missing"]
+
+    initial = historical.get("newTransactionsAtExpansion")
+    pending = historical.get("newTransactionsPendingEnrichment")
+    preserved = historical.get("existingEnrichmentsPreserved")
+    reused = historical.get("samePropertyEnrichmentsReused")
+    for field, value in (
+        ("newTransactionsAtExpansion", initial),
+        ("newTransactionsPendingEnrichment", pending),
+        ("existingEnrichmentsPreserved", preserved),
+        ("samePropertyEnrichmentsReused", reused),
+    ):
+        if type(value) is not int or value < 0:
+            failures.append(
+                f"Historical expansion: {field} must be a non-negative integer"
+            )
+
+    if type(initial) is int and type(preserved) is int and initial + preserved != len(items):
+        failures.append(
+            "Historical expansion: initial cohort and preserved enrichments do not reconcile to transaction rows"
+        )
+    if type(initial) is int and type(pending) is int and pending > initial:
+        failures.append(
+            "Historical expansion: pending enrichments exceed the initial expansion cohort"
+        )
+    if type(preserved) is int and type(reused) is int and reused > preserved:
+        failures.append(
+            "Historical expansion: same-property reuse exceeds preserved enrichments"
+        )
+    if strict_metadata and type(pending) is int and pending != 0:
+        failures.append(
+            f"Historical expansion: {pending!r} transactions remain pending enrichment"
+        )
+    return failures
+
+
 def render(rows, failures, warnings, meta):
     lines = [
         "# INSIGHT data completeness",
@@ -418,6 +460,13 @@ def main():
     actual_pre_2010 = sum(1 for item in items if clean(item.get("date")) < "2010-01-01")
     if historical_meta.get("pre2010Transactions") != actual_pre_2010:
         failures.append("Historical expansion: pre-2010 metadata does not match transaction rows")
+    failures.extend(
+        historical_expansion_failures(
+            items,
+            meta,
+            strict_metadata=args.strict_metadata and not args.base_only,
+        )
+    )
 
     failures.extend(estate_failures(items, meta))
     if not args.base_only:

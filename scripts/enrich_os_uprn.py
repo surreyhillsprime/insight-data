@@ -14,6 +14,7 @@ from insight_data_utils import (
     clean,
     ensure_coordinates,
     format_distance,
+    finalise_historical_expansion,
     haversine_metres,
     load_cache,
     normalise_postcode,
@@ -246,6 +247,10 @@ def main():
         "uprnMatches": stats.get("uprnMatches", 0),
         "maxMatchDistanceMetres": args.max_match_distance_m,
     }
+    meta = finalise_historical_expansion(
+        meta,
+        final_pass_complete=source_loaded and not (args.limit and args.limit > 0),
+    )
     write_cache(args.cache, cache, CACHE_VERSION)
     write_js(args.write_js, enriched, meta)
     print(f"Updated {args.write_js}")

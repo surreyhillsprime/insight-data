@@ -349,6 +349,48 @@ def recompute_coverage_metadata(transactions, meta):
     return meta
 
 
+def finalise_historical_expansion(meta, *, final_pass_complete):
+    """Preserve the expansion cohort and close its pending count fail-safely.
+
+    The Land Registry sweep records how many rows initially had no reusable
+    enrichment.  Later enrichers must not erase that audit value when the last
+    full enrichment pass reduces the number still pending to zero.
+    """
+
+    metadata = dict(meta)
+    historical = metadata.get("historicalExpansion")
+    if not isinstance(historical, dict):
+        return metadata
+
+    historical = dict(historical)
+    initial = historical.get("newTransactionsAtExpansion")
+    pending = historical.get("newTransactionsPendingEnrichment")
+    if type(initial) is not int or initial < 0:
+        if type(pending) is int and pending >= 0:
+            initial = pending
+        elif final_pass_complete:
+            raise ValueError(
+                "Historical expansion metadata has no valid initial cohort count"
+            )
+
+    normalised = {
+        key: value
+        for key, value in historical.items()
+        if key not in {
+            "newTransactionsAtExpansion",
+            "newTransactionsPendingEnrichment",
+        }
+    }
+    if type(initial) is int and initial >= 0:
+        normalised["newTransactionsAtExpansion"] = initial
+    if final_pass_complete:
+        normalised["newTransactionsPendingEnrichment"] = 0
+    elif "newTransactionsPendingEnrichment" in historical:
+        normalised["newTransactionsPendingEnrichment"] = pending
+    metadata["historicalExpansion"] = normalised
+    return metadata
+
+
 def write_js(path, transactions, meta):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)

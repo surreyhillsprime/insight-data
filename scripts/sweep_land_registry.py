@@ -470,12 +470,14 @@ def preserve_existing_enrichments(transactions, metadata, existing_transactions,
         enriched.append({**extras, **item})
     inherited_meta = {key: value for key, value in existing_metadata.items() if key not in BASE_METADATA_FIELDS}
     metadata = {**inherited_meta, **metadata}
+    new_transactions_at_expansion = len(transactions) - preserved
     metadata["historicalExpansion"] = {
         "coverageFrom": START_DATE,
         "pre2010Transactions": sum(1 for item in transactions if item.get("date", "") < CURRENT_START_DATE),
         "existingEnrichmentsPreserved": preserved,
         "samePropertyEnrichmentsReused": property_reused,
-        "newTransactionsPendingEnrichment": len(transactions) - preserved,
+        "newTransactionsAtExpansion": new_transactions_at_expansion,
+        "newTransactionsPendingEnrichment": new_transactions_at_expansion,
     }
     return enriched, metadata
 
