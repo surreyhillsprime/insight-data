@@ -406,29 +406,50 @@ def request_json(path, token, params=None, retries=None, timeout=None):
     return {"data": []}
 
 
-def search_candidates(transaction, token, page_size):
+def search_candidates(transaction, token, page_size, lookup_cache=None):
     params = {"current_page": 1, "page_size": page_size}
     postcode = clean(transaction.get("postcode"))
     if postcode:
         params["postcode"] = postcode
+        lookup_key = "postcode:" + normalise_postcode(postcode)
     else:
-        params["address"] = clean(transaction.get("address"))
+        address = clean(transaction.get("address"))
+        params["address"] = address
+        lookup_key = "address:" + normalise_text(address)
+    if lookup_cache is not None and lookup_key in lookup_cache:
+        return lookup_cache[lookup_key]
     payload = request_json("/api/domestic/search", token, params)
-    return response_rows(payload)
+    rows = response_rows(payload)
+    if lookup_cache is not None:
+        lookup_cache[lookup_key] = rows
+    return rows
 
 
-def fetch_certificate(certificate_number, token):
+def fetch_certificate(certificate_number, token, lookup_cache=None):
+    if lookup_cache is not None and certificate_number in lookup_cache:
+        return lookup_cache[certificate_number]
     payload = request_json("/api/certificate", token, {"certificate_number": certificate_number})
     data = payload.get("data", {})
-    return data if isinstance(data, dict) else {}
+    certificate = data if isinstance(data, dict) else {}
+    if lookup_cache is not None:
+        lookup_cache[certificate_number] = certificate
+    return certificate
 
 
 def candidate_sort_key(record):
     return extract_registration_date(record) or ""
 
 
-def best_epc_match(transaction, token, page_size, min_score, max_certificate_fetches):
-    candidates = search_candidates(transaction, token, page_size)
+def best_epc_match(
+    transaction,
+    token,
+    page_size,
+    min_score,
+    max_certificate_fetches,
+    candidate_cache=None,
+    certificate_cache=None,
+):
+    candidates = search_candidates(transaction, token, page_size, candidate_cache)
     if not candidates:
         return {
             "status": "no_match",
@@ -461,7 +482,7 @@ def best_epc_match(transaction, token, page_size, min_score, max_certificate_fet
             diagnostics["rough_score_too_low"] += 1
             continue
         certificate_number = extract_certificate_number(candidate)
-        certificate = fetch_certificate(certificate_number, token)
+        certificate = fetch_certificate(certificate_number, token, certificate_cache)
         final_score = address_score(transaction, candidate, certificate)
         area_sqm = floor_area_from_certificate(certificate) or floor_area_from_certificate(candidate)
         if final_score > best_seen["finalScore"]:
@@ -588,6 +609,8 @@ def terminal_cache_accounting(transactions, cache, refresh_days):
 
 def enrich_transactions(transactions, cache, token, args):
     records = cache.setdefault("records", {})
+    candidate_cache = {}
+    certificate_cache = {}
     enriched = []
     stats = {
         "matched": 0,
@@ -621,7 +644,15 @@ def enrich_transactions(transactions, cache, token, args):
         elif token:
             try:
                 stats["searched"] += 1
-                result = best_epc_match(item, token, args.page_size, args.min_score, args.max_certificate_fetches)
+                result = best_epc_match(
+                    item,
+                    token,
+                    args.page_size,
+                    args.min_score,
+                    args.max_certificate_fetches,
+                    candidate_cache,
+                    certificate_cache,
+                )
                 result["searchedAt"] = utc_now()
                 result["address"] = item.get("address")
                 result["postcode"] = item.get("postcode")

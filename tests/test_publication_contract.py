@@ -2,6 +2,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -9,8 +10,10 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from enrich_epc_data import (  # noqa: E402
     cache_record_is_fresh,
+    fetch_certificate,
     publishable_epc_fields,
     public_epc_record,
+    search_candidates,
     stable_transaction_key,
     terminal_cache_accounting,
 )
@@ -64,6 +67,27 @@ class PublicationContractTests(unittest.TestCase):
         self.assertEqual(accounting["resolved"], 1)
         self.assertEqual(accounting["pending"], 2)
         self.assertEqual(accounting["errors"], 1)
+
+    def test_epc_run_deduplicates_identical_postcode_and_certificate_requests(self):
+        candidate_cache = {}
+        certificate_cache = {}
+        row = transaction()
+        with patch("enrich_epc_data.request_json") as request:
+            request.side_effect = [
+                {"data": [{"certificateNumber": "certificate-1"}]},
+                {"data": {"certificateNumber": "certificate-1"}},
+            ]
+            first_candidates = search_candidates(row, "token", 5000, candidate_cache)
+            second_candidates = search_candidates(row, "token", 5000, candidate_cache)
+            first_certificate = fetch_certificate(
+                "certificate-1", "token", certificate_cache
+            )
+            second_certificate = fetch_certificate(
+                "certificate-1", "token", certificate_cache
+            )
+        self.assertIs(first_candidates, second_candidates)
+        self.assertIs(first_certificate, second_certificate)
+        self.assertEqual(request.call_count, 2)
 
     def test_writer_strips_known_private_or_legacy_fields(self):
         row = transaction(
