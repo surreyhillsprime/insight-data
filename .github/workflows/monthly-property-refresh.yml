@@ -234,8 +234,8 @@ jobs:
           python3 scripts/enrich_os_uprn.py \
             --progress-every 25
 
-      - name: Check aligned data completeness
-        run: python3 scripts/check_data_completeness.py --strict-metadata
+      - name: Check aligned context checkpoint
+        run: python3 scripts/check_data_completeness.py --base-only
 
       - name: Commit aligned context
         run: |
@@ -257,3 +257,17 @@ jobs:
             git commit -m "Align context with expanded Land Registry history"
             git push origin "HEAD:$GITHUB_REF_NAME"
           fi
+
+  verify-expanded-context:
+    needs: align-expanded-context
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out committed expanded context
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Require complete release data
+        run: python3 scripts/check_data_completeness.py --strict-metadata
