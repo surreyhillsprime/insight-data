@@ -26,11 +26,11 @@ MINIMUM_COVERAGE = {
     "Postcodes": 99.0,
     "Coordinates": 99.0,
     "EPC matches": 75.0,
-    "Fresh flood status": 90.0,
+    "Fresh flood status": 99.0,
     "UPRN matches": 3.0,
-    "School lookups": 80.0,
+    "School lookups": 99.0,
     "Planning constraint lookups": 99.0,
-    "Planning query responses": 95.0,
+    "Planning query responses": 99.0,
 }
 
 STRICT_ONLY_COVERAGE = frozenset({"Planning constraint lookups"})

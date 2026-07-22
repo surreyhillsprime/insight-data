@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from check_data_completeness import (  # noqa: E402
+    MINIMUM_COVERAGE,
     coverage_rows,
     coverage_threshold_failures,
     static_context_failures,
@@ -51,6 +52,16 @@ def successful_constraints(count=0, **overrides):
 
 
 class StaticContextCoverageTests(unittest.TestCase):
+    def test_property_context_release_gates_require_near_complete_lookup_coverage(self):
+        for name in (
+            "Coordinates",
+            "Fresh flood status",
+            "School lookups",
+            "Planning constraint lookups",
+            "Planning query responses",
+        ):
+            self.assertEqual(MINIMUM_COVERAGE[name], 99.0)
+
     def test_fresh_legacy_no_match_cache_becomes_an_explicit_successful_lookup(self):
         cache = {
             "planningConstraints": {
