@@ -116,6 +116,14 @@ def write_cache(path, cache):
     path.write_text(json.dumps(cache, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def remove_disabled_restricted_cache_entries(cache, args):
+    """Keep public workflow caches inside the declared publication boundary."""
+
+    if getattr(args, "disable_osm", False):
+        cache["osm"] = {}
+    return cache
+
+
 def cache_fresh(record, refresh_days):
     if not record or record.get("status") != "matched":
         return False
@@ -722,6 +730,7 @@ def main():
     if args.dry_run:
         return 0
 
+    remove_disabled_restricted_cache_entries(cache, args)
     flood_freshness = flood_freshness_counts(enriched, args.flood_max_age_hours)
     meta["propertyContext"] = {
         "updatedAt": utc_now(),

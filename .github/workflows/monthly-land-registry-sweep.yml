@@ -55,6 +55,7 @@ jobs:
         run: |
           python3 scripts/enrich_property_context.py \
             --missing-only \
+            --disable-osm \
             --pause 0.15 \
             --progress-every 25 \
             --max-source-errors 20

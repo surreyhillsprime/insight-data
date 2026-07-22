@@ -157,10 +157,11 @@ jobs:
           git fetch origin "$GITHUB_REF_NAME"
           git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
 
-      - name: Refresh monthly flood and amenity context
+      - name: Refresh monthly coordinate and flood context
         run: |
           python3 scripts/enrich_property_context.py \
             --missing-only \
+            --disable-osm \
             --pause 0.15 \
             --progress-every 25 \
             --max-source-errors 25
@@ -217,12 +218,11 @@ jobs:
             --progress-every 25 \
             --max-source-errors 25
 
-      - name: Align daily planning and company intelligence
-        env:
-          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+      - name: Align daily planning intelligence
         run: |
           python3 scripts/enrich_daily_intelligence.py \
             --missing-only \
+            --disable-companies-house \
             --planning-days 45 \
             --planning-radius-m 1200 \
             --pause 0.15 \

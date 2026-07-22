@@ -26,11 +26,10 @@ jobs:
           git fetch origin "$GITHUB_REF_NAME"
           git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
 
-      - name: Refresh daily planning and company intelligence
-        env:
-          COMPANIES_HOUSE_API_KEY: ${{ secrets.COMPANIES_HOUSE_API_KEY }}
+      - name: Refresh daily planning intelligence
         run: |
           python3 scripts/enrich_daily_intelligence.py \
+            --disable-companies-house \
             --planning-days 45 \
             --planning-radius-m 1200 \
             --pause 0.15 \

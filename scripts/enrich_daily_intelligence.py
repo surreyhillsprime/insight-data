@@ -358,6 +358,14 @@ def company_cache_key(company_number):
     return clean(company_number).upper().replace(" ", "")
 
 
+def remove_disabled_restricted_cache_entries(cache, args):
+    """Keep public workflow caches inside the declared publication boundary."""
+
+    if getattr(args, "disable_companies_house", False):
+        cache["companiesHouse"] = {}
+    return cache
+
+
 def companies_house_for_item(company_number, cache, args):
     api_key = os.environ.get("COMPANIES_HOUSE_API_KEY", "").strip()
     if not api_key or not company_number:
@@ -566,6 +574,7 @@ def main():
     if args.dry_run:
         return 0
 
+    remove_disabled_restricted_cache_entries(cache, args)
     planning_records = [
         item.get("planning") for item in enriched
         if planning_context_is_truthful(item.get("planning"))
