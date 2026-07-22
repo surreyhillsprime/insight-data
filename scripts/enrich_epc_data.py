@@ -743,6 +743,17 @@ def main():
     existing_matches = sum(1 for item in transactions if numeric(item.get("pricePerSqft")))
     print(f"Transactions: {len(transactions)}")
     print(f"Existing EPC price-per-sqft matches: {existing_matches}")
+    initial_accounting = terminal_cache_accounting(transactions, cache, args.refresh_days)
+    prior_epc = meta.get("epcEnrichment") if isinstance(meta.get("epcEnrichment"), dict) else {}
+    if (
+        prior_epc.get("status") == "complete"
+        and initial_accounting["resolved"] == len(transactions)
+        and initial_accounting["pending"] == 0
+        and initial_accounting["errors"] == 0
+        and all(prior_epc.get(key) == value for key, value in initial_accounting.items())
+    ):
+        print("EPC enrichment is already fully reconciled; no checkpoint changes required.")
+        return 0
     if not token:
         print(f"No {args.token_env} found; API lookups will be skipped.")
         if not args.dry_run:
