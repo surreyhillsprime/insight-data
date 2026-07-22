@@ -56,18 +56,10 @@ jobs:
             --allow-partial-success \
             --progress-every 25
 
-      - name: Refresh monthly flood and amenity context
-        run: |
-          python3 scripts/enrich_property_context.py \
-            --missing-only \
-            --pause 0.15 \
-            --progress-every 25 \
-            --max-source-errors 25
-
       - name: Check base data completeness
         run: python3 scripts/check_data_completeness.py --base-only
 
-      - name: Commit updated data
+      - name: Commit property-ledger, Land Registry, and EPC checkpoint
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
@@ -81,26 +73,76 @@ jobs:
           if [ -f work/epc-cache.json ]; then
             git add work/epc-cache.json
           fi
+          if git diff --cached --quiet; then
+            echo "No property-ledger, Land Registry, or EPC changes to commit."
+          else
+            git commit -m "Checkpoint INSIGHT monthly property and EPC data"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
+
+  refresh-monthly-context:
+    needs: monthly-property-refresh
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Check out committed property checkpoint
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Synchronise selected branch
+        run: |
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
+
+      - name: Refresh monthly flood and amenity context
+        run: |
+          python3 scripts/enrich_property_context.py \
+            --missing-only \
+            --pause 0.15 \
+            --progress-every 25 \
+            --max-source-errors 25
+
+      - name: Check monthly context checkpoint
+        run: python3 scripts/check_data_completeness.py --base-only
+
+      - name: Commit monthly context checkpoint
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
+            echo "::error::Monthly context refresh produced Git conflicts; refusing to commit."
+            exit 1
+          fi
+          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import FEED_SCHEMA_VERSION,read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==FEED_SCHEMA_VERSION'
+          git add outputs/surrey-transactions.js
           if [ -f work/property-context-cache.json ]; then
             git add work/property-context-cache.json
           fi
           if git diff --cached --quiet; then
-            echo "No monthly INSIGHT changes to commit."
+            echo "No monthly context changes to commit."
           else
-            git commit -m "Update INSIGHT monthly property data"
+            git commit -m "Checkpoint INSIGHT monthly property context"
             git push origin "HEAD:$GITHUB_REF_NAME"
           fi
 
   align-expanded-context:
-    needs: monthly-property-refresh
+    needs: refresh-monthly-context
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 360
 
     steps:
-      - name: Check out refreshed main feed
+      - name: Check out committed monthly context
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
+
+      - name: Synchronise selected branch
+        run: |
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
 
       - name: Install coordinate transformer
         run: python3 -m pip install --user pyproj
