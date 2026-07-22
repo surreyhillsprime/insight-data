@@ -73,7 +73,10 @@ class FeedSchemaContractTests(unittest.TestCase):
         for filename in ("enrich_epc_data.py", "enrich_property_context.py"):
             source = (ROOT / "scripts" / filename).read_text(encoding="utf-8")
             self.assertIn("from insight_data_utils import write_js as write_canonical_js", source)
-            self.assertIn("write_canonical_js(args.write_js, enriched, meta)", source)
+            self.assertTrue(
+                "write_canonical_js(args.write_js, enriched, meta)" in source
+                or "write_canonical_js_atomic(args.write_js, enriched, meta)" in source
+            )
 
 
 if __name__ == "__main__":

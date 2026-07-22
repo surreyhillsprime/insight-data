@@ -391,6 +391,24 @@ def main():
     epc_actual = next(row["coverage"] for row in rows if row["name"] == "EPC matches")
     if args.strict_metadata and clean(epc_meta.get("status")).lower() != "complete":
         failures.append("EPC metadata: enrichment has not completed across the full transaction universe")
+    if args.strict_metadata:
+        epc_requested = epc_meta.get("requested")
+        epc_resolved = epc_meta.get("resolved")
+        epc_pending = epc_meta.get("pending")
+        epc_errors = epc_meta.get("errors")
+        if epc_requested != len(items):
+            failures.append(
+                f"EPC metadata: requested count is {epc_requested!r}, expected {len(items):,}"
+            )
+        if not all(isinstance(value, int) for value in (epc_resolved, epc_pending, epc_errors)):
+            failures.append("EPC metadata: terminal accounting is missing")
+        else:
+            if epc_resolved + epc_pending != len(items):
+                failures.append("EPC metadata: resolved and pending counts do not reconcile")
+            if epc_pending != 0 or epc_errors != 0:
+                failures.append(
+                    f"EPC metadata: {epc_pending} lookups remain pending with {epc_errors} errors"
+                )
     epc_reported = epc_meta.get("coveragePercent")
     if isinstance(epc_reported, (int, float)) and abs(epc_reported - epc_actual) > 2.0:
         message = f"EPC metadata: reports {epc_reported:.1f}% but actual coverage is {epc_actual:.1f}%"

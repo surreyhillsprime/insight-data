@@ -175,7 +175,19 @@ def write_cache(path, cache):
     path.parent.mkdir(parents=True, exist_ok=True)
     cache["version"] = CACHE_VERSION
     cache["updatedAt"] = utc_now()
-    path.write_text(json.dumps(cache, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    pending = path.with_name(path.name + ".tmp")
+    pending.write_text(json.dumps(cache, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.replace(pending, path)
+
+
+def write_canonical_js_atomic(path, transactions, meta):
+    """Write a complete canonical ledger before atomically replacing the feed."""
+
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    pending = path.with_name(path.name + ".tmp")
+    write_canonical_js(pending, transactions, meta)
+    os.replace(pending, path)
 
 
 def stable_transaction_key(item):
@@ -544,6 +556,36 @@ def public_epc_record(item):
     return cleaned
 
 
+def terminal_cache_accounting(transactions, cache, refresh_days):
+    """Reconcile every current transaction key to fresh terminal evidence."""
+
+    records = cache.get("records", {})
+    requested_keys = {stable_transaction_key(item) for item in transactions}
+    matched = 0
+    no_match = 0
+    errors = 0
+    for key in requested_keys:
+        record = records.get(key)
+        if not record:
+            continue
+        status = record.get("status")
+        if status == "error":
+            errors += 1
+        elif status == "matched" and cache_record_is_fresh(record, refresh_days):
+            matched += 1
+        elif status == "no_match" and cache_record_is_fresh(record, refresh_days):
+            no_match += 1
+    resolved = matched + no_match
+    return {
+        "requested": len(requested_keys),
+        "resolved": resolved,
+        "pending": len(requested_keys) - resolved,
+        "errors": errors,
+        "matchedCacheRecords": matched,
+        "noMatchCacheRecords": no_match,
+    }
+
+
 def enrich_transactions(transactions, cache, token, args):
     records = cache.setdefault("records", {})
     enriched = []
@@ -700,6 +742,8 @@ def main():
         )
         return 3
 
+    accounting = terminal_cache_accounting(transactions, cache, args.refresh_days)
+    complete = not aborted_reason and accounting["pending"] == 0 and accounting["errors"] == 0
     meta["epcEnrichment"] = {
         "source": "MHCLG Get energy performance of buildings data API",
         "updatedAt": utc_now(),
@@ -708,17 +752,22 @@ def main():
         "floorAreaUnit": "sq m converted to sq ft",
         "pricePerSqft": True,
         "minimumAddressMatchScore": args.min_score,
-        "status": "partial" if aborted_reason else "complete",
+        "status": "complete" if complete else "partial",
+        **accounting,
     }
-    if aborted_reason:
-        meta["epcEnrichment"]["note"] = aborted_reason
+    if not complete:
+        meta["epcEnrichment"]["note"] = aborted_reason or (
+            f"{accounting['pending']} transaction lookups remain unresolved, "
+            f"including {accounting['errors']} transient API errors."
+        )
     write_cache(args.cache, cache)
-    write_canonical_js(args.write_js, enriched, meta)
+    write_canonical_js_atomic(args.write_js, enriched, meta)
     print(f"Updated {args.write_js}")
     print(f"Updated {args.cache}")
-    if aborted_reason:
-        print(aborted_reason, file=sys.stderr)
-        if args.allow_partial_success and stats["matched"] > 0 and "minutes" in aborted_reason:
+    if not complete:
+        note = meta["epcEnrichment"]["note"]
+        print(note, file=sys.stderr)
+        if args.allow_partial_success and matched > 0:
             print("Partial EPC progress saved; rerun the workflow to continue from the cache.")
             return 0
         return 4

@@ -7,7 +7,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from enrich_epc_data import cache_record_is_fresh, publishable_epc_fields, public_epc_record  # noqa: E402
+from enrich_epc_data import (  # noqa: E402
+    cache_record_is_fresh,
+    publishable_epc_fields,
+    public_epc_record,
+    stable_transaction_key,
+    terminal_cache_accounting,
+)
 from insight_data_utils import (  # noqa: E402
     RESTRICTED_PUBLIC_TRANSACTION_FIELDS,
     publication_contract_failures,
@@ -36,6 +42,28 @@ class PublicationContractTests(unittest.TestCase):
             "status": "error",
             "searchedAt": "2099-01-01T00:00:00Z",
         }, 30))
+
+    def test_epc_terminal_accounting_cannot_hide_missing_or_error_rows(self):
+        matched_row = transaction(id="matched")
+        missing_row = transaction(id="missing", address="2 TEST ROAD, ESHER")
+        error_row = transaction(id="error", address="3 TEST ROAD, ESHER")
+        cache = {"records": {
+            stable_transaction_key(matched_row): {
+                "status": "matched",
+                "epc": {"floorAreaSqft": 2000},
+            },
+            stable_transaction_key(error_row): {
+                "status": "error",
+                "searchedAt": "2099-01-01T00:00:00Z",
+            },
+        }}
+        accounting = terminal_cache_accounting(
+            [matched_row, missing_row, error_row], cache, 30
+        )
+        self.assertEqual(accounting["requested"], 3)
+        self.assertEqual(accounting["resolved"], 1)
+        self.assertEqual(accounting["pending"], 2)
+        self.assertEqual(accounting["errors"], 1)
 
     def test_writer_strips_known_private_or_legacy_fields(self):
         row = transaction(

@@ -84,6 +84,9 @@ class TwoMillionFloorTests(unittest.TestCase):
         source = (Path(__file__).resolve().parents[1] / "scripts" / "check_data_completeness.py").read_text(encoding="utf-8")
         self.assertIn('epc_meta.get("status")', source)
         self.assertIn("enrichment has not completed across the full transaction universe", source)
+        self.assertIn('epc_meta.get("requested")', source)
+        self.assertIn("resolved and pending counts do not reconcile", source)
+        self.assertIn("lookups remain pending", source)
 
 
 if __name__ == "__main__":
