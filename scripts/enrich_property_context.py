@@ -625,9 +625,13 @@ def enrich_transactions(transactions, cache, args):
         lon = parse_float(output.get("longitude"))
         if lat is not None and lon is not None:
             if not args.disable_environment_agency:
-                if args.missing_only and environment_agency_is_fresh(
-                    output.get("environmentAgency"),
-                    args.flood_max_age_hours,
+                if (
+                    args.missing_only
+                    and not getattr(args, "force_flood_refresh", False)
+                    and environment_agency_is_fresh(
+                        output.get("environmentAgency"),
+                        args.flood_max_age_hours,
+                    )
                 ):
                     stats["environmentAgencyFreshRetained"] += 1
                 elif "environmentAgency" in disabled:
@@ -712,6 +716,11 @@ def parse_args():
         choices=("bulk", "point"),
         default="bulk",
         help="Use one bulk alert snapshot plus official polygons, or the legacy per-point endpoint.",
+    )
+    parser.add_argument(
+        "--force-flood-refresh",
+        action="store_true",
+        help="Refresh flood observations even when their timestamps are still within the freshness window.",
     )
     parser.add_argument("--disable-osm", action="store_true", help="Skip OpenStreetMap amenities.")
     parser.add_argument("--missing-only", action="store_true", help="Preserve existing context and only populate transactions that still lack it.")

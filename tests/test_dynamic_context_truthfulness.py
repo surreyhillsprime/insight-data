@@ -29,6 +29,7 @@ def property_args(**overrides):
         "flood_radius_km": 5,
         "flood_max_age_hours": 30,
         "flood_query_mode": "point",
+        "force_flood_refresh": False,
         "osm_refresh_days": 120,
         "osm_radius_m": 1800,
         "overpass_timeout": 1,
@@ -116,6 +117,41 @@ class FloodTruthfulnessTests(unittest.TestCase):
         lookup.assert_not_called()
         self.assertEqual(enriched[0]["environmentAgency"], item["environmentAgency"])
         self.assertEqual(stats["environmentAgencyFreshRetained"], 1)
+
+    def test_forced_refresh_replaces_an_observation_that_is_still_fresh(self):
+        item = dict(self.item)
+        item["environmentAgency"] = {
+            **self.prior,
+            "observedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "updatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        }
+        replacement = {
+            "environmentAgency": {
+                **item["environmentAgency"],
+                "observedAt": "2026-07-23T20:00:00Z",
+                "updatedAt": "2026-07-23T20:00:00Z",
+            }
+        }
+        with patch.object(property_context, "flood_context", return_value=replacement) as lookup:
+            enriched, stats = property_context.enrich_transactions(
+                [item],
+                {},
+                property_args(force_flood_refresh=True),
+            )
+
+        lookup.assert_called_once()
+        self.assertEqual(enriched[0]["environmentAgency"], replacement["environmentAgency"])
+        self.assertEqual(stats["environmentAgency"], 1)
+        self.assertEqual(stats["environmentAgencyFreshRetained"], 0)
+
+    def test_daily_workflow_forces_flood_refresh_before_validation(self):
+        workflow = (ROOT / ".github" / "workflows" / "daily-intelligence.yml").read_text(
+            encoding="utf-8"
+        )
+
+        refresh = workflow.index("--force-flood-refresh")
+        validation = workflow.index("python3 scripts/check_data_completeness.py")
+        self.assertLess(refresh, validation)
 
     def test_request_failure_retains_the_prior_dated_observation(self):
         with patch.object(property_context, "flood_context", side_effect=RuntimeError("offline")):

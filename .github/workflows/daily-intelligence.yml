@@ -26,6 +26,16 @@ jobs:
           git fetch origin "$GITHUB_REF_NAME"
           git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
 
+      - name: Refresh current flood context
+        run: |
+          python3 scripts/enrich_property_context.py \
+            --missing-only \
+            --force-flood-refresh \
+            --disable-osm \
+            --pause 0 \
+            --progress-every 250 \
+            --max-source-errors 25
+
       - name: Refresh daily planning intelligence
         run: |
           python3 scripts/enrich_daily_intelligence.py \
