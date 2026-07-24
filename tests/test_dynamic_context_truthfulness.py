@@ -426,6 +426,194 @@ class PlanningTruthfulnessTests(unittest.TestCase):
         self.assertEqual(enriched[0]["planning"]["coverageReason"], "request-failed")
         self.assertEqual(stats["planningErrors"], 1)
 
+    def test_request_failure_retains_prior_observed_and_unknown_responses_with_original_dates(self):
+        observed = {
+            "source": "Planning Data API",
+            "updatedAt": "2026-07-23T04:00:00Z",
+            "coverageStatus": "observed",
+            "coverageMode": "positive-results-only",
+            "queryResultCount": 1,
+            "recentApplicationCount": 1,
+            "latestApplication": "Replacement dwelling (2026/1234)",
+            "recentApplications": [{"name": "Replacement dwelling", "reference": "2026/1234"}],
+        }
+        unknown = {
+            "source": "Planning Data API",
+            "updatedAt": "2026-07-23T04:05:00Z",
+            "coverageStatus": "unknown",
+            "coverageMode": "no-authoritative-negative-coverage",
+            "coverageReason": "no-proven-within-radius-result",
+            "queryResultCount": 0,
+            "recentApplications": [],
+        }
+        items = [
+            {
+                "id": "lr-observed",
+                "postcode": "KT10 0AA",
+                "latitude": 51.35,
+                "longitude": -0.36,
+                "planning": observed,
+            },
+            {
+                "id": "lr-unknown",
+                "postcode": "KT10 0AB",
+                "latitude": 51.36,
+                "longitude": -0.37,
+                "planning": unknown,
+            },
+        ]
+        with patch.object(daily, "recent_planning_for_item", side_effect=RuntimeError("offline")), patch.object(
+            daily, "utc_now", return_value="2026-07-24T12:00:00Z"
+        ):
+            enriched, stats = daily.enrich_transactions(
+                items,
+                {},
+                daily_args(max_source_errors=0),
+            )
+
+        self.assertEqual(enriched[0]["planning"], observed)
+        self.assertEqual(enriched[1]["planning"], unknown)
+        self.assertEqual(stats["planningErrors"], 2)
+        self.assertEqual(stats["planningRetainedAfterError"], 2)
+
+    def test_source_disable_after_error_threshold_retains_remaining_unknown_responses(self):
+        items = []
+        expected_dates = []
+        for index in range(3):
+            updated_at = f"2026-07-23T04:0{index}:00Z"
+            expected_dates.append(updated_at)
+            items.append({
+                "id": f"lr-{index}",
+                "postcode": f"KT10 0A{index}",
+                "latitude": 51.35 + index / 100,
+                "longitude": -0.36,
+                "planning": {
+                    "source": "Planning Data API",
+                    "updatedAt": updated_at,
+                    "coverageStatus": "unknown",
+                    "coverageMode": "no-authoritative-negative-coverage",
+                    "coverageReason": "no-proven-within-radius-result",
+                    "queryResultCount": 0,
+                    "recentApplications": [],
+                },
+            })
+
+        with patch.object(
+            daily,
+            "recent_planning_for_item",
+            side_effect=RuntimeError("offline"),
+        ) as requester, patch.object(daily, "utc_now", return_value="2026-07-24T12:00:00Z"):
+            enriched, stats = daily.enrich_transactions(
+                items,
+                {},
+                daily_args(max_source_errors=1),
+            )
+
+        self.assertEqual(requester.call_count, 1)
+        self.assertEqual(
+            [item["planning"]["updatedAt"] for item in enriched],
+            expected_dates,
+        )
+        self.assertTrue(all(item["planning"]["coverageStatus"] == "unknown" for item in enriched))
+        self.assertEqual(stats["planningErrors"], 1)
+        self.assertEqual(stats["planningRetainedAfterError"], 1)
+        self.assertEqual(stats["planningRetainedAfterSourceDisabled"], 2)
+
+    def test_stale_retention_and_unavailable_replacement_still_fail_the_fresh_response_gate(self):
+        stale_unknown = {
+            "source": "Planning Data API",
+            "updatedAt": "2026-07-22T00:00:00Z",
+            "coverageStatus": "unknown",
+            "coverageMode": "no-authoritative-negative-coverage",
+            "coverageReason": "no-proven-within-radius-result",
+            "queryResultCount": 0,
+            "recentApplications": [],
+        }
+        stale_unavailable = {
+            "source": "Planning Data API",
+            "updatedAt": "2026-07-22T00:00:00Z",
+            "coverageStatus": "unavailable",
+            "coverageMode": "no-authoritative-negative-coverage",
+            "coverageReason": "request-failed",
+            "recentApplications": [],
+        }
+        items = [
+            {
+                "id": "lr-stale-unknown",
+                "postcode": "KT10 0AA",
+                "latitude": 51.35,
+                "longitude": -0.36,
+                "planning": stale_unknown,
+            },
+            {
+                "id": "lr-stale-unavailable",
+                "postcode": "KT10 0AB",
+                "latitude": 51.36,
+                "longitude": -0.37,
+                "planning": stale_unavailable,
+            },
+        ]
+        with patch.object(daily, "recent_planning_for_item", side_effect=RuntimeError("offline")), patch.object(
+            daily, "utc_now", return_value="2026-07-24T12:00:00Z"
+        ):
+            enriched, _stats = daily.enrich_transactions(
+                items,
+                {},
+                daily_args(max_source_errors=0),
+            )
+
+        self.assertEqual(enriched[0]["planning"], stale_unknown)
+        self.assertEqual(enriched[1]["planning"]["updatedAt"], "2026-07-24T12:00:00Z")
+        self.assertEqual(enriched[1]["planning"]["coverageReason"], "request-failed")
+        now = datetime(2026, 7, 24, 12, tzinfo=timezone.utc)
+        rows = completeness.coverage_rows(enriched, now=now)
+        planning_row = next(row for row in rows if row["name"] == "Planning query responses")
+        failures = completeness.coverage_threshold_failures(rows)
+
+        self.assertEqual(planning_row["found"], 0)
+        self.assertTrue(any(item.startswith("Planning query responses:") for item in failures))
+
+    def test_planning_metadata_counts_retained_successes_separately_from_unavailable_rows(self):
+        observed = {
+            "coverageStatus": "observed",
+            "coverageMode": "positive-results-only",
+            "updatedAt": "2026-07-23T04:00:00Z",
+            "latestApplication": "Replacement dwelling (2026/1234)",
+            "recentApplicationCount": 1,
+            "recentApplications": [{"name": "Replacement dwelling"}],
+        }
+        unknown = {
+            "coverageStatus": "unknown",
+            "coverageMode": "no-authoritative-negative-coverage",
+            "updatedAt": "2026-07-23T04:05:00Z",
+            "queryResultCount": 0,
+            "recentApplications": [],
+        }
+        unavailable = {
+            "coverageStatus": "unavailable",
+            "coverageMode": "no-authoritative-negative-coverage",
+            "updatedAt": "2026-07-24T12:00:00Z",
+            "coverageReason": "request-failed",
+            "recentApplications": [],
+        }
+
+        metadata = daily.planning_coverage_metadata(
+            [
+                {"planning": observed},
+                {"planning": unknown},
+                {"planning": unavailable},
+                {"planning": {"coverageStatus": "unknown", "recentApplications": []}},
+                {},
+            ],
+            daily_args(),
+        )
+
+        self.assertEqual(metadata["records"], 3)
+        self.assertEqual(metadata["observedRecords"], 1)
+        self.assertEqual(metadata["unknownRecords"], 1)
+        self.assertEqual(metadata["unavailableRecords"], 1)
+        self.assertEqual(metadata["successfulResponses"], 2)
+
     def test_completeness_counts_current_unknown_as_attempt_but_rejects_legacy_claim(self):
         now = datetime(2026, 7, 19, 12, tzinfo=timezone.utc)
         current_unknown = {

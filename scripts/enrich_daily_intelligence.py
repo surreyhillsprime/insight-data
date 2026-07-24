@@ -37,6 +37,7 @@ COMPANIES_HOUSE_API = "https://api.company-information.service.gov.uk"
 PLANNING_COVERAGE_OBSERVED = "observed"
 PLANNING_COVERAGE_UNKNOWN = "unknown"
 PLANNING_COVERAGE_STATUSES = {PLANNING_COVERAGE_OBSERVED, PLANNING_COVERAGE_UNKNOWN, "unavailable"}
+PLANNING_RETAINABLE_STATUSES = {PLANNING_COVERAGE_OBSERVED, PLANNING_COVERAGE_UNKNOWN}
 PLANNING_COVERAGE_NOTE = (
     "Planning Data coverage varies by authority; an empty spatial response is not evidence "
     "that no nearby applications exist."
@@ -170,6 +171,15 @@ def planning_context_is_current(context, refresh_hours):
     return cache_fresh(
         {"updatedAt": context.get("updatedAt")},
         refresh_hours * 60 * 60,
+    )
+
+
+def planning_context_is_retainable_after_failure(context):
+    """Keep prior successful responses without pretending an outage refreshed them."""
+
+    return (
+        planning_context_is_truthful(context)
+        and clean(context.get("coverageStatus")).lower() in PLANNING_RETAINABLE_STATUSES
     )
 
 
@@ -489,19 +499,17 @@ def enrich_transactions(transactions, cache, args):
                 stats["planningErrors"] += 1
                 print(f"Planning Data skipped for {item.get('id')}: {exc}", file=sys.stderr)
                 existing = output.get("planning")
-                if not (
-                    planning_context_is_truthful(existing)
-                    and existing.get("coverageStatus") == PLANNING_COVERAGE_OBSERVED
-                ):
+                if planning_context_is_retainable_after_failure(existing):
+                    stats["planningRetainedAfterError"] += 1
+                else:
                     output["planning"] = unavailable_planning_context(args, since, "request-failed")
                 if args.max_source_errors and stats["planningErrors"] >= args.max_source_errors:
                     disabled.add("planning")
         elif not args.disable_planning and "planning" in disabled:
             existing = output.get("planning")
-            if not (
-                planning_context_is_truthful(existing)
-                and existing.get("coverageStatus") == PLANNING_COVERAGE_OBSERVED
-            ):
+            if planning_context_is_retainable_after_failure(existing):
+                stats["planningRetainedAfterSourceDisabled"] += 1
+            else:
                 output["planning"] = unavailable_planning_context(
                     args,
                     since,
@@ -535,6 +543,36 @@ def enrich_transactions(transactions, cache, args):
             print(f"Processed {index}/{len(transactions)} properties; daily fields so far: {dict(stats)}", flush=True)
 
     return enriched, stats
+
+
+def planning_coverage_metadata(items, args):
+    planning_records = [
+        item.get("planning") for item in items
+        if planning_context_is_truthful(item.get("planning"))
+    ]
+    return {
+        "source": "Planning Data API",
+        "records": len(planning_records),
+        "observedRecords": sum(
+            1 for item in planning_records
+            if item.get("coverageStatus") == PLANNING_COVERAGE_OBSERVED
+        ),
+        "unknownRecords": sum(
+            1 for item in planning_records
+            if item.get("coverageStatus") == PLANNING_COVERAGE_UNKNOWN
+        ),
+        "unavailableRecords": sum(
+            1 for item in planning_records
+            if item.get("coverageStatus") == "unavailable"
+        ),
+        "successfulResponses": sum(
+            1 for item in planning_records
+            if item.get("coverageStatus") in PLANNING_RETAINABLE_STATUSES
+        ),
+        "coverageMode": "positive-observations-only",
+        "lookbackDays": args.planning_days,
+        "radiusMetres": args.planning_radius_m,
+    }
 
 
 def parse_args():
@@ -575,35 +613,9 @@ def main():
         return 0
 
     remove_disabled_restricted_cache_entries(cache, args)
-    planning_records = [
-        item.get("planning") for item in enriched
-        if planning_context_is_truthful(item.get("planning"))
-    ]
     meta["dailyIntelligence"] = {
         "updatedAt": utc_now(),
-        "planning": {
-            "source": "Planning Data API",
-            "records": len(planning_records),
-            "observedRecords": sum(
-                1 for item in planning_records
-                if item.get("coverageStatus") == PLANNING_COVERAGE_OBSERVED
-            ),
-            "unknownRecords": sum(
-                1 for item in planning_records
-                if item.get("coverageStatus") == PLANNING_COVERAGE_UNKNOWN
-            ),
-            "unavailableRecords": sum(
-                1 for item in planning_records
-                if item.get("coverageStatus") == "unavailable"
-            ),
-            "successfulResponses": sum(
-                1 for item in planning_records
-                if item.get("coverageStatus") in {PLANNING_COVERAGE_OBSERVED, PLANNING_COVERAGE_UNKNOWN}
-            ),
-            "coverageMode": "positive-observations-only",
-            "lookbackDays": args.planning_days,
-            "radiusMetres": args.planning_radius_m,
-        },
+        "planning": planning_coverage_metadata(enriched, args),
         "companiesHouse": {
             "source": "Companies House API",
             "records": sum(1 for item in enriched if item.get("companiesHouse")),
