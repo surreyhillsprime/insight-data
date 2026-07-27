@@ -73,6 +73,7 @@ def validate(
     minimum_properties_with_history=0,
     minimum_applications=0,
     maximum_age_days=45,
+    allow_blocked=False,
 ):
     path = Path(path)
     if path.stat().st_size > MAX_FEED_BYTES:
@@ -83,6 +84,52 @@ def validate(
 
     if metadata.get("schemaVersion") != 1 or metadata.get("deploymentMode") != "commercial":
         raise ValueError("Planning metadata is missing schemaVersion 1 or deploymentMode commercial")
+    if metadata.get("publicationStatus") == "blocked-missing-licensed-source":
+        if not allow_blocked:
+            raise ValueError("Commercial planning publication is not complete")
+        if histories:
+            raise ValueError("Blocked planning publication must not contain history records")
+        expected_strings = {
+            "source": "Commercial planning feed not enabled",
+            "sourceLicenceUrl": "",
+            "redistributionRights": "not-authorised-for-publication",
+            "updatedAt": "",
+            "coverageMode": "unavailable",
+            "coverageStatus": "unavailable",
+        }
+        for field, expected in expected_strings.items():
+            if metadata.get(field) != expected:
+                raise ValueError(
+                    f"Blocked planning publication has invalid {field}"
+                )
+        for field in (
+            "propertiesRequested",
+            "propertiesChecked",
+            "propertiesWithHistory",
+            "propertiesCheckedNone",
+            "propertiesUnavailable",
+            "applicationsFound",
+            "lookupKeys",
+            "canonicalPropertyRecords",
+            "transactionAliases",
+        ):
+            if metadata.get(field) != 0:
+                raise ValueError(
+                    f"Blocked planning publication must report zero {field}"
+                )
+        if metadata.get("authorities") != [] or metadata.get("authorityCoverage") != []:
+            raise ValueError(
+                "Blocked planning publication must not claim authority coverage"
+            )
+        return {
+            "publicationStatus": "blocked-missing-licensed-source",
+            "lookupKeys": 0,
+            "canonicalPropertyRecords": 0,
+            "transactionAliases": 0,
+            "propertiesWithHistory": 0,
+            "applicationsFound": 0,
+            "updatedAt": "",
+        }
     if metadata.get("publicationStatus") != "complete":
         raise ValueError("Commercial planning publication is not complete")
     if metadata.get("coverageMode") != "full-available-history" or metadata.get("coverageStatus") != "complete":
@@ -270,6 +317,14 @@ def main():
     parser.add_argument("--minimum-properties-with-history", type=int, default=0)
     parser.add_argument("--minimum-applications", type=int, default=0)
     parser.add_argument("--maximum-age-days", type=int, default=45)
+    parser.add_argument(
+        "--allow-blocked",
+        action="store_true",
+        help=(
+            "Accept only the explicit zero-record missing-licensed-source "
+            "publication; never relax validation of a populated feed."
+        ),
+    )
     args = parser.parse_args()
     result = validate(
         args.path,
@@ -277,7 +332,14 @@ def main():
         minimum_properties_with_history=args.minimum_properties_with_history,
         minimum_applications=args.minimum_applications,
         maximum_age_days=args.maximum_age_days,
+        allow_blocked=args.allow_blocked,
     )
+    if result.get("publicationStatus") == "blocked-missing-licensed-source":
+        print(
+            "Valid blocked planning publication: licensed redistribution "
+            "source is not configured."
+        )
+        return
     print(
         "Valid commercial planning feed: "
         f"{result['lookupKeys']:,} lookup keys, "
