@@ -1,0 +1,2379 @@
+{
+  "auditVersion": 1,
+  "reviewedAt": "2026-07-27",
+  "reviewedBy": "Codex exhaustive official address and document audit",
+  "source": {
+    "name": "Historic England National Heritage List for England",
+    "addressSearchUrl": "https://historicengland.org.uk/listing/the-list/",
+    "geometryServiceUrl": "https://services-eu1.arcgis.com/ZOdPfBS3aqqDYPUQ/arcgis/rest/services/National_Heritage_List_for_England_NHLE_v02_VIEW/FeatureServer",
+    "addressCorpus": {
+      "fetchedAt": "2026-07-27",
+      "records": 6624,
+      "uniqueListEntries": 6624,
+      "sha256": "e9edeb0c849376102ea0b519740b5965746521c496aef616862905c018bc11a9"
+    },
+    "officialEntryDetails": {
+      "fetchedAt": "2026-07-27",
+      "records": 106,
+      "sha256": "84a3aab240d6f7f8eaef12891fca790eaa8b64e2025e7a7274a7f9ece3c95d4a"
+    },
+    "adjudicationSha256": "06ddaaee22c5467b1d873817a3a6254b1b22313afe7807f7beb068307eb876f4"
+  },
+  "criteria": [
+    "Match the canonical full address and property identity before considering distance.",
+    "Accept documented former names, spelling variants, road-name changes and divided-building identities.",
+    "Reject same-name and same-postcode collisions when authority records identify different properties.",
+    "Use official NHLE geometry to refine map location only after property identity is confirmed.",
+    "No direct NHLE match is not legal proof that a property is unlisted or outside listed-building curtilage."
+  ],
+  "canonicalPropertyCount": 3947,
+  "canonicalPropertyDigest": "55d16ab7967c4859790492bea57da79542729678f038cb3e0b8790a875cd187d",
+  "officialAddressRecordsScreened": 6624,
+  "officialUniqueListEntriesScreened": 6624,
+  "candidatePropertyCount": 1415,
+  "candidatePairCount": 5218,
+  "confirmedPropertyCount": 130,
+  "confirmedUniqueListEntryCount": 127,
+  "confirmedGradeCounts": {
+    "I": 3,
+    "II": 119,
+    "II*": 8
+  },
+  "confirmedPairDigest": "7600d5ae724af3bc3a6664baec135c25e10beab7104dc1a4650abe2af56babd5",
+  "documentedNoDirectPropertyCount": 38,
+  "genericNoDirectPropertyCount": 3779,
+  "unknownPropertyCount": 0,
+  "confirmedMappings": [
+    {
+      "propertyRecordId": "property:14 WARWICKS BENCH GUILDFORD GU1 3TG|GU13TG",
+      "address": "14, WARWICKS BENCH, GUILDFORD, GU1 3TG",
+      "postcode": "GU1 3TG",
+      "listEntryNumbers": [
+        "1293935"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1293935",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1293935"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:159 HIGH STREET GUILDFORD GU1 3AJ|GU13AJ",
+      "address": "159, HIGH STREET, GUILDFORD, GU1 3AJ",
+      "postcode": "GU1 3AJ",
+      "listEntryNumbers": [
+        "1377874"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377874",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377874"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:18 CHURCH STREET COBHAM KT11 3EG|KT113EG",
+      "address": "18, CHURCH STREET, COBHAM, KT11 3EG",
+      "postcode": "KT11 3EG",
+      "listEntryNumbers": [
+        "1030264"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1030264",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1030264"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:18 FORT ROAD GUILDFORD GU1 3TD|GU13TD",
+      "address": "18, FORT ROAD, GUILDFORD, GU1 3TD",
+      "postcode": "GU1 3TD",
+      "listEntryNumbers": [
+        "1096031"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1096031",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1096031"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:19 CHURCH STREET COBHAM KT11 3EG|KT113EG",
+      "address": "19, CHURCH STREET, COBHAM, KT11 3EG",
+      "postcode": "KT11 3EG",
+      "listEntryNumbers": [
+        "1030263"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1030263",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1030263"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:21 GUILDOWN ROAD GUILDFORD GU2 4ET|GU24ET",
+      "address": "21, GUILDOWN ROAD, GUILDFORD, GU2 4ET",
+      "postcode": "GU2 4ET",
+      "listEntryNumbers": [
+        "1029317"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029317",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029317"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:3 CASTLE HILL GUILDFORD GU1 3SX|GU13SX",
+      "address": "3, CASTLE HILL, GUILDFORD, GU1 3SX",
+      "postcode": "GU1 3SX",
+      "listEntryNumbers": [
+        "1295249"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1295249",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1295249"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:45 WAVERLEY LANE FARNHAM GU9 8BH|GU98BH",
+      "address": "45, WAVERLEY LANE, FARNHAM, GU9 8BH",
+      "postcode": "GU9 8BH",
+      "listEntryNumbers": [
+        "1258086"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1258086",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1258086"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:55 QUARRY STREET GUILDFORD GU1 3UA|GU13UA",
+      "address": "55, QUARRY STREET, GUILDFORD, GU1 3UA",
+      "postcode": "GU1 3UA",
+      "listEntryNumbers": [
+        "1029216"
+      ],
+      "grade": "II*",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029216",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029216"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:61 CASTLE STREET FARNHAM GU9 7LN|GU97LN",
+      "address": "61, CASTLE STREET, FARNHAM, GU9 7LN",
+      "postcode": "GU9 7LN",
+      "listEntryNumbers": [
+        "1242623"
+      ],
+      "grade": "II*",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1242623",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1242623"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:7 LEIGH HILL ROAD COBHAM KT11 2HS|KT112HS",
+      "address": "7, LEIGH HILL ROAD, COBHAM, KT11 2HS",
+      "postcode": "KT11 2HS",
+      "listEntryNumbers": [
+        "1030161"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1030161",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1030161"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:8 LAMMAS LANE ESHER KT10 8NY|KT108NY",
+      "address": "8, LAMMAS LANE, ESHER, KT10 8NY",
+      "postcode": "KT10 8NY",
+      "listEntryNumbers": [
+        "1365896"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1365896",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1365896"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:ALDERTONS SEND MARSH ROAD SEND WOKING GU23 7DJ|GU237DJ",
+      "address": "ALDERTONS, SEND MARSH ROAD, SEND, WOKING, GU23 7DJ",
+      "postcode": "GU23 7DJ",
+      "listEntryNumbers": [
+        "1029347"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029347",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029347"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:APARTMENT 1 ALBURY PARK MANSION ALBURY PARK ALBURY GUILDFORD GU5 9BB|GU59BB",
+      "address": "APARTMENT 1, ALBURY PARK MANSION, ALBURY PARK, ALBURY, GUILDFORD, GU5 9BB",
+      "postcode": "GU5 9BB",
+      "listEntryNumbers": [
+        "1029565"
+      ],
+      "grade": "II*",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029565",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029565"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:APARTMENT 2 PEPER HAROW HOUSE PEPER HAROW PARK PEPER HAROW GODALMING GU8 6BG|GU86BG",
+      "address": "APARTMENT 2, PEPER HAROW HOUSE, PEPER HAROW PARK, PEPER HAROW, GODALMING, GU8 6BG",
+      "postcode": "GU8 6BG",
+      "listEntryNumbers": [
+        "1044443"
+      ],
+      "grade": "I",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044443",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044443"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:BACHELORS FARM LONG REACH OCKHAM WOKING GU23 6PG|GU236PG",
+      "address": "BACHELORS FARM, LONG REACH, OCKHAM, WOKING, GU23 6PG",
+      "postcode": "GU23 6PG",
+      "listEntryNumbers": [
+        "1188408"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1188408",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1188408",
+        "https://www.guildford.gov.uk/media/28025/REP-8749121-001a-Mr-and-Mrs-Paton-Appendices-v2/pdf/REP-_8749121-001a_Mr_and_Mrs_Paton__Appendices_v2.pdf?m=1529596995197"
+      ],
+      "note": "The statutory Batchelors spelling and current Bachelors Farm address refer to the same Long Reach, Ockham property."
+    },
+    {
+      "propertyRecordId": "property:BARHATCH BARHATCH LANE CRANLEIGH GU6 7NG|GU67NG",
+      "address": "BARHATCH, BARHATCH LANE, CRANLEIGH, GU6 7NG",
+      "postcode": "GU6 7NG",
+      "listEntryNumbers": [
+        "1044401"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044401",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044401"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:BERESFORD COURT WESTERHAM ROAD OXTED RH8 0SL|RH80SL",
+      "address": "BERESFORD COURT, WESTERHAM ROAD, OXTED, RH8 0SL",
+      "postcode": "RH8 0SL",
+      "listEntryNumbers": [
+        "1029786"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029786",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029786"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:BILLHURST FARM WHITE HART LANE WOOD STREET VILLAGE GUILDFORD GU3 3DZ|GU33DZ",
+      "address": "BILLHURST FARM, WHITE HART LANE, WOOD STREET VILLAGE, GUILDFORD, GU3 3DZ",
+      "postcode": "GU3 3DZ",
+      "listEntryNumbers": [
+        "1029585"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029585",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029585"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:BIRCH HALL CHURCH ROAD WINDLESHAM GU20 6BN|GU206BN",
+      "address": "BIRCH HALL, CHURCH ROAD, WINDLESHAM, GU20 6BN",
+      "postcode": "GU20 6BN",
+      "listEntryNumbers": [
+        "1377544"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377544",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377544"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:BOROUGH FARM COTTAGE PORTSMOUTH ROAD MILFORD GODALMING GU8 5JY|GU85JY",
+      "address": "BOROUGH FARM COTTAGE, PORTSMOUTH ROAD, MILFORD, GODALMING, GU8 5JY",
+      "postcode": "GU8 5JY",
+      "listEntryNumbers": [
+        "1096865"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1096865",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1096865",
+        "https://historicengland.org.uk/images-books/photos/item/IOE01/13526/10"
+      ],
+      "note": "Historic England's official image record gives exact postcode GU8 5JY, confirming Witley Common and Portsmouth Road as alternative descriptors."
+    },
+    {
+      "propertyRecordId": "property:BOURNEBROOK COTTAGE CLAPPERS LANE CHOBHAM WOKING GU24 8DD|GU248DD",
+      "address": "BOURNEBROOK COTTAGE, CLAPPERS LANE, CHOBHAM, WOKING, GU24 8DD",
+      "postcode": "GU24 8DD",
+      "listEntryNumbers": [
+        "1252704"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1252704",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1252704"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:BRIDGE END HOUSE HYDE LANE OCKHAM WOKING GU23 6NS|GU236NS",
+      "address": "BRIDGE END HOUSE, HYDE LANE, OCKHAM, WOKING, GU23 6NS",
+      "postcode": "GU23 6NS",
+      "listEntryNumbers": [
+        "1029396"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029396",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029396"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:BROOKLANDS BAYNARDS PARK CRANLEIGH GU6 8EQ|GU68EQ",
+      "address": "BROOKLANDS, BAYNARDS PARK, CRANLEIGH, GU6 8EQ",
+      "postcode": "GU6 8EQ",
+      "listEntryNumbers": [
+        "1044376"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044376",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044376",
+        "https://www.cranleigh-pc.gov.uk/_UserFiles/Files/ListedBuildingsInCranleigh.pdf"
+      ],
+      "note": "Cranleigh's official listed-buildings record bridges Brooklands Farm on Horsham Road to the present Baynards Park postal address."
+    },
+    {
+      "propertyRecordId": "property:BUCKHURST WESTWOOD LANE NORMANDY GUILDFORD GU3 2JE|GU32JE",
+      "address": "BUCKHURST, WESTWOOD LANE, NORMANDY, GUILDFORD, GU3 2JE",
+      "postcode": "GU3 2JE",
+      "listEntryNumbers": [
+        "1029659"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029659",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029659"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:BULKELEY HOUSE MIDDLE HILL ENGLEFIELD GREEN EGHAM TW20 0JU|TW200JU",
+      "address": "BULKELEY HOUSE, MIDDLE HILL, ENGLEFIELD GREEN, EGHAM, TW20 0JU",
+      "postcode": "TW20 0JU",
+      "listEntryNumbers": [
+        "1028950"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1028950",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1028950"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:CASTLE GROVE HOUSE CASTLE GROVE ROAD CHOBHAM WOKING GU24 8EE|GU248EE",
+      "address": "CASTLE GROVE HOUSE, CASTLE GROVE ROAD, CHOBHAM, WOKING, GU24 8EE",
+      "postcode": "GU24 8EE",
+      "listEntryNumbers": [
+        "1189485"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1189485",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1189485"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:CHANTRY HOUSE THE GREEN CHIDDINGFOLD GODALMING GU8 4TT|GU84TT",
+      "address": "CHANTRY HOUSE, THE GREEN, CHIDDINGFOLD, GODALMING, GU8 4TT",
+      "postcode": "GU8 4TT",
+      "listEntryNumbers": [
+        "1277974"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1277974",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1277974"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:CHINTHURST FARMHOUSE CHINTHURST LANE BRAMLEY GUILDFORD GU5 0DR|GU50DR",
+      "address": "CHINTHURST FARMHOUSE, CHINTHURST LANE, BRAMLEY, GUILDFORD, GU5 0DR",
+      "postcode": "GU5 0DR",
+      "listEntryNumbers": [
+        "1377770"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377770",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377770"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:CHINTHURST GRANGE CHINTHURST LANE WONERSH GUILDFORD GU5 0QH|GU50QH",
+      "address": "CHINTHURST GRANGE, CHINTHURST LANE, WONERSH, GUILDFORD, GU5 0QH",
+      "postcode": "GU5 0QH",
+      "listEntryNumbers": [
+        "1260635"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1260635",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1260635"
+      ],
+      "note": "Address, official NGR and the NHLE description of the divided Chinthurst Hill building confirm this principal current division."
+    },
+    {
+      "propertyRecordId": "property:CHURCH HILL HOUSE CHURCH HILL HASLEMERE GU27 1BW|GU271BW",
+      "address": "CHURCH HILL HOUSE, CHURCH HILL, HASLEMERE, GU27 1BW",
+      "postcode": "GU27 1BW",
+      "listEntryNumbers": [
+        "1243900"
+      ],
+      "grade": "II*",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1243900",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1243900"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:CLAREMONT BARN 4 HOME FARM CLOSE ESHER KT10 9HA|KT109HA",
+      "address": "CLAREMONT BARN, 4, HOME FARM CLOSE, ESHER, KT10 9HA",
+      "postcode": "KT10 9HA",
+      "listEntryNumbers": [
+        "1190767"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1190767",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1190767"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:COBBLE COTTAGE THORNCOMBE STREET BRAMLEY GUILDFORD GU5 0LZ|GU50LZ",
+      "address": "COBBLE COTTAGE, THORNCOMBE STREET, BRAMLEY, GUILDFORD, GU5 0LZ",
+      "postcode": "GU5 0LZ",
+      "listEntryNumbers": [
+        "1240039"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1240039",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1240039"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:COSFORD MILL PORTSMOUTH ROAD THURSLEY GODALMING GU8 6NH|GU86NH",
+      "address": "COSFORD MILL, PORTSMOUTH ROAD, THURSLEY, GODALMING, GU8 6NH",
+      "postcode": "GU8 6NH",
+      "listEntryNumbers": [
+        "1241732"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1241732",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1241732"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:COXLAND SOMERSBURY LANE EWHURST CRANLEIGH GU6 7SP|GU67SP",
+      "address": "COXLAND, SOMERSBURY LANE, EWHURST, CRANLEIGH, GU6 7SP",
+      "postcode": "GU6 7SP",
+      "listEntryNumbers": [
+        "1190433"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1190433",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1190433"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:CULMER FARMHOUSE PETWORTH ROAD WORMLEY GODALMING GU8 5SW|GU85SW",
+      "address": "CULMER FARMHOUSE, PETWORTH ROAD, WORMLEY, GODALMING, GU8 5SW",
+      "postcode": "GU8 5SW",
+      "listEntryNumbers": [
+        "1334350"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1334350",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1334350"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:DAIRY FARM HOUSE LOWER MOUSHILL LANE MILFORD GODALMING GU8 5JX|GU85JX",
+      "address": "DAIRY FARM HOUSE, LOWER MOUSHILL LANE, MILFORD, GODALMING, GU8 5JX",
+      "postcode": "GU8 5JX",
+      "listEntryNumbers": [
+        "1393843"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1393843",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1393843"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:DEBNERSHE 15 THE STREET SHALFORD GUILDFORD GU4 8BT|GU48BT",
+      "address": "DEBNERSHE, 15, THE STREET, SHALFORD, GUILDFORD, GU4 8BT",
+      "postcode": "GU4 8BT",
+      "listEntryNumbers": [
+        "1029501"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029501",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029501"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:DUNALLY HOUSE WALTON LANE SHEPPERTON TW17 8LQ|TW178LQ",
+      "address": "DUNALLY HOUSE, WALTON LANE, SHEPPERTON, TW17 8LQ",
+      "postcode": "TW17 8LQ",
+      "listEntryNumbers": [
+        "1029645"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029645",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029645"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:EASTWATER HOUSE SNOWDENHAM LANE BRAMLEY GUILDFORD GU5 0DB|GU50DB",
+      "address": "EASTWATER HOUSE, SNOWDENHAM LANE, BRAMLEY, GUILDFORD, GU5 0DB",
+      "postcode": "GU5 0DB",
+      "listEntryNumbers": [
+        "1239971"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1239971",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1239971"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:EYOT HOUSE LTD DOYLY CARTE ISLAND WEYBRIDGE KT13 8LX|KT138LX",
+      "address": "EYOT HOUSE LTD, DOYLY CARTE ISLAND, WEYBRIDGE, KT13 8LX",
+      "postcode": "KT13 8LX",
+      "listEntryNumbers": [
+        "1294565"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1294565",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1294565"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:FAIRFIELD PETWORTH ROAD CHIDDINGFOLD GODALMING GU8 4SL|GU84SL",
+      "address": "FAIRFIELD, PETWORTH ROAD, CHIDDINGFOLD, GODALMING, GU8 4SL",
+      "postcode": "GU8 4SL",
+      "listEntryNumbers": [
+        "1277881"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1277881",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1277881"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:FIG TREE COURT TILFORD FARNHAM GU10 2AY|GU102AY",
+      "address": "FIG TREE COURT, TILFORD, FARNHAM, GU10 2AY",
+      "postcode": "GU10 2AY",
+      "listEntryNumbers": [
+        "1294507"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1294507",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1294507"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:FISHER LANE FARM FISHER LANE CHIDDINGFOLD GODALMING GU8 4TB|GU84TB",
+      "address": "FISHER LANE FARM, FISHER LANE, CHIDDINGFOLD, GODALMING, GU8 4TB",
+      "postcode": "GU8 4TB",
+      "listEntryNumbers": [
+        "1248250"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1248250",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1248250"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:FLAT 1 PEPER HAROW HOUSE PEPER HAROW PARK PEPER HAROW GODALMING GU8 6BG|GU86BG",
+      "address": "FLAT 1, PEPER HAROW HOUSE, PEPER HAROW PARK, PEPER HAROW, GODALMING, GU8 6BG",
+      "postcode": "GU8 6BG",
+      "listEntryNumbers": [
+        "1044443"
+      ],
+      "grade": "I",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044443",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044443"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:FREDLEY MANOR LONDON ROAD MICKLEHAM DORKING RH5 6DE|RH56DE",
+      "address": "FREDLEY MANOR, LONDON ROAD, MICKLEHAM, DORKING, RH5 6DE",
+      "postcode": "RH5 6DE",
+      "listEntryNumbers": [
+        "1378058"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1378058",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1378058"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:FRENSHAM MANOR MILL LANE FRENSHAM FARNHAM GU10 3EE|GU103EE",
+      "address": "FRENSHAM MANOR, MILL LANE, FRENSHAM, FARNHAM, GU10 3EE",
+      "postcode": "GU10 3EE",
+      "listEntryNumbers": [
+        "1044429"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044429",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044429"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:FRILLINGHURST OLD MANOR WEST END LANE HASLEMERE GU27 2EN|GU272EN",
+      "address": "FRILLINGHURST OLD MANOR, WEST END LANE, HASLEMERE, GU27 2EN",
+      "postcode": "GU27 2EN",
+      "listEntryNumbers": [
+        "1044602"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044602",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044602"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:GLEBE HOUSE HAMBLEDON ROAD HAMBLEDON GODALMING GU8 4DR|GU84DR",
+      "address": "GLEBE HOUSE, HAMBLEDON ROAD, HAMBLEDON, GODALMING, GU8 4DR",
+      "postcode": "GU8 4DR",
+      "listEntryNumbers": [
+        "1240220"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1240220",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1240220"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:GREEN PLACE THE STREET WONERSH GUILDFORD GU5 0PF|GU50PF",
+      "address": "GREEN PLACE, THE STREET, WONERSH, GUILDFORD, GU5 0PF",
+      "postcode": "GU5 0PF",
+      "listEntryNumbers": [
+        "1260555"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1260555",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1260555"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:GREENWAYS DANES HILL WOKING GU22 7HQ|GU227HQ",
+      "address": "GREENWAYS, DANES HILL, WOKING, GU22 7HQ",
+      "postcode": "GU22 7HQ",
+      "listEntryNumbers": [
+        "1271997"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1271997",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1271997"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:GUILDFORD HOUSE CASTLE HILL FARNHAM GU9 7JG|GU97JG",
+      "address": "GUILDFORD HOUSE, CASTLE HILL, FARNHAM, GU9 7JG",
+      "postcode": "GU9 7JG",
+      "listEntryNumbers": [
+        "1242416"
+      ],
+      "grade": "II*",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1242416",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1242416"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:HAM MANOR MILL ROAD COBHAM COBHAM KT11 3AL|KT113AL",
+      "address": "HAM MANOR, MILL ROAD, COBHAM, COBHAM, KT11 3AL",
+      "postcode": "KT11 3AL",
+      "listEntryNumbers": [
+        "1365900"
+      ],
+      "grade": "II*",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1365900",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1365900"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:HAMME HOUSE KINGS MILL LANE SOUTH NUTFIELD REDHILL RH1 5NB|RH15NB",
+      "address": "HAMME HOUSE, KINGS MILL LANE, SOUTH NUTFIELD, REDHILL, RH1 5NB",
+      "postcode": "RH1 5NB",
+      "listEntryNumbers": [
+        "1377596"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377596",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377596"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:HARTSMERE COTTAGE HURTMORE BOTTOM HURTMORE GODALMING GU7 2RP|GU72RP",
+      "address": "HARTSMERE COTTAGE, HURTMORE BOTTOM, HURTMORE, GODALMING, GU7 2RP",
+      "postcode": "GU7 2RP",
+      "listEntryNumbers": [
+        "1188954"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1188954",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1188954"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:HATCH HILL HOUSE CHURT ROAD HINDHEAD GU26 6HY|GU266HY",
+      "address": "HATCH HILL HOUSE, CHURT ROAD, HINDHEAD, GU26 6HY",
+      "postcode": "GU26 6HY",
+      "listEntryNumbers": [
+        "1243991"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1243991",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1243991"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:HAZELHURST BUNCH LANE HASLEMERE GU27 1AJ|GU271AJ",
+      "address": "HAZELHURST, BUNCH LANE, HASLEMERE, GU27 1AJ",
+      "postcode": "GU27 1AJ",
+      "listEntryNumbers": [
+        "1272656"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1272656",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1272656"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:HIGH CANFOLD FARM BARHATCH LANE CRANLEIGH CRANLEIGH GU6 7NH|GU67NH",
+      "address": "HIGH CANFOLD FARM, BARHATCH LANE, CRANLEIGH, CRANLEIGH, GU6 7NH",
+      "postcode": "GU6 7NH",
+      "listEntryNumbers": [
+        "1189596"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1189596",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1189596"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:HOLDFAST COTTAGE HOLDFAST LANE HASLEMERE GU27 2EY|GU272EY",
+      "address": "HOLDFAST COTTAGE, HOLDFAST LANE, HASLEMERE, GU27 2EY",
+      "postcode": "GU27 2EY",
+      "listEntryNumbers": [
+        "1244177"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1244177",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1244177"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:HOME FARM HOUSE THE STREET SHACKLEFORD GODALMING GU8 6AH|GU86AH",
+      "address": "HOME FARM HOUSE, THE STREET, SHACKLEFORD, GODALMING, GU8 6AH",
+      "postcode": "GU8 6AH",
+      "listEntryNumbers": [
+        "1377747"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377747",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377747"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:HOUND HOUSE HOUND HOUSE ROAD SHERE GUILDFORD GU5 9JH|GU59JH",
+      "address": "HOUND HOUSE, HOUND HOUSE ROAD, SHERE, GUILDFORD, GU5 9JH",
+      "postcode": "GU5 9JH",
+      "listEntryNumbers": [
+        "1029471"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029471",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029471"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:LITTLETON FARMHOUSE LITTLETON LANE GUILDFORD GU3 1HW|GU31HW",
+      "address": "LITTLETON FARMHOUSE, LITTLETON LANE, GUILDFORD, GU3 1HW",
+      "postcode": "GU3 1HW",
+      "listEntryNumbers": [
+        "1029533"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029533",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029533"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:LONG WALL GOLF CLUB ROAD WEYBRIDGE KT13 0NJ|KT130NJ",
+      "address": "LONG WALL, GOLF CLUB ROAD, WEYBRIDGE, KT13 0NJ",
+      "postcode": "KT13 0NJ",
+      "listEntryNumbers": [
+        "1375675"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1375675",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1375675"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:LONGDOWN HOUSE LONGDOWN LANE NORTH EPSOM KT17 3JB|KT173JB",
+      "address": "LONGDOWN HOUSE, LONGDOWN LANE NORTH, EPSOM, KT17 3JB",
+      "postcode": "KT17 3JB",
+      "listEntryNumbers": [
+        "1213416"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1213416",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1213416"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:LOSELY HOLMBURY ROAD EWHURST CRANLEIGH GU6 7SJ|GU67SJ",
+      "address": "LOSELY, HOLMBURY ROAD, EWHURST, CRANLEIGH, GU6 7SJ",
+      "postcode": "GU6 7SJ",
+      "listEntryNumbers": [
+        "1352797"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1352797",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1352797",
+        "https://waverley.inconsult.uk/gf2.ti/f/1334658/119022789.1/PDF/-/Buildings%20and%20Structures%20of%20Architectural%20and%20Historic%20Interest%20in%20the%20Parish%20of%20Ewhurst_%20Surrey.pdf"
+      ],
+      "note": "Waverley's official heritage record identifies Losely on Holmbury Road with the same rounded grid reference as the legacy Three Mile Road entry."
+    },
+    {
+      "propertyRecordId": "property:MANOR HOUSE THE GREEN CHIDDINGFOLD GODALMING GU8 4TU|GU84TU",
+      "address": "MANOR HOUSE, THE GREEN, CHIDDINGFOLD, GODALMING, GU8 4TU",
+      "postcode": "GU8 4TU",
+      "listEntryNumbers": [
+        "1277975"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1277975",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1277975"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:MILL HOUSE PETWORTH ROAD CHIDDINGFOLD GODALMING GU8 4SL|GU84SL",
+      "address": "MILL HOUSE, PETWORTH ROAD, CHIDDINGFOLD, GODALMING, GU8 4SL",
+      "postcode": "GU8 4SL",
+      "listEntryNumbers": [
+        "1248583"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1248583",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1248583"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:MILLSTREAM HOUSE MILL LANE RIPLEY WOKING GU23 6QT|GU236QT",
+      "address": "MILLSTREAM HOUSE, MILL LANE, RIPLEY, WOKING, GU23 6QT",
+      "postcode": "GU23 6QT",
+      "listEntryNumbers": [
+        "1188416"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1188416",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1188416"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:MOAT FARM ARDENRUN LINGFIELD RH7 6LN|RH76LN",
+      "address": "MOAT FARM, ARDENRUN, LINGFIELD, RH7 6LN",
+      "postcode": "RH7 6LN",
+      "listEntryNumbers": [
+        "1029717"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029717",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029717"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:MOOR FARM MOOR LANE MARSH GREEN EDENBRIDGE TN8 5RA|TN85RA",
+      "address": "MOOR FARM, MOOR LANE, MARSH GREEN, EDENBRIDGE, TN8 5RA",
+      "postcode": "TN8 5RA",
+      "listEntryNumbers": [
+        "1029890"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029890",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029890"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:MUNSTEAD PLACE HEATH LANE GODALMING GODALMING GU7 1UN|GU71UN",
+      "address": "MUNSTEAD PLACE, HEATH LANE, GODALMING, GODALMING, GU7 1UN",
+      "postcode": "GU7 1UN",
+      "listEntryNumbers": [
+        "1240098"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1240098",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1240098"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:NEW PARK HORSHAM ROAD CRANLEIGH GU6 8EJ|GU68EJ",
+      "address": "NEW PARK, HORSHAM ROAD, CRANLEIGH, GU6 8EJ",
+      "postcode": "GU6 8EJ",
+      "listEntryNumbers": [
+        "1189721"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1189721",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1189721"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:OAK FARM JESSES LANE PEASLAKE GUILDFORD GU5 9RT|GU59RT",
+      "address": "OAK FARM, JESSES LANE, PEASLAKE, GUILDFORD, GU5 9RT",
+      "postcode": "GU5 9RT",
+      "listEntryNumbers": [
+        "1029486"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029486",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029486"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:OCKHAM MILL MILL LANE RIPLEY WOKING GU23 6QT|GU236QT",
+      "address": "OCKHAM MILL, MILL LANE, RIPLEY, WOKING, GU23 6QT",
+      "postcode": "GU23 6QT",
+      "listEntryNumbers": [
+        "1188416"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1188416",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1188416"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:OLD GREENDENE COTTAGE GREEN DENE EAST HORSLEY LEATHERHEAD KT24 5TB|KT245TB",
+      "address": "OLD GREENDENE COTTAGE, GREEN DENE, EAST HORSLEY, LEATHERHEAD, KT24 5TB",
+      "postcode": "KT24 5TB",
+      "listEntryNumbers": [
+        "1377812"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377812",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377812"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:OLD HURST STATION LANE MILFORD GODALMING GU8 5HT|GU85HT",
+      "address": "OLD HURST, STATION LANE, MILFORD, GODALMING, GU8 5HT",
+      "postcode": "GU8 5HT",
+      "listEntryNumbers": [
+        "1096900"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1096900",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1096900"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:OLD PICKHURST PICKHURST ROAD CHIDDINGFOLD GODALMING GU8 4YD|GU84YD",
+      "address": "OLD PICKHURST, PICKHURST ROAD, CHIDDINGFOLD, GODALMING, GU8 4YD",
+      "postcode": "GU8 4YD",
+      "listEntryNumbers": [
+        "1248584"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1248584",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1248584"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:OLD RECTORY GODALMING ROAD LOXHILL GODALMING GU8 4BQ|GU84BQ",
+      "address": "OLD RECTORY, GODALMING ROAD, LOXHILL, GODALMING, GU8 4BQ",
+      "postcode": "GU8 4BQ",
+      "listEntryNumbers": [
+        "1260931"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1260931",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1260931"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:ORCHARD HOUSE THAMES STREET SUNBURY ON THAMES TW16 6AB|TW166AB",
+      "address": "ORCHARD HOUSE, THAMES STREET, SUNBURY-ON-THAMES, TW16 6AB",
+      "postcode": "TW16 6AB",
+      "listEntryNumbers": [
+        "1377700"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377700",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377700"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:OVERDEANS COURT DIPPENHALL FARNHAM GU10 5EB|GU105EB",
+      "address": "OVERDEANS COURT, DIPPENHALL, FARNHAM, GU10 5EB",
+      "postcode": "GU10 5EB",
+      "listEntryNumbers": [
+        "1044633"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044633",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044633"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:PEAR TREE COTTAGE THE COMMON CRANLEIGH GU6 8QA|GU68QA",
+      "address": "PEAR TREE COTTAGE, THE COMMON, CRANLEIGH, GU6 8QA",
+      "postcode": "GU6 8QA",
+      "listEntryNumbers": [
+        "1189621"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1189621",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1189621"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:PEAR TREE HOUSE 1 CHERTSEY ROAD CHOBHAM WOKING GU24 8ND|GU248ND",
+      "address": "PEAR TREE HOUSE, 1, CHERTSEY ROAD, CHOBHAM, WOKING, GU24 8ND",
+      "postcode": "GU24 8ND",
+      "listEntryNumbers": [
+        "1294238"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1294238",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1294238"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:PENDELL HOUSE PENDELL ROAD BLETCHINGLEY REDHILL RH1 4QH|RH14QH",
+      "address": "PENDELL HOUSE, PENDELL ROAD, BLETCHINGLEY, REDHILL, RH1 4QH",
+      "postcode": "RH1 4QH",
+      "listEntryNumbers": [
+        "1029987"
+      ],
+      "grade": "I",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029987",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029987"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:PITCH PLACE HOUSE WORPLESDON ROAD GUILDFORD GU3 3LQ|GU33LQ",
+      "address": "PITCH PLACE HOUSE, WORPLESDON ROAD, GUILDFORD, GU3 3LQ",
+      "postcode": "GU3 3LQ",
+      "listEntryNumbers": [
+        "1029589"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029589",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029589"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:PIXHAM MILL HOUSE PIXHAM LANE DORKING RH4 1PQ|RH41PQ",
+      "address": "PIXHAM MILL HOUSE, PIXHAM LANE, DORKING, RH4 1PQ",
+      "postcode": "RH4 1PQ",
+      "listEntryNumbers": [
+        "1271210"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1271210",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1271210"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:POUND FARM THE COMMON DUNSFOLD GODALMING GU8 4LA|GU84LA",
+      "address": "POUND FARM, THE COMMON, DUNSFOLD, GODALMING, GU8 4LA",
+      "postcode": "GU8 4LA",
+      "listEntryNumbers": [
+        "1044352"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044352",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044352"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:REDWOOD HIGH STREET GREEN CHIDDINGFOLD GODALMING GU8 4XY|GU84XY",
+      "address": "REDWOOD, HIGH STREET GREEN, CHIDDINGFOLD, GODALMING, GU8 4XY",
+      "postcode": "GU8 4XY",
+      "listEntryNumbers": [
+        "1277932"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1277932",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1277932"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:ROBIN HILL BOWLHEAD GREEN GODALMING GU8 6NW|GU86NW",
+      "address": "ROBIN HILL, BOWLHEAD GREEN, GODALMING, GU8 6NW",
+      "postcode": "GU8 6NW",
+      "listEntryNumbers": [
+        "1240752"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1240752",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1240752"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:RODSALL MANOR RODSALL LANE PUTTENHAM GUILDFORD GU3 1BE|GU31BE",
+      "address": "RODSALL MANOR, RODSALL LANE, PUTTENHAM, GUILDFORD, GU3 1BE",
+      "postcode": "GU3 1BE",
+      "listEntryNumbers": [
+        "1377705"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377705",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377705"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:ROOKERY FARM BALCHINS LANE WESTCOTT DORKING RH4 3LL|RH43LL",
+      "address": "ROOKERY FARM, BALCHINS LANE, WESTCOTT, DORKING, RH4 3LL",
+      "postcode": "RH4 3LL",
+      "listEntryNumbers": [
+        "1028906"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1028906",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1028906"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:ROPPELEGHS WEST END LANE HASLEMERE HASLEMERE GU27 2EN|GU272EN",
+      "address": "ROPPELEGHS, WEST END LANE, HASLEMERE, HASLEMERE, GU27 2EN",
+      "postcode": "GU27 2EN",
+      "listEntryNumbers": [
+        "1248595"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1248595",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1248595",
+        "https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/planning-applications-and-enforcement/planning%20applications/weekly%20lists/weekly_list_2025-07-28.pdf"
+      ],
+      "note": "Waverley records confirm Roppeleghs as the current spelling of the statutory Roppelaghs property at West End Lane."
+    },
+    {
+      "propertyRecordId": "property:RYDE HOUSE HIGH STREET RIPLEY WOKING GU23 6AT|GU236AT",
+      "address": "RYDE HOUSE, HIGH STREET, RIPLEY, WOKING, GU23 6AT",
+      "postcode": "GU23 6AT",
+      "listEntryNumbers": [
+        "1029369"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029369",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029369"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:SANDHILLS OUTWOOD LANE BLETCHINGLEY REDHILL RH1 4LS|RH14LS",
+      "address": "SANDHILLS, OUTWOOD LANE, BLETCHINGLEY, REDHILL, RH1 4LS",
+      "postcode": "RH1 4LS",
+      "listEntryNumbers": [
+        "1204642"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1204642",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1204642"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:SENTOSA ESHER CLOSE ESHER KT10 9LL|KT109LL",
+      "address": "SENTOSA, ESHER CLOSE, ESHER, KT10 9LL",
+      "postcode": "KT10 9LL",
+      "listEntryNumbers": [
+        "1030092"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1030092",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1030092"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:SHELLEYS COTTAGE WICK LANE ENGLEFIELD GREEN EGHAM TW20 0XE|TW200XE",
+      "address": "SHELLEYS COTTAGE, WICK LANE, ENGLEFIELD GREEN, EGHAM, TW20 0XE",
+      "postcode": "TW20 0XE",
+      "listEntryNumbers": [
+        "1028923"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1028923",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1028923"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:SOMERSBURY MANOR SOMERSBURY LANE EWHURST CRANLEIGH GU6 7SR|GU67SR",
+      "address": "SOMERSBURY MANOR, SOMERSBURY LANE, EWHURST, CRANLEIGH, GU6 7SR",
+      "postcode": "GU6 7SR",
+      "listEntryNumbers": [
+        "1044342"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044342",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044342"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:SPREAKLEY HOUSE FRENSHAM FARNHAM GU10 3EJ|GU103EJ",
+      "address": "SPREAKLEY HOUSE, FRENSHAM, FARNHAM, GU10 3EJ",
+      "postcode": "GU10 3EJ",
+      "listEntryNumbers": [
+        "1044466"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044466",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044466"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:ST MARTHAS PRIORY HALFPENNY LANE GUILDFORD GU4 8PZ|GU48PZ",
+      "address": "ST. MARTHAS PRIORY, HALFPENNY LANE, GUILDFORD, GU4 8PZ",
+      "postcode": "GU4 8PZ",
+      "listEntryNumbers": [
+        "1393416"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1393416",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1393416"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:STABLE FLAT ELDERSLIE STANE STREET OCKLEY DORKING RH5 5TD|RH55TD",
+      "address": "STABLE FLAT, ELDERSLIE, STANE STREET, OCKLEY, DORKING, RH5 5TD",
+      "postcode": "RH5 5TD",
+      "listEntryNumbers": [
+        "1028701"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1028701",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1028701"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:STANNERS HILL COTTAGE STONEHILL ROAD CHOBHAM WOKING GU24 8HN|GU248HN",
+      "address": "STANNERS HILL COTTAGE, STONEHILL ROAD, CHOBHAM, WOKING, GU24 8HN",
+      "postcode": "GU24 8HN",
+      "listEntryNumbers": [
+        "1377513"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377513",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377513",
+        "https://publicaccess.surreyheath.gov.uk/online-applications/applicationDetails.do?keyVal=ZZZZN4PRDR782&activeTab=summary"
+      ],
+      "note": "Current Surrey Heath planning records and the official NGR confirm Stanners Hill Cottage as the current identity of the designated property."
+    },
+    {
+      "propertyRecordId": "property:STREET HOUSE THE STREET THURSLEY GODALMING GU8 6QE|GU86QE",
+      "address": "STREET HOUSE, THE STREET, THURSLEY, GODALMING, GU8 6QE",
+      "postcode": "GU8 6QE",
+      "listEntryNumbers": [
+        "1240968"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1240968",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1240968"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:SUMMERS THE STREET WEST CLANDON GUILDFORD GU4 7SY|GU47SY",
+      "address": "SUMMERS, THE STREET, WEST CLANDON, GUILDFORD, GU4 7SY",
+      "postcode": "GU4 7SY",
+      "listEntryNumbers": [
+        "1029355"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029355",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029355"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:TANHURST TANHURST LANE HOLMBURY ST MARY DORKING RH5 6LU|RH56LU",
+      "address": "TANHURST, TANHURST LANE, HOLMBURY ST MARY, DORKING, RH5 6LU",
+      "postcode": "RH5 6LU",
+      "listEntryNumbers": [
+        "1294023"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1294023",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1294023"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:THATCHED HOUSE FARM DUNSFOLD ROAD LOXHILL GODALMING GU8 4BW|GU84BW",
+      "address": "THATCHED HOUSE FARM, DUNSFOLD ROAD, LOXHILL, GODALMING, GU8 4BW",
+      "postcode": "GU8 4BW",
+      "listEntryNumbers": [
+        "1044577"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044577",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044577"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:THE CLOSE HOUSE CHINTHURST LANE WONERSH GUILDFORD GU5 0QH|GU50QH",
+      "address": "THE CLOSE HOUSE, CHINTHURST LANE, WONERSH, GUILDFORD, GU5 0QH",
+      "postcode": "GU5 0QH",
+      "listEntryNumbers": [
+        "1260635"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1260635",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1260635"
+      ],
+      "note": "The NHLE entry expressly records the divided house's former listed name as Chinthurst Hill, Close House and the Gatehouse."
+    },
+    {
+      "propertyRecordId": "property:THE COACH HOUSE EASHING LANE GODALMING GU7 2QA|GU72QA",
+      "address": "THE COACH HOUSE, EASHING LANE, GODALMING, GU7 2QA",
+      "postcode": "GU7 2QA",
+      "listEntryNumbers": [
+        "1377780"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377780",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377780"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:THE MANOR HOUSE MILL LANE PIRBRIGHT WOKING GU24 0BN|GU240BN",
+      "address": "THE MANOR HOUSE, MILL LANE, PIRBRIGHT, WOKING, GU24 0BN",
+      "postcode": "GU24 0BN",
+      "listEntryNumbers": [
+        "1188635"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1188635",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1188635"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:THE MANOR HOUSE NORWOOD HILL ROAD CHARLWOOD HORLEY RH6 0ED|RH60ED",
+      "address": "THE MANOR HOUSE, NORWOOD HILL ROAD, CHARLWOOD, HORLEY, RH6 0ED",
+      "postcode": "RH6 0ED",
+      "listEntryNumbers": [
+        "1248380"
+      ],
+      "grade": "II*",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1248380",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1248380"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:THE MANOR HOUSE PUTTENHAM HEATH ROAD PUTTENHAM GUILDFORD GU3 1AP|GU31AP",
+      "address": "THE MANOR HOUSE, PUTTENHAM HEATH ROAD, PUTTENHAM, GUILDFORD, GU3 1AP",
+      "postcode": "GU3 1AP",
+      "listEntryNumbers": [
+        "1377719"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377719",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377719"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:THE NORE TELEGRAPH HILL HASCOMBE GODALMING GU8 4BT|GU84BT",
+      "address": "THE NORE, TELEGRAPH HILL, HASCOMBE, GODALMING, GU8 4BT",
+      "postcode": "GU8 4BT",
+      "listEntryNumbers": [
+        "1044548"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044548",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044548"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:THE OLD HOUSE PITT LANE FRENSHAM FARNHAM GU10 3EF|GU103EF",
+      "address": "THE OLD HOUSE, PITT LANE, FRENSHAM, FARNHAM, GU10 3EF",
+      "postcode": "GU10 3EF",
+      "listEntryNumbers": [
+        "1044451"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044451",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044451"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:THE OLD VICARAGE BOROUGH ROAD GODALMING GU7 1ES|GU71ES",
+      "address": "THE OLD VICARAGE, BOROUGH ROAD, GODALMING, GU7 1ES",
+      "postcode": "GU7 1ES",
+      "listEntryNumbers": [
+        "1044565"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044565",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044565",
+        "https://godalming-tc.gov.uk/wp-content/uploads/2016/08/12.-21-August-2014-PE-Minutes.pdf"
+      ],
+      "note": "Godalming authority records link the current Old Vicarage name to the NHLE Vicarage at the exact Borough Road address."
+    },
+    {
+      "propertyRecordId": "property:THE STABLES UPPER HIGHFIELD FARMHOUSE HIGHFIELD LANE THURSLEY GODALMING GU8 6QJ|GU86QJ",
+      "address": "THE STABLES, UPPER HIGHFIELD FARMHOUSE, HIGHFIELD LANE, THURSLEY, GODALMING, GU8 6QJ",
+      "postcode": "GU8 6QJ",
+      "listEntryNumbers": [
+        "1260875"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1260875",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1260875"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:THE TERRACE APARTMENT 4 THE MANSION OTTERSHAW PARK OTTERSHAW CHERTSEY KT16 0QG|KT160QG",
+      "address": "THE TERRACE APARTMENT 4, THE MANSION, OTTERSHAW PARK, OTTERSHAW, CHERTSEY, KT16 0QG",
+      "postcode": "KT16 0QG",
+      "listEntryNumbers": [
+        "1242304"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1242304",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1242304"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:TUGLEY FARM PICKHURST ROAD CHIDDINGFOLD GODALMING GU8 4TG|GU84TG",
+      "address": "TUGLEY FARM, PICKHURST ROAD, CHIDDINGFOLD, GODALMING, GU8 4TG",
+      "postcode": "GU8 4TG",
+      "listEntryNumbers": [
+        "1044601"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044601",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044601"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:TUMBLEDOWN FARM WHEELERS LANE BROCKHAM BETCHWORTH RH3 7HJ|RH37HJ",
+      "address": "TUMBLEDOWN FARM, WHEELERS LANE, BROCKHAM, BETCHWORTH, RH3 7HJ",
+      "postcode": "RH3 7HJ",
+      "listEntryNumbers": [
+        "1278727"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1278727",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1278727"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:UPPER SYDENHURST MILL LANE CHIDDINGFOLD GODALMING GU8 4SJ|GU84SJ",
+      "address": "UPPER SYDENHURST, MILL LANE, CHIDDINGFOLD, GODALMING, GU8 4SJ",
+      "postcode": "GU8 4SJ",
+      "listEntryNumbers": [
+        "1248479"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1248479",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1248479"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:VANHURST THORNCOMBE STREET BRAMLEY GUILDFORD GU5 0ND|GU50ND",
+      "address": "VANHURST, THORNCOMBE STREET, BRAMLEY, GUILDFORD, GU5 0ND",
+      "postcode": "GU5 0ND",
+      "listEntryNumbers": [
+        "1240033"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1240033",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1240033"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:WARREN MERE PORTSMOUTH ROAD THURSLEY GODALMING GU8 6NA|GU86NA",
+      "address": "WARREN MERE, PORTSMOUTH ROAD, THURSLEY, GODALMING, GU8 6NA",
+      "postcode": "GU8 6NA",
+      "listEntryNumbers": [
+        "1260848"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1260848",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1260848"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:WEST END HOUSE WEST END LANE FRENSHAM FARNHAM GU10 3EP|GU103EP",
+      "address": "WEST END HOUSE, WEST END LANE, FRENSHAM, FARNHAM, GU10 3EP",
+      "postcode": "GU10 3EP",
+      "listEntryNumbers": [
+        "1352734"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1352734",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1352734"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:WEST FLEXFORD HOUSE WEST FLEXFORD LANE WANBOROUGH GUILDFORD GU3 2JW|GU32JW",
+      "address": "WEST FLEXFORD HOUSE, WEST FLEXFORD LANE, WANBOROUGH, GUILDFORD, GU3 2JW",
+      "postcode": "GU3 2JW",
+      "listEntryNumbers": [
+        "1191481"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1191481",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1191481"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:WEST RIDGE WALPOLE AVENUE CHIPSTEAD COULSDON CR5 3PR|CR53PR",
+      "address": "WEST RIDGE, WALPOLE AVENUE, CHIPSTEAD, COULSDON, CR5 3PR",
+      "postcode": "CR5 3PR",
+      "listEntryNumbers": [
+        "1466683"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1466683",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1466683"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:WESTBROOK HOUSE WESTBROOK ROAD GODALMING GODALMING GU7 2QH|GU72QH",
+      "address": "WESTBROOK HOUSE, WESTBROOK ROAD, GODALMING, GODALMING, GU7 2QH",
+      "postcode": "GU7 2QH",
+      "listEntryNumbers": [
+        "1299619"
+      ],
+      "grade": "II*",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1299619",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1299619"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:WESTON HOUSE THE STREET ALBURY GUILDFORD GU5 9AE|GU59AE",
+      "address": "WESTON HOUSE, THE STREET, ALBURY, GUILDFORD, GU5 9AE",
+      "postcode": "GU5 9AE",
+      "listEntryNumbers": [
+        "1188236"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1188236",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1188236"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:WESTON LODGE THE STREET ALBURY GUILDFORD GU5 9AE|GU59AE",
+      "address": "WESTON LODGE, THE STREET, ALBURY, GUILDFORD, GU5 9AE",
+      "postcode": "GU5 9AE",
+      "listEntryNumbers": [
+        "1390537"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1390537",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1390537"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:WIDEWOODS HORSHAM LANE EWHURST CRANLEIGH GU6 7SW|GU67SW",
+      "address": "WIDEWOODS, HORSHAM LANE, EWHURST, CRANLEIGH, GU6 7SW",
+      "postcode": "GU6 7SW",
+      "listEntryNumbers": [
+        "1424163"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1424163",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1424163"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:WILLINGHURST FARMHOUSE WILLINGHURST ESTATE SHAMLEY GREEN GUILDFORD GU5 0SU|GU50SU",
+      "address": "WILLINGHURST FARMHOUSE, WILLINGHURST ESTATE, SHAMLEY GREEN, GUILDFORD, GU5 0SU",
+      "postcode": "GU5 0SU",
+      "listEntryNumbers": [
+        "1241581"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1241581",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1241581"
+      ],
+      "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:WILLINGHURST HOUSE WILLINGHURST ESTATE SHAMLEY GREEN GUILDFORD GU5 0SU|GU50SU",
+      "address": "WILLINGHURST HOUSE, WILLINGHURST ESTATE, SHAMLEY GREEN, GUILDFORD, GU5 0SU",
+      "postcode": "GU5 0SU",
+      "listEntryNumbers": [
+        "1241361"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1241361",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1241361"
+      ],
+      "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:WOODWAYS 46 ABBOTSWOOD GUILDFORD GU1 1UY|GU11UY",
+      "address": "WOODWAYS, 46, ABBOTSWOOD, GUILDFORD, GU1 1UY",
+      "postcode": "GU1 1UY",
+      "listEntryNumbers": [
+        "1119784"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1119784",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1119784"
+      ],
+      "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:YAFFLE HILL YAFFLE ROAD WEYBRIDGE KT13 0QF|KT130QF",
+      "address": "YAFFLE HILL, YAFFLE ROAD, WEYBRIDGE, KT13 0QF",
+      "postcode": "KT13 0QF",
+      "listEntryNumbers": [
+        "1392383"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1392383",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1392383"
+      ],
+      "note": "Canonical statutory address exact."
+    }
+  ],
+  "noDirectMappings": [
+    {
+      "propertyRecordId": "property:12 CLAREMONT DRIVE ESHER KT10 9LU|KT109LU",
+      "address": "12, CLAREMONT DRIVE, ESHER, KT10 9LU",
+      "postcode": "KT10 9LU",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1377465"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377465"
+      ],
+      "note": "The shortlisted NHLE entries designate ancillary structures rather than the transacted property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:16 CLAREMONT DRIVE ESHER KT10 9LU|KT109LU",
+      "address": "16, CLAREMONT DRIVE, ESHER, KT10 9LU",
+      "postcode": "KT10 9LU",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1377465"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377465"
+      ],
+      "note": "The shortlisted NHLE entries designate ancillary structures rather than the transacted property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:2 CLAREMONT DRIVE ESHER KT10 9LU|KT109LU",
+      "address": "2, CLAREMONT DRIVE, ESHER, KT10 9LU",
+      "postcode": "KT10 9LU",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1377465"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377465"
+      ],
+      "note": "The shortlisted NHLE entries designate ancillary structures rather than the transacted property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:22 CLAREMONT DRIVE ESHER ESHER KT10 9LU|KT109LU",
+      "address": "22, CLAREMONT DRIVE, ESHER, ESHER, KT10 9LU",
+      "postcode": "KT10 9LU",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1377465"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377465"
+      ],
+      "note": "The shortlisted NHLE entries designate ancillary structures rather than the transacted property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:3 CLAREMONT DRIVE ESHER KT10 9LU|KT109LU",
+      "address": "3, CLAREMONT DRIVE, ESHER, KT10 9LU",
+      "postcode": "KT10 9LU",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1377465"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377465"
+      ],
+      "note": "The shortlisted NHLE entries designate ancillary structures rather than the transacted property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:3 CLAREMONT PARK ROAD ESHER KT10 9LT|KT109LT",
+      "address": "3, CLAREMONT PARK ROAD, ESHER, KT10 9LT",
+      "postcode": "KT10 9LT",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1377465"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377465"
+      ],
+      "note": "The shortlisted NHLE entries designate ancillary structures rather than the transacted property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:8 CLAREMONT DRIVE ESHER KT10 9LU|KT109LU",
+      "address": "8, CLAREMONT DRIVE, ESHER, KT10 9LU",
+      "postcode": "KT10 9LU",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1377465"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377465"
+      ],
+      "note": "The shortlisted NHLE entries designate ancillary structures rather than the transacted property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:ALDERMOOR HOLMBURY ST MARY DORKING RH5 6NR|RH56NR",
+      "address": "ALDERMOOR, HOLMBURY ST MARY, DORKING, RH5 6NR",
+      "postcode": "RH5 6NR",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1377763"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377763"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:ASHLEY HOUSE 68 ASHLEY PARK AVENUE WALTON ON THAMES KT12 1EU|KT121EU",
+      "address": "ASHLEY HOUSE, 68, ASHLEY PARK AVENUE, WALTON-ON-THAMES, KT12 1EU",
+      "postcode": "KT12 1EU",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1365887"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1365887"
+      ],
+      "note": "NHLE 1365887 is Ashley House, 13 Oatlands Drive, a different numbered street address. The status means no direct NHLE match, not legal proof of being unlisted."
+    },
+    {
+      "propertyRecordId": "property:BARN COTTAGE CHURCH LANE BROOK GODALMING GU8 5UQ|GU85UQ",
+      "address": "BARN COTTAGE, CHURCH LANE, BROOK, GODALMING, GU8 5UQ",
+      "postcode": "GU8 5UQ",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1241014"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1241014"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:CEDAR HOUSE 1 MIZEN CLOSE COBHAM KT11 2RJ|KT112RJ",
+      "address": "CEDAR HOUSE, 1, MIZEN CLOSE, COBHAM, KT11 2RJ",
+      "postcode": "KT11 2RJ",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1365901"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1365901",
+        "https://www.elmbridge.gov.uk/sites/default/files/2023-05/Land%20Availability%20Assessment%202021.pdf"
+      ],
+      "note": "NHLE 1365901 is Cedar House, Mill Road, KT11 3AL; Mizen Close is a distinct property. The status means no direct NHLE match, not legal proof of being unlisted."
+    },
+    {
+      "propertyRecordId": "property:CHINTHURST COTTAGE CHINTHURST LANE SHALFORD GUILDFORD GU4 8JR|GU48JR",
+      "address": "CHINTHURST COTTAGE, CHINTHURST LANE, SHALFORD, GUILDFORD, GU4 8JR",
+      "postcode": "GU4 8JR",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1029491"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029491"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:COACH HOUSE GOWER ROAD WEYBRIDGE KT13 0HA|KT130HA",
+      "address": "COACH HOUSE, GOWER ROAD, WEYBRIDGE, KT13 0HA",
+      "postcode": "KT13 0HA",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1030248"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1030248",
+        "https://elmbridge.gov.uk/sites/default/files/2023-04/Weybridge%20Town%20Centre%20character%20appraisal.pdf"
+      ],
+      "note": "NHLE 1030248 is the coach house and stable block to the Queen's Head on Bridge Road, not Gower Road. The status means no direct NHLE match, not legal proof of being unlisted."
+    },
+    {
+      "propertyRecordId": "property:FIELDHEAD HOUSE CHURCH HILL SHAMLEY GREEN GUILDFORD GU5 0UD|GU50UD",
+      "address": "FIELDHEAD HOUSE, CHURCH HILL, SHAMLEY GREEN, GUILDFORD, GU5 0UD",
+      "postcode": "GU5 0UD",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1260648"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1260648"
+      ],
+      "note": "NHLE 1260648 directly designates Old Hall and Oak House at the shared postcode, not Fieldhead House. The status means no direct NHLE match, not legal proof of being unlisted."
+    },
+    {
+      "propertyRecordId": "property:GARDEN COTTAGE THE OLD PARSONAGE THE STREET EAST CLANDON GUILDFORD GU4 7RU|GU47RU",
+      "address": "GARDEN COTTAGE, THE OLD PARSONAGE, THE STREET, EAST CLANDON, GUILDFORD, GU4 7RU",
+      "postcode": "GU4 7RU",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1029447"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029447",
+        "https://publicaccess.guildford.gov.uk/online-applications/propertyDetails.do?keyVal=_GUILD_PROPLPI_6217795_1&activeTab=summary"
+      ],
+      "note": "Guildford records Garden Cottage separately from the directly designated Old Parsonage. No direct grade is assigned; possible curtilage protection is not determined. The status means no direct NHLE match, not legal proof of being unlisted."
+    },
+    {
+      "propertyRecordId": "property:HIGH PINES WESTWOOD ROAD WINDLESHAM GU20 6LS|GU206LS",
+      "address": "HIGH PINES, WESTWOOD ROAD, WINDLESHAM, GU20 6LS",
+      "postcode": "GU20 6LS",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1380298"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1380298"
+      ],
+      "note": "NHLE 1380298 designates High Chimneys; High Pines is a different named property. The status means no direct NHLE match, not legal proof of being unlisted."
+    },
+    {
+      "propertyRecordId": "property:HOE HOUSE FRANKSFIELD PEASLAKE GUILDFORD GU5 9SR|GU59SR",
+      "address": "HOE HOUSE, FRANKSFIELD, PEASLAKE, GUILDFORD, GU5 9SR",
+      "postcode": "GU5 9SR",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1189403"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1189403"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:HOLDFAST HOUSE HOLDFAST LANE HASLEMERE GU27 2EU|GU272EU",
+      "address": "HOLDFAST HOUSE, HOLDFAST LANE, HASLEMERE, GU27 2EU",
+      "postcode": "GU27 2EU",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1244177"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1244177"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:HOLMDALE COTTAGE HOLMBURY ST MARY DORKING RH5 6NR|RH56NR",
+      "address": "HOLMDALE COTTAGE, HOLMBURY ST MARY, DORKING, RH5 6NR",
+      "postcode": "RH5 6NR",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1029481"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029481"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:JEBB HOUSE RUNNYMEDE PARK TITE HILL EGHAM TW20 0NB|TW200NB",
+      "address": "JEBB HOUSE, RUNNYMEDE PARK, TITE HILL, EGHAM, TW20 0NB",
+      "postcode": "TW20 0NB",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1028921"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1028921",
+        "https://planning.runnymede.gov.uk/Northgate/PlanningExplorer/GeneralSearch.aspx"
+      ],
+      "note": "Runnymede application RU.07/0925 identifies Jebb House as a dwelling independent of the Grade I Runnymede Park mansion. The status means no direct NHLE match, not legal proof of being unlisted."
+    },
+    {
+      "propertyRecordId": "property:LITTLEWOOD PYLE HILL WOKING WOKING GU22 0SR|GU220SR",
+      "address": "LITTLEWOOD, PYLE HILL, WOKING, WOKING, GU22 0SR",
+      "postcode": "GU22 0SR",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1236749"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1236749"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:ORMISTON BUNCH LANE HASLEMERE GU27 1AJ|GU271AJ",
+      "address": "ORMISTON, BUNCH LANE, HASLEMERE, GU27 1AJ",
+      "postcode": "GU27 1AJ",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1272654"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1272654"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:RIDGEWAY FARM SAILORS LANE THURSLEY GODALMING GU8 6QP|GU86QP",
+      "address": "RIDGEWAY FARM, SAILORS LANE, THURSLEY, GODALMING, GU8 6QP",
+      "postcode": "GU8 6QP",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1260844"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1260844"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:SOUTH LODGE THE CHASE OXSHOTT LEATHERHEAD KT22 0HY|KT220HY",
+      "address": "SOUTH LODGE, THE CHASE, OXSHOTT, LEATHERHEAD, KT22 0HY",
+      "postcode": "KT22 0HY",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1377479"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377479"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:STANYARDS CHERTSEY ROAD CHOBHAM WOKING GU24 8JE|GU248JE",
+      "address": "STANYARDS, CHERTSEY ROAD, CHOBHAM, WOKING, GU24 8JE",
+      "postcode": "GU24 8JE",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1189674"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1189674"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:THE COACH HOUSE GRANVILLE CLOSE WEYBRIDGE KT13 0QH|KT130QH",
+      "address": "THE COACH HOUSE, GRANVILLE CLOSE, WEYBRIDGE, KT13 0QH",
+      "postcode": "KT13 0QH",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1030248"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1030248"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:THE COACH HOUSE WEY ROAD WEYBRIDGE KT13 8HP|KT138HP",
+      "address": "THE COACH HOUSE, WEY ROAD, WEYBRIDGE, KT13 8HP",
+      "postcode": "KT13 8HP",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1029695",
+        "1030248"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1030248",
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029695"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:THE DRIVE LODGE RAKE MANOR STATION LANE MILFORD GODALMING GU8 5AD|GU85AD",
+      "address": "THE DRIVE LODGE, RAKE MANOR, STATION LANE, MILFORD, GODALMING, GU8 5AD",
+      "postcode": "GU8 5AD",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1096899"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1096899"
+      ],
+      "note": "The shortlisted NHLE entries designate ancillary structures rather than the transacted property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:THE OLD BARN HORSHAM ROAD CRANLEIGH GU6 8EJ|GU68EJ",
+      "address": "THE OLD BARN, HORSHAM ROAD, CRANLEIGH, GU6 8EJ",
+      "postcode": "GU6 8EJ",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1044589"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044589"
+      ],
+      "note": "NHLE 1044589 is Old Barns at Bramley/Rushett Common, a different property roughly 6 km away. The status means no direct NHLE match, not legal proof of being unlisted."
+    },
+    {
+      "propertyRecordId": "property:THE OLD VICARAGE 5 SWINGATE ROAD FARNHAM GU9 8JJ|GU98JJ",
+      "address": "THE OLD VICARAGE, 5, SWINGATE ROAD, FARNHAM, GU9 8JJ",
+      "postcode": "GU9 8JJ",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1273555"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1273555"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:THE OLD VICARAGE OLD REIGATE ROAD BETCHWORTH RH3 7DE|RH37DE",
+      "address": "THE OLD VICARAGE, OLD REIGATE ROAD, BETCHWORTH, RH3 7DE",
+      "postcode": "RH3 7DE",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1378130"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1378130"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:THE WHITE HOUSE 27 CHURCH ROAD MILFORD GODALMING GU8 5JB|GU85JB",
+      "address": "THE WHITE HOUSE, 27, CHURCH ROAD, MILFORD, GODALMING, GU8 5JB",
+      "postcode": "GU8 5JB",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1188896"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1188896"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:TODD HOUSE THE STREET WEST CLANDON GUILDFORD GU4 7TG|GU47TG",
+      "address": "TODD HOUSE, THE STREET, WEST CLANDON, GUILDFORD, GU4 7TG",
+      "postcode": "GU4 7TG",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1029357"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029357",
+        "https://www.guildford.gov.uk/media/36241/Appendix-4-Sites-with-Outstanding-Planning-Permission-2024/pdf/Appendix_4_-_Sites_with_Outstanding_Planning_Permission_-_2024.pdf?m=1724243047177"
+      ],
+      "note": "NHLE 1029357 directly designates The Old House. Todd House is separately identified in current Guildford planning records. The status means no direct NHLE match, not legal proof of being unlisted."
+    },
+    {
+      "propertyRecordId": "property:TYRRELLS WOOD HOUSE TYRRELLS WOOD LEATHERHEAD KT22 8QW|KT228QW",
+      "address": "TYRRELLS WOOD HOUSE, TYRRELLS WOOD, LEATHERHEAD, KT22 8QW",
+      "postcode": "KT22 8QW",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1028595"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1028595"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:WESTBROOK HOUSE WESTBROOK HILL ELSTEAD GODALMING GU8 6LJ|GU86LJ",
+      "address": "WESTBROOK HOUSE, WESTBROOK HILL, ELSTEAD, GODALMING, GU8 6LJ",
+      "postcode": "GU8 6LJ",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1044465"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044465"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:WHITE HOUSE GOLF CLUB ROAD WEYBRIDGE WEYBRIDGE KT13 0NJ|KT130NJ",
+      "address": "WHITE HOUSE, GOLF CLUB ROAD, WEYBRIDGE, WEYBRIDGE, KT13 0NJ",
+      "postcode": "KT13 0NJ",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1044722"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1044722"
+      ],
+      "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:WILLINGHURST DAIRY WILLINGHURST ESTATE SHAMLEY GREEN GUILDFORD GU5 0SU|GU50SU",
+      "address": "WILLINGHURST DAIRY, WILLINGHURST ESTATE, SHAMLEY GREEN, GUILDFORD, GU5 0SU",
+      "postcode": "GU5 0SU",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1241361"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1241361"
+      ],
+      "note": "NHLE 1241361 directly designates Willinghurst House, not Willinghurst Dairy. Possible curtilage protection is not determined. The status means no direct NHLE match, not legal proof of being unlisted."
+    },
+    {
+      "propertyRecordId": "property:WOLD COTTAGE STATION ROAD WOLDINGHAM CATERHAM CR3 7DA|CR37DA",
+      "address": "WOLD COTTAGE, STATION ROAD, WOLDINGHAM, CATERHAM, CR3 7DA",
+      "postcode": "CR3 7DA",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1029900"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029900"
+      ],
+      "note": "NHLE 1029900 is The Old Cottage in Lingfield; the generic name and road similarity do not identify Wold Cottage. The status means no direct NHLE match, not legal proof of being unlisted."
+    }
+  ],
+  "unknownMappings": []
+}

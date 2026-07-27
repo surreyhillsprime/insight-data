@@ -1,10 +1,10 @@
 {
   "$schema": "./private-estates.map-geometry.schema.json",
   "schemaVersion": 1,
-  "registryVersion": "surrey-private-estates-2026-07-19-corrected-4",
-  "sourceRegistrySha256": "5e2a803b346084158b9a7c0252e521b7b1a7abdcec88ad68658700d9d7ff89af",
-  "geometryVersion": "surrey-private-estates-geometry-2026-07-19-navigation-only",
-  "asOf": "2026-07-18",
+  "registryVersion": "surrey-private-estates-2026-07-22-corrected-6",
+  "sourceRegistrySha256": "8686da82cc41c20c4913a0fd3ec8bd4e4a5e9647e5c7babf3c41ed3f4257b651",
+  "geometryVersion": "surrey-private-estates-geometry-2026-07-22-navigation-only",
+  "asOf": "2026-07-22",
   "status": "installed_navigation_anchors_only",
   "crs": "OGC:CRS84",
   "coordinateOrder": "longitude_latitude",
@@ -85,6 +85,23 @@
       "accessedAt": "2026-07-18",
       "url": "https://dormanspark.co.uk/wp-content/uploads/2021/11/Dormans-Park-map-2020-hi-res-WEB.pdf"
     },
+    "crown-elmbridge-character-guide": {
+      "type": "council_character_area_map",
+      "title": "Companion Guide: Cobham, Oxshott, Stoke D'Abernon & Downside",
+      "publisher": "Elmbridge Borough Council",
+      "accessedAt": "2026-07-22",
+      "url": "https://elmbridge.gov.uk/sites/default/files/2023-03/Companion%20guide%20-%20Cobham%20Oxshott%20Stoke%20dAbernon%20and%20Downside.pdf",
+      "reuseStatus": "navigation_context_only",
+      "notes": "COS10 identifies Birds Hill as a private estate inside the wider Crown Estate / Bevendean planning area; the character-area outline is not installed as a legal boundary."
+    },
+    "crown-road-centreline-audit-2026-07-22": {
+      "type": "cross_source_road_centroid_audit",
+      "title": "INSIGHT Crown Estate private-road navigation audit",
+      "publisher": "INSIGHT research",
+      "accessedAt": "2026-07-22",
+      "reuseStatus": "navigation_only",
+      "notes": "The fixed point was checked against the included Birds Hill private-road network. It is not a boundary or legal centroid."
+    },
     "existing-app-seed": {
       "type": "legacy_unverified_app_coordinate",
       "title": "Current INSIGHT estate pin seed",
@@ -135,8 +152,8 @@
   },
   "approvalSummary": {
     "registryEntityCount": 71,
-    "productionCandidateRecordCount": 23,
-    "productionCandidateWithLabelPointCount": 23,
+    "productionCandidateRecordCount": 24,
+    "productionCandidateWithLabelPointCount": 24,
     "candidateLabelPointCount": 56,
     "approvedLabelPointCount": 0,
     "authoritativeGeoreferencedBoundaryCount": 0,
@@ -634,12 +651,12 @@
     },
     {
       "estateId": "crown-estate-oxshott",
-      "registryDisposition": "hold",
-      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.35142, 51.33825]}, "readiness": "candidate", "anchorBasis": "named_locality_centroid", "derivation": {"method": "named_locality_geocode"}, "sourceRefs": ["coordinate-audit-2026-07-18"], "validation": {"onVerifiedIncludedFeature": null, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
-      "entrances": {"primary": null, "secondary": [{"entranceId": "stokesheath-south", "role": "vehicular", "accessType": "open_private", "geometry": {"type": "Point", "coordinates": [-0.35007, 51.34132]}, "readiness": "candidate"}, {"entranceId": "crown-sign-reference", "role": "reference_only", "accessType": "unknown", "geometry": {"type": "Point", "coordinates": [-0.36302, 51.34456]}, "readiness": "candidate"}]},
-      "displayBoundary": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
-      "classificationGeometry": {"geometryStatus": "authoritative_plan_not_obtained", "geometry": null, "sourceRefs": [], "reviewStatus": "not_started"},
-      "blockers": ["Obtain a current legal road/property schedule and definitive residential boundary plan."]
+      "registryDisposition": "partial_ready",
+      "labelPoint": {"geometry": {"type": "Point", "coordinates": [-0.35142, 51.33825]}, "readiness": "candidate", "anchorBasis": "verified_internal_road", "derivation": {"method": "fixed_point_checked_against_included_private_road_network"}, "sourceRefs": ["crown-road-centreline-audit-2026-07-22", "crown-elmbridge-character-guide"], "validation": {"onVerifiedIncludedFeature": true, "insideApprovedDisplayBoundary": null}, "approvedForInstall": false},
+      "entrances": {"primary": null, "secondary": [{"entranceId": "stokesheath-south", "role": "vehicular", "accessType": "open_private", "geometry": {"type": "Point", "coordinates": [-0.35007, 51.34132]}, "readiness": "candidate"}], "notes": "The private-road network has several open entrances; no single point is represented as the legal or principal gate."},
+      "displayBoundary": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": ["crown-elmbridge-character-guide"], "reviewStatus": "not_started"},
+      "classificationGeometry": {"geometryStatus": "road_schedule_only", "geometry": null, "sourceRefs": ["crown-road-centreline-audit-2026-07-22"], "reviewStatus": "not_started"},
+      "blockers": ["Obtain a definitive legal property boundary before installing or describing any Crown Estate polygon."]
     },
     {
       "estateId": "kingswood-north-estate",

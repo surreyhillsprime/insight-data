@@ -40,6 +40,7 @@ jobs:
           --output outputs/sales-history.js
           --cache work/title-history-cache.json
           --deployment-mode commercial
+          --refresh-days 28
           --workers 3
           --batch-size 8
       - name: Validate commercial feed
@@ -47,6 +48,10 @@ jobs:
           python3 scripts/validate_sales_history_feed.py
           outputs/sales-history.js
           --base-feed outputs/surrey-transactions.js
+          --minimum-properties-with-history 3942
+          --minimum-transactions 6735
+          --maximum-properties-unavailable 4
+          --maximum-age-days 45
       - name: Save resumable postcode cache
         if: always()
         uses: actions/cache/save@v4
@@ -55,10 +60,17 @@ jobs:
           key: title-history-${{ github.run_id }}
       - name: Commit changed feed
         run: |
-          if git diff --quiet -- outputs/sales-history.js; then exit 0; fi
           git config user.name "insight-data-bot"
           git config user.email "actions@users.noreply.github.com"
           git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          python3 scripts/validate_sales_history_feed.py \
+            outputs/sales-history.js \
+            --base-feed outputs/surrey-transactions.js \
+            --minimum-properties-with-history 3942 \
+            --minimum-transactions 6735 \
+            --maximum-properties-unavailable 4 \
+            --maximum-age-days 45
+          if git diff --quiet -- outputs/sales-history.js; then exit 0; fi
           git add outputs/sales-history.js
           git commit -m "Update complete sales history feed"
           git push origin "HEAD:$GITHUB_REF_NAME"

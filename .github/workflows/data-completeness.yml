@@ -22,3 +22,20 @@ jobs:
           git diff --exit-code -- outputs/private-estates.js
       - name: Check shared feed coverage
         run: python3 scripts/check_data_completeness.py --strict-metadata
+      - name: Check published sales-history identity and freshness
+        run: >-
+          python3 scripts/validate_sales_history_feed.py
+          outputs/sales-history.js
+          --base-feed outputs/surrey-transactions.js
+          --minimum-properties-with-history 3942
+          --minimum-transactions 6735
+          --maximum-properties-unavailable 4
+          --maximum-age-days 45
+      - name: Check published planning-history identity and freshness
+        run: >-
+          python3 scripts/validate_planning_feed.py
+          outputs/planning-history.js
+          --base-feed outputs/surrey-transactions.js
+          --minimum-properties-with-history 3204
+          --minimum-applications 21180
+          --maximum-age-days 8

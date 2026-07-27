@@ -1,18 +1,21 @@
 name: Planning history feed
 
 on:
+  schedule:
+    - cron: '45 6 * * 1'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: planning-history-feed
+  group: insight-data-refresh
   cancel-in-progress: false
 
 jobs:
   build:
-    # Deliberately dormant until commercial licensing and publication are approved.
+    # This remains fail-closed until the repository has an approved provider,
+    # explicit redistribution evidence and the activation variable.
     if: ${{ vars.PLANNING_COMMERCIAL_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -27,13 +30,26 @@ jobs:
       - name: Require licensed source
         env:
           PLANNING_DATA_SOURCE: ${{ secrets.PLANNING_DATA_SOURCE }}
-        run: test -n "$PLANNING_DATA_SOURCE"
+          PLANNING_SOURCE_NAME: ${{ vars.PLANNING_SOURCE_NAME }}
+          PLANNING_SOURCE_LICENCE_URL: ${{ vars.PLANNING_SOURCE_LICENCE_URL }}
+        run: |
+          test -n "$PLANNING_DATA_SOURCE"
+          test -n "$PLANNING_SOURCE_NAME"
+          test -n "$PLANNING_SOURCE_LICENCE_URL"
+          case "$PLANNING_SOURCE_LICENCE_URL" in
+            https://*) ;;
+            *) echo "Planning source licence URL must use HTTPS" >&2; exit 1 ;;
+          esac
       - name: Build planning feed
         env:
           PLANNING_DATA_SOURCE: ${{ secrets.PLANNING_DATA_SOURCE }}
+          PLANNING_SOURCE_NAME: ${{ vars.PLANNING_SOURCE_NAME }}
+          PLANNING_SOURCE_LICENCE_URL: ${{ vars.PLANNING_SOURCE_LICENCE_URL }}
         run: >-
           python3 scripts/build_commercial_planning_feed.py
           --source "$PLANNING_DATA_SOURCE"
+          --source-name "$PLANNING_SOURCE_NAME"
+          --source-licence-url "$PLANNING_SOURCE_LICENCE_URL"
           --input-js outputs/surrey-transactions.js
           --write-js outputs/planning-history.js
       - name: Validate project and feed
@@ -41,12 +57,21 @@ jobs:
           python3 scripts/validate_planning_feed.py
           outputs/planning-history.js
           --base-feed outputs/surrey-transactions.js
+          --minimum-properties-with-history 3204
+          --minimum-applications 21180
+          --maximum-age-days 8
       - name: Commit changed feed
         run: |
           if git diff --quiet -- outputs/planning-history.js; then exit 0; fi
           git config user.name "insight-data-bot"
           git config user.email "actions@users.noreply.github.com"
           git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          python3 scripts/validate_planning_feed.py \
+            outputs/planning-history.js \
+            --base-feed outputs/surrey-transactions.js \
+            --minimum-properties-with-history 3204 \
+            --minimum-applications 21180 \
+            --maximum-age-days 8
           git add outputs/planning-history.js
           git commit -m "Update planning history feed"
           git push origin "HEAD:$GITHUB_REF_NAME"

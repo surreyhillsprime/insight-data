@@ -150,6 +150,24 @@ class StaticContextCoverageTests(unittest.TestCase):
         )
         self.assertEqual(static_context_failures(items, metadata), [])
 
+    def test_metadata_recompute_removes_legacy_weekly_heritage_payload(self):
+        metadata = recompute_coverage_metadata(
+            [successful_constraints(0)],
+            {
+                "weeklyContext": {
+                    "historicEngland": {
+                        "source": "Planning Data API listed-building dataset",
+                        "records": 1,
+                    },
+                    "planningConstraints": {
+                        "source": "Planning Data API",
+                    },
+                }
+            },
+        )
+        self.assertNotIn("historicEngland", metadata["weeklyContext"])
+        self.assertIn("planningConstraints", metadata["weeklyContext"])
+
     def test_static_lookup_threshold_is_strict_only_and_never_blocks_base_only(self):
         items = [successful_constraints() for _ in range(98)] + [{}, {}]
         row = next(

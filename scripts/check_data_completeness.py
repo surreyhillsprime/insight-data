@@ -19,6 +19,10 @@ from insight_data_utils import (
     read_js,
 )
 from private_estates import classify_estate, load_compiled_registry
+from enrich_listed_buildings import (
+    heritage_contract_failures,
+    heritage_publication_required,
+)
 
 
 EXPECTED_PRICE_FLOOR = 2_000_000
@@ -239,6 +243,27 @@ def coverage_threshold_failures(rows, *, strict_metadata=False, base_only=False)
                 f"{row['name']}: {row['coverage']:.1f}% is below {row['minimum']:.1f}%"
             )
     return failures
+
+
+def dependent_heritage_failures(items, meta, *, base_only=False):
+    """Gate heritage only after monthly property expansion reaches alignment."""
+
+    if base_only:
+        return []
+    try:
+        required = heritage_publication_required()
+    except ValueError as exc:
+        return [f"Heritage production policy: {exc}"]
+    active = bool(meta.get("heritageSync")) or any(
+        "historicEngland" in item for item in items
+    )
+    if not required and not active:
+        return []
+    return heritage_contract_failures(
+        items,
+        meta,
+        require_complete=required or active,
+    )
 
 
 def estate_failures(items, meta):
@@ -474,6 +499,9 @@ def main():
     if args.strict_metadata and not args.base_only:
         failures.extend(static_context_failures(items, meta))
     failures.extend(publication_contract_failures(items))
+    failures.extend(
+        dependent_heritage_failures(items, meta, base_only=args.base_only)
+    )
     failures.extend(coverage_threshold_failures(
         rows,
         strict_metadata=args.strict_metadata,

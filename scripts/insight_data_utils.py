@@ -297,6 +297,9 @@ def recompute_coverage_metadata(transactions, meta):
 
     weekly = dict(meta.get("weeklyContext") or {})
     if weekly:
+        # Listed-building evidence is owned solely by the dedicated NHLE sync.
+        # Never preserve or revive the retired Planning Data weekly payload.
+        weekly.pop("historicEngland", None)
         constraints = dict(weekly.get("planningConstraints") or {})
         if constraints:
             coverage = planning_constraint_coverage_counts(transactions)
@@ -304,18 +307,6 @@ def recompute_coverage_metadata(transactions, meta):
             constraints["records"] = coverage["successfulResponses"]
             constraints["coverageMode"] = "explicit-per-row-success"
             weekly["planningConstraints"] = constraints
-        historic = dict(weekly.get("historicEngland") or {})
-        if historic:
-            historic["records"] = sum(
-                1
-                for item in transactions
-                if item.get("historicEngland")
-                or (
-                    isinstance(item.get("planningConstraints"), dict)
-                    and item["planningConstraints"].get("historicEngland")
-                )
-            )
-            weekly["historicEngland"] = historic
         schools = dict(weekly.get("schools") or {})
         if schools:
             schools["records"] = populated("ofsted")

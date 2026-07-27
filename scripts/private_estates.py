@@ -22,8 +22,8 @@ REGISTRY_PATH = ROOT / "config" / "private-estates.installation-candidate.json"
 GEOMETRY_PATH = ROOT / "config" / "private-estates.map-geometry.installation-candidate.json"
 
 ACTIVE_INSTALL_STATUSES = frozenset({"ready", "partial_ready"})
-EXPECTED_ACTIVE_DEFINITION_COUNT = 23
-EXPECTED_ACTIVE_RULE_COUNT = 137
+EXPECTED_ACTIVE_DEFINITION_COUNT = 24
+EXPECTED_ACTIVE_RULE_COUNT = 155
 
 MARKET_BY_AUTHORITY = {
     "Elmbridge": "elmbridge-prime",

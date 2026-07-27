@@ -42,7 +42,9 @@ INSIGHT now uses separate refresh jobs so high-change sources stay fresh without
 | Workflow | Runs | What it refreshes |
 | --- | --- | --- |
 | `daily-intelligence.yml` | Daily at 05:15 UTC | Recent planning applications near tracked properties; Companies House publication remains disabled |
-| `weekly-context.yml` | Mondays at 07:15 UTC | Planning constraints, listed-building matches, conservation/heritage overlays, and schools if a school CSV feed is supplied |
+| `heritage-listed-buildings.yml` | Daily at 08:15 UTC | Official Historic England NHLE listed-building evidence, reviewed property mappings and explicit coverage states |
+| `weekly-context.yml` | Mondays at 07:15 UTC | Planning constraints, conservation/heritage overlays, and schools if a school CSV feed is supplied |
+| `planning-history-feed.yml` | Mondays at 06:45 UTC when licensed-source publication is enabled | Complete property-level planning histories from the approved redistribution source |
 | `monthly-property-refresh.yml` | 1st of each month at 06:00 UTC | Land Registry, EPC floor areas, GBP/sq ft, and live flood-alert context; OSM amenity publication remains disabled |
 | `sales-history-feed.yml` | 2nd of each month at 06:30 UTC | Complete HM Land Registry Price Paid history for properties in the base feed |
 | `six-week-os-refresh.yml` | Guarded Sunday schedule | OS Open UPRN matching and geometry/linkage improvement when an OS CSV is supplied |
@@ -62,23 +64,126 @@ when no producer workflow is being run manually.
 
 The monthly workflow now carries the Land Registry expansion through the full
 dependency chain. After the base/EPC/property job commits, a second job aligns
-planning constraints, heritage, schools, recent planning intelligence and OS
-UPRN data with every newly added transaction before committing the shared feed.
+planning constraints, schools, recent planning intelligence, OS UPRN data and
+the dedicated Historic England designation layer with every newly added
+transaction before committing the shared feed.
 The base sweep preserves existing enrichment fields on unchanged transactions.
 
+## Listed-building evidence
+
+`scripts/enrich_listed_buildings.py` downloads the official National Heritage
+List for England point layer and the much smaller set of genuine positive-area
+building outlines from Historic England's ArcGIS FeatureServer. It validates
+the pinned service item, required fields, pagination, grades, List Entry
+Numbers, WGS84 Surrey search envelope and source counts before considering a
+publication. ArcGIS can return multipoint or polygon features whose overall
+geometry envelope touches the query while the relevant designation point is
+outside it. Raw pages must still reconcile to the server's declared counts;
+the producer then clips point members to the exact approved envelope and drops
+boundary polygons without retained point evidence under strict count,
+percentage and retained-cohort gates.
+
+Matching is performed once per canonical full-address `propertyRecordId`.
+Every transaction for that property receives the same compact
+`historicEngland` object:
+
+```json
+{
+  "status": "confirmed_listed",
+  "entries": [
+    {
+      "listEntryNumber": "1234567",
+      "grade": "II*",
+      "name": "EXAMPLE HOUSE",
+      "url": "https://historicengland.org.uk/listing/the-list/list-entry/1234567",
+      "matchMethod": "reviewed_override",
+      "matchConfidence": "confirmed"
+    }
+  ],
+  "source": "Historic England NHLE",
+  "checkedAt": "2026-07-26T12:00:00Z",
+  "sourceUpdatedAt": "2026-07-25T23:00:00Z",
+  "sourceSnapshot": "nhle-2026-07-25-0123456789ab"
+}
+```
+
+The public contract retains four coverage states: `confirmed_listed`,
+`candidate_review`, `no_direct_match` and `unknown`. The current production
+ledger does not publish centroid-generated candidates. Every current property
+was screened against the official address corpus first; a missing future ledger
+decision remains `unknown`. `no_direct_match` means only that the completed
+screen found no supported direct NHLE property identity. It is not a legal
+assertion that the property is unlisted or outside listed-building curtilage.
+Automatic confirmation outside the ledger is limited to a genuine Historic
+England positive-area outline containing a trusted property-level coordinate.
+
+For a confirmed reviewed mapping with exactly one List Entry Number and one
+official NHLE point, the sync may replace a Postcodes.io postcode-centroid map
+position with that designation point. The original centroid is preserved as
+`geocode.postcodeCentroidLatitude` / `postcodeCentroidLongitude`, and every
+later match is made from that preserved base view so the display refinement
+cannot confirm itself. Removing the mapping, or encountering multiple entries
+or multiple official points, restores the original coordinate and provenance.
+Trusted address/rooftop/property points and polygon-derived confirmations are
+never moved. `heritageSync.confirmedLocationsApplied` records the exact number
+of properties refined under
+`single-reviewed-entry-single-nhle-point`.
+
+The complete address-screened decisions live in
+`config/heritage-listing-overrides.json`: one mapping for each of the 3,947
+current canonical properties. Each mapping is keyed by the full-address
+Property Record identity and records reviewer/date evidence. Confirmed mappings
+retain every applicable seven-digit List Entry Number; the remaining mappings
+carry the explicit `no_direct_match` interpretation above. Review decisions
+must pass `config/heritage-listing-overrides.schema.json` and the stricter
+runtime checks before publication.
+
+`config/heritage-listing-address-audit.json` pins the address-corpus and
+official-document evidence, source hashes, criteria, 130 confirmed properties,
+127 unique NHLE entries and the canonical decision digests. The original
+47-property phase remains preserved in
+`config/heritage-listing-initial-audit.json`. Run
+`scripts/build_heritage_address_ledger.py --check` to prove that the expanded
+production ledger still matches the compact final audit and the audited
+property universe.
+
+The writer is atomic and capped below the installed app's feed limit. A source
+failure cannot replace the feed: a complete validated prior publication is
+retained unchanged, while the workflow exits non-zero so maintainers are
+alerted immediately. A first run with no last-known-good heritage state also
+fails closed. Successful unchanged snapshots are left untouched to avoid
+timestamp-only Git commits.
+
 Planning uses two deliberately separate time horizons. The daily intelligence
-job remains a rolling 45-day alert search. The dormant licensed planning-history
-feed imports each provider's complete available archive, records the earliest
-and latest application years supplied, and searches each distinct property only
-once even when it has several Land Registry transactions. EPC, constraints,
-flood, school and OS enrichment is applied across every property in the expanded
-feed using each source's full available or current coverage; those snapshot
-sources are not artificially backdated to 1995.
+job remains a rolling 45-day alert search. The licensed planning-history feed
+imports each provider's complete available archive, records the earliest and
+latest application years supplied, and searches each distinct property only
+once even when it has several Land Registry transactions. The workflow is
+scheduled but deliberately fails closed unless an approved redistribution
+source and its public licence evidence are configured. EPC, constraints, flood,
+school and OS enrichment is applied across every property in the expanded feed
+using each source's full available or current coverage; those snapshot sources
+are not artificially backdated to 1995.
 
 `sales-history-feed.yml` publishes the separate complete Price Paid history
 feed each month. Its postcode cache is resumable and its output is
 `outputs/sales-history.js`. This is Price Paid transaction history from 1995
-onwards, not the legal title register, ownership, deeds, or charges.
+onwards, not the legal title register, ownership, deeds, or charges. The
+published file is accepted only when it contains every canonical property and
+every transaction lookup alias in the exact base feed, including the same
+transaction-to-property pairings. Counts, record content and the base identity
+universe are protected by SHA-256 fingerprints. The workflow rejects files
+over 50 MiB, snapshots older than 45 days, fewer than 3,942 properties with
+history, fewer than 6,735 matched Price Paid transactions, or more than the
+reviewed four unavailable properties. Every canonical property is explicitly
+accounted as complete or unavailable. The 28-day cache threshold ensures each
+monthly run refreshes its postcode evidence before the 45-day publication
+freshness window can expire.
+
+Price Paid Data is reused under the Open Government Licence v3.0 for the
+permitted purpose of displaying residential property price information. The
+required attribution and the HM Land Registry address-data conditions are
+recorded in `DATA-NOTICES.md` and in each publication's metadata.
 
 The audited private-estate registry is published as
 `outputs/private-estates.js`, with its evidence and exact road rules under
@@ -89,7 +194,25 @@ draw or claim legal estate perimeters.
 
 `outputs/planning-history.js` remains a separate licensed-provider publication
 path. It must not be populated from a source whose terms do not permit product
-redistribution. Recent public planning context in the base feed is unaffected.
+redistribution. A publishable snapshot must account for every canonical
+property and transaction alias, reconcile every application array to metadata,
+remain below 50 MiB, be no more than eight days old at workflow publication,
+and retain the reviewed non-regression floors of 3,204 properties with history
+and 21,180 applications. The 1,763 figure in the private collection audit is
+the number of distinct council-portal/cache queries; it is not an application
+count. Recent public planning context in the base feed is unaffected.
+
+Until the licensed source is configured, the checked-in planning artifact
+declares `blocked-missing-licensed-source` and compatible remote-mode app builds
+reject it. The private 21,180-application council-cache snapshot is not copied
+into this public repository.
+
+The daily completeness workflow independently revalidates both standalone
+history files against `outputs/surrey-transactions.js`. It applies the same
+identity, count, size, rights, content-fingerprint, non-regression and freshness
+gates used by their producer workflows. A missing or placeholder planning file,
+or a stale/partial sales file, therefore leaves the production completeness
+check red rather than silently passing the base-feed audit.
 
 The scheduled market-enrichment workflows update:
 
@@ -108,6 +231,18 @@ Settings -> Secrets and variables -> Actions -> New repository secret
 Name: EPC_BEARER_TOKEN
 Value: your GOV.UK EPC API bearer token
 ```
+
+The all-user planning-history workflow additionally requires:
+
+```text
+Repository variable: PLANNING_COMMERCIAL_ENABLED=true
+Repository variable: PLANNING_SOURCE_NAME=<approved provider name>
+Repository variable: PLANNING_SOURCE_LICENCE_URL=https://<public redistribution terms>
+Repository secret:   PLANNING_DATA_SOURCE=<licensed CSV/JSON URL or source>
+```
+
+All four settings are mandatory. The workflow does not publish a local
+council-portal cache when any setting is absent.
 
 The monthly job will fail if this is missing, because EPC floor area is required for GBP/sq ft.
 
@@ -217,3 +352,7 @@ This data is licensed under the Open Government Licence v3.0.
 - Domestic EPC floor area where a confident address match is found
 - GBP/sq ft calculated from Land Registry sold price divided by matched EPC floor area
 - Optional public context where sources return usable data
+- Official Historic England NHLE listed-building grades where address/document
+  identity is confirmed, with no-direct-match and unknown coverage kept explicit
+
+See `DATA-NOTICES.md` for attribution, licence and interpretation limits.

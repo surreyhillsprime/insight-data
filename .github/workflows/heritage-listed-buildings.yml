@@ -1,0 +1,59 @@
+name: Daily INSIGHT Listed Buildings
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Historic England refreshes the NHLE service nightly.
+    - cron: "15 8 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insight-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  listed-buildings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Synchronise selected branch
+        run: |
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
+
+      - name: Test listed-building data contract
+        run: PYTHONPATH=scripts python3 -m unittest tests.test_listed_buildings
+
+      - name: Refresh Historic England listed-building evidence
+        run: python3 scripts/enrich_listed_buildings.py
+
+      - name: Validate listed-building publication
+        run: python3 scripts/enrich_listed_buildings.py --validate-only
+
+      - name: Commit updated evidence
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          if git diff --name-only --diff-filter=U | grep -q .; then
+            echo "::error::Heritage refresh produced unresolved Git conflicts; refusing to commit."
+            exit 1
+          fi
+          if grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
+            echo "::error::Feed contains Git conflict markers; refusing to commit."
+            exit 1
+          fi
+          python3 scripts/enrich_listed_buildings.py --validate-only
+          git add outputs/surrey-transactions.js
+          if git diff --cached --quiet; then
+            echo "No semantic Historic England changes to commit."
+          else
+            git commit -m "Update INSIGHT listed-building evidence"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
