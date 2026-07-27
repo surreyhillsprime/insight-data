@@ -125,6 +125,32 @@ class StandaloneFeedValidatorTests(unittest.TestCase):
         write_assignments(planning, self.planning_assignments())
         self.run_validator(validate_planning_feed, planning, "--base-feed", self.base)
 
+    def test_planning_accepts_only_the_explicit_blocked_artifact_when_allowed(self):
+        blocked = ROOT / "outputs" / "planning-history.js"
+        with self.assertRaisesRegex(ValueError, "not complete"):
+            self.run_validator(validate_planning_feed, blocked)
+        self.run_validator(validate_planning_feed, blocked, "--allow-blocked")
+
+    def test_planning_blocked_mode_never_accepts_populated_unlicensed_history(self):
+        planning = self.root / "planning-blocked-with-data.js"
+        assignments = self.planning_assignments()
+        assignments["SURREY_PLANNING_HISTORY_META"].update({
+            "publicationStatus": "blocked-missing-licensed-source",
+            "source": "Commercial planning feed not enabled",
+            "sourceLicenceUrl": "",
+            "redistributionRights": "not-authorised-for-publication",
+            "updatedAt": "",
+            "coverageMode": "unavailable",
+            "coverageStatus": "unavailable",
+        })
+        write_assignments(planning, assignments)
+        with self.assertRaisesRegex(ValueError, "must not contain history"):
+            self.run_validator(
+                validate_planning_feed,
+                planning,
+                "--allow-blocked",
+            )
+
     def test_planning_rejects_application_count_regression(self):
         planning = self.root / "planning-regression.js"
         write_assignments(planning, self.planning_assignments())
@@ -203,6 +229,12 @@ class StandaloneFeedValidatorTests(unittest.TestCase):
         self.assertIn("vars.PLANNING_SOURCE_LICENCE_URL", workflow)
         self.assertEqual(workflow.count("--minimum-applications 21180"), 2)
         self.assertEqual(workflow.count("--base-feed outputs/surrey-transactions.js"), 2)
+        completeness = (
+            ROOT / ".github" / "workflows" / "data-completeness.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("vars.PLANNING_COMMERCIAL_ENABLED == 'true'", completeness)
+        self.assertIn("vars.PLANNING_COMMERCIAL_ENABLED != 'true'", completeness)
+        self.assertIn("--allow-blocked", completeness)
 
     def test_sales_rejects_stale_canonical_property_set(self):
         sales = self.root / "sales.js"

@@ -32,6 +32,7 @@ jobs:
           --maximum-properties-unavailable 4
           --maximum-age-days 45
       - name: Check published planning-history identity and freshness
+        if: ${{ vars.PLANNING_COMMERCIAL_ENABLED == 'true' }}
         run: >-
           python3 scripts/validate_planning_feed.py
           outputs/planning-history.js
@@ -39,3 +40,9 @@ jobs:
           --minimum-properties-with-history 3204
           --minimum-applications 21180
           --maximum-age-days 8
+      - name: Check explicit blocked planning publication
+        if: ${{ vars.PLANNING_COMMERCIAL_ENABLED != 'true' }}
+        run: >-
+          python3 scripts/validate_planning_feed.py
+          outputs/planning-history.js
+          --allow-blocked
