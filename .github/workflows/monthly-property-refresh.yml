@@ -209,7 +209,7 @@ jobs:
       - name: Install coordinate transformer
         run: python3 -m pip install --user pyproj
 
-      - name: Align weekly planning, heritage, and school context
+      - name: Align weekly planning-constraint and school context
         env:
           SCHOOLS_CSV_URL: ${{ secrets.SCHOOLS_CSV_URL }}
         run: |
@@ -234,8 +234,13 @@ jobs:
           python3 scripts/enrich_os_uprn.py \
             --progress-every 25
 
+      - name: Align Historic England listed-building evidence
+        run: python3 scripts/enrich_listed_buildings.py
+
       - name: Check aligned context checkpoint
-        run: python3 scripts/check_data_completeness.py --base-only
+        run: |
+          python3 scripts/enrich_listed_buildings.py --validate-only
+          python3 scripts/check_data_completeness.py --base-only
 
       - name: Commit aligned context
         run: |
@@ -246,6 +251,7 @@ jobs:
             echo "::error::Context alignment produced Git conflicts; refusing to commit."
             exit 1
           fi
+          python3 scripts/enrich_listed_buildings.py --validate-only
           PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import FEED_SCHEMA_VERSION,read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==FEED_SCHEMA_VERSION'
           git add outputs/surrey-transactions.js
           for cache in work/weekly-context-cache.json work/daily-intelligence-cache.json work/os-uprn-cache.json work/schools.csv; do

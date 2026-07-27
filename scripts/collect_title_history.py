@@ -10,6 +10,7 @@ import argparse
 import json
 import os
 import re
+import tempfile
 import time
 import urllib.parse
 import urllib.request
@@ -21,6 +22,17 @@ from pathlib import Path
 from insight_data_utils import DEFAULT_INPUT_JS, clean, load_cache, normalise_postcode, read_js, utc_now, write_cache
 from enrich_planning_history import address_score
 from sweep_land_registry import SPARQL_ENDPOINT, build_address, category_label, price_text, property_label
+from validate_sales_history_feed import (
+    ADDRESS_DATA_USE,
+    ATTRIBUTION,
+    MAX_FEED_BYTES,
+    MAX_FRESHNESS_WINDOW_DAYS,
+    REDISTRIBUTION_RIGHTS,
+    SOURCE_LICENCE_URL,
+    SOURCE_NAME,
+    base_feed_identity,
+    sha256_json,
+)
 
 
 CACHE_VERSION = 1
@@ -49,6 +61,40 @@ def cache_is_fresh(record, refresh_days):
     except (TypeError, ValueError):
         return False
     return (datetime.now(timezone.utc) - updated).total_seconds() < refresh_days * 86400
+
+
+def cache_coverage(postcode, selected, cache_record):
+    """Return one truthful property lookup state from a postcode cache record."""
+
+    rows = cache_record.get("rows", []) if isinstance(cache_record, dict) else []
+    if not postcode:
+        return (
+            "unavailable",
+            "No postcode in the source Price Paid record",
+            [],
+            "",
+        )
+    if postcode not in selected:
+        return (
+            "not_checked",
+            "Excluded by the requested postcode or limit filter",
+            [],
+            "",
+        )
+    last_error = clean(cache_record.get("lastError"))
+    if last_error:
+        # Retain the old rows in the resumable cache, but never present them as
+        # a successful current lookup after the refresh attempt failed.
+        return "unavailable", last_error, [], ""
+    checked_at = clean(cache_record.get("updatedAt"))
+    if not checked_at or not isinstance(rows, list):
+        return (
+            "unavailable",
+            "Price Paid postcode lookup unavailable",
+            [],
+            "",
+        )
+    return "complete", "", rows, checked_at
 
 
 def sparql_query(postcodes):
@@ -119,7 +165,7 @@ def transaction_from_row(row):
         "date": clean(row.get("date"))[:10],
         "propertyType": property_label(row.get("propertyType")),
         "category": category,
-        "source": "HM Land Registry Price Paid Data",
+        "source": SOURCE_NAME,
     }
 
 
@@ -131,7 +177,18 @@ def write_output(path, history, meta):
         "window.SURREY_SALES_HISTORY_META = " + json.dumps(meta, separators=(",", ":")) + ";",
         "",
     ])
-    path.write_text(content, encoding="utf-8")
+    if len(content.encode("utf-8")) > MAX_FEED_BYTES:
+        raise ValueError("Sales history feed exceeds the native 50 MiB safety limit")
+    with tempfile.NamedTemporaryFile(
+        "w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        delete=False,
+    ) as handle:
+        handle.write(content)
+        temporary_path = Path(handle.name)
+    os.replace(temporary_path, path)
     if meta.get("deploymentMode") == "local":
         (path.parent / LOCAL_MARKER).touch(exist_ok=True)
 
@@ -150,7 +207,7 @@ def main():
     parser.add_argument("--limit-postcodes", type=int, default=0)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--workers", type=int, default=3)
-    parser.add_argument("--refresh-days", type=int, default=35)
+    parser.add_argument("--refresh-days", type=int, default=28)
     parser.add_argument("--timeout", type=int, default=90)
     parser.add_argument("--pause", type=float, default=0.2)
     parser.add_argument("--deployment-mode", choices=("local", "commercial"), default="local")
@@ -210,30 +267,25 @@ def main():
     properties_checked = 0
     properties_unavailable = 0
     properties_not_checked = 0
+    collected_at = utc_now()
+    complete_check_times = []
     for key, item in properties.items():
         postcode = normalise_postcode(item.get("postcode"))
         target = address_key(item.get("address"))
         cache_record = store.get(postcode, {}) if postcode else {}
-        rows = cache_record.get("rows", [])
-        coverage_reason = ""
-        if not postcode:
-            coverage_status = "unavailable"
-            coverage_reason = "No postcode in the source Price Paid record"
-            rows = []
-            properties_unavailable += 1
-        elif postcode not in selected:
-            coverage_status = "not_checked"
-            coverage_reason = "Excluded by the requested postcode or limit filter"
-            rows = []
-            properties_not_checked += 1
-        elif not cache_record.get("updatedAt") or not isinstance(rows, list):
-            coverage_status = "unavailable"
-            coverage_reason = clean(cache_record.get("lastError")) or "Price Paid postcode lookup unavailable"
-            rows = []
-            properties_unavailable += 1
-        else:
-            coverage_status = "complete"
+        (
+            coverage_status,
+            coverage_reason,
+            rows,
+            cache_checked_at,
+        ) = cache_coverage(postcode, selected, cache_record)
+        if coverage_status == "complete":
             properties_checked += 1
+            complete_check_times.append(cache_checked_at)
+        elif coverage_status == "not_checked":
+            properties_not_checked += 1
+        else:
+            properties_unavailable += 1
         canonical = target
         match_method = "exact-address"
         exact_rows = [row for row in rows if address_key(build_address(row)) == target]
@@ -263,8 +315,12 @@ def main():
             "latestTransaction": sales[0] if sales else None,
             "transactions": sales,
             "matchMethod": match_method,
-            "source": "HM Land Registry Price Paid Data",
-            "updatedAt": utc_now(),
+            "source": SOURCE_NAME,
+            "updatedAt": (
+                cache_checked_at
+                if coverage_status == "complete"
+                else collected_at
+            ),
         }
         if coverage_reason:
             record["coverageReason"] = coverage_reason
@@ -275,18 +331,37 @@ def main():
         matched_transactions += len(sales)
 
     properties_with_history = sum(1 for key in properties if history.get(key, {}).get("transactions"))
+    publication_complete = properties_not_checked == 0
+    _base_properties, base_transactions, _base_map, base_fingerprint = (
+        base_feed_identity(transactions)
+    )
     meta = {
         "schemaVersion": 1,
-        "source": "HM Land Registry Price Paid Data",
-        "coverageFrom": "1995",
         "deploymentMode": args.deployment_mode,
-        "updatedAt": utc_now(),
+        "publicationStatus": "complete" if publication_complete else "partial",
+        "coverageMode": "full-available-price-paid-history",
+        "coverageStatus": "complete-accounted" if publication_complete else "partial",
+        "source": SOURCE_NAME,
+        "sourceLicenceUrl": SOURCE_LICENCE_URL,
+        "redistributionRights": REDISTRIBUTION_RIGHTS,
+        "addressDataUse": ADDRESS_DATA_USE,
+        "attribution": ATTRIBUTION,
+        "coverageFrom": "1995",
+        "updatedAt": collected_at,
+        "sourceCheckedAt": min(complete_check_times) if complete_check_times else collected_at,
+        "freshnessWindowDays": MAX_FRESHNESS_WINDOW_DAYS,
         "propertiesRequested": len(properties),
         "propertiesChecked": properties_checked,
         "propertiesUnavailable": properties_unavailable,
         "propertiesNotChecked": properties_not_checked,
         "propertiesWithHistory": properties_with_history,
+        "propertiesCheckedNoHistory": properties_checked - properties_with_history,
         "transactionsFound": matched_transactions,
+        "lookupKeys": len(history),
+        "canonicalPropertyRecords": len(properties),
+        "transactionAliases": len(base_transactions),
+        "baseFeedFingerprint": base_fingerprint,
+        "historyFingerprint": sha256_json(history),
         "note": "Price Paid transaction history only; not the legal title register, ownership, deeds or charges.",
     }
     write_output(args.output, history, meta)

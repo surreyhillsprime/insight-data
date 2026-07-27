@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Weekly INSIGHT enrichment for planning constraints, heritage, and schools."""
+"""Weekly INSIGHT enrichment for Planning Data constraints and schools."""
 
 import argparse
 import csv
@@ -40,7 +40,6 @@ DEFAULT_SCHOOLS_CACHE = DEFAULT_INPUT_JS.parents[1] / "work" / "schools.csv"
 PLANNING_ENTITY_API = "https://www.planning.data.gov.uk/entity.json"
 
 CONSTRAINT_DATASETS = [
-    "listed-building",
     "conservation-area",
     "scheduled-monument",
     "heritage-at-risk",
@@ -137,12 +136,9 @@ def normalise_cached_constraint_result(cached):
 
     existing = data.get("planningConstraints")
     constraints = dict(existing) if isinstance(existing, dict) else {}
-    historic = data.get("historicEngland")
-    historic = historic if isinstance(historic, dict) else {}
     observed_at = clean(
         constraints.get("updatedAt")
         or cached.get("updatedAt")
-        or historic.get("updatedAt")
     ) or utc_now()
     constraints.update({
         "source": clean(constraints.get("source")) or "Planning Data API",
@@ -151,6 +147,9 @@ def normalise_cached_constraint_result(cached):
         "constraintCount": constraint_count,
     })
     data["planningConstraints"] = constraints
+    # Heritage is deliberately owned by enrich_listed_buildings.py. Never
+    # replay the old postcode-keyed listed-building payload from this cache.
+    data.pop("historicEngland", None)
     cached["data"] = data
     return data
 
@@ -196,21 +195,6 @@ def constraints_for_item(item, lat, lon, cache, args):
             constraints[field] = f"{label}: {names}" if names else label
 
     data = {"planningConstraints": constraints}
-
-    listed = by_dataset.get("listed-building", [])
-    if listed:
-        first = listed[0]
-        grade = clean(entity_value(first, ["listed_building_grade", "grade"]))
-        reference = clean(entity_value(first, ["reference", "list_entry_number", "entry_number"]))
-        name = clean(entity_value(first, ["name", "description"]))
-        data["historicEngland"] = {
-            "source": "Planning Data API listed-building dataset",
-            "updatedAt": observed_at,
-            "listedStatus": "Listed building match",
-            "grade": grade,
-            "listEntryNumber": reference,
-            "nearestListedBuilding": name,
-        }
 
     store[key] = {
         "status": "matched" if constraints["constraintCount"] > 0 else "no_match",
@@ -389,8 +373,6 @@ def enrich_transactions(transactions, cache, args):
                         stats["planningConstraintResponses"] += 1
                     if planning_constraint_has_positive_result(constraints):
                         stats["planningConstraints"] += 1
-                    if constraints.get("historicEngland"):
-                        stats["historicEngland"] += 1
             except Exception as exc:
                 stats["planningConstraintErrors"] += 1
                 print(f"Planning constraints skipped for {item.get('id')}: {exc}", file=sys.stderr)
@@ -452,10 +434,6 @@ def main():
             "records": planning_constraint_coverage["successfulResponses"],
             **planning_constraint_coverage,
             "coverageMode": "explicit-per-row-success",
-        },
-        "historicEngland": {
-            "source": "Planning Data API listed-building dataset",
-            "records": sum(1 for item in enriched if item.get("historicEngland")),
         },
         "schools": {
             "source": "DfE / Ofsted school data",

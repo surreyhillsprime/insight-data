@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://insight.local/schema/heritage-listing-overrides.schema.json",
+  "title": "INSIGHT reviewed Historic England property mappings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "updatedAt",
+    "productionRequired",
+    "mappings"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "productionRequired": {
+      "const": true
+    },
+    "mappings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/mapping"
+      }
+    }
+  },
+  "$defs": {
+    "mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "propertyRecordId",
+        "status",
+        "listEntryNumbers",
+        "reviewedBy",
+        "reviewedAt"
+      ],
+      "properties": {
+        "propertyRecordId": {
+          "type": "string",
+          "pattern": "^property:.+\\|(?:[A-Z0-9]+|NOPOSTCODE)$"
+        },
+        "address": {
+          "type": "string",
+          "minLength": 1
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "confirmed_listed",
+            "no_direct_match",
+            "unknown"
+          ]
+        },
+        "listEntryNumbers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9]{7}$"
+          }
+        },
+        "reviewedBy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewedAt": {
+          "type": "string",
+          "format": "date"
+        },
+        "evidenceUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+      ,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "confirmed_listed"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "evidenceUrl"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
