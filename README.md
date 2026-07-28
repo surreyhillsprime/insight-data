@@ -139,8 +139,8 @@ must pass `config/heritage-listing-overrides.schema.json` and the stricter
 runtime checks before publication.
 
 `config/heritage-listing-address-audit.json` pins the address-corpus and
-official-document evidence, source hashes, criteria, 130 confirmed properties,
-127 unique NHLE entries and the canonical decision digests. The original
+official-document evidence, source hashes, criteria, 143 confirmed properties,
+140 unique NHLE entries and the canonical decision digests. The original
 47-property phase remains preserved in
 `config/heritage-listing-initial-audit.json`. Run
 `scripts/build_heritage_address_ledger.py --check` to prove that the expanded

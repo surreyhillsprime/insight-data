@@ -1413,7 +1413,7 @@ class HistoricEnglandContractTests(unittest.TestCase):
         self.assertEqual(len({item["propertyRecordId"] for item in mappings}), 3_947)
         self.assertEqual(
             Counter(item["status"] for item in mappings),
-            Counter({"confirmed_listed": 130, "no_direct_match": 3_817}),
+            Counter({"confirmed_listed": 143, "no_direct_match": 3_804}),
         )
         self.assertTrue(
             all(
@@ -1436,14 +1436,14 @@ class HistoricEnglandContractTests(unittest.TestCase):
             )
         )
         self.assertEqual(audit["canonicalPropertyCount"], 3_947)
-        self.assertEqual(audit["confirmedPropertyCount"], 130)
-        self.assertEqual(audit["confirmedUniqueListEntryCount"], 127)
+        self.assertEqual(audit["confirmedPropertyCount"], 143)
+        self.assertEqual(audit["confirmedUniqueListEntryCount"], 140)
         self.assertEqual(
             audit["confirmedGradeCounts"],
-            {"I": 3, "II": 119, "II*": 8},
+            {"I": 3, "II": 132, "II*": 8},
         )
-        self.assertEqual(audit["documentedNoDirectPropertyCount"], 38)
-        self.assertEqual(audit["genericNoDirectPropertyCount"], 3_779)
+        self.assertEqual(audit["documentedNoDirectPropertyCount"], 43)
+        self.assertEqual(audit["genericNoDirectPropertyCount"], 3_761)
         self.assertEqual(audit["unknownPropertyCount"], 0)
         audit_pairs = sorted(
             f"{item['propertyRecordId']}|{number}"
@@ -1459,7 +1459,7 @@ class HistoricEnglandContractTests(unittest.TestCase):
         self.assertEqual(audit_pairs, ledger_pairs)
         self.assertEqual(
             audit["confirmedPairDigest"],
-            "7600d5ae724af3bc3a6664baec135c25e10beab7104dc1a4650abe2af56babd5",
+            "dbbb9cddaf70663727f95e23e9522a31ee2eb20fbde3f746a213ccc05d3a6f0a",
         )
         transactions, _summary, _metadata = read_js(
             ROOT / "outputs" / "surrey-transactions.js"
