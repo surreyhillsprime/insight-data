@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gaininsight.app/schemas/news-sources.schema.json",
+  "title": "INSIGHT news source registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sources"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    }
+  },
+  "$defs": {
+    "httpsUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "url",
+        "adapter",
+        "articleHosts",
+        "publisherGroup",
+        "lane",
+        "category",
+        "quality",
+        "primePropertyBias",
+        "minimumScore",
+        "defaultGeography",
+        "expectedCadenceMinutes",
+        "publicationMode",
+        "rights"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "adapter": {
+          "enum": [
+            "rss",
+            "atom",
+            "news-sitemap",
+            "publisher-feed-required"
+          ]
+        },
+        "articleHosts": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9.-]+$"
+          }
+        },
+        "publisherGroup": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "lane": {
+          "enum": [
+            "surrey-local",
+            "prime-market",
+            "uk-market",
+            "official-market"
+          ]
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quality": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "primePropertyBias": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "minimumScore": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "defaultGeography": {
+          "type": "string"
+        },
+        "defaultLocation": {
+          "type": "string"
+        },
+        "expectedCadenceMinutes": {
+          "type": "integer",
+          "minimum": 5
+        },
+        "publicationMode": {
+          "enum": [
+            "live",
+            "shadow",
+            "disabled"
+          ]
+        },
+        "authoritativeNational": {
+          "type": "boolean"
+        },
+        "requiredTitlePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "blockedTitlePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "rights": {
+          "$ref": "#/$defs/rights"
+        }
+      }
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "collectionStatus",
+        "publicationStatus",
+        "mode",
+        "basis",
+        "referenceUrl",
+        "reviewedAt"
+      ],
+      "properties": {
+        "collectionStatus": {
+          "enum": [
+            "approved",
+            "permission-required",
+            "prohibited-without-permission"
+          ]
+        },
+        "publicationStatus": {
+          "enum": [
+            "approved",
+            "permission-required",
+            "prohibited-without-permission"
+          ]
+        },
+        "mode": {
+          "const": "link-only"
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "referenceUrl": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "reviewedAt": {
+          "type": "string",
+          "format": "date"
+        },
+        "licenceId": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

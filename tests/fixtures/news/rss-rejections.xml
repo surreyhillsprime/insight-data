@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Example mixed feed</title>
+    <item>
+      <title>Valid Surrey property item</title>
+      <link>https://news.example.test/property/valid</link>
+      <description>Accepted fixture article.</description>
+      <pubDate>Tue, 28 Jul 2026 09:30:00 +0100</pubDate>
+    </item>
+    <item>
+      <title>Missing publication date</title>
+      <link>https://news.example.test/property/missing-date</link>
+    </item>
+    <item>
+      <title>Wrong publisher domain</title>
+      <link>https://attacker.invalid/copied-story</link>
+      <pubDate>Tue, 28 Jul 2026 09:31:00 +0100</pubDate>
+    </item>
+    <item>
+      <title>Insecure article link</title>
+      <link>http://news.example.test/property/insecure</link>
+      <pubDate>Tue, 28 Jul 2026 09:32:00 +0100</pubDate>
+    </item>
+    <item>
+      <link>https://news.example.test/property/no-title</link>
+      <pubDate>Tue, 28 Jul 2026 09:33:00 +0100</pubDate>
+    </item>
+  </channel>
+</rss>

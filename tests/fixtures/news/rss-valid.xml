@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Example property news</title>
+    <link>https://news.example.test/</link>
+    <description>Fixture feed</description>
+    <item>
+      <title>Surrey housing market records a measured change</title>
+      <link>https://news.example.test/property/surrey-market?edition=morning#top</link>
+      <description><![CDATA[<p>A factual <strong>property</strong> description.</p>]]></description>
+      <pubDate>Tue, 28 Jul 2026 09:30:00 +0100</pubDate>
+    </item>
+  </channel>
+</rss>

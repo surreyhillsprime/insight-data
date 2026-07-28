@@ -1,61 +1,505 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "sources": [
+    {
+      "id": "epsom-ewell-times-planning",
+      "name": "Epsom & Ewell Times",
+      "url": "https://epsomandewelltimes.com/category/council/planning/feed/",
+      "adapter": "rss",
+      "articleHosts": [
+        "epsomandewelltimes.com"
+      ],
+      "publisherGroup": "epsom-ewell-times",
+      "lane": "surrey-local",
+      "category": "surrey-local",
+      "quality": 7,
+      "primePropertyBias": 0,
+      "minimumScore": 42,
+      "defaultGeography": "Surrey",
+      "expectedCadenceMinutes": 1440,
+      "publicationMode": "live",
+      "requiredTitlePatterns": [
+        "\\b(hous(?:e|es|ing)|homes?|residential|development|planning|local plan|green belt|landlord|rent)\\b"
+      ],
+      "blockedTitlePatterns": [
+        "\\b(defibrillator|advertising kiosk|telecom(?:s|munications)? kiosk)\\b"
+      ],
+      "rights": {
+        "collectionStatus": "approved",
+        "publicationStatus": "approved",
+        "mode": "link-only",
+        "basis": "Publisher-operated category RSS; INSIGHT publishes title, source, date and canonical link only.",
+        "referenceUrl": "https://epsomandewelltimes.com/category/council/planning/feed/",
+        "reviewedAt": "2026-07-28"
+      }
+    },
+    {
+      "id": "epsom-ewell-times-housing",
+      "name": "Epsom & Ewell Times",
+      "url": "https://epsomandewelltimes.com/category/council/housing/feed/",
+      "adapter": "rss",
+      "articleHosts": [
+        "epsomandewelltimes.com"
+      ],
+      "publisherGroup": "epsom-ewell-times",
+      "lane": "surrey-local",
+      "category": "surrey-local",
+      "quality": 7,
+      "primePropertyBias": 0,
+      "minimumScore": 42,
+      "defaultGeography": "Surrey",
+      "expectedCadenceMinutes": 1440,
+      "publicationMode": "live",
+      "requiredTitlePatterns": [
+        "\\b(hous(?:e|es|ing)|homes?|residential|development|planning|local plan|green belt|landlord|rent|leasehold|freehold)\\b"
+      ],
+      "rights": {
+        "collectionStatus": "approved",
+        "publicationStatus": "approved",
+        "mode": "link-only",
+        "basis": "Publisher-operated category RSS; INSIGHT publishes title, source, date and canonical link only.",
+        "referenceUrl": "https://epsomandewelltimes.com/category/council/housing/feed/",
+        "reviewedAt": "2026-07-28"
+      }
+    },
+    {
+      "id": "guildford-dragon",
+      "name": "Guildford Dragon",
+      "url": "https://guildford-dragon.com/feed/",
+      "adapter": "rss",
+      "articleHosts": [
+        "guildford-dragon.com"
+      ],
+      "publisherGroup": "guildford-dragon",
+      "lane": "surrey-local",
+      "category": "surrey-local",
+      "quality": 7,
+      "primePropertyBias": 0,
+      "minimumScore": 44,
+      "defaultGeography": "Surrey",
+      "expectedCadenceMinutes": 1440,
+      "publicationMode": "live",
+      "requiredTitlePatterns": [
+        "\\b(hous(?:e|es|ing)|homes?|property|residential|development|planning|local plan|green belt|station|infrastructure|landlord|rent)\\b"
+      ],
+      "blockedTitlePatterns": [
+        "\\b(apology|break in service|letters? to the editor|sport)\\b"
+      ],
+      "rights": {
+        "collectionStatus": "approved",
+        "publicationStatus": "approved",
+        "mode": "link-only",
+        "basis": "Publisher-operated RSS; INSIGHT publishes title, source, date and canonical link only.",
+        "referenceUrl": "https://guildford-dragon.com/feed/",
+        "reviewedAt": "2026-07-28"
+      }
+    },
+    {
+      "id": "hmlr-official",
+      "name": "HM Land Registry",
+      "url": "https://www.gov.uk/government/organisations/land-registry.atom",
+      "adapter": "atom",
+      "articleHosts": [
+        "www.gov.uk"
+      ],
+      "publisherGroup": "uk-government",
+      "lane": "official-market",
+      "category": "official-statistics",
+      "quality": 10,
+      "primePropertyBias": 0,
+      "minimumScore": 40,
+      "defaultGeography": "",
+      "defaultLocation": "UK housing market",
+      "expectedCadenceMinutes": 43200,
+      "publicationMode": "live",
+      "authoritativeNational": true,
+      "requiredTitlePatterns": [
+        "\\bUK House Price Index\\b",
+        "\\bPrice Paid Data\\b",
+        "\\bTransaction Data\\b"
+      ],
+      "blockedTitlePatterns": [
+        "\\b(training|recruitment|expenses?|practice guide|procurement)\\b"
+      ],
+      "rights": {
+        "collectionStatus": "approved",
+        "publicationStatus": "approved",
+        "mode": "link-only",
+        "basis": "Crown copyright material published under the Open Government Licence v3.0.",
+        "referenceUrl": "https://www.gov.uk/help/terms-conditions",
+        "reviewedAt": "2026-07-28",
+        "licenceId": "OGL-3.0"
+      }
+    },
+    {
+      "id": "mhclg-official",
+      "name": "Ministry of Housing, Communities and Local Government",
+      "url": "https://www.gov.uk/government/organisations/ministry-of-housing-communities-local-government.atom",
+      "adapter": "atom",
+      "articleHosts": [
+        "www.gov.uk"
+      ],
+      "publisherGroup": "uk-government",
+      "lane": "official-market",
+      "category": "official-policy",
+      "quality": 10,
+      "primePropertyBias": 0,
+      "minimumScore": 45,
+      "defaultGeography": "",
+      "defaultLocation": "UK housing policy",
+      "expectedCadenceMinutes": 1440,
+      "publicationMode": "live",
+      "authoritativeNational": true,
+      "requiredTitlePatterns": [
+        "\\b(housing|housebuilding|planning|leasehold|freehold|homebuying|green belt|building safety|residential property)\\b"
+      ],
+      "blockedTitlePatterns": [
+        "^(Correspondence|Form|Transparency data):",
+        "\\bHomes for Ukraine\\b",
+        "\\blocal government reorganisation\\b",
+        "\\bnon-domestic rates\\b"
+      ],
+      "rights": {
+        "collectionStatus": "approved",
+        "publicationStatus": "approved",
+        "mode": "link-only",
+        "basis": "Crown copyright material published under the Open Government Licence v3.0.",
+        "referenceUrl": "https://www.gov.uk/help/terms-conditions",
+        "reviewedAt": "2026-07-28",
+        "licenceId": "OGL-3.0"
+      }
+    },
+    {
+      "id": "ons-housing",
+      "name": "Office for National Statistics",
+      "url": "https://www.ons.gov.uk/releasecalendar?rss=&keywords=house%20price&highlight=true&limit=50&page=1&release-type=type-published&sort=date-newest",
+      "adapter": "rss",
+      "articleHosts": [
+        "www.ons.gov.uk"
+      ],
+      "publisherGroup": "ons",
+      "lane": "official-market",
+      "category": "official-statistics",
+      "quality": 10,
+      "primePropertyBias": 0,
+      "minimumScore": 40,
+      "defaultGeography": "",
+      "defaultLocation": "UK housing market",
+      "expectedCadenceMinutes": 43200,
+      "publicationMode": "live",
+      "authoritativeNational": true,
+      "requiredTitlePatterns": [
+        "\\bPrivate rent and house prices\\b",
+        "\\bHouse price statistics\\b",
+        "\\bHousing affordability\\b",
+        "\\bIndicators of house building\\b"
+      ],
+      "rights": {
+        "collectionStatus": "approved",
+        "publicationStatus": "approved",
+        "mode": "link-only",
+        "basis": "ONS material available under the Open Government Licence except where otherwise stated.",
+        "referenceUrl": "https://www.ons.gov.uk/help/termsandconditions",
+        "reviewedAt": "2026-07-28",
+        "licenceId": "OGL-3.0"
+      }
+    },
     {
       "id": "prime-resi",
       "name": "PrimeResi",
       "url": "https://primeresi.com/feed/",
+      "adapter": "rss",
+      "articleHosts": [
+        "primeresi.com"
+      ],
+      "publisherGroup": "prime-resi",
+      "lane": "prime-market",
       "category": "prime-specialist",
       "quality": 9,
       "primePropertyBias": 8,
+      "minimumScore": 45,
       "defaultGeography": "",
-      "rightsMode": "link-only",
-      "enabled": true
+      "expectedCadenceMinutes": 1440,
+      "publicationMode": "disabled",
+      "rights": {
+        "collectionStatus": "permission-required",
+        "publicationStatus": "permission-required",
+        "mode": "link-only",
+        "basis": "Published terms restrict systematic and commercial reuse; written permission is required.",
+        "referenceUrl": "https://primeresi.com/terms-conditions/",
+        "reviewedAt": "2026-07-28"
+      }
     },
     {
-      "id": "country-life-property",
-      "name": "Country Life",
-      "url": "https://www.countrylife.co.uk/property/feed",
-      "category": "prime-specialist",
+      "id": "estate-agent-today",
+      "name": "Estate Agent Today",
+      "url": "https://www.estateagenttoday.co.uk/rss-feed",
+      "adapter": "rss",
+      "articleHosts": [
+        "www.estateagenttoday.co.uk"
+      ],
+      "publisherGroup": "estate-agent-today",
+      "lane": "uk-market",
+      "category": "industry-press",
       "quality": 8,
-      "primePropertyBias": 6,
+      "primePropertyBias": 2,
+      "minimumScore": 45,
       "defaultGeography": "",
-      "rightsMode": "link-only",
-      "enabled": true
+      "expectedCadenceMinutes": 360,
+      "publicationMode": "disabled",
+      "rights": {
+        "collectionStatus": "permission-required",
+        "publicationStatus": "permission-required",
+        "mode": "link-only",
+        "basis": "Commercial automated feed and metadata rights were not verifiable; written confirmation is required.",
+        "referenceUrl": "https://www.estateagenttoday.co.uk/rss-feed",
+        "reviewedAt": "2026-07-28"
+      }
     },
     {
       "id": "property-industry-eye",
       "name": "Property Industry Eye",
       "url": "https://propertyindustryeye.com/feed/",
+      "adapter": "rss",
+      "articleHosts": [
+        "propertyindustryeye.com"
+      ],
+      "publisherGroup": "property-industry-eye",
+      "lane": "uk-market",
       "category": "industry-press",
       "quality": 8,
       "primePropertyBias": 3,
+      "minimumScore": 45,
       "defaultGeography": "",
-      "rightsMode": "link-only",
-      "enabled": true
+      "expectedCadenceMinutes": 360,
+      "publicationMode": "disabled",
+      "rights": {
+        "collectionStatus": "prohibited-without-permission",
+        "publicationStatus": "prohibited-without-permission",
+        "mode": "link-only",
+        "basis": "Published terms prohibit unauthorised automated access and obtaining links.",
+        "referenceUrl": "https://propertyindustryeye.com/terms-and-conditions/",
+        "reviewedAt": "2026-07-28"
+      }
     },
     {
       "id": "bbc-surrey",
       "name": "BBC Surrey",
       "url": "https://feeds.bbci.co.uk/news/england/surrey/rss.xml",
+      "adapter": "rss",
+      "articleHosts": [
+        "www.bbc.co.uk",
+        "www.bbc.com"
+      ],
+      "publisherGroup": "bbc",
+      "lane": "surrey-local",
       "category": "surrey-local",
       "quality": 9,
       "primePropertyBias": 0,
+      "minimumScore": 45,
       "defaultGeography": "Surrey",
-      "rightsMode": "link-only",
-      "enabled": true
+      "expectedCadenceMinutes": 360,
+      "publicationMode": "disabled",
+      "rights": {
+        "collectionStatus": "permission-required",
+        "publicationStatus": "permission-required",
+        "mode": "link-only",
+        "basis": "BBC business use of RSS and metadata requires permission or a licence.",
+        "referenceUrl": "https://downloads.bbc.co.uk/usingthebbc/bbc_terms_of_use_31March2022english.pdf",
+        "reviewedAt": "2026-07-28"
+      }
+    },
+    {
+      "id": "bbc-business",
+      "name": "BBC Business",
+      "url": "https://feeds.bbci.co.uk/news/business/rss.xml",
+      "adapter": "rss",
+      "articleHosts": [
+        "www.bbc.co.uk",
+        "www.bbc.com"
+      ],
+      "publisherGroup": "bbc",
+      "lane": "uk-market",
+      "category": "authority",
+      "quality": 9,
+      "primePropertyBias": 0,
+      "minimumScore": 50,
+      "defaultGeography": "",
+      "expectedCadenceMinutes": 180,
+      "publicationMode": "disabled",
+      "rights": {
+        "collectionStatus": "permission-required",
+        "publicationStatus": "permission-required",
+        "mode": "link-only",
+        "basis": "BBC business use of RSS and metadata requires permission or a licence.",
+        "referenceUrl": "https://downloads.bbc.co.uk/usingthebbc/bbc_terms_of_use_31March2022english.pdf",
+        "reviewedAt": "2026-07-28"
+      }
     },
     {
       "id": "surrey-live",
       "name": "SurreyLive",
       "url": "https://www.getsurrey.co.uk/news/?service=rss",
+      "adapter": "rss",
+      "articleHosts": [
+        "www.getsurrey.co.uk"
+      ],
+      "publisherGroup": "reach-surrey",
+      "lane": "surrey-local",
       "category": "surrey-local",
       "quality": 6,
       "primePropertyBias": 0,
+      "minimumScore": 42,
       "defaultGeography": "Surrey",
+      "expectedCadenceMinutes": 180,
+      "publicationMode": "disabled",
+      "rights": {
+        "collectionStatus": "permission-required",
+        "publicationStatus": "permission-required",
+        "mode": "link-only",
+        "basis": "Reach terms restrict the site to personal and non-commercial use unless prior written permission is obtained.",
+        "referenceUrl": "https://www.reachplc.com/site-services/terms-conditions",
+        "reviewedAt": "2026-07-28"
+      }
+    },
+    {
+      "id": "country-life-property",
+      "name": "Country Life",
+      "url": "https://www.countrylife.co.uk/property/feed",
+      "adapter": "rss",
+      "articleHosts": [
+        "www.countrylife.co.uk"
+      ],
+      "publisherGroup": "country-life",
+      "lane": "prime-market",
+      "category": "prime-specialist",
+      "quality": 8,
+      "primePropertyBias": 6,
+      "minimumScore": 48,
+      "defaultGeography": "",
+      "expectedCadenceMinutes": 1440,
+      "publicationMode": "disabled",
+      "rights": {
+        "collectionStatus": "permission-required",
+        "publicationStatus": "permission-required",
+        "mode": "link-only",
+        "basis": "Commercial automated feed publication rights have not been confirmed.",
+        "referenceUrl": "https://www.countrylife.co.uk/terms-and-conditions",
+        "reviewedAt": "2026-07-28"
+      }
+    },
+    {
+      "id": "woking-news-mail",
+      "name": "Woking News & Mail",
+      "url": "https://www.wokingnewsandmail.co.uk/news/planning/rss",
+      "adapter": "rss",
+      "articleHosts": [
+        "www.wokingnewsandmail.co.uk"
+      ],
+      "publisherGroup": "tindle-surrey",
+      "lane": "surrey-local",
+      "category": "surrey-local",
+      "quality": 7,
+      "primePropertyBias": 0,
+      "minimumScore": 42,
+      "defaultGeography": "Surrey",
+      "expectedCadenceMinutes": 1440,
+      "publicationMode": "disabled",
+      "requiredTitlePatterns": [
+        "\\b(hous(?:e|es|ing)|homes?|property|residential|development|planning|local plan|green belt|landlord|rent)\\b"
+      ],
+      "rights": {
+        "collectionStatus": "permission-required",
+        "publicationStatus": "permission-required",
+        "mode": "link-only",
+        "basis": "A publisher planning RSS is available, but the site reserves its rights; written commercial metadata permission is required.",
+        "referenceUrl": "https://www.wokingnewsandmail.co.uk/news/planning/rss",
+        "reviewedAt": "2026-07-28"
+      }
+    },
+    {
+      "id": "farnham-herald",
+      "name": "Farnham Herald",
+      "url": "https://www.farnhamherald.com/rss",
+      "adapter": "rss",
+      "articleHosts": [
+        "www.farnhamherald.com"
+      ],
+      "publisherGroup": "tindle-surrey",
+      "lane": "surrey-local",
+      "category": "surrey-local",
+      "quality": 7,
+      "primePropertyBias": 0,
+      "minimumScore": 42,
+      "defaultGeography": "Surrey",
+      "expectedCadenceMinutes": 1440,
+      "publicationMode": "disabled",
+      "requiredTitlePatterns": [
+        "\\b(hous(?:e|es|ing)|homes?|property|residential|development|planning|local plan|green belt|landlord|rent)\\b"
+      ],
+      "rights": {
+        "collectionStatus": "permission-required",
+        "publicationStatus": "permission-required",
+        "mode": "link-only",
+        "basis": "A publisher sitewide RSS is available, but the site reserves its rights; written commercial metadata permission is required.",
+        "referenceUrl": "https://www.farnhamherald.com/rss",
+        "reviewedAt": "2026-07-28"
+      }
+    },
+    {
+      "id": "haslemere-herald",
+      "name": "Haslemere Herald",
+      "url": "https://www.haslemereherald.com/rss",
+      "adapter": "rss",
+      "articleHosts": [
+        "www.haslemereherald.com"
+      ],
+      "publisherGroup": "tindle-surrey",
+      "lane": "surrey-local",
+      "category": "surrey-local",
+      "quality": 7,
+      "primePropertyBias": 0,
+      "minimumScore": 42,
+      "defaultGeography": "Surrey",
+      "expectedCadenceMinutes": 1440,
+      "publicationMode": "disabled",
+      "requiredTitlePatterns": [
+        "\\b(hous(?:e|es|ing)|homes?|property|residential|development|planning|local plan|green belt|landlord|rent)\\b"
+      ],
+      "rights": {
+        "collectionStatus": "permission-required",
+        "publicationStatus": "permission-required",
+        "mode": "link-only",
+        "basis": "A publisher sitewide RSS is available, but the site reserves its rights; written commercial metadata permission is required.",
+        "referenceUrl": "https://www.haslemereherald.com/rss",
+        "reviewedAt": "2026-07-28"
+      }
+    },
+    {
+      "id": "surrey-county-council",
+      "name": "Surrey County Council",
+      "url": "https://www.surreycc.gov.uk/community/news/press-releases",
+      "adapter": "publisher-feed-required",
+      "articleHosts": [
+        "www.surreycc.gov.uk"
+      ],
+      "publisherGroup": "surrey-county-council",
+      "lane": "surrey-local",
+      "category": "official-local",
+      "quality": 9,
+      "primePropertyBias": 0,
       "minimumScore": 45,
-      "rightsMode": "link-only",
-      "enabled": true
+      "defaultGeography": "Surrey",
+      "expectedCadenceMinutes": 1440,
+      "publicationMode": "disabled",
+      "rights": {
+        "collectionStatus": "permission-required",
+        "publicationStatus": "permission-required",
+        "mode": "link-only",
+        "basis": "The former WordPress RSS now redirects to an HTML press-release page; a stable approved feed is required.",
+        "referenceUrl": "https://www.surreycc.gov.uk/community/news/press-releases",
+        "reviewedAt": "2026-07-28"
+      }
     }
   ]
 }

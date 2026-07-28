@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>https://news.example.test/feed</id>
+  <title>Example official activity</title>
+  <updated>2026-07-28T10:00:00Z</updated>
+  <entry>
+    <id>https://news.example.test/policy/housing-update</id>
+    <title>Housing policy update for England</title>
+    <link rel="self" href="https://feeds.example.test/entry/1" />
+    <link rel="alternate" href="https://news.example.test/policy/housing-update" />
+    <summary>Official housing policy evidence.</summary>
+    <updated>2026-07-28T10:00:00Z</updated>
+  </entry>
+</feed>

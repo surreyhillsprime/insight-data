@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  <url>
+    <loc>https://news.example.test/property/sitemap-story</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Example News</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-07-28</news:publication_date>
+      <news:title>Surrey planning decision from a news sitemap</news:title>
+    </news:news>
+  </url>
+</urlset>
