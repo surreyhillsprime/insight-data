@@ -175,6 +175,37 @@ class NewsScoringTests(unittest.TestCase):
         self.assertEqual(admitted["matchType"], "national")
         self.assertIsNone(rejected)
 
+    def test_curated_local_planning_feed_admits_material_building_story(self):
+        source = {
+            **SOURCE,
+            "id": "local-planning",
+            "name": "Local Planning",
+            "quality": 7,
+            "primePropertyBias": 0,
+            "publisherGroup": "local-planning",
+            "lane": "surrey-local",
+            "defaultGeography": "Surrey",
+            "curatedPropertyFeed": True,
+            "defaultTopics": ["Planning"],
+        }
+        admitted = score_article(
+            {
+                "title": "School given green light for sports hall",
+                "url": "https://example.com/sports-hall",
+                "publishedAt": "2026-07-15T10:00:00Z",
+                "sourceId": source["id"],
+                "source": source["name"],
+                "_description": "Permission was granted to build replacement facilities.",
+            },
+            source,
+            self.catalog,
+            NOW,
+        )
+        self.assertIsNotNone(admitted)
+        self.assertGreaterEqual(admitted["score"], 42)
+        self.assertEqual(admitted["location"], "Surrey")
+        self.assertEqual(admitted["topics"][0], "Planning")
+
 
 class NewsFeedValidationTests(unittest.TestCase):
     def test_link_only_feed_round_trip(self):

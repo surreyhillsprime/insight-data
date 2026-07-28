@@ -14,22 +14,25 @@ both automated collection and link-only publication are explicitly approved.
 | Epsom & Ewell Times planning | Surrey planning and development | Publisher-operated category RSS; link metadata only |
 | Epsom & Ewell Times housing | Surrey housing | Publisher-operated category RSS; link metadata only |
 | Guildford Dragon | Guildford housing, planning and infrastructure | Publisher-operated RSS; link metadata only |
+| Woking News & Mail planning | Woking and Guildford planning decisions | Publisher-operated category RSS; link metadata only |
+| Farnham Herald | Farnham and western Surrey property stories | Publisher-operated RSS; property classifier; link metadata only |
+| Haslemere Herald | Haslemere and Surrey Hills property stories | Publisher-operated RSS; property classifier; link metadata only |
 | HM Land Registry | UK House Price Index, Price Paid and transaction releases | Open Government Licence v3.0 |
 | Ministry of Housing, Communities and Local Government | Material national housing and planning policy | Open Government Licence v3.0 |
 | Office for National Statistics | House prices, rents, affordability and housebuilding | Open Government Licence |
 
 Official national feeds use strict title allowlists before their authority
-override is applied. Local feeds use source-specific property title gates,
-then the normal INSIGHT geography, entity, materiality and freshness scoring.
+override is applied. First-party planning and housing category feeds are
+treated as curated property lanes; sitewide local feeds still use strict
+property title gates before the normal INSIGHT geography, entity, materiality
+and freshness scoring.
 
 ## Registered but disabled
 
 PrimeResi, Estate Agent Today, Property Industry Eye, BBC Surrey, BBC Business,
-SurreyLive, Country Life, Woking News & Mail, Farnham Herald, Haslemere Herald
-and Surrey County Council remain registered but are not fetched or published.
-The Woking, Farnham and Haslemere publisher feeds are recorded so they can be
-activated cleanly if permission is obtained. Their current rights or
-stable-feed status requires permission or further verification.
+SurreyLive, Country Life and Surrey County Council remain registered but are
+not fetched or published. Their current rights or stable-feed status requires
+permission or further verification.
 Changing one of these sources to `live` will fail registry validation unless
 its collection and publication approvals are also recorded.
 

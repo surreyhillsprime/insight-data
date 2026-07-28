@@ -127,6 +127,25 @@
         "authoritativeNational": {
           "type": "boolean"
         },
+        "curatedPropertyFeed": {
+          "type": "boolean"
+        },
+        "defaultTopics": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "Planning",
+              "Transaction",
+              "Prime market",
+              "Market",
+              "Policy",
+              "Heritage",
+              "Infrastructure",
+              "Environment"
+            ]
+          }
+        },
         "requiredTitlePatterns": {
           "type": "array",
           "items": {

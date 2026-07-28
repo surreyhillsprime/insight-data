@@ -467,6 +467,14 @@ def score_article(
         for name, keywords in TOPIC_KEYWORDS.items()
         if any(term in lower for term in keywords)
     ]
+    default_topics = [
+        topic
+        for topic in source.get("defaultTopics", [])
+        if topic in TOPIC_KEYWORDS
+    ]
+    for topic in reversed(default_topics):
+        if topic not in topics:
+            topics.insert(0, topic)
     value = money_value(combined)
     material_hits = sum(1 for term in MATERIAL_KEYWORDS if term in lower)
     materiality = min(
@@ -482,6 +490,9 @@ def score_article(
             else 0
         ),
     )
+    if source.get("curatedPropertyFeed") is True:
+        property_relevance = max(property_relevance, 9)
+        materiality = max(materiality, 4)
     if "Planning" in topics and any(
         term in lower for term in ("approved", "refused", "appeal")
     ):

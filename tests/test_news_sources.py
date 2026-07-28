@@ -99,7 +99,10 @@ class NewsSourceRegistryTests(unittest.TestCase):
             validate_registry(registry, self.schema)
 
     def test_title_gate_blocks_before_required_patterns(self):
-        source = self.registry["sources"][0]
+        source = {
+            "requiredTitlePatterns": [r"\b(housing|planning)\b"],
+            "blockedTitlePatterns": [r"\btelecom kiosk\b"],
+        }
         self.assertTrue(title_is_allowed(source, "Housing and planning decision"))
         self.assertFalse(title_is_allowed(source, "Planning decision for a telecom kiosk"))
         self.assertFalse(title_is_allowed(source, "Community festival announced"))

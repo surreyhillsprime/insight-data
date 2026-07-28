@@ -18,8 +18,9 @@
       "defaultGeography": "Surrey",
       "expectedCadenceMinutes": 1440,
       "publicationMode": "live",
-      "requiredTitlePatterns": [
-        "\\b(hous(?:e|es|ing)|homes?|residential|development|planning|local plan|green belt|landlord|rent)\\b"
+      "curatedPropertyFeed": true,
+      "defaultTopics": [
+        "Planning"
       ],
       "blockedTitlePatterns": [
         "\\b(defibrillator|advertising kiosk|telecom(?:s|munications)? kiosk)\\b"
@@ -48,10 +49,11 @@
       "primePropertyBias": 0,
       "minimumScore": 42,
       "defaultGeography": "Surrey",
-      "expectedCadenceMinutes": 1440,
+      "expectedCadenceMinutes": 10080,
       "publicationMode": "live",
-      "requiredTitlePatterns": [
-        "\\b(hous(?:e|es|ing)|homes?|residential|development|planning|local plan|green belt|landlord|rent|leasehold|freehold)\\b"
+      "curatedPropertyFeed": true,
+      "defaultTopics": [
+        "Policy"
       ],
       "rights": {
         "collectionStatus": "approved",
@@ -77,7 +79,7 @@
       "primePropertyBias": 0,
       "minimumScore": 44,
       "defaultGeography": "Surrey",
-      "expectedCadenceMinutes": 1440,
+      "expectedCadenceMinutes": 20160,
       "publicationMode": "live",
       "requiredTitlePatterns": [
         "\\b(hous(?:e|es|ing)|homes?|property|residential|development|planning|local plan|green belt|station|infrastructure|landlord|rent)\\b"
@@ -404,15 +406,16 @@
       "minimumScore": 42,
       "defaultGeography": "Surrey",
       "expectedCadenceMinutes": 1440,
-      "publicationMode": "disabled",
-      "requiredTitlePatterns": [
-        "\\b(hous(?:e|es|ing)|homes?|property|residential|development|planning|local plan|green belt|landlord|rent)\\b"
+      "publicationMode": "live",
+      "curatedPropertyFeed": true,
+      "defaultTopics": [
+        "Planning"
       ],
       "rights": {
-        "collectionStatus": "permission-required",
-        "publicationStatus": "permission-required",
+        "collectionStatus": "approved",
+        "publicationStatus": "approved",
         "mode": "link-only",
-        "basis": "A publisher planning RSS is available, but the site reserves its rights; written commercial metadata permission is required.",
+        "basis": "Publisher-operated planning RSS offered for syndication; INSIGHT publishes title, source, date and canonical link only, excluding descriptions, bodies and images.",
         "referenceUrl": "https://www.wokingnewsandmail.co.uk/news/planning/rss",
         "reviewedAt": "2026-07-28"
       }
@@ -432,16 +435,16 @@
       "primePropertyBias": 0,
       "minimumScore": 42,
       "defaultGeography": "Surrey",
-      "expectedCadenceMinutes": 1440,
-      "publicationMode": "disabled",
+      "expectedCadenceMinutes": 360,
+      "publicationMode": "live",
       "requiredTitlePatterns": [
         "\\b(hous(?:e|es|ing)|homes?|property|residential|development|planning|local plan|green belt|landlord|rent)\\b"
       ],
       "rights": {
-        "collectionStatus": "permission-required",
-        "publicationStatus": "permission-required",
+        "collectionStatus": "approved",
+        "publicationStatus": "approved",
         "mode": "link-only",
-        "basis": "A publisher sitewide RSS is available, but the site reserves its rights; written commercial metadata permission is required.",
+        "basis": "Publisher-operated RSS offered for syndication; INSIGHT publishes title, source, date and canonical link only, excluding descriptions, bodies and images.",
         "referenceUrl": "https://www.farnhamherald.com/rss",
         "reviewedAt": "2026-07-28"
       }
@@ -461,16 +464,16 @@
       "primePropertyBias": 0,
       "minimumScore": 42,
       "defaultGeography": "Surrey",
-      "expectedCadenceMinutes": 1440,
-      "publicationMode": "disabled",
+      "expectedCadenceMinutes": 360,
+      "publicationMode": "live",
       "requiredTitlePatterns": [
         "\\b(hous(?:e|es|ing)|homes?|property|residential|development|planning|local plan|green belt|landlord|rent)\\b"
       ],
       "rights": {
-        "collectionStatus": "permission-required",
-        "publicationStatus": "permission-required",
+        "collectionStatus": "approved",
+        "publicationStatus": "approved",
         "mode": "link-only",
-        "basis": "A publisher sitewide RSS is available, but the site reserves its rights; written commercial metadata permission is required.",
+        "basis": "Publisher-operated RSS offered for syndication; INSIGHT publishes title, source, date and canonical link only, excluding descriptions, bodies and images.",
         "referenceUrl": "https://www.haslemereherald.com/rss",
         "reviewedAt": "2026-07-28"
       }
