@@ -106,6 +106,24 @@ class NewsScoringTests(unittest.TestCase):
         self.assertIsNotNone(below_floor)
         self.assertEqual(two_million["score"], below_floor["score"] + 2)
 
+    def test_scored_article_strips_tracking_query_from_published_link(self):
+        scored = score_article(
+            {
+                "title": "Major Wentworth redevelopment approved",
+                "url": "https://example.com/wentworth?utm_source=rss&utm_medium=rss",
+                "publishedAt": "2026-07-15T10:00:00Z",
+                "sourceId": SOURCE["id"],
+                "source": SOURCE["name"],
+                "sourceCategory": SOURCE["category"],
+                "_description": "A residential planning decision in Surrey.",
+            },
+            SOURCE,
+            self.catalog,
+            NOW,
+        )
+        self.assertIsNotNone(scored)
+        self.assertEqual(scored["url"], "https://example.com/wentworth")
+
     def test_duplicate_story_cluster_keeps_higher_score(self):
         base = {
             "location": "Wentworth",
@@ -173,6 +191,7 @@ class NewsScoringTests(unittest.TestCase):
         self.assertGreaterEqual(admitted["score"], 45)
         self.assertEqual(admitted["location"], "UK housing market")
         self.assertEqual(admitted["matchType"], "national")
+        self.assertEqual(admitted["topics"][0], "Market")
         self.assertIsNone(rejected)
 
     def test_curated_local_planning_feed_admits_material_building_story(self):

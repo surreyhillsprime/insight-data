@@ -401,6 +401,9 @@ def score_article(
     now = now or utc_now()
     if not title_is_allowed(str(article.get("title") or ""), source):
         return None
+    article_url = canonical_url(article.get("url", ""))
+    if not article_url:
+        return None
     combined = f"{article.get('title', '')} {article.get('_description', '')}"
     upper = normalise(combined)
     lower = combined.lower()
@@ -500,6 +503,19 @@ def score_article(
 
     authoritative = bool(source.get("authoritativeNational"))
     if authoritative:
+        title_lower = str(article.get("title") or "").lower()
+        preferred_topic = (
+            "Transaction"
+            if "transaction" in title_lower or "price paid" in title_lower
+            else "Market"
+            if "house price index" in title_lower
+            else None
+        )
+        if preferred_topic:
+            topics = [
+                preferred_topic,
+                *(topic for topic in topics if topic != preferred_topic),
+            ]
         geography = max(geography, 8)
         property_relevance = max(property_relevance, 20)
         materiality = max(materiality, 15)
@@ -561,12 +577,12 @@ def score_article(
         reason_parts.append("Prime property market")
 
     identifier = hashlib.sha256(
-        f"{article['sourceId']}|{article['url']}".encode()
+        f"{article['sourceId']}|{article_url}".encode()
     ).hexdigest()[:20]
     return {
         "id": f"news-{identifier}",
         "title": article["title"],
-        "url": article["url"],
+        "url": article_url,
         "sourceId": article["sourceId"],
         "source": article["source"],
         "sourceCategory": article.get("sourceCategory", "editorial"),
