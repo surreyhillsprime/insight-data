@@ -12,6 +12,9 @@ class NewsWorkflowContractTests(unittest.TestCase):
         cls.workflow = (
             ROOT / ".github" / "workflows" / "news-feed.yml"
         ).read_text(encoding="utf-8")
+        cls.daily_workflow = (
+            ROOT / ".github" / "workflows" / "daily-intelligence.yml"
+        ).read_text(encoding="utf-8")
 
     def test_cadence_and_concurrency_are_news_specific(self):
         self.assertIn("cron: '17,47 * * * *'", self.workflow)
@@ -49,6 +52,14 @@ class NewsWorkflowContractTests(unittest.TestCase):
         self.assertLess(pull_index, source_validation_index)
         self.assertLess(source_validation_index, feed_validation_index)
         self.assertLess(feed_validation_index, add_index)
+
+    def test_independent_publishers_retry_after_concurrent_main_updates(self):
+        for workflow in (self.workflow, self.daily_workflow):
+            self.assertIn("for attempt in 1 2 3; do", workflow)
+            self.assertIn('git fetch origin "$GITHUB_REF_NAME"', workflow)
+            self.assertIn('git rebase "origin/$GITHUB_REF_NAME"', workflow)
+            self.assertIn('git push origin "HEAD:$GITHUB_REF_NAME"', workflow)
+            self.assertIn('if [ "$attempt" -eq 3 ]; then', workflow)
 
 
 if __name__ == "__main__":

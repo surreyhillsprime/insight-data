@@ -90,5 +90,19 @@ jobs:
             echo "No daily flood-context or opportunity changes to commit."
           else
             git commit -m "Update INSIGHT daily context and opportunities"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            for attempt in 1 2 3; do
+              git fetch origin "$GITHUB_REF_NAME"
+              if ! git rebase "origin/$GITHUB_REF_NAME"; then
+                git rebase --abort || true
+                echo "::error::Concurrent publication conflicted with the daily refresh."
+                exit 1
+              fi
+              if git push origin "HEAD:$GITHUB_REF_NAME"; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "::error::Daily refresh could not publish after 3 attempts."
+                exit 1
+              fi
+            done
           fi

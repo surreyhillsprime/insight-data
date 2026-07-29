@@ -86,5 +86,19 @@ jobs:
             echo "No news feed changes to commit after synchronisation."
           else
             git commit -m "Update Surrey intelligence news feed"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            for attempt in 1 2 3; do
+              git fetch origin "$GITHUB_REF_NAME"
+              if ! git rebase "origin/$GITHUB_REF_NAME"; then
+                git rebase --abort || true
+                echo "::error::Concurrent publication conflicted with the news refresh."
+                exit 1
+              fi
+              if git push origin "HEAD:$GITHUB_REF_NAME"; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "::error::News refresh could not publish after 3 attempts."
+                exit 1
+              fi
+            done
           fi
