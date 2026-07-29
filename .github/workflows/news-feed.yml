@@ -88,7 +88,7 @@ jobs:
             git commit -m "Update Surrey intelligence news feed"
             for attempt in 1 2 3; do
               git fetch origin "$GITHUB_REF_NAME"
-              if ! git rebase "origin/$GITHUB_REF_NAME"; then
+              if ! git rebase --autostash "origin/$GITHUB_REF_NAME"; then
                 git rebase --abort || true
                 echo "::error::Concurrent publication conflicted with the news refresh."
                 exit 1

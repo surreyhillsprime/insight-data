@@ -57,7 +57,7 @@ class NewsWorkflowContractTests(unittest.TestCase):
         for workflow in (self.workflow, self.daily_workflow):
             self.assertIn("for attempt in 1 2 3; do", workflow)
             self.assertIn('git fetch origin "$GITHUB_REF_NAME"', workflow)
-            self.assertIn('git rebase "origin/$GITHUB_REF_NAME"', workflow)
+            self.assertIn('git rebase --autostash "origin/$GITHUB_REF_NAME"', workflow)
             self.assertIn('git push origin "HEAD:$GITHUB_REF_NAME"', workflow)
             self.assertIn('if [ "$attempt" -eq 3 ]; then', workflow)
 
