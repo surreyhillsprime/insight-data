@@ -33,16 +33,12 @@ jobs:
         run: |
           python3 scripts/validate_news_sources.py
           python3 -m unittest discover -s tests -p 'test_news*.py'
-          python3 -m unittest tests.test_update_today_news
       - name: Collect and score link-only article metadata
         run: python3 scripts/collect_news.py
-      - name: Project current news into Today
-        run: python3 scripts/update_today_news.py
-      - name: Validate atomic publication
+      - name: Validate collected news
         run: |
           python3 scripts/validate_news_feed.py outputs/news-feed.js
           python3 scripts/check_news_freshness.py
-          python3 scripts/validate_today_news.py
       - name: Publish source health summary
         run: |
           python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
@@ -68,25 +64,27 @@ jobs:
           PY
       - name: Refuse conflicted output
         run: |
-          if grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/news-feed.js outputs/today-feed.js; then
-            echo 'Conflict markers found in news or Today feed' >&2
+          if grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/news-feed.js; then
+            echo 'Conflict markers found in news feed' >&2
             exit 1
           fi
-      - name: Commit changed feeds atomically
+      - name: Commit changed feed
         run: |
-          if git diff --quiet -- outputs/news-feed.js outputs/today-feed.js; then exit 0; fi
+          if git diff --quiet -- outputs/news-feed.js; then exit 0; fi
           git config user.name "insight-data-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add outputs/news-feed.js outputs/today-feed.js
-          git commit -m "Update Surrey intelligence news and Today feeds"
-          git pull --rebase origin "$GITHUB_REF_NAME"
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/news-feed.js; then
+            echo 'News refresh produced Git conflicts; refusing to commit' >&2
+            exit 1
+          fi
           python3 scripts/validate_news_sources.py
           python3 scripts/validate_news_feed.py outputs/news-feed.js
-          python3 scripts/update_today_news.py
-          python3 scripts/validate_today_news.py
-          if ! git diff --quiet -- outputs/today-feed.js; then
-            git add outputs/today-feed.js
-            git commit --amend --no-edit
+          python3 scripts/check_news_freshness.py
+          git add outputs/news-feed.js
+          if git diff --cached --quiet; then
+            echo "No news feed changes to commit after synchronisation."
+          else
+            git commit -m "Update Surrey intelligence news feed"
+            git push origin "HEAD:$GITHUB_REF_NAME"
           fi
-          git diff --exit-code -- outputs/news-feed.js outputs/today-feed.js
-          git push origin "HEAD:$GITHUB_REF_NAME"

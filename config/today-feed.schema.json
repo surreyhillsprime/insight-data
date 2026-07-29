@@ -1,0 +1,453 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gaininsight.app/schemas/today-feed.schema.json",
+  "title": "INSIGHT Today feed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "asOf",
+    "signals",
+    "opportunities"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "asOf": {
+      "$ref": "#/$defs/day"
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/signal"
+      }
+    },
+    "opportunities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/opportunity"
+      }
+    }
+  },
+  "$defs": {
+    "day": {
+      "type": "string",
+      "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}$"
+    },
+    "sourceDate": {
+      "type": "string",
+      "pattern": "^(?:|(?:19|20)\\d{2}(?:-\\d{2}(?:-\\d{2})?)?)$"
+    },
+    "datePrecision": {
+      "enum": [
+        "day",
+        "month",
+        "year",
+        "unknown"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "property": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "propertyId",
+        "address",
+        "postcode",
+        "market",
+        "district",
+        "town",
+        "estate",
+        "estateId"
+      ],
+      "properties": {
+        "propertyId": {
+          "type": "string",
+          "pattern": "^property:"
+        },
+        "address": {
+          "type": "string",
+          "minLength": 1
+        },
+        "postcode": {
+          "type": "string"
+        },
+        "market": {
+          "type": "string"
+        },
+        "district": {
+          "type": "string"
+        },
+        "town": {
+          "type": "string"
+        },
+        "estate": {
+          "type": "string"
+        },
+        "estateId": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "coordinatePrecision": {
+          "type": "string"
+        }
+      }
+    },
+    "place": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "planning_application",
+            "property",
+            "estate",
+            "town",
+            "district"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidenceId",
+        "source",
+        "sourceId",
+        "effectiveDate",
+        "datePrecision"
+      ],
+      "properties": {
+        "evidenceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effectiveDate": {
+          "$ref": "#/$defs/sourceDate"
+        },
+        "datePrecision": {
+          "$ref": "#/$defs/datePrecision"
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https://"
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceKey",
+        "status",
+        "complete",
+        "coverageMode",
+        "basis",
+        "checkedAt",
+        "limitations"
+      ],
+      "properties": {
+        "sourceKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "complete",
+            "partial",
+            "checked_none",
+            "not_checked",
+            "unavailable",
+            "failed"
+          ]
+        },
+        "complete": {
+          "type": "boolean"
+        },
+        "coverageMode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checkedAt": {
+          "type": "string"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "commonItem": {
+      "type": "object",
+      "required": [
+        "id",
+        "lane",
+        "kind",
+        "rank",
+        "title",
+        "summary",
+        "fact",
+        "why",
+        "context",
+        "effectiveDate",
+        "datePrecision",
+        "confidence",
+        "source",
+        "sourceIds",
+        "evidenceIds",
+        "sourceFamily",
+        "evidence",
+        "coverage",
+        "limitations",
+        "propertyIds",
+        "place",
+        "attributes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^today-"
+        },
+        "lane": {
+          "enum": [
+            "signals",
+            "opportunities"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rank": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fact": {
+          "type": "string",
+          "minLength": 1
+        },
+        "why": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effectiveDate": {
+          "$ref": "#/$defs/sourceDate"
+        },
+        "datePrecision": {
+          "$ref": "#/$defs/datePrecision"
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "sourceFamily": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+        "coverage": {
+          "$ref": "#/$defs/coverage"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "propertyIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^property:"
+          },
+          "uniqueItems": true
+        },
+        "place": {
+          "$ref": "#/$defs/place"
+        },
+        "attributes": {
+          "type": "object"
+        }
+      }
+    },
+    "signal": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonItem"
+        },
+        {
+          "type": "object",
+          "required": [
+            "property"
+          ],
+          "properties": {
+            "lane": {
+              "const": "signals"
+            },
+            "kind": {
+              "enum": [
+                "epc_observation",
+                "property_planning",
+                "sale_age_milestone"
+              ]
+            },
+            "property": {
+              "$ref": "#/$defs/property"
+            }
+          }
+        }
+      ]
+    },
+    "opportunity": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonItem"
+        },
+        {
+          "type": "object",
+          "required": [
+            "property",
+            "directSignalId",
+            "corroborationIds",
+            "independentSourceCount",
+            "indicatorKindCount",
+            "opportunityLevel",
+            "corroborationCoverage"
+          ],
+          "properties": {
+            "lane": {
+              "const": "opportunities"
+            },
+            "kind": {
+              "const": "property_opportunity"
+            },
+            "property": {
+              "$ref": "#/$defs/property"
+            },
+            "directSignalId": {
+              "type": "string",
+              "pattern": "^today-signal:"
+            },
+            "corroborationIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^today-signal:"
+              },
+              "uniqueItems": true
+            },
+            "independentSourceCount": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "indicatorKindCount": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "opportunityLevel": {
+              "enum": [
+                "Standard",
+                "Hot"
+              ]
+            },
+            "corroborationCoverage": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/coverage"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

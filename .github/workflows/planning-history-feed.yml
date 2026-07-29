@@ -14,8 +14,7 @@ concurrency:
 
 jobs:
   build:
-    # This remains fail-closed until the repository has an approved provider,
-    # explicit redistribution evidence and the activation variable.
+    # Fail closed until an approved provider and redistribution terms exist.
     if: ${{ vars.PLANNING_COMMERCIAL_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     steps:
@@ -52,7 +51,7 @@ jobs:
           --source-licence-url "$PLANNING_SOURCE_LICENCE_URL"
           --input-js outputs/surrey-transactions.js
           --write-js outputs/planning-history.js
-      - name: Validate project and feed
+      - name: Validate licensed feed against every £2m+ property
         run: >-
           python3 scripts/validate_planning_feed.py
           outputs/planning-history.js
@@ -62,16 +61,39 @@ jobs:
           --maximum-age-days 8
       - name: Commit changed feed
         run: |
-          if git diff --quiet -- outputs/planning-history.js; then exit 0; fi
           git config user.name "insight-data-bot"
           git config user.email "actions@users.noreply.github.com"
           git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/planning-history.js; then
+            echo "Planning refresh produced Git conflicts; refusing to publish." >&2
+            exit 1
+          fi
           python3 scripts/validate_planning_feed.py \
             outputs/planning-history.js \
             --base-feed outputs/surrey-transactions.js \
             --minimum-properties-with-history 3204 \
             --minimum-applications 21180 \
             --maximum-age-days 8
-          git add outputs/planning-history.js
-          git commit -m "Update planning history feed"
-          git push origin "HEAD:$GITHUB_REF_NAME"
+          python3 scripts/build_property_records.py \
+            --transactions outputs/surrey-transactions.js \
+            --sales-history outputs/sales-history.js \
+            --planning-history outputs/planning-history.js \
+            --output /tmp/insight-property-records.js
+          python3 scripts/validate_property_records.py \
+            /tmp/insight-property-records.js \
+            --transactions outputs/surrey-transactions.js
+          python3 scripts/build_today_feed.py \
+            --property-records /tmp/insight-property-records.js \
+            --output outputs/today-feed.js
+          python3 scripts/validate_today_feed.py outputs/today-feed.js
+          if grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/today-feed.js; then
+            echo "Today feed contains Git conflict markers; refusing to publish." >&2
+            exit 1
+          fi
+          git add outputs/planning-history.js outputs/today-feed.js
+          if git diff --cached --quiet; then
+            echo "No planning-history or Today changes to commit."
+          else
+            git commit -m "Update planning history and Today opportunities"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi

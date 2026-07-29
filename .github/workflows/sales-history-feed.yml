@@ -43,7 +43,7 @@ jobs:
           --refresh-days 28
           --workers 3
           --batch-size 8
-      - name: Validate commercial feed
+      - name: Validate commercial feed against every £2m+ property
         run: >-
           python3 scripts/validate_sales_history_feed.py
           outputs/sales-history.js
@@ -63,6 +63,10 @@ jobs:
           git config user.name "insight-data-bot"
           git config user.email "actions@users.noreply.github.com"
           git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/sales-history.js; then
+            echo "Sales-history refresh produced Git conflicts; refusing to publish." >&2
+            exit 1
+          fi
           python3 scripts/validate_sales_history_feed.py \
             outputs/sales-history.js \
             --base-feed outputs/surrey-transactions.js \
@@ -70,7 +74,26 @@ jobs:
             --minimum-transactions 6735 \
             --maximum-properties-unavailable 4 \
             --maximum-age-days 45
-          if git diff --quiet -- outputs/sales-history.js; then exit 0; fi
-          git add outputs/sales-history.js
-          git commit -m "Update complete sales history feed"
-          git push origin "HEAD:$GITHUB_REF_NAME"
+          python3 scripts/build_property_records.py \
+            --transactions outputs/surrey-transactions.js \
+            --sales-history outputs/sales-history.js \
+            --planning-history outputs/planning-history.js \
+            --output /tmp/insight-property-records.js
+          python3 scripts/validate_property_records.py \
+            /tmp/insight-property-records.js \
+            --transactions outputs/surrey-transactions.js
+          python3 scripts/build_today_feed.py \
+            --property-records /tmp/insight-property-records.js \
+            --output outputs/today-feed.js
+          python3 scripts/validate_today_feed.py outputs/today-feed.js
+          if grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/today-feed.js; then
+            echo "Today feed contains Git conflict markers; refusing to publish." >&2
+            exit 1
+          fi
+          git add outputs/sales-history.js outputs/today-feed.js
+          if git diff --cached --quiet; then
+            echo "No sales-history or Today changes to commit."
+          else
+            git commit -m "Update complete sales history and Today opportunities"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi

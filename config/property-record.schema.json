@@ -1,0 +1,553 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://insight.local/schemas/property-record.schema.json",
+  "title": "INSIGHT persistent property record",
+  "description": "A versioned, property-grain record whose timeline and narrative claims link to source evidence.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "propertyId",
+    "recordVersion",
+    "createdAt",
+    "updatedAt",
+    "canonicalAddress",
+    "postcode",
+    "transactionIds",
+    "events",
+    "evidence",
+    "coverage",
+    "metrics",
+    "factPacket",
+    "story",
+    "fingerprint"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "propertyId": {
+      "type": "string",
+      "pattern": "^property:.+\\|[A-Z0-9]+$"
+    },
+    "recordVersion": {"type": "integer", "minimum": 1},
+    "createdAt": {"type": "string", "minLength": 1},
+    "updatedAt": {"type": "string", "minLength": 1},
+    "canonicalAddress": {"type": "string", "minLength": 1},
+    "postcode": {"type": "string", "minLength": 1},
+    "profile": {"type": "object"},
+    "context": {
+      "type": "object",
+      "properties": {
+        "historicEngland": {"$ref": "#/$defs/historicEngland"}
+      },
+      "additionalProperties": true
+    },
+    "transactionIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/event"}
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/evidence"}
+    },
+    "coverage": {
+      "type": "object",
+      "required": ["sales", "planning", "epc", "listedBuilding"],
+      "properties": {
+        "sales": {"$ref": "#/$defs/coverage"},
+        "planning": {"$ref": "#/$defs/coverage"},
+        "epc": {"$ref": "#/$defs/coverage"},
+        "listedBuilding": {"$ref": "#/$defs/listedBuildingCoverage"}
+      },
+      "additionalProperties": {"$ref": "#/$defs/coverage"}
+    },
+    "metrics": {"type": "object", "minProperties": 1},
+    "factPacket": {"$ref": "#/$defs/factPacket"},
+    "story": {"$ref": "#/$defs/story"},
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^(?:sha256:)?[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "evidenceIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "event": {
+      "type": "object",
+      "required": ["eventId", "propertyId", "type", "date", "source", "evidenceIds"],
+      "properties": {
+        "eventId": {"type": "string", "minLength": 1},
+        "propertyId": {"type": "string", "minLength": 1},
+        "type": {
+          "enum": ["sale", "planning_application", "epc_certificate"]
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^(?:(?:19|20)\\d{2}(?:-\\d{2}(?:-\\d{2})?)?)?$"
+        },
+        "datePrecision": {"enum": ["day", "month", "year", "unknown"]},
+        "source": {"type": "string", "minLength": 1},
+        "evidenceIds": {"$ref": "#/$defs/evidenceIds"},
+        "summary": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "historicEnglandEntry": {
+      "type": "object",
+      "required": [
+        "listEntryNumber",
+        "grade",
+        "name",
+        "url",
+        "matchMethod",
+        "matchConfidence"
+      ],
+      "properties": {
+        "listEntryNumber": {
+          "type": "string",
+          "pattern": "^\\d{7}$"
+        },
+        "grade": {"enum": ["I", "II*", "II"]},
+        "name": {"type": "string", "minLength": 1},
+        "url": {
+          "type": "string",
+          "pattern": "^https://historicengland\\.org\\.uk/listing/the-list/list-entry/\\d{7}$"
+        },
+        "matchMethod": {
+          "enum": ["reviewed_override", "genuine_polygon_contains", "nearby_nhle_point"]
+        },
+        "matchConfidence": {
+          "enum": ["confirmed", "review_required"]
+        },
+        "listDate": {
+          "type": "string",
+          "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}$"
+        },
+        "amendDate": {
+          "type": "string",
+          "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}$"
+        },
+        "distanceMetres": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "historicEngland": {
+      "type": "object",
+      "required": [
+        "status",
+        "entries",
+        "source",
+        "checkedAt",
+        "sourceUpdatedAt",
+        "sourceSnapshot"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["confirmed_listed", "candidate_review", "no_direct_match", "unknown"]
+        },
+        "entries": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/historicEnglandEntry"}
+        },
+        "source": {"const": "Historic England NHLE"},
+        "checkedAt": {
+          "type": "string",
+          "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "sourceUpdatedAt": {
+          "type": "string",
+          "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "sourceSnapshot": {
+          "type": "string",
+          "pattern": "^nhle-(?:19|20)\\d{2}-\\d{2}-\\d{2}-[0-9a-f]{12}$"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {"const": "confirmed_listed"}
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "entries": {
+                "minItems": 1,
+                "items": {
+                  "allOf": [
+                    {"$ref": "#/$defs/historicEnglandEntry"},
+                    {
+                      "properties": {
+                        "matchMethod": {
+                          "enum": ["reviewed_override", "genuine_polygon_contains"]
+                        },
+                        "matchConfidence": {"const": "confirmed"}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {"const": "candidate_review"}
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "entries": {
+                "minItems": 1,
+                "items": {
+                  "allOf": [
+                    {"$ref": "#/$defs/historicEnglandEntry"},
+                    {
+                      "properties": {
+                        "matchMethod": {"const": "nearby_nhle_point"},
+                        "matchConfidence": {"const": "review_required"}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {"enum": ["no_direct_match", "unknown"]}
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "entries": {"maxItems": 0}
+            }
+          }
+        }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["evidenceId", "propertyId", "type", "source", "sourceId", "data"],
+      "properties": {
+        "evidenceId": {"type": "string", "minLength": 1},
+        "propertyId": {"type": "string", "minLength": 1},
+        "type": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "sourceId": {"type": "string", "minLength": 1},
+        "effectiveDate": {"type": "string"},
+        "data": {"type": "object"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {"const": "listed_building"}
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "properties": {
+              "data": {"$ref": "#/$defs/historicEngland"}
+            }
+          }
+        }
+      ],
+      "additionalProperties": true
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "status",
+        "complete",
+        "coverageMode",
+        "source",
+        "checkedAt",
+        "coverageFrom",
+        "coverageTo",
+        "recordCount",
+        "evidenceIds",
+        "basis",
+        "limitations"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["complete", "partial", "checked_none", "not_checked", "unavailable", "failed"]
+        },
+        "complete": {"type": "boolean"},
+        "coverageMode": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "checkedAt": {"type": "string"},
+        "coverageFrom": {"type": "string"},
+        "coverageTo": {"type": "string"},
+        "recordCount": {"type": "integer", "minimum": 0},
+        "evidenceIds": {"$ref": "#/$defs/evidenceIds"},
+        "basis": {"type": "string", "minLength": 1},
+        "limitations": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "additionalProperties": true
+    },
+    "listedBuildingCoverage": {
+      "type": "object",
+      "required": [
+        "status",
+        "complete",
+        "coverageMode",
+        "source",
+        "checkedAt",
+        "coverageFrom",
+        "coverageTo",
+        "recordCount",
+        "evidenceIds",
+        "basis",
+        "limitations",
+        "designationStatus",
+        "resultStatus",
+        "sourceUpdatedAt",
+        "sourceSnapshot"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["complete", "checked_none", "unavailable"]
+        },
+        "complete": {"type": "boolean"},
+        "coverageMode": {"type": "string", "minLength": 1},
+        "source": {"const": "Historic England NHLE"},
+        "checkedAt": {"type": "string"},
+        "coverageFrom": {"type": "string"},
+        "coverageTo": {"type": "string"},
+        "recordCount": {"type": "integer", "minimum": 0},
+        "evidenceIds": {"$ref": "#/$defs/evidenceIds"},
+        "basis": {"type": "string", "minLength": 1},
+        "limitations": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "designationStatus": {
+          "enum": ["confirmed_listed", "candidate_review", "no_direct_match", "unknown"]
+        },
+        "resultStatus": {
+          "enum": ["confirmed_listed", "candidate_review", "no_direct_match", "unknown"]
+        },
+        "sourceUpdatedAt": {"type": "string"},
+        "sourceSnapshot": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "fact": {
+      "type": "object",
+      "required": ["factId", "type", "text", "evidenceIds", "confidence"],
+      "properties": {
+        "factId": {"type": "string", "minLength": 1},
+        "type": {"type": "string", "minLength": 1},
+        "text": {"type": "string", "minLength": 1},
+        "evidenceIds": {"$ref": "#/$defs/evidenceIds"},
+        "confidence": {"enum": ["low", "medium", "high"]},
+        "value": {}
+      },
+      "additionalProperties": true
+    },
+    "factPacket": {
+      "type": "object",
+      "required": ["version", "asOf", "facts", "limitations"],
+      "properties": {
+        "version": {"type": "integer", "minimum": 1},
+        "asOf": {"type": "string", "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}$"},
+        "facts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/fact"}
+        },
+        "limitations": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "additionalProperties": true
+    },
+    "claim": {
+      "type": "object",
+      "required": ["claimId", "text", "evidenceIds", "confidence"],
+      "properties": {
+        "claimId": {"type": "string", "minLength": 1},
+        "text": {"type": "string", "minLength": 1},
+        "evidenceIds": {"$ref": "#/$defs/evidenceIds"},
+        "confidence": {"enum": ["low", "medium", "high"]}
+      },
+      "additionalProperties": true
+    },
+    "story": {
+      "type": "object",
+      "required": ["text", "paragraphs", "claims", "generator", "limitations", "valuation", "status"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "paragraphs": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/claim"}
+        },
+        "generator": {
+          "type": "object",
+          "required": ["type", "version"],
+          "properties": {
+            "type": {"type": "string", "minLength": 1},
+            "version": {"type": "string", "minLength": 1},
+            "model": {"type": ["string", "null"]}
+          },
+          "additionalProperties": true
+        },
+        "limitations": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "valuation": {
+          "type": "object",
+          "required": [
+            "modelVersion",
+            "cpihVersion",
+            "asOf",
+            "baseEstimate",
+            "estimatedCurrentValue",
+            "planningAdjustment",
+            "confidence",
+            "targetFloorAreaSqft",
+            "targetPropertyType",
+            "ownSaleAnchor",
+            "ownSaleDate",
+            "ownSalePrice",
+            "comparableCentre",
+            "comparableMedianPricePerSqft",
+            "comparableCount",
+            "selectedComparableCount",
+            "comparableChannel",
+            "comparableScope",
+            "comparableWindowYears",
+            "effectiveSampleSize",
+            "targetAreaStaleAfterPlanning",
+            "nearFloorPriceFallback",
+            "splitSignal",
+            "transactionUniverseCount",
+            "transactionUniverseLatestSaleDate",
+            "transactionUniversePriceTotal",
+            "comparables"
+          ],
+          "properties": {
+            "modelVersion": {"type": "string", "minLength": 1},
+            "cpihVersion": {"type": "string", "minLength": 1},
+            "asOf": {"type": "string", "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}$"},
+            "baseEstimate": {"type": "integer", "minimum": 1},
+            "estimatedCurrentValue": {"type": "integer", "minimum": 1},
+            "planningAdjustment": {"type": "integer", "minimum": 0},
+            "confidence": {"enum": ["low", "medium", "high"]},
+            "targetFloorAreaSqft": {"type": ["integer", "null"], "minimum": 0},
+            "targetPropertyType": {"type": ["string", "null"]},
+            "ownSaleAnchor": {"type": ["integer", "null"], "minimum": 0},
+            "ownSaleDate": {"type": "string", "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}$"},
+            "ownSalePrice": {"type": ["integer", "null"], "minimum": 0},
+            "comparableCentre": {"type": ["integer", "null"], "minimum": 0},
+            "comparableMedianPricePerSqft": {"type": ["integer", "null"], "minimum": 0},
+            "comparableCount": {"type": "integer", "minimum": 0},
+            "selectedComparableCount": {"type": "integer", "minimum": 0},
+            "comparableChannel": {"enum": ["price-per-sq-ft", "absolute-price"]},
+            "comparableScope": {"enum": ["estate", "town", "market", "surrey-prime"]},
+            "comparableWindowYears": {"enum": [5, 7, 10, 12]},
+            "effectiveSampleSize": {"type": "number", "minimum": 0},
+            "targetAreaStaleAfterPlanning": {"type": "boolean"},
+            "nearFloorPriceFallback": {"type": "boolean"},
+            "splitSignal": {"type": "boolean"},
+            "transactionUniverseCount": {"type": "integer", "minimum": 1},
+            "transactionUniverseLatestSaleDate": {"type": "string", "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}$"},
+            "transactionUniversePriceTotal": {"type": "integer", "minimum": 1},
+            "planningSignals": {
+              "type": "object",
+              "required": ["postEvidenceApprovedSchemeCount", "implementationSignalCount", "references"],
+              "properties": {
+                "postEvidenceApprovedSchemeCount": {"type": "integer", "minimum": 1},
+                "implementationSignalCount": {"type": "integer", "minimum": 0},
+                "approvedAdditionalAreaSqft": {"type": "integer", "minimum": 100},
+                "references": {"type": "array", "items": {"type": "string"}}
+              },
+              "additionalProperties": true
+            },
+            "comparables": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "propertyId",
+                  "transactionId",
+                  "category",
+                  "date",
+                  "price",
+                  "floorAreaSqft",
+                  "score",
+                  "adjustedPrice",
+                  "adjustedPricePerSqft",
+                  "trustedPricePerSqft",
+                  "areaStaleAtSale",
+                  "ageYears",
+                  "estateId",
+                  "town",
+                  "market",
+                  "usedInChannel"
+                ],
+                "properties": {
+                  "propertyId": {"type": "string", "minLength": 1},
+                  "transactionId": {"type": "string"},
+                  "category": {"const": "A"},
+                  "date": {"type": "string", "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}$"},
+                  "price": {"type": ["integer", "null"], "minimum": 0},
+                  "floorAreaSqft": {"type": ["integer", "null"], "minimum": 0},
+                  "score": {"type": "number", "minimum": 0},
+                  "distanceKm": {"type": ["number", "null"], "minimum": 0},
+                  "adjustedPrice": {"type": ["integer", "null"], "minimum": 0},
+                  "adjustedPricePerSqft": {"type": ["integer", "null"], "minimum": 0},
+                  "trustedPricePerSqft": {"type": "boolean"},
+                  "areaStaleAtSale": {"type": "boolean"},
+                  "ageYears": {"type": ["number", "null"], "minimum": 0},
+                  "estateId": {"type": "string"},
+                  "town": {"type": "string"},
+                  "market": {"type": "string"},
+                  "usedInChannel": {"type": "boolean"}
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "status": {"enum": ["ready", "fallback", "review_required"]}
+      },
+      "additionalProperties": true
+    }
+  }
+}

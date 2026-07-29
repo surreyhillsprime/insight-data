@@ -64,13 +64,12 @@ PUBLIC_TRANSACTION_FIELDS = frozenset({
     "ordnanceSurvey",
     "uprn",
     "ofsted",
-    "planning",
     "planningConstraints",
     "historicEngland",
 })
 
-# These fields existed in the older public feed. The canonical writer removes
-# them during migration, while validation rejects any published recurrence.
+# These fields existed in the pre-v1.5.1 public feed. The writer removes them
+# during migration, while the validator rejects any published recurrence.
 RESTRICTED_PUBLIC_TRANSACTION_FIELDS = frozenset({
     "epcAddress",
     "epcCertificateNumber",
@@ -85,6 +84,7 @@ RESTRICTED_PUBLIC_TRANSACTION_FIELDS = frozenset({
     "queryAddress",
     "openStreetMap",
     "companiesHouse",
+    "planning",
     "planningHistory",
 })
 
@@ -268,11 +268,7 @@ def recompute_coverage_metadata(transactions, meta):
 
     epc = dict(meta.get("epcEnrichment") or {})
     if epc:
-        matched = sum(
-            1
-            for item in transactions
-            if item.get("epcMatched") is True and numeric(item.get("floorAreaSqft"))
-        )
+        matched = sum(1 for item in transactions if item.get("epcMatched") is True and numeric(item.get("floorAreaSqft")))
         epc["matched"] = matched
         epc["coveragePercent"] = round(matched * 100 / len(transactions), 1) if transactions else 0
         meta["epcEnrichment"] = epc
@@ -297,9 +293,6 @@ def recompute_coverage_metadata(transactions, meta):
 
     weekly = dict(meta.get("weeklyContext") or {})
     if weekly:
-        # Listed-building evidence is owned solely by the dedicated NHLE sync.
-        # Never preserve or revive the retired Planning Data weekly payload.
-        weekly.pop("historicEngland", None)
         constraints = dict(weekly.get("planningConstraints") or {})
         if constraints:
             coverage = planning_constraint_coverage_counts(transactions)
@@ -307,6 +300,11 @@ def recompute_coverage_metadata(transactions, meta):
             constraints["records"] = coverage["successfulResponses"]
             constraints["coverageMode"] = "explicit-per-row-success"
             weekly["planningConstraints"] = constraints
+        # Statutory listed-building evidence is owned exclusively by the
+        # dedicated Historic England sync and its top-level heritageSync
+        # metadata. Never revive the legacy Planning Data weekly summary while
+        # migrating a downloaded feed.
+        weekly.pop("historicEngland", None)
         schools = dict(weekly.get("schools") or {})
         if schools:
             schools["records"] = populated("ofsted")
@@ -316,27 +314,12 @@ def recompute_coverage_metadata(transactions, meta):
 
     daily = dict(meta.get("dailyIntelligence") or {})
     if daily:
-        planning = dict(daily.get("planning") or {})
-        if planning:
-            planning_rows = [
-                item["planning"]
-                for item in transactions
-                if isinstance(item.get("planning"), dict)
-            ]
-            planning["records"] = len(planning_rows)
-            planning["observedRecords"] = sum(
-                1 for item in planning_rows if item.get("coverageStatus") == "observed"
-            )
-            planning["unknownRecords"] = sum(
-                1 for item in planning_rows if item.get("coverageStatus") == "unknown"
-            )
-            planning["unavailableRecords"] = sum(
-                1 for item in planning_rows if item.get("coverageStatus") == "unavailable"
-            )
-            planning["successfulResponses"] = planning["observedRecords"] + planning["unknownRecords"]
-            daily["planning"] = planning
+        daily.pop("planning", None)
         daily.pop("companiesHouse", None)
-        meta["dailyIntelligence"] = daily
+        if any(key != "updatedAt" for key in daily):
+            meta["dailyIntelligence"] = daily
+        else:
+            meta.pop("dailyIntelligence", None)
     return meta
 
 
@@ -344,7 +327,7 @@ def finalise_historical_expansion(meta, *, final_pass_complete):
     """Preserve the expansion cohort and close its pending count fail-safely.
 
     The Land Registry sweep records how many rows initially had no reusable
-    enrichment.  Later enrichers must not erase that audit value when the last
+    enrichment. Later enrichers must not erase that audit value when the last
     full enrichment pass reduces the number still pending to zero.
     """
 
@@ -393,9 +376,7 @@ def write_js(path, transactions, meta):
     meta = recompute_coverage_metadata(canonical_transactions, meta)
     meta["schemaVersion"] = FEED_SCHEMA_VERSION
     meta["propertyRecordSchemaVersion"] = PROPERTY_RECORD_SCHEMA_VERSION
-    meta["canonicalPropertyRecords"] = len({
-        item["propertyRecordId"] for item in canonical_transactions
-    })
+    meta["canonicalPropertyRecords"] = len({item["propertyRecordId"] for item in canonical_transactions})
     meta["propertyIdentityMode"] = "full-normalised-address-plus-postcode-fail-closed"
     content = "\n".join(
         [

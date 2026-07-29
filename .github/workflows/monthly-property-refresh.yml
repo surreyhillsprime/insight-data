@@ -218,17 +218,6 @@ jobs:
             --progress-every 25 \
             --max-source-errors 25
 
-      - name: Align daily planning intelligence
-        run: |
-          python3 scripts/enrich_daily_intelligence.py \
-            --missing-only \
-            --disable-companies-house \
-            --planning-days 45 \
-            --planning-radius-m 1200 \
-            --pause 0.15 \
-            --progress-every 25 \
-            --max-source-errors 25
-
       - name: Align OS UPRN context
         run: |
           python3 scripts/enrich_os_uprn.py \
@@ -236,6 +225,15 @@ jobs:
 
       - name: Align Historic England listed-building evidence
         run: python3 scripts/enrich_listed_buildings.py
+
+      - name: Synchronise final checkpoint
+        run: |
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
+            echo "::error::Context alignment produced Git conflicts; refusing to build property records."
+            exit 1
+          fi
+          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import FEED_SCHEMA_VERSION,read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==FEED_SCHEMA_VERSION'
 
       - name: Check aligned context checkpoint
         run: |
@@ -246,15 +244,9 @@ jobs:
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
-          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
-          if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
-            echo "::error::Context alignment produced Git conflicts; refusing to commit."
-            exit 1
-          fi
           python3 scripts/enrich_listed_buildings.py --validate-only
-          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import FEED_SCHEMA_VERSION,read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==FEED_SCHEMA_VERSION'
           git add outputs/surrey-transactions.js
-          for cache in work/weekly-context-cache.json work/daily-intelligence-cache.json work/os-uprn-cache.json work/schools.csv; do
+          for cache in work/weekly-context-cache.json work/os-uprn-cache.json work/schools.csv; do
             if [ -f "$cache" ]; then git add "$cache"; fi
           done
           if git diff --cached --quiet; then
@@ -264,10 +256,10 @@ jobs:
             git push origin "HEAD:$GITHUB_REF_NAME"
           fi
 
-  verify-expanded-context:
+  materialise-today:
     needs: align-expanded-context
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 120
 
     steps:
       - name: Check out committed expanded context
@@ -275,5 +267,37 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
+      - name: Synchronise selected branch
+        run: |
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
+
       - name: Require complete release data
         run: python3 scripts/check_data_completeness.py --strict-metadata
+
+      - name: Materialise public property records and Today
+        run: |
+          python3 scripts/build_property_records.py \
+            --transactions outputs/surrey-transactions.js \
+            --sales-history outputs/sales-history.js \
+            --planning-history outputs/planning-history.js \
+            --output /tmp/insight-property-records.js
+          python3 scripts/validate_property_records.py \
+            /tmp/insight-property-records.js \
+            --transactions outputs/surrey-transactions.js
+          python3 scripts/build_today_feed.py \
+            --property-records /tmp/insight-property-records.js \
+            --output outputs/today-feed.js
+          python3 scripts/validate_today_feed.py outputs/today-feed.js
+
+      - name: Commit refreshed Today opportunities
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git add outputs/today-feed.js
+          if git diff --cached --quiet; then
+            echo "No Today opportunity changes to commit."
+          else
+            git commit -m "Materialise INSIGHT Today opportunities"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi

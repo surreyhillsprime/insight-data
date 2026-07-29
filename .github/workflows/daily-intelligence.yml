@@ -1,4 +1,4 @@
-name: Daily INSIGHT Intelligence
+name: Daily INSIGHT Flood Context
 
 on:
   workflow_dispatch:
@@ -36,29 +36,41 @@ jobs:
             --progress-every 250 \
             --max-source-errors 25
 
-      - name: Refresh daily planning intelligence
+      - name: Synchronise refreshed flood context
         run: |
-          python3 scripts/enrich_daily_intelligence.py \
-            --disable-companies-house \
-            --planning-days 45 \
-            --planning-radius-m 1200 \
-            --pause 0.15 \
-            --progress-every 25 \
-            --max-source-errors 25
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/surrey-transactions.js; then
+            echo "::error::Flood refresh produced Git conflicts; refusing to build public outputs."
+            exit 1
+          fi
 
       - name: Check data completeness
         run: python3 scripts/check_data_completeness.py
 
-      - name: Commit updated data
+      - name: Materialise current Today opportunities
+        run: |
+          python3 scripts/build_property_records.py \
+            --transactions outputs/surrey-transactions.js \
+            --sales-history outputs/sales-history.js \
+            --planning-history outputs/planning-history.js \
+            --output /tmp/insight-property-records.js
+          python3 scripts/validate_property_records.py \
+            /tmp/insight-property-records.js \
+            --transactions outputs/surrey-transactions.js
+          python3 scripts/build_today_feed.py \
+            --property-records /tmp/insight-property-records.js \
+            --output outputs/today-feed.js
+          python3 scripts/validate_today_feed.py outputs/today-feed.js
+
+      - name: Commit updated flood context and opportunities
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
-          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
           if git diff --name-only --diff-filter=U | grep -q .; then
             echo "::error::Refresh produced unresolved Git conflicts; refusing to commit."
             exit 1
           fi
-          if grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
+          if grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js outputs/today-feed.js; then
             echo "::error::Feed contains Git conflict markers; refusing to commit."
             exit 1
           fi
@@ -73,13 +85,10 @@ jobs:
           assert transactions and isinstance(summary, dict), "feed data is incomplete"
           assert meta.get("schemaVersion") == FEED_SCHEMA_VERSION, "feed schemaVersion is stale"
           PY
-          git add outputs/surrey-transactions.js
-          if [ -f work/daily-intelligence-cache.json ]; then
-            git add work/daily-intelligence-cache.json
-          fi
+          git add outputs/surrey-transactions.js outputs/today-feed.js
           if git diff --cached --quiet; then
-            echo "No daily INSIGHT changes to commit."
+            echo "No daily flood-context or opportunity changes to commit."
           else
-            git commit -m "Update INSIGHT daily intelligence"
+            git commit -m "Update INSIGHT daily context and opportunities"
             git push origin "HEAD:$GITHUB_REF_NAME"
           fi

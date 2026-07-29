@@ -32,9 +32,9 @@ and freshness scoring.
 PrimeResi, Estate Agent Today, Property Industry Eye, BBC Surrey, BBC Business,
 SurreyLive, Country Life and Surrey County Council remain registered but are
 not fetched or published. Their current rights or stable-feed status requires
-permission or further verification.
-Changing one of these sources to `live` will fail registry validation unless
-its collection and publication approvals are also recorded.
+permission or further verification. Changing one of these sources to `live`
+will fail registry validation unless its collection and publication approvals
+are also recorded.
 
 ## Cadence and publication
 
@@ -46,8 +46,8 @@ has an independent concurrency group, supports manual runs and accepts the
 2. fetches live sources concurrently with bounded retry;
 3. publishes per-source diagnostics and safe last-known-good fallback;
 4. validates pipeline freshness separately from editorial freshness;
-5. refreshes the news-derived Today lane; and
-6. commits the news and Today feeds atomically.
+5. leaves the independently generated Today feed untouched; and
+6. commits the Market News feed only.
 
 GitHub-hosted schedules are best effort. The repository dispatch hook exists
 for an independent scheduler or watchdog where a contractual cadence is

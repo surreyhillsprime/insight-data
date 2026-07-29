@@ -34,13 +34,11 @@ MINIMUM_COVERAGE = {
     "UPRN matches": 3.0,
     "School lookups": 99.0,
     "Planning constraint lookups": 99.0,
-    "Planning query responses": 99.0,
 }
 
 STRICT_ONLY_COVERAGE = frozenset({"Planning constraint lookups"})
 
 MAX_DYNAMIC_AGE_HOURS = 30
-PLANNING_COVERAGE_STATUSES = {"observed", "unknown", "unavailable"}
 
 ESTATE_CLASSIFICATION_FIELDS = (
     "estateId",
@@ -93,39 +91,6 @@ def flood_status_is_fresh(item, now=None):
     )
 
 
-def planning_context_is_truthful(context):
-    if not isinstance(context, dict):
-        return False
-    status = clean(context.get("coverageStatus")).lower()
-    applications = context.get("recentApplications")
-    applications = applications if isinstance(applications, list) else []
-    latest = clean(context.get("latestApplication"))
-    if status == "observed":
-        return (
-            context.get("coverageMode") == "positive-results-only"
-            and bool(applications)
-            and bool(latest)
-            and not latest.lower().startswith("no recent")
-        )
-    if status in PLANNING_COVERAGE_STATUSES - {"observed"}:
-        return (
-            context.get("coverageMode") == "no-authoritative-negative-coverage"
-            and not applications
-            and not latest
-            and "recentApplicationCount" not in context
-        )
-    return False
-
-
-def planning_response_is_current(item, now=None):
-    context = item.get("planning")
-    status = clean(context.get("coverageStatus")).lower() if isinstance(context, dict) else ""
-    return status in {"observed", "unknown"} and planning_context_is_truthful(context) and timestamp_is_fresh(
-        context.get("updatedAt"),
-        now=now,
-    )
-
-
 def coverage_rows(items, now=None):
     total = len(items)
     checks = {
@@ -136,7 +101,6 @@ def coverage_rows(items, now=None):
         "UPRN matches": lambda x: present(x.get("uprn")) or present(nested(x, "ordnanceSurvey", "uprn")),
         "School lookups": lambda x: present(x.get("ofsted")),
         "Planning constraint lookups": planning_constraint_lookup_succeeded,
-        "Planning query responses": lambda x: planning_response_is_current(x, now=now),
     }
     return [
         {
@@ -177,34 +141,6 @@ def dynamic_context_failures(items, meta, now=None):
         failures.append(
             f"Flood freshness metadata: maximumAgeHours must be {MAX_DYNAMIC_AGE_HOURS}"
         )
-
-    planning_rows = [item.get("planning") for item in items if item.get("planning") is not None]
-    invalid_planning = [context for context in planning_rows if not planning_context_is_truthful(context)]
-    if invalid_planning:
-        failures.append(
-            f"Planning truthfulness: {len(invalid_planning):,} rows have unproved or contradictory coverage claims"
-        )
-
-    planning_meta = nested(meta, "dailyIntelligence", "planning")
-    planning_meta = planning_meta if isinstance(planning_meta, dict) else {}
-    truthful_planning = [context for context in planning_rows if planning_context_is_truthful(context)]
-    observed = sum(1 for context in truthful_planning if context.get("coverageStatus") == "observed")
-    unknown = sum(1 for context in truthful_planning if context.get("coverageStatus") == "unknown")
-    unavailable = sum(1 for context in truthful_planning if context.get("coverageStatus") == "unavailable")
-    expected_planning_meta = {
-        "records": len(truthful_planning),
-        "observedRecords": observed,
-        "unknownRecords": unknown,
-        "unavailableRecords": unavailable,
-        "successfulResponses": observed + unknown,
-    }
-    for field, expected in expected_planning_meta.items():
-        if planning_meta.get(field) != expected:
-            failures.append(
-                f"Planning coverage metadata: {field} reports {planning_meta.get(field, 'missing')}, expected {expected}"
-            )
-    if planning_meta.get("coverageMode") != "positive-observations-only":
-        failures.append("Planning coverage metadata: expected positive-observations-only mode")
     return failures
 
 

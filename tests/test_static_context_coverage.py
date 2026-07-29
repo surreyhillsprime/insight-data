@@ -14,7 +14,7 @@ from check_data_completeness import (  # noqa: E402
     coverage_threshold_failures,
     static_context_failures,
 )
-from enrich_weekly_context import constraints_for_item  # noqa: E402
+from enrich_weekly_context import CONSTRAINT_DATASETS, constraints_for_item  # noqa: E402
 from insight_data_utils import (  # noqa: E402
     planning_constraint_coverage_counts,
     recompute_coverage_metadata,
@@ -52,15 +52,48 @@ def successful_constraints(count=0, **overrides):
 
 
 class StaticContextCoverageTests(unittest.TestCase):
+    def test_weekly_constraints_cannot_query_or_replay_listed_building_data(self):
+        self.assertNotIn("listed-building", CONSTRAINT_DATASETS)
+        cache = {
+            "planningConstraints": {
+                "KT100AA": {
+                    "status": "matched",
+                    "updatedAt": "2099-01-01T00:00:00Z",
+                    "data": {
+                        "planningConstraints": {
+                            "source": "Planning Data API",
+                            "updatedAt": "2099-01-01T00:00:00Z",
+                            "constraintCount": 1,
+                            "greenBelt": "Green belt: Elmbridge",
+                        },
+                        "historicEngland": {
+                            "source": "Planning Data API listed-building dataset",
+                            "listedStatus": "Listed building match",
+                        },
+                    },
+                }
+            }
+        }
+
+        with patch("enrich_weekly_context.request_json") as request:
+            result = constraints_for_item(transaction(), 51.3, -0.4, cache, args())
+
+        self.assertFalse(request.called)
+        self.assertNotIn("historicEngland", result)
+        self.assertNotIn(
+            "historicEngland",
+            cache["planningConstraints"]["KT100AA"]["data"],
+        )
+
     def test_property_context_release_gates_require_near_complete_lookup_coverage(self):
         for name in (
             "Coordinates",
             "Fresh flood status",
             "School lookups",
             "Planning constraint lookups",
-            "Planning query responses",
         ):
             self.assertEqual(MINIMUM_COVERAGE[name], 99.0)
+        self.assertNotIn("Planning query responses", MINIMUM_COVERAGE)
 
     def test_fresh_legacy_no_match_cache_becomes_an_explicit_successful_lookup(self):
         cache = {
@@ -205,7 +238,6 @@ class StaticContextCoverageTests(unittest.TestCase):
         failures = static_context_failures(items, metadata)
         self.assertEqual(len(failures), 1)
         self.assertIn("positiveRecords reports 0, expected 1", failures[0])
-
 
 if __name__ == "__main__":
     unittest.main()

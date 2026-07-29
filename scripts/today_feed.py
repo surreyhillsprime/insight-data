@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Build INSIGHT's deterministic, read-only Today evidence feed.
 
-The feed deliberately separates property-level signals, place-level changes,
-and corroborated opportunities.  An opportunity is only created when a direct
-property signal is joined to an independently sourced place change.
+Every signal-bearing property receives one opportunity. A single source family
+is Standard; two or more independent families add the Hot flag. Market News
+remains a separate context feed and cannot create or strengthen an opportunity.
 """
 
 from __future__ import annotations
@@ -14,59 +14,29 @@ import math
 import re
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 from urllib.parse import urlsplit, urlunsplit
 
 
-SCHEMA_VERSION = 1
-GENERATOR_VERSION = "today-feed-1"
+SCHEMA_VERSION = 2
+GENERATOR_VERSION = "today-feed-3"
 TODAY_FEED_NAME = "INSIGHT_TODAY_FEED"
 TODAY_META_NAME = "INSIGHT_TODAY_META"
-LANE_ORDER = ("signals", "opportunities", "placeChanges")
+LANE_ORDER = ("signals", "opportunities")
 SUMMARY_LABELS = {
     "signals": "New signals",
     "opportunities": "Opportunities",
-    "placeChanges": "Place changes",
 }
 SIGNAL_KINDS = {"epc_observation", "property_planning", "sale_age_milestone"}
-PLACE_CHANGE_KINDS = {"nearby_planning", "entity_news"}
-OPPORTUNITY_KINDS = {"corroborated_property_opportunity"}
+OPPORTUNITY_KINDS = {"property_opportunity"}
 MINIMUM_MARKET_HOLDING_GAPS = 20
 DATE_RE = re.compile(r"^(?:19|20)\d{2}(?:-\d{2}(?:-\d{2})?)?$")
-MATERIAL_PLANNING_RE = re.compile(
-    r"\b(?:"
-    r"major|demolit(?:ion|ish)|redevelop|develop(?:ment)?|new\s+(?:build|dwelling|house|home)|"
-    r"\d+\s+(?:new\s+)?(?:dwelling|house|home)s?|residential|change\s+of\s+use|conversion|"
-    r"subdivi(?:de|sion)|basement|additional\s+storey|two[- ]storey|block\s+of\s+flats|"
-    r"swimming\s+pool|tennis\s+court"
-    r")\b",
-    re.I,
-)
-NON_MATERIAL_PLANNING_RE = re.compile(
-    r"\b(?:"
-    r"non[- ]material\s+amendment|discharge\s+of\s+condition|tree\s+(?:work|works|prun|fell)|"
-    r"certificate\s+of\s+lawful|advert(?:isement|ising)|telecom|prior\s+approval"
-    r")\b",
-    re.I,
-)
-MATERIAL_NEWS_TOPICS = {
-    "Planning",
-    "Transaction",
-    "Infrastructure",
-    "Policy",
-    "Heritage",
-    "Environment",
-}
-ENTITY_NEWS_MATCH_TYPES = {"property", "estate", "town", "district"}
 SOURCE_FAMILY_BY_SIGNAL_KIND = {
     "epc_observation": "epc",
     "property_planning": "planning",
     "sale_age_milestone": "land_registry",
-}
-SOURCE_FAMILY_BY_PLACE_KIND = {
-    "nearby_planning": "planning",
-    "entity_news": "news",
 }
 COMMON_LIMITATION = (
     "INSIGHT does not infer seller intent, marketing activity, whether a property is marketed, "
@@ -457,11 +427,69 @@ def exact_property_planning_evidence(
         return evidence, {
             "reference": clean(data.get("reference")),
             "status": clean(data.get("status")),
+            "decision": clean(data.get("decision")),
             "proposal": clean(data.get("proposal") or event.get("summary")),
             "siteAddress": clean(data.get("siteAddress")),
             "matchConfidence": round(confidence, 3),
         }
     return None
+
+
+def planning_record_type(status: Any, decision: Any = "") -> str:
+    """Return approval only for an explicit positive source decision."""
+    value = normalise(f"{clean(status)} {clean(decision)}")
+    if re.search(
+        r"\b(?:NOT\s+APPROV(?:E|ED)|REFUS(?:E|ED|AL)|REJECT(?:ED|ION)?|"
+        r"DISMISS(?:ED|AL)?|WITHDRAWN|DECLIN(?:E|ED)|CANCELLED)\b",
+        value,
+    ):
+        return "application"
+    if re.search(r"\b(?:APPROVE|APPROVED|GRANT|GRANTED)\b", value):
+        return "approval"
+    return "application"
+
+
+def planning_observation_key(signal: Mapping[str, Any]) -> tuple[Any, ...]:
+    attributes = signal.get("attributes") if isinstance(signal.get("attributes"), Mapping) else {}
+    reference = normalise(attributes.get("reference"))
+    authority = normalise(signal.get("source"))
+    if reference:
+        return ("authority-reference", authority, reference)
+    return ("source-identity", *unique_strings(signal.get("sourceIds", [])))
+
+
+def planning_candidate_sort_key(signal: Mapping[str, Any]) -> tuple[Any, ...]:
+    prop = signal.get("property") if isinstance(signal.get("property"), Mapping) else {}
+    attributes = signal.get("attributes") if isinstance(signal.get("attributes"), Mapping) else {}
+    canonical = normalise(prop.get("address"))
+    site = normalise(attributes.get("siteAddress"))
+    similarity = SequenceMatcher(None, canonical, site).ratio() if canonical and site else 0.0
+    canonical_tokens = canonical.split()
+    repeated_token_count = max(0, len(canonical_tokens) - len(set(canonical_tokens)))
+    try:
+        confidence = float(attributes.get("matchConfidence") or 0)
+    except (TypeError, ValueError):
+        confidence = 0
+    return (
+        -confidence,
+        -similarity,
+        repeated_token_count,
+        abs(len(canonical_tokens) - len(site.split())),
+        clean(prop.get("propertyId")),
+        clean(signal.get("id")),
+    )
+
+
+def deduplicate_planning_signals(
+    signals: Iterable[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    grouped: dict[tuple[Any, ...], list[Mapping[str, Any]]] = defaultdict(list)
+    for signal in signals:
+        grouped[planning_observation_key(signal)].append(signal)
+    return [
+        dict(sorted(grouped[key], key=planning_candidate_sort_key)[0])
+        for key in sorted(grouped)
+    ]
 
 
 def planning_signals(
@@ -488,9 +516,35 @@ def planning_signals(
             if not references:
                 continue
             coverage = coverage_ref(record, "planning")
+            observed = date_sort_key(event.get("date"), precision)
+            age_days = max(0, (as_of - observed).days)
+            rank = max(55, 90 - age_days // 7)
+            record_type = planning_record_type(
+                attributes.get("status"),
+                attributes.get("decision"),
+            )
+            record_label = f"Planning {record_type}"
+            status = clean(attributes.get("status"))
+            decision = clean(attributes.get("decision"))
+            proposal = attributes["proposal"] or clean(event.get("summary"))
+            stages = []
+            for value in (status, decision):
+                if value and value not in stages:
+                    stages.append(value)
+            fact = " · ".join(value for value in (record_label, *stages, proposal) if value)
             why = (
-                f"The source links this planning record to the property within the "
-                f"{lookback_days}-day signal window."
+                f"The source links this planning {record_type} record to the property within "
+                f"the {lookback_days}-day signal window."
+            )
+            context = (
+                "The source explicitly records a positive approval decision. Approval does not "
+                "prove that permitted work was started or completed."
+                if record_type == "approval"
+                else (
+                    "This is an exact-property planning application record. It is not labelled "
+                    "as an approval without an explicit positive source decision, and does not "
+                    "prove that proposed work was started or completed."
+                )
             )
             output.append(
                 base_property_item(
@@ -499,13 +553,10 @@ def planning_signals(
                     kind="property_planning",
                     rank=rank,
                     record=record,
-                    title=f"Property planning record · {property_ref(record)['address']}",
-                    fact=attributes["proposal"] or clean(event.get("summary")),
+                    title=f"{record_label} · {property_ref(record)['address']}",
+                    fact=fact,
                     why=why,
-                    context=(
-                        "This is an exact-property source match. An application or decision does not "
-                        "prove that proposed or permitted work was started or completed."
-                    ),
+                    context=context,
                     effective_date=clean(event.get("date")),
                     precision=precision,
                     confidence="high",
@@ -513,10 +564,14 @@ def planning_signals(
                     evidence=references,
                     coverage=coverage,
                     limitations=coverage["limitations"],
-                    attributes={**attributes, "lookbackDays": lookback_days},
+                    attributes={
+                        **attributes,
+                        "planningRecordType": record_type,
+                        "lookbackDays": lookback_days,
+                    },
                 )
             )
-    return output
+    return deduplicate_planning_signals(output)
 
 
 def recorded_sale_dates(
@@ -645,286 +700,6 @@ def sale_age_signals(
     return output
 
 
-def material_planning_application(application: Mapping[str, Any]) -> bool:
-    text = " ".join(
-        clean(application.get(key))
-        for key in ("name", "description", "proposal", "address", "status", "decision")
-    )
-    if not text or NON_MATERIAL_PLANNING_RE.search(text):
-        return False
-    return bool(MATERIAL_PLANNING_RE.search(text))
-
-
-def nearby_planning_changes(
-    records: Mapping[str, Mapping[str, Any]],
-) -> list[dict[str, Any]]:
-    grouped: dict[str, dict[str, Any]] = {}
-    for property_id in sorted(records):
-        record = records[property_id]
-        context = record.get("context") if isinstance(record.get("context"), Mapping) else {}
-        nearby = context.get("nearbyPlanning") if isinstance(context.get("nearbyPlanning"), Mapping) else {}
-        applications = nearby.get("recentApplications")
-        if not isinstance(applications, list):
-            continue
-        for application in applications:
-            if not isinstance(application, Mapping) or not material_planning_application(application):
-                continue
-            reference = normalise(application.get("reference"))
-            fallback = "|".join(
-                normalise(application.get(key))
-                for key in ("name", "address", "date")
-            )
-            key = reference or fallback
-            if not key:
-                continue
-            group = grouped.setdefault(
-                key,
-                {
-                    "application": dict(application),
-                    "source": clean(nearby.get("source")) or "Planning Data API",
-                    "updatedAt": clean(nearby.get("updatedAt")),
-                    "searchRadii": set(),
-                    "propertyIds": set(),
-                    "coverageEvidenceIds": set(),
-                    "minimumMetres": None,
-                    "coverageModes": set(),
-                },
-            )
-            group["propertyIds"].add(property_id)
-            group["searchRadii"].add(clean(nearby.get("searchRadius")))
-            group["coverageModes"].add(clean(nearby.get("coverageMode")))
-            coverage = record.get("coverage") if isinstance(record.get("coverage"), Mapping) else {}
-            current = coverage.get("currentPlanning") if isinstance(coverage.get("currentPlanning"), Mapping) else {}
-            group["coverageEvidenceIds"].update(current.get("evidenceIds", []))
-            metres = application.get("metres")
-            if isinstance(metres, (int, float)) and math.isfinite(metres):
-                group["minimumMetres"] = (
-                    float(metres)
-                    if group["minimumMetres"] is None
-                    else min(group["minimumMetres"], float(metres))
-                )
-
-    output = []
-    for key in sorted(grouped):
-        group = grouped[key]
-        application = group["application"]
-        effective_date = clean(application.get("date"))
-        precision = date_precision(effective_date)
-        reference = clean(application.get("reference"))
-        source_id = reference or stable_id("planning-source", key)
-        url = canonical_url(application.get("url"))
-        evidence = [{
-            "evidenceId": stable_id("source-observation", "nearby-planning", key),
-            "source": group["source"],
-            "sourceId": source_id,
-            "effectiveDate": effective_date,
-            "datePrecision": precision,
-            **({"url": url} if url else {}),
-        }]
-        property_ids = sorted(group["propertyIds"])
-        name = clean(application.get("name")) or clean(application.get("address")) or "Material nearby planning"
-        location = clean(application.get("address")) or name
-        coverage_mode = (
-            sorted(value for value in group["coverageModes"] if value)[0]
-            if any(group["coverageModes"])
-            else "positive-results-only"
-        )
-        minimum_metres = group["minimumMetres"]
-        output.append({
-            "id": stable_id("today-place", "nearby-planning", key),
-            "lane": "placeChanges",
-            "kind": "nearby_planning",
-            "rank": 78 if minimum_metres is not None and minimum_metres <= 500 else 68,
-            "title": f"Material nearby planning · {location}",
-            "summary": name,
-            "fact": name,
-            "why": (
-                f"The application appears within the configured nearby-planning radius of "
-                f"{len(property_ids):,} tracked property file{'s' if len(property_ids) != 1 else ''}."
-            ),
-            "context": (
-                "This is a nearby spatial result, not an exact-property planning match. "
-                "An application or decision does not prove that work was started or completed."
-            ),
-            "effectiveDate": effective_date,
-            "datePrecision": precision,
-            "confidence": "medium",
-            "source": group["source"],
-            "sourceIds": unique_strings(item.get("sourceId") for item in evidence),
-            "evidenceIds": unique_strings(item.get("evidenceId") for item in evidence),
-            "sourceFamily": SOURCE_FAMILY_BY_PLACE_KIND["nearby_planning"],
-            "evidence": evidence,
-            "coverage": {
-                "sourceKey": "currentPlanning",
-                "status": "complete",
-                "complete": True,
-                "coverageMode": coverage_mode,
-                "basis": "One or more positive nearby spatial results were retained.",
-                "checkedAt": group["updatedAt"],
-                "limitations": [
-                    "Planning Data coverage varies by authority; this feed cannot establish complete negative coverage.",
-                    "Distance is measured from the available property mapping point and may use a postcode centroid.",
-                ],
-            },
-            "limitations": [
-                "This is nearby place evidence and is not attributed to the tracked property itself.",
-                COMMON_LIMITATION,
-            ],
-            "propertyIds": property_ids,
-            "place": {
-                "type": "planning_application",
-                "id": source_id,
-                "name": location,
-            },
-            "attributes": {
-                "reference": reference,
-                "status": clean(application.get("status")),
-                "decision": clean(application.get("decision")),
-                "address": clean(application.get("address")),
-                "minimumDistanceMetres": round(minimum_metres) if minimum_metres is not None else None,
-                "affectedPropertyCount": len(property_ids),
-                "searchRadii": unique_strings(group["searchRadii"]),
-            },
-        })
-    return output
-
-
-def news_property_ids(
-    news_item: Mapping[str, Any],
-    records: Mapping[str, Mapping[str, Any]],
-) -> list[str]:
-    match_type = clean(news_item.get("matchType")).lower()
-    location = normalise(news_item.get("location"))
-    if match_type not in ENTITY_NEWS_MATCH_TYPES or not location:
-        return []
-    output = []
-    for property_id in sorted(records):
-        record = records[property_id]
-        profile = record.get("profile") if isinstance(record.get("profile"), Mapping) else {}
-        if match_type == "property":
-            matched = normalise(record.get("canonicalAddress")).startswith(location)
-        elif match_type == "estate":
-            estate = normalise(profile.get("estate"))
-            matched = bool(estate and (estate == location or location in estate or estate in location))
-        elif match_type == "town":
-            matched = normalise(profile.get("town")) == location
-        else:
-            matched = normalise(profile.get("district")) == location
-        if matched:
-            output.append(property_id)
-    return output
-
-
-def entity_news_changes(
-    records: Mapping[str, Mapping[str, Any]],
-    news_items: Iterable[Mapping[str, Any]],
-    minimum_score: int,
-) -> list[dict[str, Any]]:
-    selected: dict[str, Mapping[str, Any]] = {}
-    for item in news_items:
-        if not isinstance(item, Mapping):
-            continue
-        try:
-            score = int(item.get("score") or 0)
-        except (TypeError, ValueError):
-            score = 0
-        topics = {clean(topic) for topic in item.get("topics", [])}
-        if (
-            score < minimum_score
-            or clean(item.get("matchType")).lower() not in ENTITY_NEWS_MATCH_TYPES
-            or not topics.intersection(MATERIAL_NEWS_TOPICS)
-            or clean(item.get("rightsMode")) != "link-only"
-        ):
-            continue
-        url = canonical_url(item.get("url"))
-        key = url or normalise(item.get("title"))
-        if not key:
-            continue
-        prior = selected.get(key)
-        if not prior or int(prior.get("score") or 0) < score:
-            selected[key] = item
-
-    output = []
-    for key, item in sorted(selected.items()):
-        property_ids = news_property_ids(item, records)
-        if not property_ids:
-            continue
-        match_type = clean(item.get("matchType")).lower()
-        location = clean(item.get("location"))
-        published_at = clean(item.get("publishedAt"))
-        effective_date = published_at[:10] if iso_datetime(published_at) else ""
-        url = canonical_url(item.get("url"))
-        source_id = clean(item.get("id")) or stable_id("news-source", key)
-        evidence = [{
-            "evidenceId": source_id,
-            "source": clean(item.get("source")),
-            "sourceId": source_id,
-            "effectiveDate": effective_date,
-            "datePrecision": "day" if effective_date else "unknown",
-            **({"url": url} if url else {}),
-        }]
-        output.append({
-            "id": stable_id("today-place", "entity-news", source_id),
-            "lane": "placeChanges",
-            "kind": "entity_news",
-            "rank": max(0, min(100, int(item.get("score") or 0))),
-            "title": f"Entity-linked news · {location}",
-            "summary": clean(item.get("title")),
-            "fact": clean(item.get("title")),
-            "why": (
-                f"The link-only feed matched this article to {match_type} entity {location}, "
-                f"which connects to {len(property_ids):,} tracked property file"
-                f"{'s' if len(property_ids) != 1 else ''}."
-            ),
-            "context": (
-                "This is link-only editorial metadata. INSIGHT has not treated the article title "
-                "as independently verified property fact."
-            ),
-            "effectiveDate": effective_date,
-            "datePrecision": "day" if effective_date else "unknown",
-            "confidence": "medium",
-            "source": clean(item.get("source")),
-            "sourceIds": unique_strings(reference.get("sourceId") for reference in evidence),
-            "evidenceIds": unique_strings(reference.get("evidenceId") for reference in evidence),
-            "sourceFamily": SOURCE_FAMILY_BY_PLACE_KIND["entity_news"],
-            "evidence": evidence,
-            "coverage": {
-                "sourceKey": "news",
-                "status": "complete",
-                "complete": True,
-                "coverageMode": "link-only-scored-feed",
-                "basis": clean(item.get("reason")) or "The article passed the configured entity and materiality score.",
-                "checkedAt": published_at,
-                "limitations": [
-                    "Only licensed link metadata is retained; article body text is not present in INSIGHT.",
-                    "Entity matching is deterministic but can still be broader than an exact property match.",
-                ],
-            },
-            "limitations": [
-                "The article title is contextual evidence, not proof of a change at every linked property.",
-                COMMON_LIMITATION,
-            ],
-            "propertyIds": property_ids,
-            "place": {
-                "type": match_type,
-                "id": normalise(location).lower().replace(" ", "-"),
-                "name": location,
-            },
-            "url": url,
-            "rightsMode": "link-only",
-            "attributes": {
-                "newsId": source_id,
-                "url": url,
-                "rightsMode": "link-only",
-                "score": int(item.get("score") or 0),
-                "topics": sorted({clean(topic) for topic in item.get("topics", []) if clean(topic)}),
-                "matchType": match_type,
-                "affectedPropertyCount": len(property_ids),
-            },
-        })
-    return output
-
-
 def evidence_union(items: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
     indexed: dict[tuple[str, str], dict[str, Any]] = {}
     for item in items:
@@ -938,71 +713,72 @@ def evidence_union(items: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
 
 def opportunities_from(
     signals: Iterable[Mapping[str, Any]],
-    place_changes: Iterable[Mapping[str, Any]],
 ) -> list[dict[str, Any]]:
     by_property: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
-    for change in place_changes:
-        for property_id in change.get("propertyIds", []):
-            by_property[clean(property_id)].append(change)
-    output = []
     for signal in signals:
         prop = signal.get("property") if isinstance(signal.get("property"), Mapping) else {}
         property_id = clean(prop.get("propertyId"))
-        direct_family = clean(signal.get("sourceFamily"))
-        corroboration = [
-            change
-            for change in by_property.get(property_id, [])
-            if clean(change.get("sourceFamily")) and clean(change.get("sourceFamily")) != direct_family
-        ]
-        if not corroboration:
-            continue
-        corroboration.sort(key=item_sort_key)
-        corroboration = corroboration[:3]
-        families = sorted({clean(item.get("sourceFamily")) for item in corroboration})
-        supporting_families = sorted({direct_family, *families})
-        strongest = corroboration[0]
-        rank = round(
-            int(signal.get("rank") or 0) * 0.6
-            + int(strongest.get("rank") or 0) * 0.4
-            + (5 if len(families) > 1 else 0)
-        )
-        evidence = evidence_union([signal, *corroboration])
-        why = (
-            f"A direct {clean(signal.get('kind')).replace('_', ' ')} is independently "
-            f"corroborated by {len(corroboration)} place change"
-            f"{'s' if len(corroboration) != 1 else ''} led by “{clean(strongest.get('fact'))}”."
-        )
+        if property_id:
+            by_property[property_id].append(signal)
+
+    output = []
+    for property_id in sorted(by_property):
+        property_signals = sorted(by_property[property_id], key=item_sort_key)
+        direct = property_signals[0]
+        corroboration = property_signals[1:]
+        prop = direct.get("property") if isinstance(direct.get("property"), Mapping) else {}
+        direct_family = clean(direct.get("sourceFamily"))
+        signal_kinds = sorted({clean(item.get("kind")) for item in property_signals})
+        source_families = sorted({
+            clean(item.get("sourceFamily"))
+            for item in property_signals
+            if clean(item.get("sourceFamily"))
+        })
+        corroboration_families = sorted({
+            clean(item.get("sourceFamily"))
+            for item in corroboration
+            if clean(item.get("sourceFamily"))
+        })
+        level = "Hot" if len(source_families) >= 2 else "Standard"
+        rank = min(100, int(direct.get("rank") or 0) + (5 if level == "Hot" else 0))
+        evidence = evidence_union(property_signals)
+        if level == "Hot":
+            why = (
+                f"This Hot opportunity combines {len(property_signals)} qualifying property signals "
+                f"across {len(source_families)} independent indicator families."
+            )
+        else:
+            why = (
+                f"This Standard opportunity contains {len(property_signals)} qualifying property signal"
+                f"{'s' if len(property_signals) != 1 else ''} from one indicator family."
+            )
         output.append({
-            "id": stable_id(
-                "today-opportunity",
-                signal.get("id"),
-                [item.get("id") for item in corroboration],
-            ),
+            "id": stable_id("today-opportunity", property_id),
             "lane": "opportunities",
-            "kind": "corroborated_property_opportunity",
+            "kind": "property_opportunity",
             "rank": max(0, min(100, rank)),
-            "title": f"Corroborated research opportunity · {clean(prop.get('address'))}",
+            "title": f"{level} opportunity · {clean(prop.get('address'))}",
             "summary": why,
-            "fact": clean(signal.get("fact")),
+            "fact": clean(direct.get("fact")),
             "why": why,
             "context": (
                 "This is an evidence-led prompt for further research, not a prediction of a sale, "
                 "seller intent, marketing activity, whether a property is marketed, or future value."
             ),
-            "effectiveDate": clean(signal.get("effectiveDate")),
-            "datePrecision": clean(signal.get("datePrecision")),
+            "effectiveDate": clean(direct.get("effectiveDate")),
+            "datePrecision": clean(direct.get("datePrecision")),
             "confidence": "medium",
             "source": "INSIGHT deterministic Today synthesis",
             "sourceIds": unique_strings(item.get("sourceId") for item in evidence),
             "evidenceIds": unique_strings(item.get("evidenceId") for item in evidence),
             "sourceFamily": "insight",
             "evidence": evidence,
-            "coverage": dict(signal.get("coverage") or {}),
+            "coverage": dict(direct.get("coverage") or {}),
             "corroborationCoverage": [
                 dict(item.get("coverage") or {}) for item in corroboration
             ],
             "limitations": unique_limitations(
-                signal.get("limitations", []),
+                direct.get("limitations", []),
                 *(item.get("limitations", []) for item in corroboration),
                 [COMMON_LIMITATION],
             ),
@@ -1013,32 +789,28 @@ def opportunities_from(
                 "id": property_id,
                 "name": clean(prop.get("address")),
             },
-            "directSignalId": clean(signal.get("id")),
+            "directSignalId": clean(direct.get("id")),
             "corroborationIds": [clean(item.get("id")) for item in corroboration],
-            "independentSourceCount": len(supporting_families),
+            "independentSourceCount": len(source_families),
+            "indicatorKindCount": len(signal_kinds),
+            "opportunityLevel": level,
             "attributes": {
-                "directSignalKind": clean(signal.get("kind")),
+                "directSignalKind": clean(direct.get("kind")),
                 "directSourceFamily": direct_family,
                 "corroborationKinds": sorted({clean(item.get("kind")) for item in corroboration}),
-                "corroborationSourceFamilies": families,
+                "corroborationSourceFamilies": corroboration_families,
+                "signalKinds": signal_kinds,
+                "sourceFamilies": source_families,
             },
         })
     return output
 
 
-def default_clock(
-    property_metadata: Mapping[str, Any],
-    news_metadata: Mapping[str, Any],
-) -> tuple[date, str]:
-    timestamps = [
-        parsed
-        for parsed in (
-            iso_datetime(property_metadata.get("generatedAt")),
-            iso_datetime(news_metadata.get("generatedAt")),
-        )
-        if parsed
-    ]
-    generated = max(timestamps) if timestamps else datetime(1970, 1, 1, tzinfo=timezone.utc)
+def default_clock(property_metadata: Mapping[str, Any]) -> tuple[date, str]:
+    generated = (
+        iso_datetime(property_metadata.get("generatedAt"))
+        or datetime(1970, 1, 1, tzinfo=timezone.utc)
+    )
     generated_at = generated.replace(microsecond=0).isoformat().replace("+00:00", "Z")
     return generated.date(), generated_at
 
@@ -1046,17 +818,14 @@ def default_clock(
 def build_today_feed(
     records: Mapping[str, Mapping[str, Any]],
     property_metadata: Mapping[str, Any],
-    news_items: Iterable[Mapping[str, Any]],
-    news_metadata: Mapping[str, Any],
     *,
     as_of: str | date | None = None,
     generated_at: str | None = None,
     epc_lookback_days: int = 30,
-    planning_lookback_days: int = 365,
+    planning_lookback_days: int = 45,
     sale_age_crossing_window_days: int = 30,
-    news_minimum_score: int = 55,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    default_as_of, default_generated_at = default_clock(property_metadata, news_metadata)
+    default_as_of, default_generated_at = default_clock(property_metadata)
     if isinstance(as_of, date):
         as_of_date = as_of
     elif as_of:
@@ -1074,25 +843,13 @@ def build_today_feed(
         or sale_age_crossing_window_days <= 0
     ):
         raise ValueError("Today lookback windows must be positive")
-    if not 0 <= news_minimum_score <= 100:
-        raise ValueError("News minimum score must be between 0 and 100")
-    news_records = sorted(
-        (dict(item) for item in news_items if isinstance(item, Mapping)),
-        key=canonical_json,
-    )
-
     signals = [
         *epc_signals(records, as_of_date, epc_lookback_days),
         *planning_signals(records, as_of_date, planning_lookback_days),
         *sale_age_signals(records, as_of_date, sale_age_crossing_window_days),
     ]
     signals.sort(key=item_sort_key)
-    place_changes = [
-        *nearby_planning_changes(records),
-        *entity_news_changes(records, news_records, news_minimum_score),
-    ]
-    place_changes.sort(key=item_sort_key)
-    opportunities = opportunities_from(signals, place_changes)
+    opportunities = opportunities_from(signals)
     opportunities.sort(key=item_sort_key)
 
     feed = {
@@ -1100,16 +857,11 @@ def build_today_feed(
         "asOf": as_of_date.isoformat(),
         "signals": signals,
         "opportunities": opportunities,
-        "placeChanges": place_changes,
     }
     counts = {
         "signals": len(signals),
         "opportunities": len(opportunities),
-        "placeChanges": len(place_changes),
     }
-    news_fingerprint = hashlib.sha256(
-        canonical_json(news_records).encode("utf-8")
-    ).hexdigest()
     metadata = {
         "schemaVersion": SCHEMA_VERSION,
         "generatedAt": iso_datetime(generated_value).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -1117,18 +869,18 @@ def build_today_feed(
         "generatorVersion": GENERATOR_VERSION,
         "sourceFingerprints": {
             "propertyRecords": clean(property_metadata.get("datasetFingerprint")),
-            "news": news_fingerprint,
         },
         "sourceGeneratedAt": {
             "propertyRecords": clean(property_metadata.get("generatedAt")),
-            "news": clean(news_metadata.get("generatedAt")),
         },
         "criteria": {
             "epcLookbackDays": epc_lookback_days,
             "planningLookbackDays": planning_lookback_days,
             "saleAgeCrossingWindowDays": sale_age_crossing_window_days,
-            "newsMinimumScore": news_minimum_score,
-            "opportunityRequiresIndependentSource": True,
+            "newsRowsExcluded": True,
+            "everyQualifyingSignalCreatesPropertyOpportunity": True,
+            "opportunityGrouping": "one-per-property",
+            "hotMinimumIndependentSourceFamilies": 2,
         },
         "summary": [
             {"id": lane, "label": SUMMARY_LABELS[lane], "count": counts[lane]}
@@ -1138,7 +890,7 @@ def build_today_feed(
         "datasetFingerprint": hashlib.sha256(canonical_json(feed).encode("utf-8")).hexdigest(),
         "limitations": [
             "Today is a read-only evidence snapshot; it contains no user-managed fields.",
-            "An opportunity requires a direct property signal and independently sourced corroboration, but remains a research prompt rather than a prediction.",
+            "Every qualifying signal is represented by one property-grouped opportunity; Standard has one source family and Hot has two or more.",
             "Year-only source dates remain year-only and are never presented as newly submitted on a specific day.",
             COMMON_LIMITATION,
         ],
@@ -1167,7 +919,6 @@ __all__ = [
     "GENERATOR_VERSION",
     "LANE_ORDER",
     "OPPORTUNITY_KINDS",
-    "PLACE_CHANGE_KINDS",
     "SCHEMA_VERSION",
     "SIGNAL_KINDS",
     "SUMMARY_LABELS",
@@ -1175,5 +926,8 @@ __all__ = [
     "TODAY_META_NAME",
     "build_today_feed",
     "canonical_json",
+    "item_sort_key",
+    "normalise",
+    "planning_record_type",
     "write_today_feed",
 ]
