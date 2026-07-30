@@ -1,0 +1,76 @@
+name: Daily INSIGHT View
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+      timezone: "Europe/London"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insight-daily-briefing-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Start from selected branch
+        run: |
+          git fetch origin "$GITHUB_REF_NAME"
+          git rebase "origin/$GITHUB_REF_NAME"
+
+      - name: Collect governed official observations
+        run: python3 scripts/collect_insight_view.py
+
+      - name: Build the dated editorial briefing
+        run: python3 scripts/build_insight_view.py
+
+      - name: Validate the briefing contract
+        run: python3 scripts/validate_insight_view.py outputs/insight-view.js
+
+      - name: Refuse conflicted output
+        run: |
+          if grep -Eq '^(<<<<<<<|=======|>>>>>>>)' \
+            config/insight-view-snapshot.json outputs/insight-view.js; then
+            echo "::error::Conflict markers found in the INSIGHT View inputs or output."
+            exit 1
+          fi
+
+      - name: Commit changed briefing
+        run: |
+          if git diff --quiet -- \
+            config/insight-view-snapshot.json outputs/insight-view.js; then
+            exit 0
+          fi
+          git config user.name "insight-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add config/insight-view-snapshot.json outputs/insight-view.js
+          git commit -m "Update daily INSIGHT View"
+          for attempt in 1 2 3; do
+            if git fetch origin "$GITHUB_REF_NAME" &&
+              git rebase "origin/$GITHUB_REF_NAME" &&
+              python3 scripts/validate_insight_view.py outputs/insight-view.js &&
+              git push origin "HEAD:$GITHUB_REF_NAME"; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            if [ "$attempt" -eq 3 ]; then
+              echo "::error::Unable to publish the validated INSIGHT View after three attempts."
+              exit 1
+            fi
+          done

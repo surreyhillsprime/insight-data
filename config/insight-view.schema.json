@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gaininsight.app/schemas/insight-view.schema.json",
+  "title": "INSIGHT daily editorial view",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "briefingDate",
+    "generatedAt",
+    "timeZone",
+    "heading",
+    "category",
+    "policy",
+    "mortgage",
+    "market",
+    "narrative",
+    "sources",
+    "staleSources",
+    "limitations",
+    "fingerprint"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "briefingDate": {
+      "$ref": "#/$defs/day"
+    },
+    "generatedAt": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "timeZone": {
+      "const": "Europe/London"
+    },
+    "heading": {
+      "const": "INSIGHT View"
+    },
+    "category": {
+      "const": "Rates and market"
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bankRate",
+        "bankRateObservedOn",
+        "nextDecisionDate",
+        "nextDecisionTime",
+        "countdownDays",
+        "signalValue",
+        "signalDetail",
+        "latestVote",
+        "sourceId"
+      ],
+      "properties": {
+        "bankRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 25
+        },
+        "bankRateObservedOn": {
+          "$ref": "#/$defs/day"
+        },
+        "nextDecisionDate": {
+          "$ref": "#/$defs/day"
+        },
+        "nextDecisionTime": {
+          "type": "string",
+          "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$"
+        },
+        "countdownDays": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "signalValue": {
+          "enum": [
+            "Hold favoured",
+            "Cut favoured",
+            "Rise favoured"
+          ]
+        },
+        "signalDetail": {
+          "type": "string",
+          "pattern": "^Latest MPC vote"
+        },
+        "latestVote": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "announcementDate",
+            "outcome",
+            "for",
+            "against",
+            "alternative"
+          ],
+          "properties": {
+            "announcementDate": {
+              "$ref": "#/$defs/day"
+            },
+            "outcome": {
+              "enum": [
+                "hold",
+                "cut",
+                "raise"
+              ]
+            },
+            "for": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "against": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 11
+            },
+            "alternative": {
+              "enum": [
+                "hold",
+                "cut",
+                "raise",
+                "none"
+              ]
+            }
+          }
+        },
+        "sourceId": {
+          "const": "bank-of-england-mpc"
+        }
+      }
+    },
+    "mortgage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rate",
+        "previousRate",
+        "trend",
+        "observationDate",
+        "retrievedAt",
+        "seriesId",
+        "qualifier",
+        "sourceId"
+      ],
+      "properties": {
+        "rate": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 25
+        },
+        "previousRate": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "maximum": 25
+        },
+        "trend": {
+          "enum": [
+            "up",
+            "down",
+            "unchanged",
+            "unknown"
+          ]
+        },
+        "observationDate": {
+          "$ref": "#/$defs/day"
+        },
+        "retrievedAt": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "seriesId": {
+          "const": "IUMBV34"
+        },
+        "qualifier": {
+          "type": "string",
+          "pattern": "75% LTV"
+        },
+        "sourceId": {
+          "const": "bank-of-england-iumbv34"
+        }
+      }
+    },
+    "market": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ukAveragePrice",
+        "ukAnnualChange",
+        "ukPreviousAnnualChange",
+        "ukMonthlyChange",
+        "surreyAveragePrice",
+        "surreyAnnualChange",
+        "surreyMonthlyChange",
+        "londonAnnualChange",
+        "londonPreviousAnnualChange",
+        "observationMonth",
+        "retrievedAt",
+        "provisional",
+        "sourceId"
+      ],
+      "properties": {
+        "ukAveragePrice": {
+          "type": "integer",
+          "minimum": 50000,
+          "maximum": 2000000
+        },
+        "ukAnnualChange": {
+          "$ref": "#/$defs/change"
+        },
+        "ukPreviousAnnualChange": {
+          "$ref": "#/$defs/change"
+        },
+        "ukMonthlyChange": {
+          "$ref": "#/$defs/change"
+        },
+        "surreyAveragePrice": {
+          "type": "integer",
+          "minimum": 100000,
+          "maximum": 5000000
+        },
+        "surreyAnnualChange": {
+          "$ref": "#/$defs/change"
+        },
+        "surreyMonthlyChange": {
+          "$ref": "#/$defs/change"
+        },
+        "londonAnnualChange": {
+          "$ref": "#/$defs/change"
+        },
+        "londonPreviousAnnualChange": {
+          "$ref": "#/$defs/change"
+        },
+        "observationMonth": {
+          "type": "string",
+          "pattern": "^(?:19|20)\\d{2}-(?:0[1-9]|1[0-2])$"
+        },
+        "retrievedAt": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "provisional": {
+          "type": "boolean"
+        },
+        "sourceId": {
+          "const": "hm-land-registry-uk-hpi"
+        }
+      }
+    },
+    "narrative": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "string",
+        "minLength": 80,
+        "maxLength": 900
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "url",
+          "observedAt",
+          "rights"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "bank-of-england-mpc",
+              "bank-of-england-iumbv34",
+              "hm-land-registry-uk-hpi"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "url": {
+            "type": "string",
+            "pattern": "^https://"
+          },
+          "observedAt": {
+            "type": "string",
+            "pattern": "^(?:19|20)\\d{2}-\\d{2}(?:-\\d{2})?$"
+          },
+          "rights": {
+            "const": "Open Government Licence v3.0"
+          }
+        }
+      }
+    },
+    "staleSources": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "bank-of-england-mpc",
+          "bank-of-england-iumbv34",
+          "hm-land-registry-uk-hpi"
+        ]
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300
+      }
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "$defs": {
+    "day": {
+      "type": "string",
+      "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^(?:19|20)\\d{2}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "change": {
+      "type": "number",
+      "minimum": -50,
+      "maximum": 50
+    }
+  }
+}
