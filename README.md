@@ -24,14 +24,16 @@ property-level planning history remain outside the public transaction ledger.
 
 ## Install INSIGHT
 
-The current macOS package is published at:
+The current public-safe INSIGHT v2.0.0 (build 37) macOS package is published at:
 
 ```text
 https://raw.githubusercontent.com/surreyhillsprime/insight-data/main/downloads/INSIGHT-macOS.zip
 ```
 
-The package contains the matching private-estate registry and app code. On
-first launch, INSIGHT downloads the current base feed from this repository.
+The package contains the matching private-estate registry and app code, but no
+private council-portal planning history. Planning remains explicitly
+unavailable until a separately licensed commercial publication is configured.
+On first launch, INSIGHT downloads the current base feed from this repository.
 The installer and feed are released together whenever their required estate
 registry version changes.
 
@@ -203,9 +205,10 @@ the number of distinct council-portal/cache queries; it is not an application
 count. Recent public planning context in the base feed is unaffected.
 
 Until the licensed source is configured, the checked-in planning artifact
-declares `blocked-missing-licensed-source` and compatible remote-mode app builds
-reject it. The private 21,180-application council-cache snapshot is not copied
-into this public repository.
+declares `blocked-missing-licensed-source`. INSIGHT v2 public-profile builds
+accept only that exact zero-record placeholder or a complete licensed
+commercial publication. The private 21,180-application council-cache snapshot
+is not copied into this public repository or public installer.
 
 The daily completeness workflow independently revalidates both standalone
 history files against `outputs/surrey-transactions.js`. It applies the same
