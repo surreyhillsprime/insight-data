@@ -1,0 +1,31 @@
+name: INSIGHT Pull Request Validation
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: insight-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test repository contracts
+        run: PYTHONPATH=scripts python3 -m unittest discover -s tests
+      - name: Verify deterministic private-estate publication
+        run: |
+          python3 scripts/build_private_estates_asset.py
+          git diff --exit-code -- outputs/private-estates.js
+      - name: Check the canonical public feed
+        run: python3 scripts/check_data_completeness.py --base-only
+      - name: Check the tracked public macOS package
+        run: python3 scripts/validate_public_release_zip.py
