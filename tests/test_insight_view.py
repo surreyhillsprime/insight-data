@@ -34,9 +34,29 @@ class InsightViewTests(unittest.TestCase):
         cls.snapshot_path = ROOT / "config" / "insight-view-snapshot.json"
         cls.snapshot = load_snapshot(cls.snapshot_path)
 
-    def build(self, briefing_date="2026-07-30", generated_at="2026-07-30T05:00:00Z"):
+    def build(self, briefing_date="2026-07-31", generated_at="2026-07-31T10:10:00Z"):
         return build_insight_view(
             copy.deepcopy(self.snapshot),
+            news_items=[
+                {
+                    "title": "Planning applications submitted to Woking Borough Council",
+                    "source": "Woking News & Mail",
+                    "sourceId": "woking-news-mail",
+                    "publisherGroup": "tindle-surrey",
+                    "publishedAt": "2026-07-30T15:04:04Z",
+                    "rightsMode": "link-only",
+                    "score": 63,
+                },
+                {
+                    "title": "Housing safety case studies published",
+                    "source": "Ministry of Housing, Communities and Local Government",
+                    "sourceId": "mhclg-official",
+                    "publisherGroup": "uk-government",
+                    "publishedAt": "2026-07-30T08:37:02Z",
+                    "rightsMode": "link-only",
+                    "score": 61,
+                },
+            ],
             briefing_date=briefing_date,
             generated_at=generated_at,
         )
@@ -46,16 +66,16 @@ class InsightViewTests(unittest.TestCase):
         repeated = self.build()
 
         self.assertEqual(view, repeated)
-        self.assertEqual(view["briefingDate"], "2026-07-30")
+        self.assertEqual(view["briefingDate"], "2026-07-31")
         self.assertEqual(view["timeZone"], "Europe/London")
         self.assertEqual(view["heading"], "INSIGHT View")
         self.assertEqual(view["category"], "Rates and market")
         self.assertEqual(view["policy"]["bankRate"], 3.75)
-        self.assertEqual(view["policy"]["countdownDays"], 0)
+        self.assertEqual(view["policy"]["countdownDays"], 48)
         self.assertEqual(view["policy"]["signalValue"], "Hold favoured")
         self.assertEqual(
             view["policy"]["signalDetail"],
-            "Latest MPC vote · 7–2 to hold",
+            "Latest MPC vote · 6–3 to hold",
         )
         self.assertEqual(view["mortgage"]["rate"], 4.81)
         self.assertEqual(view["mortgage"]["previousRate"], 4.92)
@@ -65,9 +85,12 @@ class InsightViewTests(unittest.TestCase):
         self.assertEqual(view["market"]["ukAveragePrice"], 271295)
         self.assertEqual(view["market"]["ukAnnualChange"], 2.7)
         self.assertEqual(view["market"]["surreyAnnualChange"], -0.1)
-        self.assertEqual(len(view["narrative"]), 2)
+        self.assertEqual(len(view["narrative"]), 3)
         self.assertIn("not a forecast", view["narrative"][0])
         self.assertIn("property-level", view["narrative"][1])
+        self.assertIn("Relevant Market News updates", view["narrative"][2])
+        self.assertIn("Woking News & Mail", view["narrative"][2])
+        self.assertIn("link-only context", view["narrative"][2])
         self.assertEqual(
             [source["id"] for source in view["sources"]],
             [
@@ -306,6 +329,44 @@ class InsightViewTests(unittest.TestCase):
                     "hm-land-registry-uk-hpi",
                 ],
             },
+        )
+
+    def test_post_announcement_collection_closes_the_mpc_event_immediately(self):
+        def failing_fetcher(_url):
+            raise OSError("offline fixture")
+
+        refreshed = collect_snapshot(
+            copy.deepcopy(self.snapshot),
+            now=datetime(2026, 7, 30, 11, 5, tzinfo=timezone.utc),
+            fetcher=failing_fetcher,
+            policy_rate_csv=(
+                b"DATE,IUDBEDR\n29 Jul 2026,3.75\n30 Jul 2026,3.75\n"
+            ),
+            vote_html=(
+                b"<p>The Committee voted by a majority of 6\xe2\x80\x933 to maintain "
+                b"Bank Rate.</p><p>Three members voted to increase Bank Rate.</p>"
+            ),
+        )
+
+        self.assertEqual(refreshed["policy"]["observationDate"], "2026-07-30")
+        self.assertEqual(
+            refreshed["policy"]["latestVote"],
+            {
+                "announcementDate": "2026-07-30",
+                "outcome": "hold",
+                "for": 6,
+                "against": 3,
+                "alternative": "raise",
+                "sourceUrl": (
+                    "https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes/"
+                    "2026/july-2026"
+                ),
+            },
+        )
+        self.assertEqual(refreshed["policy"]["nextDecisionDate"], "2026-09-17")
+        self.assertNotIn(
+            "bank-of-england-mpc",
+            refreshed["collectionStatus"]["staleSources"],
         )
 
 

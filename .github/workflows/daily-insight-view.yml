@@ -2,48 +2,101 @@ name: Daily INSIGHT View
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Surrey intelligence news feed"]
+    types: [completed]
+    branches: [main]
   schedule:
     - cron: "0 6 * * *"
+      timezone: "Europe/London"
+    - cron: "*/5 11-13 4,5 2 *"
+      timezone: "Europe/London"
+    - cron: "*/5 11-13 18,19 3 *"
+      timezone: "Europe/London"
+    - cron: "*/5 11-13 29,30 4 *"
+      timezone: "Europe/London"
+    - cron: "*/5 11-13 17,18 6 *"
+      timezone: "Europe/London"
+    - cron: "*/5 11-13 29,30 7 *"
+      timezone: "Europe/London"
+    - cron: "*/5 11-13 16,17 9 *"
+      timezone: "Europe/London"
+    - cron: "*/5 11-13 4,5 11 *"
+      timezone: "Europe/London"
+    - cron: "*/5 11-13 16,17 12 *"
       timezone: "Europe/London"
 
 permissions:
   contents: write
 
 concurrency:
-  group: insight-daily-briefing-${{ github.ref }}
+  group: insight-daily-briefing-${{ github.event.repository.default_branch }}
   cancel-in-progress: false
 
 jobs:
   publish:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      TARGET_BRANCH: ${{ github.event.repository.default_branch }}
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ env.TARGET_BRANCH }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Start from selected branch
+      - name: Check whether MPC event polling is due
+        id: cadence
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_SCHEDULE: ${{ github.event.schedule }}
         run: |
-          git fetch origin "$GITHUB_REF_NAME"
-          git rebase "origin/$GITHUB_REF_NAME"
+          if [ "$EVENT_NAME" != "schedule" ] || [ "$EVENT_SCHEDULE" = "0 6 * * *" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python3 - <<'PY'
+          import json
+          import os
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          snapshot = json.loads(Path("config/insight-view-snapshot.json").read_text())
+          today = datetime.now(ZoneInfo("Europe/London")).date().isoformat()
+          due = today in snapshot["policy"]["schedule"]
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
+              output.write(f"run={'true' if due else 'false'}\n")
+          PY
+
+      - name: Start from selected branch
+        if: steps.cadence.outputs.run == 'true'
+        run: |
+          git fetch origin "$TARGET_BRANCH"
+          git rebase "origin/$TARGET_BRANCH"
 
       - name: Collect governed official observations
+        if: steps.cadence.outputs.run == 'true'
         run: python3 scripts/collect_insight_view.py
 
       - name: Build the dated editorial briefing
+        if: steps.cadence.outputs.run == 'true'
         run: python3 scripts/build_insight_view.py
 
       - name: Validate the briefing contract
+        if: steps.cadence.outputs.run == 'true'
         run: python3 scripts/validate_insight_view.py outputs/insight-view.js
 
       - name: Refuse conflicted output
+        if: steps.cadence.outputs.run == 'true'
         run: |
           if grep -Eq '^(<<<<<<<|=======|>>>>>>>)' \
             config/insight-view-snapshot.json outputs/insight-view.js; then
@@ -52,9 +105,9 @@ jobs:
           fi
 
       - name: Commit changed briefing
+        if: steps.cadence.outputs.run == 'true'
         run: |
-          if git diff --quiet -- \
-            config/insight-view-snapshot.json outputs/insight-view.js; then
+          if git diff --quiet -- outputs/insight-view.js; then
             exit 0
           fi
           git config user.name "insight-data-bot"
@@ -62,10 +115,10 @@ jobs:
           git add config/insight-view-snapshot.json outputs/insight-view.js
           git commit -m "Update daily INSIGHT View"
           for attempt in 1 2 3; do
-            if git fetch origin "$GITHUB_REF_NAME" &&
-              git rebase "origin/$GITHUB_REF_NAME" &&
+            if git fetch origin "$TARGET_BRANCH" &&
+              git rebase "origin/$TARGET_BRANCH" &&
               python3 scripts/validate_insight_view.py outputs/insight-view.js &&
-              git push origin "HEAD:$GITHUB_REF_NAME"; then
+              git push origin "HEAD:$TARGET_BRANCH"; then
               exit 0
             fi
             git rebase --abort 2>/dev/null || true

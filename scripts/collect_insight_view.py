@@ -11,7 +11,7 @@ import re
 import sys
 import urllib.request
 from copy import deepcopy
-from datetime import date, datetime, timezone
+from datetime import date, datetime, time, timezone
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
 from pathlib import Path
@@ -247,17 +247,52 @@ def mpc_summary_url(announcement_date: date) -> str:
     )
 
 
-def next_decision(schedule: list[str], today: date) -> date:
+def next_decision(
+    schedule: list[str],
+    today: date,
+    latest_vote_date: date | None = None,
+) -> date:
     candidates = [iso_date(value) for value in schedule]
-    result = next((value for value in candidates if value and value >= today), None)
+    result = next(
+        (
+            value
+            for value in candidates
+            if value
+            and value >= today
+            and (not latest_vote_date or value > latest_vote_date)
+        ),
+        None,
+    )
     if not result:
         raise ValueError("MPC calendar has no current or future decision")
     return result
 
 
-def latest_completed_decision(schedule: list[str], today: date) -> date:
+def latest_completed_decision(
+    schedule: list[str],
+    now: datetime,
+    decision_time: str,
+) -> date:
+    local_now = now.astimezone(ZoneInfo(TIME_ZONE))
+    try:
+        announced_at = time.fromisoformat(decision_time)
+    except ValueError as error:
+        raise ValueError("MPC decision time is invalid") from error
     candidates = [iso_date(value) for value in schedule]
-    result = next((value for value in reversed(candidates) if value and value < today), None)
+    result = next(
+        (
+            value
+            for value in reversed(candidates)
+            if value
+            and datetime.combine(
+                value,
+                announced_at,
+                tzinfo=ZoneInfo(TIME_ZONE),
+            )
+            <= local_now
+        ),
+        None,
+    )
     if not result:
         raise ValueError("MPC calendar has no completed decision")
     return result
@@ -296,7 +331,11 @@ def collect_snapshot(
     except (OSError, ValueError, KeyError):
         policy_failed = True
     try:
-        completed = latest_completed_decision(policy["schedule"], today)
+        completed = latest_completed_decision(
+            policy["schedule"],
+            now,
+            clean(policy["nextDecisionTime"]),
+        )
         summary_url = mpc_summary_url(completed)
         summary_payload = vote_html or fetcher(summary_url)
         vote = parse_vote_summary(summary_payload, completed)
@@ -305,8 +344,9 @@ def collect_snapshot(
     except (OSError, ValueError, KeyError):
         policy_failed = True
     try:
+        latest_vote_date = iso_date(policy["latestVote"]["announcementDate"])
         policy["nextDecisionDate"] = next_decision(
-            policy["schedule"], today
+            policy["schedule"], today, latest_vote_date
         ).isoformat()
     except (ValueError, KeyError):
         policy_failed = True

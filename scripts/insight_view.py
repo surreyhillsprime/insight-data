@@ -7,7 +7,7 @@ import hashlib
 import json
 import math
 import re
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Mapping
 from zoneinfo import ZoneInfo
@@ -278,9 +278,78 @@ def source_rows(snapshot: Mapping[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+def market_news_synopsis(
+    news_items: list[Mapping[str, Any]] | None,
+    briefing_day: date,
+) -> str:
+    """Summarise fresh governed headlines without copying article bodies."""
+    earliest = briefing_day - timedelta(days=6)
+    eligible: list[tuple[datetime, int, Mapping[str, Any]]] = []
+    for item in news_items or []:
+        published = iso_datetime(item.get("publishedAt"))
+        published_day = (
+            published.astimezone(ZoneInfo(TIME_ZONE)).date() if published else None
+        )
+        if (
+            not published_day
+            or published_day < earliest
+            or published_day > briefing_day
+            or clean(item.get("rightsMode")) != "link-only"
+            or not clean(item.get("title"))
+            or not clean(item.get("source"))
+        ):
+            continue
+        eligible.append((published, int(item.get("score") or 0), item))
+    eligible.sort(key=lambda row: (row[0], row[1]), reverse=True)
+
+    selected: list[Mapping[str, Any]] = []
+    publisher_keys: set[str] = set()
+    for _, _, item in eligible:
+        publisher_key = clean(
+            item.get("publisherGroup")
+            or item.get("sourceId")
+            or item.get("source")
+        ).lower()
+        if publisher_key and publisher_key not in publisher_keys:
+            selected.append(item)
+            publisher_keys.add(publisher_key)
+        if len(selected) == 3:
+            break
+    if len(selected) < 3:
+        for _, _, item in eligible:
+            if item not in selected:
+                selected.append(item)
+            if len(selected) == 3:
+                break
+
+    if not selected:
+        return (
+            "There are no qualifying Market News updates within the last seven days. "
+            "INSIGHT will keep checking the governed link-only sources; a quiet feed is "
+            "unknown context, not negative property evidence."
+        )
+
+    clauses = [
+        f"{clean(item['source'])}: “{clean(item['title']).rstrip('.')}”"
+        for item in selected
+    ]
+    if len(clauses) == 1:
+        updates = clauses[0]
+    elif len(clauses) == 2:
+        updates = " and ".join(clauses)
+    else:
+        updates = "; ".join(clauses[:-1]) + f"; and {clauses[-1]}"
+    return (
+        f"Relevant Market News updates include {updates}. "
+        "These are sourced, link-only context; they do not constitute evidence of "
+        "seller intent or create a property opportunity."
+    )
+
+
 def build_insight_view(
     snapshot: Mapping[str, Any],
     *,
+    news_items: list[Mapping[str, Any]] | None = None,
     briefing_date: str | date | None = None,
     generated_at: str | None = None,
 ) -> dict[str, Any]:
@@ -360,6 +429,7 @@ def build_insight_view(
         f"{london_phrase} year on year. That divergence argues for property-level "
         "and micro-market evidence rather than assuming the national headline applies evenly."
     )
+    third_paragraph = market_news_synopsis(news_items, briefing_day)
 
     view = {
         "schemaVersion": SCHEMA_VERSION,
@@ -417,7 +487,7 @@ def build_insight_view(
             "provisional": bool(market["provisional"]),
             "sourceId": MARKET_SOURCE_ID,
         },
-        "narrative": [first_paragraph, second_paragraph],
+        "narrative": [first_paragraph, second_paragraph, third_paragraph],
         "sources": source_rows(snapshot),
         "staleSources": list(snapshot["collectionStatus"]["staleSources"]),
         "limitations": [
@@ -647,10 +717,10 @@ def validate_insight_view(view: Mapping[str, Any]) -> None:
     narrative = view.get("narrative")
     if (
         not isinstance(narrative, list)
-        or len(narrative) != 2
+        or len(narrative) != 3
         or any(not 80 <= len(clean(value)) <= 900 for value in narrative)
     ):
-        raise InsightViewValidationError("INSIGHT View must contain two concise analysis paragraphs")
+        raise InsightViewValidationError("INSIGHT View must contain three concise analysis paragraphs")
     sources = view.get("sources")
     if not isinstance(sources, list) or len(sources) != 3:
         raise InsightViewValidationError("INSIGHT View must contain three governed sources")
