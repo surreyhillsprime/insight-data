@@ -1425,6 +1425,25 @@
       "searchedAt": "2026-07-22T05:44:50Z",
       "status": "matched"
     },
+    "1 THE BOROUGH BROCKHAM BETCHWORTH RH3 7NB|RH37NB|2420000|2025-09-03": {
+      "address": "1, THE BOROUGH, BROCKHAM, BETCHWORTH, RH3 7NB",
+      "candidateCount": 33,
+      "epc": {
+        "epcAddress": "1 The Borough, Brockham, BETCHWORTH, RH3 7NB",
+        "epcCertificateNumber": "9103-3944-4202-4594-9204",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2024-12-12",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 3315,
+        "floorAreaSqm": 308.0,
+        "pricePerSqft": 730
+      },
+      "postcode": "RH3 7NB",
+      "searchedAt": "2026-08-01T11:13:20Z",
+      "status": "matched"
+    },
     "1 THE MANSION COBHAM PARK COBHAM KT11 3LE|KT113LE|2880000|2016-02-01": {
       "address": "1, THE MANSION, COBHAM PARK, COBHAM, KT11 3LE",
       "candidateCount": 5,
@@ -4139,6 +4158,25 @@
       "searchedAt": "2026-07-22T04:40:48Z",
       "status": "matched"
     },
+    "112 SILVERDALE AVENUE WALTON ON THAMES KT12 1EQ|KT121EQ|2900000|2026-01-09": {
+      "address": "112, SILVERDALE AVENUE, WALTON-ON-THAMES, KT12 1EQ",
+      "candidateCount": 11,
+      "epc": {
+        "epcAddress": "112 Silverdale Avenue, WALTON-ON-THAMES, KT12 1EQ",
+        "epcCertificateNumber": "2753-3026-4204-1427-2200",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "D",
+        "epcRegistrationDate": "2023-04-26",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 3455,
+        "floorAreaSqm": 321.0,
+        "pricePerSqft": 839
+      },
+      "postcode": "KT12 1EQ",
+      "searchedAt": "2026-08-01T11:12:50Z",
+      "status": "matched"
+    },
     "116 SILVERDALE AVENUE WALTON ON THAMES KT12 1EQ|KT121EQ|2950000|2021-06-29": {
       "address": "116, SILVERDALE AVENUE, WALTON-ON-THAMES, KT12 1EQ",
       "candidateCount": 10,
@@ -4327,6 +4365,25 @@
       },
       "postcode": "KT10 0PW",
       "searchedAt": "2026-07-22T08:44:55Z",
+      "status": "matched"
+    },
+    "12 BEACONSFIELD ROAD CLAYGATE ESHER KT10 0PW|KT100PW|2775000|2025-11-24": {
+      "address": "12, BEACONSFIELD ROAD, CLAYGATE, ESHER, KT10 0PW",
+      "candidateCount": 16,
+      "epc": {
+        "epcAddress": "12 Beaconsfield Road, Claygate, ESHER, KT10 0PW",
+        "epcCertificateNumber": "2261-1859-4212-9154-1171",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "E",
+        "epcRegistrationDate": "2024-07-26",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 4704,
+        "floorAreaSqm": 437.0,
+        "pricePerSqft": 590
+      },
+      "postcode": "KT10 0PW",
+      "searchedAt": "2026-08-01T11:13:11Z",
       "status": "matched"
     },
     "12 BEECH ROAD REIGATE RH2 9LR|RH29LR|2425000|2021-09-08": {
@@ -14796,6 +14853,25 @@
       "searchedAt": "2026-07-22T04:29:57Z",
       "status": "matched"
     },
+    "20 WATER LANE COBHAM KT11 2PB|KT112PB|2650000|2025-12-12": {
+      "address": "20, WATER LANE, COBHAM, KT11 2PB",
+      "candidateCount": 21,
+      "epc": {
+        "epcAddress": "20 Water Lane, COBHAM, KT11 2PB",
+        "epcCertificateNumber": "2831-7218-1503-8015-1277",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2025-09-13",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 3552,
+        "floorAreaSqm": 330.0,
+        "pricePerSqft": 746
+      },
+      "postcode": "KT11 2PB",
+      "searchedAt": "2026-08-01T11:12:57Z",
+      "status": "matched"
+    },
     "20A NEW ROAD ESHER KT10 9PG|KT109PG|2690000|2024-12-11": {
       "address": "20A, NEW ROAD, ESHER, KT10 9PG",
       "candidateCount": 45,
@@ -16067,6 +16143,25 @@
       },
       "postcode": "KT11 2PB",
       "searchedAt": "2026-07-22T07:41:35Z",
+      "status": "matched"
+    },
+    "22 WATER LANE COBHAM KT11 2PB|KT112PB|2747500|2026-05-26": {
+      "address": "22, WATER LANE, COBHAM, KT11 2PB",
+      "candidateCount": 21,
+      "epc": {
+        "epcAddress": "22 Water Lane, COBHAM, KT11 2PB",
+        "epcCertificateNumber": "2053-3034-2209-0794-1200",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "D",
+        "epcRegistrationDate": "2024-01-26",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 5059,
+        "floorAreaSqm": 470.0,
+        "pricePerSqft": 543
+      },
+      "postcode": "KT11 2PB",
+      "searchedAt": "2026-08-01T11:12:35Z",
       "status": "matched"
     },
     "22A BROADWATER ROAD SOUTH HERSHAM WALTON ON THAMES KT12 5DE|KT125DE|2300000|2010-07-30": {
@@ -22320,6 +22415,25 @@
       "searchedAt": "2026-07-22T04:18:55Z",
       "status": "matched"
     },
+    "33 RIVER MOUNT WALTON ON THAMES KT12 2PR|KT122PR|2350000|2025-12-17": {
+      "address": "33, RIVER MOUNT, WALTON-ON-THAMES, KT12 2PR",
+      "candidateCount": 13,
+      "epc": {
+        "epcAddress": "33 River Mount, WALTON-ON-THAMES, KT12 2PR",
+        "epcCertificateNumber": "2317-3041-6208-0794-4200",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2024-09-02",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 4273,
+        "floorAreaSqm": 397.0,
+        "pricePerSqft": 550
+      },
+      "postcode": "KT12 2PR",
+      "searchedAt": "2026-08-01T11:12:55Z",
+      "status": "matched"
+    },
     "33 ST MARYS ROAD LONG DITTON SURBITON KT6 5HB|KT65HB|2000000|2023-09-08": {
       "address": "33, ST MARYS ROAD, LONG DITTON, SURBITON, KT6 5HB",
       "candidateCount": 19,
@@ -24322,6 +24436,25 @@
       "searchedAt": "2026-07-22T07:23:13Z",
       "status": "matched"
     },
+    "4 EATON PARK COBHAM KT11 2JE|KT112JE|2975000|2025-11-28": {
+      "address": "4, EATON PARK, COBHAM, KT11 2JE",
+      "candidateCount": 20,
+      "epc": {
+        "epcAddress": "4 Eaton Park, COBHAM, KT11 2JE",
+        "epcCertificateNumber": "2883-8521-1110-1171-2461",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2024-02-23",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 6372,
+        "floorAreaSqm": 592.0,
+        "pricePerSqft": 467
+      },
+      "postcode": "KT11 2JE",
+      "searchedAt": "2026-08-01T11:13:09Z",
+      "status": "matched"
+    },
     "4 ERISWELL CRESCENT HERSHAM WALTON ON THAMES KT12 5DS|KT125DS|2450000|2014-08-08": {
       "address": "4, ERISWELL CRESCENT, HERSHAM, WALTON-ON-THAMES, KT12 5DS",
       "candidateCount": 18,
@@ -25574,6 +25707,25 @@
       },
       "postcode": "KT8 9EW",
       "searchedAt": "2026-07-22T08:38:23Z",
+      "status": "matched"
+    },
+    "42 CHERRY TREE LANE GODALMING GU7 3RS|GU73RS|39500000|2026-05-11": {
+      "address": "42, CHERRY TREE LANE, GODALMING, GU7 3RS",
+      "candidateCount": 21,
+      "epc": {
+        "epcAddress": "42 Cherry Tree Lane, GODALMING, GU7 3RS",
+        "epcCertificateNumber": "0657-3048-5207-2145-2200",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "D",
+        "epcRegistrationDate": "2025-03-24",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 990,
+        "floorAreaSqm": 92.0,
+        "pricePerSqft": 39899
+      },
+      "postcode": "GU7 3RS",
+      "searchedAt": "2026-08-01T11:12:39Z",
       "status": "matched"
     },
     "42 CRANLEY ROAD HERSHAM WALTON ON THAMES KT12 5BL|KT125BL|2362916|2021-02-26": {
@@ -28369,6 +28521,25 @@
       "searchedAt": "2026-07-07T12:59:48Z",
       "status": "matched"
     },
+    "5 TORLAND DRIVE OXSHOTT LEATHERHEAD KT22 0SA|KT220SA|3808000|2025-11-28": {
+      "address": "5, TORLAND DRIVE, OXSHOTT, LEATHERHEAD, KT22 0SA",
+      "candidateCount": 11,
+      "epc": {
+        "epcAddress": "5 Torland Drive, Oxshott, LEATHERHEAD, KT22 0SA",
+        "epcCertificateNumber": "2676-1121-2993-1706-6131",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2024-08-19",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 5651,
+        "floorAreaSqm": 525.0,
+        "pricePerSqft": 674
+      },
+      "postcode": "KT22 0SA",
+      "searchedAt": "2026-08-01T11:13:07Z",
+      "status": "matched"
+    },
     "5 VIRGINIA AVENUE VIRGINIA WATER GU25 4RY|GU254RY|2100000|2017-02-20": {
       "address": "5, VIRGINIA AVENUE, VIRGINIA WATER, GU25 4RY",
       "candidateCount": 13,
@@ -29515,6 +29686,25 @@
       },
       "postcode": "KT8 9JJ",
       "searchedAt": "2026-07-22T08:32:30Z",
+      "status": "matched"
+    },
+    "6 ASHBURNHAM PARK ESHER KT10 9TW|KT109TW|3125000|2026-06-04": {
+      "address": "6, ASHBURNHAM PARK, ESHER, KT10 9TW",
+      "candidateCount": 6,
+      "epc": {
+        "epcAddress": "6 Ashburnham Park, ESHER, KT10 9TW",
+        "epcCertificateNumber": "3336-2022-1500-0112-9292",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2026-02-13",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 4424,
+        "floorAreaSqm": 411.0,
+        "pricePerSqft": 706
+      },
+      "postcode": "KT10 9TW",
+      "searchedAt": "2026-08-01T11:12:31Z",
       "status": "matched"
     },
     "6 BADGERS HILL VIRGINIA WATER GU25 4SB|GU254SB|4550000|2013-02-14": {
@@ -32071,6 +32261,25 @@
       "searchedAt": "2026-07-22T09:14:54Z",
       "status": "matched"
     },
+    "7 FORT ROAD GUILDFORD GU1 3TB|GU13TB|2360000|2026-05-15": {
+      "address": "7, FORT ROAD, GUILDFORD, GU1 3TB",
+      "candidateCount": 10,
+      "epc": {
+        "epcAddress": "6 Fort Road, GUILDFORD, GU1 3TB",
+        "epcCertificateNumber": "3200-8166-0322-4602-3563",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "B",
+        "epcRegistrationDate": "2026-05-06",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 2648,
+        "floorAreaSqm": 246.0,
+        "pricePerSqft": 891
+      },
+      "postcode": "GU1 3TB",
+      "searchedAt": "2026-08-01T11:12:37Z",
+      "status": "matched"
+    },
     "7 FOX WOOD WALTON ON THAMES KT12 4BS|KT124BS|2075000|2016-08-25": {
       "address": "7, FOX WOOD, WALTON-ON-THAMES, KT12 4BS",
       "candidateCount": 9,
@@ -33321,6 +33530,25 @@
       },
       "postcode": "KT6 5LA",
       "searchedAt": "2026-07-22T05:39:47Z",
+      "status": "matched"
+    },
+    "77 MASSETTS ROAD HORLEY RH6 7EB|RH67EB|2000000|2025-12-02": {
+      "address": "77, MASSETTS ROAD, HORLEY, RH6 7EB",
+      "candidateCount": 3,
+      "epc": {
+        "epcAddress": "77 MASSETTS ROAD, HORLEY, RH6 7EB",
+        "epcCertificateNumber": "3800-4659-0322-3008-3893",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "D",
+        "epcRegistrationDate": "2021-08-06",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 1485,
+        "floorAreaSqm": 138.0,
+        "pricePerSqft": 1347
+      },
+      "postcode": "RH6 7EB",
+      "searchedAt": "2026-08-01T11:13:05Z",
       "status": "matched"
     },
     "79 FAIRMILE LANE COBHAM KT11 2DG|KT112DG|4300000|2024-05-09": {
@@ -40320,6 +40548,25 @@
       },
       "postcode": "KT14 6JW",
       "searchedAt": "2026-07-22T05:04:09Z",
+      "status": "matched"
+    },
+    "BEAUMONT LODGE EAST ROAD WEYBRIDGE KT13 0LE|KT130LE|3450000|2025-09-02": {
+      "address": "BEAUMONT LODGE, EAST ROAD, WEYBRIDGE, KT13 0LE",
+      "candidateCount": 9,
+      "epc": {
+        "epcAddress": "Beaumont Lodge, East Road, WEYBRIDGE, KT13 0LE",
+        "epcCertificateNumber": "0550-2894-6614-2990-9851",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "D",
+        "epcRegistrationDate": "2020-09-14",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 3703,
+        "floorAreaSqm": 344.0,
+        "pricePerSqft": 932
+      },
+      "postcode": "KT13 0LE",
+      "searchedAt": "2026-08-01T11:13:22Z",
       "status": "matched"
     },
     "BEDDINGTON HOUSE EGMONT PARK ROAD WALTON ON THE HILL TADWORTH KT20 7QG|KT207QG|2085000|2021-12-09": {
@@ -49207,6 +49454,25 @@
       "searchedAt": "2026-07-22T09:47:23Z",
       "status": "matched"
     },
+    "CONNISTON PARK VIEW ROAD WOLDINGHAM CATERHAM CR3 7DJ|CR37DJ|2800000|2026-03-27": {
+      "address": "CONNISTON, PARK VIEW ROAD, WOLDINGHAM, CATERHAM, CR3 7DJ",
+      "candidateCount": 16,
+      "epc": {
+        "epcAddress": "Overdale, Park View Road, Woldingham, CATERHAM, CR3 7DJ",
+        "epcCertificateNumber": "4534-5526-7300-0258-9222",
+        "epcMatchScore": 0.743,
+        "epcMatched": true,
+        "epcRating": "D",
+        "epcRegistrationDate": "2024-07-01",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 6114,
+        "floorAreaSqm": 568.0,
+        "pricePerSqft": 458
+      },
+      "postcode": "CR3 7DJ",
+      "searchedAt": "2026-08-01T11:12:44Z",
+      "status": "matched"
+    },
     "CONSTANTIA SOUTH ROAD ST GEORGES HILL WEYBRIDGE KT13 0NA|KT130NA|19000000|2025-08-29": {
       "address": "CONSTANTIA, SOUTH ROAD, ST GEORGES HILL, WEYBRIDGE, KT13 0NA",
       "candidateCount": 23,
@@ -51806,6 +52072,25 @@
       },
       "postcode": "KT6 5HQ",
       "searchedAt": "2026-07-22T08:44:47Z",
+      "status": "matched"
+    },
+    "DITTON HOUSE WESTON GREEN ROAD THAMES DITTON KT7 0HY|KT70HY|2280000|2025-12-09": {
+      "address": "DITTON HOUSE, WESTON GREEN ROAD, THAMES DITTON, KT7 0HY",
+      "candidateCount": 12,
+      "epc": {
+        "epcAddress": "Ditton House, Weston Green Road, THAMES DITTON, KT7 0HY",
+        "epcCertificateNumber": "8386-7029-4510-4285-3922",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2016-01-26",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 3035,
+        "floorAreaSqm": 282.0,
+        "pricePerSqft": 751
+      },
+      "postcode": "KT7 0HY",
+      "searchedAt": "2026-08-01T11:13:01Z",
       "status": "matched"
     },
     "DOLPHINS BRACKEN CLOSE WONERSH GUILDFORD GU5 0QS|GU50QS|2000000|2023-03-10": {
@@ -60039,6 +60324,25 @@
       "searchedAt": "2026-07-14T12:22:13Z",
       "status": "matched"
     },
+    "HAVANA HOUSE 2 CRANLEY ROAD HERSHAM WALTON ON THAMES KT12 5BP|KT125BP|4850000|2025-09-30": {
+      "address": "HAVANA HOUSE, 2, CRANLEY ROAD, HERSHAM, WALTON-ON-THAMES, KT12 5BP",
+      "candidateCount": 14,
+      "epc": {
+        "epcAddress": "Havana House, 2 Cranley Road, Hersham, WALTON-ON-THAMES, KT12 5BP",
+        "epcCertificateNumber": "4377-2465-7942-2495-7806",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2025-05-17",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 6943,
+        "floorAreaSqm": 645.0,
+        "pricePerSqft": 699
+      },
+      "postcode": "KT12 5BP",
+      "searchedAt": "2026-08-01T11:13:15Z",
+      "status": "matched"
+    },
     "HAVERSTOCK HOUSE 1 KEEPERS WALK VIRGINIA WATER GU25 4RU|GU254RU|5000000|2020-08-05": {
       "address": "HAVERSTOCK HOUSE, 1 KEEPERS WALK, VIRGINIA WATER, GU25 4RU",
       "candidateCount": 5,
@@ -61394,6 +61698,25 @@
       },
       "postcode": "GU20 6LP",
       "searchedAt": "2026-07-22T09:47:52Z",
+      "status": "matched"
+    },
+    "HIDDEN COTTAGE EGERTON ROAD WEYBRIDGE KT13 0PW|KT130PW|3200000|2026-05-11": {
+      "address": "HIDDEN COTTAGE, EGERTON ROAD, WEYBRIDGE, KT13 0PW",
+      "candidateCount": 13,
+      "epc": {
+        "epcAddress": "Hidden Cottage, Egerton Road, WEYBRIDGE, KT13 0PW",
+        "epcCertificateNumber": "1836-0222-0500-0781-9292",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "B",
+        "epcRegistrationDate": "2026-02-19",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 6512,
+        "floorAreaSqm": 605.0,
+        "pricePerSqft": 491
+      },
+      "postcode": "KT13 0PW",
+      "searchedAt": "2026-08-01T11:12:42Z",
       "status": "matched"
     },
     "HIDDEN COTTAGE EGERTON ROAD WEYBRIDGE KT13 0PW|KT130PW|3275000|2020-08-07": {
@@ -64736,6 +65059,25 @@
       "searchedAt": "2026-07-22T07:59:12Z",
       "status": "matched"
     },
+    "HURST HOUSE 12 CHURCH ROAD EAST MOLESEY KT8 9DR|KT89DR|2660000|2026-06-18": {
+      "address": "HURST HOUSE, 12, CHURCH ROAD, EAST MOLESEY, KT8 9DR",
+      "candidateCount": 15,
+      "epc": {
+        "epcAddress": "12 Church Road, EAST MOLESEY, KT8 9DR",
+        "epcCertificateNumber": "2776-1076-3114-2614-1914",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "D",
+        "epcRegistrationDate": "2025-09-18",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 4628,
+        "floorAreaSqm": 430.0,
+        "pricePerSqft": 575
+      },
+      "postcode": "KT8 9DR",
+      "searchedAt": "2026-08-01T11:12:28Z",
+      "status": "matched"
+    },
     "HURTMORE GAP HURTMORE ROAD HURTMORE GODALMING GU7 2RA|GU72RA|2500000|2022-08-25": {
       "address": "HURTMORE GAP, HURTMORE ROAD, HURTMORE, GODALMING, GU7 2RA",
       "candidateCount": 18,
@@ -67743,6 +68085,25 @@
       "searchedAt": "2026-07-22T05:16:08Z",
       "status": "matched"
     },
+    "LANGHAM PARK VIEW ROAD WOLDINGHAM CATERHAM CR3 7DJ|CR37DJ|2925000|2025-12-18": {
+      "address": "LANGHAM, PARK VIEW ROAD, WOLDINGHAM, CATERHAM, CR3 7DJ",
+      "candidateCount": 16,
+      "epc": {
+        "epcAddress": "Langham, Park View Road, Woldingham, CR3 7DJ",
+        "epcCertificateNumber": "7735-7832-2109-0508-0206",
+        "epcMatchScore": 0.964,
+        "epcMatched": true,
+        "epcRating": "B",
+        "epcRegistrationDate": "2025-12-08",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 5134,
+        "floorAreaSqm": 477.0,
+        "pricePerSqft": 570
+      },
+      "postcode": "CR3 7DJ",
+      "searchedAt": "2026-08-01T11:12:52Z",
+      "status": "matched"
+    },
     "LANGLEY HOUSE CHURCH LANE OXTED RH8 9LH|RH89LH|2770000|2006-03-21": {
       "address": "LANGLEY HOUSE, CHURCH LANE, OXTED, RH8 9LH",
       "candidateCount": 24,
@@ -69280,6 +69641,25 @@
       },
       "postcode": "KT11 2NJ",
       "searchedAt": "2026-07-22T06:37:00Z",
+      "status": "matched"
+    },
+    "LITTLE OAKS CHALK LANE ASHTEAD KT21 1DJ|KT211DJ|2750000|2026-06-04": {
+      "address": "LITTLE OAKS, CHALK LANE, ASHTEAD, KT21 1DJ",
+      "candidateCount": 11,
+      "epc": {
+        "epcAddress": "Little Oaks, Chalk Lane, ASHTEAD, KT21 1DJ",
+        "epcCertificateNumber": "0300-2717-5260-2697-7745",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2024-07-02",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 4392,
+        "floorAreaSqm": 408.0,
+        "pricePerSqft": 626
+      },
+      "postcode": "KT21 1DJ",
+      "searchedAt": "2026-08-01T11:12:33Z",
       "status": "matched"
     },
     "LITTLE OAKS WOODLAND WAY KINGSWOOD TADWORTH KT20 6NX|KT206NX|2750000|2011-04-01": {
@@ -70933,6 +71313,25 @@
       },
       "postcode": "GU6 8QN",
       "searchedAt": "2026-07-22T06:19:14Z",
+      "status": "matched"
+    },
+    "MANOR COTTAGE ALDERBROOK ROAD SMITHWOOD COMMON CRANLEIGH GU6 8QX|GU68QX|2974550|2026-01-12": {
+      "address": "MANOR COTTAGE, ALDERBROOK ROAD, SMITHWOOD COMMON, CRANLEIGH, GU6 8QX",
+      "candidateCount": 12,
+      "epc": {
+        "epcAddress": "Acorn Cottage, Smithwood Common, CRANLEIGH, GU6 8QX",
+        "epcCertificateNumber": "9898-1906-7220-2978-9944",
+        "epcMatchScore": 0.645,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2018-10-13",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 1615,
+        "floorAreaSqm": 150.0,
+        "pricePerSqft": 1842
+      },
+      "postcode": "GU6 8QX",
+      "searchedAt": "2026-08-01T11:12:48Z",
       "status": "matched"
     },
     "MANOR COTTAGE MANOR LANE SHAMLEY GREEN GUILDFORD GU5 0FD|GU50FD|2325000|2025-01-24": {
@@ -74348,6 +74747,25 @@
       "searchedAt": "2026-07-22T06:48:12Z",
       "status": "matched"
     },
+    "NORTH DOWNS HOUSE THE RIDGE WOLDINGHAM CATERHAM CR3 7AH|CR37AH|2350000|2025-12-05": {
+      "address": "NORTH DOWNS HOUSE, THE RIDGE, WOLDINGHAM, CATERHAM, CR3 7AH",
+      "candidateCount": 5,
+      "epc": {
+        "epcAddress": "North Downs House, The Ridge, Woldingham, CATERHAM, CR3 7AH",
+        "epcCertificateNumber": "8765-7529-2629-0194-7922",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "E",
+        "epcRegistrationDate": "2015-11-25",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 4058,
+        "floorAreaSqm": 377.0,
+        "pricePerSqft": 579
+      },
+      "postcode": "CR3 7AH",
+      "searchedAt": "2026-08-01T11:13:03Z",
+      "status": "matched"
+    },
     "NORTH DRIVE LODGE NORTH DRIVE VIRGINIA WATER VIRGINIA WATER GU25 4NL|GU254NL|3500000|2001-07-15": {
       "address": "NORTH DRIVE LODGE, NORTH DRIVE, VIRGINIA WATER, VIRGINIA WATER, GU25 4NL",
       "candidateCount": 2,
@@ -75087,6 +75505,25 @@
       },
       "postcode": "KT20 6ND",
       "searchedAt": "2026-07-07T14:10:30Z",
+      "status": "matched"
+    },
+    "OAKMONT LONGCROSS ROAD LONGCROSS CHERTSEY KT16 0AH|KT160AH|2800000|2025-12-18": {
+      "address": "OAKMONT, LONGCROSS ROAD, LONGCROSS, CHERTSEY, KT16 0AH",
+      "candidateCount": 8,
+      "epc": {
+        "epcAddress": "Oakmont, Longcross Road, Longcross, CHERTSEY, KT16 0AH",
+        "epcCertificateNumber": "9128-8978-7392-2988-2910",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "B",
+        "epcRegistrationDate": "2018-12-12",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 3294,
+        "floorAreaSqm": 306.0,
+        "pricePerSqft": 850
+      },
+      "postcode": "KT16 0AH",
+      "searchedAt": "2026-08-01T11:12:54Z",
       "status": "matched"
     },
     "OAKRIDGE 3 ABBOTSWOOD DRIVE WEYBRIDGE KT13 0LT|KT130LT|2850000|2014-01-15": {
@@ -77903,6 +78340,25 @@
       },
       "postcode": "KT13 0QL",
       "searchedAt": "2026-07-14T12:23:06Z",
+      "status": "matched"
+    },
+    "PINE HILL GRANVILLE ROAD WEYBRIDGE KT13 0QL|KT130QL|4800000|2025-11-21": {
+      "address": "PINE HILL, GRANVILLE ROAD, WEYBRIDGE, KT13 0QL",
+      "candidateCount": 5,
+      "epc": {
+        "epcAddress": "Pine Hill, Granville Road, WEYBRIDGE, KT13 0QL",
+        "epcCertificateNumber": "0360-2276-3240-2227-7605",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "D",
+        "epcRegistrationDate": "2023-05-11",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 7793,
+        "floorAreaSqm": 724.0,
+        "pricePerSqft": 616
+      },
+      "postcode": "KT13 0QL",
+      "searchedAt": "2026-08-01T11:13:13Z",
       "status": "matched"
     },
     "PINE HOUSE 2 FAIRMILE AVENUE COBHAM KT11 2JB|KT112JB|5200000|2022-11-11": {
@@ -85870,6 +86326,25 @@
       "searchedAt": "2026-07-22T04:30:01Z",
       "status": "matched"
     },
+    "STILL WATERS PINE WALK EAST HORSLEY LEATHERHEAD KT24 5AG|KT245AG|2100000|2026-06-19": {
+      "address": "STILL WATERS, PINE WALK, EAST HORSLEY, LEATHERHEAD, KT24 5AG",
+      "candidateCount": 18,
+      "epc": {
+        "epcAddress": "Penneys, Pine Walk, East Horsley, LEATHERHEAD, KT24 5AG",
+        "epcCertificateNumber": "0812-3957-3202-5335-3200",
+        "epcMatchScore": 0.716,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2025-12-11",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 5586,
+        "floorAreaSqm": 519.0,
+        "pricePerSqft": 376
+      },
+      "postcode": "KT24 5AG",
+      "searchedAt": "2026-08-01T11:12:26Z",
+      "status": "matched"
+    },
     "STOKE HOUSE STOKESHEATH ROAD LEATHERHEAD KT22 0PS|KT220PS|6750000|2023-07-14": {
       "address": "STOKE HOUSE, STOKESHEATH ROAD, LEATHERHEAD, KT22 0PS",
       "candidateCount": 11,
@@ -86624,6 +87099,25 @@
       },
       "postcode": "KT20 6PU",
       "searchedAt": "2026-07-22T04:17:32Z",
+      "status": "matched"
+    },
+    "SUNRAY FARM WEST HILL ELSTEAD GODALMING GU8 6DQ|GU86DQ|4000000|2025-08-29": {
+      "address": "SUNRAY FARM, WEST HILL, ELSTEAD, GODALMING, GU8 6DQ",
+      "candidateCount": 36,
+      "epc": {
+        "epcAddress": "Sunray Farm, West Hill, Elstead, GODALMING, GU8 6DQ",
+        "epcCertificateNumber": "0548-3051-1206-7535-3204",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "D",
+        "epcRegistrationDate": "2025-06-08",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 1270,
+        "floorAreaSqm": 118.0,
+        "pricePerSqft": 3150
+      },
+      "postcode": "GU8 6DQ",
+      "searchedAt": "2026-08-01T11:13:24Z",
       "status": "matched"
     },
     "SUNRIDGE GRUB STREET OXTED RH8 0SH|RH80SH|2200000|2020-10-28": {
@@ -90338,6 +90832,25 @@
       "searchedAt": "2026-07-22T09:47:25Z",
       "status": "matched"
     },
+    "THE SHACK 15 CROSSWAY WALTON ON THAMES KT12 3JA|KT123JA|2000000|2025-12-10": {
+      "address": "THE SHACK, 15, CROSSWAY, WALTON-ON-THAMES, KT12 3JA",
+      "candidateCount": 13,
+      "epc": {
+        "epcAddress": "15, Crossway, WALTON-ON-THAMES, KT12 3JA",
+        "epcCertificateNumber": "8700-1954-8129-9527-2963",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "D",
+        "epcRegistrationDate": "2016-01-25",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 1970,
+        "floorAreaSqm": 183.0,
+        "pricePerSqft": 1015
+      },
+      "postcode": "KT12 3JA",
+      "searchedAt": "2026-08-01T11:12:59Z",
+      "status": "matched"
+    },
     "THE SHIELING 8 EATON PARK ROAD COBHAM KT11 2JH|KT112JH|2040000|2010-01-07": {
       "address": "THE SHIELING, 8, EATON PARK ROAD, COBHAM, KT11 2JH",
       "candidateCount": 10,
@@ -91994,6 +92507,25 @@
       },
       "postcode": "RH12 3DP",
       "searchedAt": "2026-07-22T06:01:58Z",
+      "status": "matched"
+    },
+    "TUSCAN HOUSE EAST ROAD WEYBRIDGE KT13 0LF|KT130LF|2600000|2026-01-16": {
+      "address": "TUSCAN HOUSE, EAST ROAD, WEYBRIDGE, KT13 0LF",
+      "candidateCount": 24,
+      "epc": {
+        "epcAddress": "Tuscan House, East Road, WEYBRIDGE, KT13 0LF",
+        "epcCertificateNumber": "2151-4520-1175-1156-6515",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "D",
+        "epcRegistrationDate": "2024-06-10",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 5543,
+        "floorAreaSqm": 515.0,
+        "pricePerSqft": 469
+      },
+      "postcode": "KT13 0LF",
+      "searchedAt": "2026-08-01T11:12:46Z",
       "status": "matched"
     },
     "TUSCAN HOUSE EAST ROAD WEYBRIDGE WEYBRIDGE KT13 0LF|KT130LF|2000000|2001-05-14": {
@@ -96957,6 +97489,25 @@
       "searchedAt": "2026-07-14T12:22:59Z",
       "status": "matched"
     },
+    "WOODHAY WHITE LANE GUILDFORD GU4 8PU|GU48PU|3650000|2025-09-10": {
+      "address": "WOODHAY, WHITE LANE, GUILDFORD, GU4 8PU",
+      "candidateCount": 1,
+      "epc": {
+        "epcAddress": "Woodhay, White Lane, GUILDFORD, GU4 8PU",
+        "epcCertificateNumber": "2480-4615-6183-9180-9215",
+        "epcMatchScore": 1.0,
+        "epcMatched": true,
+        "epcRating": "C",
+        "epcRegistrationDate": "2024-05-16",
+        "epcSource": "MHCLG EPC Register",
+        "floorAreaSqft": 4413,
+        "floorAreaSqm": 410.0,
+        "pricePerSqft": 827
+      },
+      "postcode": "GU4 8PU",
+      "searchedAt": "2026-08-01T11:13:17Z",
+      "status": "matched"
+    },
     "WOODHAYES 5 ASHLEY DRIVE WALTON ON THAMES KT12 1JL|KT121JL|3350000|2013-03-22": {
       "address": "WOODHAYES, 5 ASHLEY DRIVE, WALTON-ON-THAMES, KT12 1JL",
       "candidateCount": 15,
@@ -98380,6 +98931,6 @@
       "status": "matched"
     }
   },
-  "updatedAt": "2026-07-22T10:08:27Z",
+  "updatedAt": "2026-08-01T11:13:25Z",
   "version": 3
 }
