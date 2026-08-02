@@ -19,6 +19,7 @@ from enrich_epc_data import (  # noqa: E402
     search_candidates,
     stable_transaction_key,
     terminal_cache_accounting,
+    terminal_cache_can_reconcile,
 )
 from insight_data_utils import (  # noqa: E402
     PUBLIC_TRANSACTION_FIELDS,
@@ -285,6 +286,11 @@ class PublicationContractTests(unittest.TestCase):
         self.assertEqual(accounting["resolved"], 1)
         self.assertEqual(accounting["pending"], 2)
         self.assertEqual(accounting["errors"], 1)
+        self.assertFalse(terminal_cache_can_reconcile(accounting, 3))
+
+    def test_complete_epc_cache_can_reconcile_metadata_without_api_access(self):
+        accounting = {"requested": 2, "resolved": 2, "pending": 0, "errors": 0}
+        self.assertTrue(terminal_cache_can_reconcile(accounting, 2))
 
     def test_epc_accounting_counts_distinct_rows_that_share_lookup_evidence(self):
         category_a = {

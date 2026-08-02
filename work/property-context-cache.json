@@ -20131,7 +20131,7 @@
     },
     "KT220SJ": {
       "status": "no_match",
-      "updatedAt": "2026-08-01T11:16:47Z"
+      "updatedAt": "2026-08-02T17:20:51Z"
     },
     "KT220SP": {
       "data": {
@@ -22871,7 +22871,7 @@
     },
     "RH20RD": {
       "status": "no_match",
-      "updatedAt": "2026-08-01T11:16:47Z"
+      "updatedAt": "2026-08-02T17:20:51Z"
     },
     "RH20SA": {
       "data": {
@@ -25099,7 +25099,7 @@
     },
     "TW200HH": {
       "status": "no_match",
-      "updatedAt": "2026-08-01T11:16:45Z"
+      "updatedAt": "2026-08-02T17:20:51Z"
     },
     "TW200HT": {
       "data": {
@@ -25374,6 +25374,6 @@
       "updatedAt": "2026-07-22T10:24:17Z"
     }
   },
-  "updatedAt": "2026-08-01T11:16:47Z",
+  "updatedAt": "2026-08-02T17:20:51Z",
   "version": 1
 }

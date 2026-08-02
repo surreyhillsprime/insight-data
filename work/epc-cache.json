@@ -25709,25 +25709,6 @@
       "searchedAt": "2026-07-22T08:38:23Z",
       "status": "matched"
     },
-    "42 CHERRY TREE LANE GODALMING GU7 3RS|GU73RS|39500000|2026-05-11": {
-      "address": "42, CHERRY TREE LANE, GODALMING, GU7 3RS",
-      "candidateCount": 21,
-      "epc": {
-        "epcAddress": "42 Cherry Tree Lane, GODALMING, GU7 3RS",
-        "epcCertificateNumber": "0657-3048-5207-2145-2200",
-        "epcMatchScore": 1.0,
-        "epcMatched": true,
-        "epcRating": "D",
-        "epcRegistrationDate": "2025-03-24",
-        "epcSource": "MHCLG EPC Register",
-        "floorAreaSqft": 990,
-        "floorAreaSqm": 92.0,
-        "pricePerSqft": 39899
-      },
-      "postcode": "GU7 3RS",
-      "searchedAt": "2026-08-01T11:12:39Z",
-      "status": "matched"
-    },
     "42 CRANLEY ROAD HERSHAM WALTON ON THAMES KT12 5BL|KT125BL|2362916|2021-02-26": {
       "address": "42, CRANLEY ROAD, HERSHAM, WALTON-ON-THAMES, KT12 5BL",
       "candidateCount": 8,
@@ -98931,6 +98912,6 @@
       "status": "matched"
     }
   },
-  "updatedAt": "2026-08-01T11:13:25Z",
+  "updatedAt": "2026-08-02T17:21:38Z",
   "version": 3
 }

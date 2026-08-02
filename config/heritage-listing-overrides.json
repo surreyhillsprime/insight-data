@@ -10485,16 +10485,6 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
-      "propertyRecordId": "property:42 CHERRY TREE LANE GODALMING GU7 3RS|GU73RS",
-      "address": "42, CHERRY TREE LANE, GODALMING, GU7 3RS",
-      "postcode": "GU7 3RS",
-      "status": "unknown",
-      "listEntryNumbers": [],
-      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
-      "reviewedAt": "2026-08-02",
-      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
-    },
-    {
       "propertyRecordId": "property:42 CRANLEY ROAD HERSHAM WALTON ON THAMES KT12 5BL|KT125BL",
       "address": "42, CRANLEY ROAD, HERSHAM, WALTON-ON-THAMES, KT12 5BL",
       "postcode": "KT12 5BL",

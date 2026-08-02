@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "matchPolicy": "reviewed-hmlr-source-id-or-exact-tuple-fail-closed",
+  "description": "Product-owner-reviewed HMLR Price Paid transactions excluded from INSIGHT. An exact source transaction ID remains quarantined until reviewed again; the exact tuple is the fallback for processed rows that no longer retain the source ID.",
+  "exclusions": [
+    {
+      "id": "hmlr-559c5ad5-8fa4-afe3-e063-4804a8c004a4-price-input-error",
+      "disposition": "exclude",
+      "source": "HM Land Registry Price Paid Data",
+      "sourceTransactionId": "http://landregistry.data.gov.uk/data/ppi/transaction/559C5AD5-8FA4-AFE3-E063-4804A8C004A4/current",
+      "transactionUuid": "559C5AD5-8FA4-AFE3-E063-4804A8C004A4",
+      "address": "42, CHERRY TREE LANE, GODALMING, GU7 3RS",
+      "postcode": "GU7 3RS",
+      "price": 39500000,
+      "date": "2026-05-11",
+      "propertyType": "Terraced",
+      "category": "A",
+      "reason": "Confirmed 100x price input error; the published GBP 39.5m value is not a credible residential transaction for this property.",
+      "evidence": "Product owner review on 2026-08-02, corroborated by the impossible GBP 39,899 per sq ft derived from the matched 92 sq m EPC.",
+      "reviewedAt": "2026-08-02",
+      "reviewedBy": "INSIGHT product owner"
+    }
+  ]
+}

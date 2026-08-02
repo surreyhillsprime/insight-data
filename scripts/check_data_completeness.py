@@ -23,6 +23,10 @@ from enrich_listed_buildings import (
     heritage_contract_failures,
     heritage_publication_required,
 )
+from transaction_exclusions import (
+    excluded_transaction_failures,
+    transaction_exclusion_metadata,
+)
 
 
 EXPECTED_PRICE_FLOOR = 2_000_000
@@ -435,6 +439,9 @@ def main():
     if args.strict_metadata and not args.base_only:
         failures.extend(static_context_failures(items, meta))
     failures.extend(publication_contract_failures(items))
+    failures.extend(excluded_transaction_failures(items))
+    if meta.get("transactionExclusions") != transaction_exclusion_metadata():
+        failures.append("Transaction exclusions: published metadata does not match the reviewed exclusion ledger")
     failures.extend(
         dependent_heritage_failures(items, meta, base_only=args.base_only)
     )

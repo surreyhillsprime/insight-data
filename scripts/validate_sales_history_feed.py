@@ -114,6 +114,7 @@ def validate(
     minimum_transactions=0,
     maximum_properties_unavailable=None,
     maximum_age_days=MAX_FRESHNESS_WINDOW_DAYS,
+    allow_unbound_commercial=False,
 ):
     path = Path(path)
     if path.stat().st_size > MAX_FEED_BYTES:
@@ -336,6 +337,14 @@ def validate(
             raise ValueError(
                 "Sales-history historyFingerprint does not match the published records"
             )
+        alias_base_fingerprint = sha256_json(sorted(
+            [transaction_id, str(record.get("propertyRecordId") or "")]
+            for transaction_id, record in aliases.items()
+        ))
+        if metadata["baseFeedFingerprint"] != alias_base_fingerprint:
+            raise ValueError(
+                "Sales-history baseFeedFingerprint does not match its transaction aliases"
+            )
 
     if base_feed:
         base_rows = read_base_feed(base_feed)
@@ -413,7 +422,7 @@ def validate(
                     f"found {len(canonical):,} keys / {requested} requested / "
                     f"{accounted} accounted"
                 )
-    elif mode == "commercial":
+    elif mode == "commercial" and not allow_unbound_commercial:
         raise ValueError(
             "Commercial sales-history validation requires the exact base feed"
         )
