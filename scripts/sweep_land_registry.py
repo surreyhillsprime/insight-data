@@ -28,6 +28,11 @@ from insight_data_utils import (
     property_record_id,
     write_js as write_canonical_js,
 )
+from transaction_exclusions import (
+    find_transaction_exclusion,
+    load_transaction_exclusion_ledger,
+    transaction_exclusion_metadata,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,7 +61,7 @@ BASE_METADATA_FIELDS = {
     "estateTypeSummary", "estateRegistryVersion", "estateClassifierMode",
     "estateClassificationMode", "estateStructuredFieldCoverage",
     "estateActiveDefinitionCount", "estateActiveRuleCount",
-    "propertyRecordSchemaVersion", "canonicalPropertyRecords", "propertyIdentityMode",
+    "propertyRecordSchemaVersion", "canonicalPropertyRecords", "propertyIdentityMode", "transactionExclusions",
 }
 
 CANONICAL_DISTRICTS = {
@@ -158,7 +163,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX lrppi: <http://landregistry.data.gov.uk/def/ppi/>
 PREFIX lrcommon: <http://landregistry.data.gov.uk/def/common/>
 
-SELECT ?paon ?saon ?street ?locality ?town ?district ?county ?postcode ?propertyType ?price ?date ?category
+SELECT ?tx ?paon ?saon ?street ?locality ?town ?district ?county ?postcode ?propertyType ?price ?date ?category
 WHERE {{
   ?tx lrppi:propertyAddress ?addr ;
       lrppi:pricePaid ?price ;
@@ -503,6 +508,7 @@ def normalise_rows(rows):
     seen = set()
     raw_count = len(rows)
     estate_registry_version = load_compiled_registry()["registryVersion"]
+    exclusion_ledger = load_transaction_exclusion_ledger()
     for row in rows:
         price = parse_price(row.get("price") or row.get("price_paid") or 0)
         if price < PRICE_FLOOR:
@@ -546,6 +552,17 @@ def normalise_rows(rows):
             "postcode": postcode,
         })
         category = category_label(row.get("category") or row.get("transaction_category"))
+        exclusion_candidate = {
+            "tx": row.get("tx") or row.get("sourceTransactionId") or "",
+            "address": address,
+            "postcode": postcode,
+            "price": price,
+            "date": date,
+            "propertyType": property_type,
+            "category": category,
+        }
+        if find_transaction_exclusion(exclusion_candidate, exclusion_ledger):
+            continue
         key = (address.upper(), postcode, price, date, property_type, category)
         if key in seen:
             continue
@@ -668,6 +685,7 @@ def metadata(raw_count, transactions):
         "propertyTypes": list(PROPERTY_TYPES.keys()),
         "updateCadence": "monthly",
         "officialSearch": "county=Surrey; price >= GBP 2,000,000; date >= 1995-01-01; residential property types",
+        "transactionExclusions": transaction_exclusion_metadata(),
         "propertyRecordSchemaVersion": PROPERTY_RECORD_SCHEMA_VERSION,
         "canonicalPropertyRecords": len({item["propertyRecordId"] for item in transactions}),
         "propertyIdentityMode": "full-normalised-address-plus-postcode-fail-closed",

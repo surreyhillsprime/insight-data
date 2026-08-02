@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gaininsight.app/schemas/transaction-exclusions.schema.json",
+  "title": "INSIGHT reviewed HMLR transaction exclusions",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "matchPolicy", "description", "exclusions"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "matchPolicy": {"const": "reviewed-hmlr-source-id-or-exact-tuple-fail-closed"},
+    "description": {"type": "string", "minLength": 1},
+    "exclusions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id", "disposition", "source", "sourceTransactionId", "transactionUuid",
+          "address", "postcode", "price", "date", "propertyType", "category",
+          "reason", "evidence", "reviewedAt", "reviewedBy"
+        ],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "disposition": {"const": "exclude"},
+          "source": {"const": "HM Land Registry Price Paid Data"},
+          "sourceTransactionId": {"type": "string", "pattern": "^https?://landregistry\\.data\\.gov\\.uk/data/ppi/transaction/[A-F0-9-]+/current$"},
+          "transactionUuid": {"type": "string", "pattern": "^[A-F0-9-]+$"},
+          "address": {"type": "string", "minLength": 1},
+          "postcode": {"type": "string", "minLength": 1},
+          "price": {"type": "integer", "minimum": 2000000},
+          "date": {"type": "string", "format": "date"},
+          "propertyType": {"enum": ["Detached", "Semi Detached", "Terraced", "Flat Maisonette"]},
+          "category": {"enum": ["A", "B"]},
+          "reason": {"type": "string", "minLength": 20},
+          "evidence": {"type": "string", "minLength": 20},
+          "reviewedAt": {"type": "string", "format": "date"},
+          "reviewedBy": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

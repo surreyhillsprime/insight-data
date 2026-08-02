@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,6 +14,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from collect_title_history import (  # noqa: E402
     cache_coverage,
     load_seed_history,
+    main as collect_title_history_main,
     seed_record_is_fresh,
 )
 from validate_sales_history_feed import (  # noqa: E402
@@ -274,6 +276,70 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         self.write_sales(assignments)
         with self.assertRaisesRegex(ValueError, "historyFingerprint"):
             load_seed_history(self.sales_path, 28)
+
+    def test_exact_commercial_base_allows_valid_seed_reuse(self):
+        self.write_sales(self.assignments())
+        history = load_seed_history(self.sales_path, 28)
+        self.assertEqual(history[self.property_one]["coverageStatus"], "complete")
+
+    def test_unbound_seed_rejects_a_forged_base_identity(self):
+        assignments = self.assignments()
+        assignments["SURREY_SALES_HISTORY_META"]["baseFeedFingerprint"] = "0" * 64
+        assignments["SURREY_SALES_HISTORY_META"]["historyFingerprint"] = sha256_json(
+            assignments["SURREY_SALES_HISTORY"]
+        )
+        self.write_sales(assignments)
+        with self.assertRaisesRegex(ValueError, "transaction aliases"):
+            load_seed_history(self.sales_path, 28)
+
+    def test_valid_prior_publication_beats_an_incomplete_fresh_cache(self):
+        self.write_sales(self.assignments())
+        current_base = self.root / "current-base.js"
+        output = self.root / "aligned-sales.js"
+        cache = self.root / "cache.json"
+        write_assignments(
+            current_base,
+            {
+                "SURREY_LAND_REG_TRANSACTIONS": [{
+                    "id": "txn-one",
+                    "propertyRecordId": self.property_one,
+                    "address": "1 TEST ROAD",
+                    "postcode": "KT10 0AA",
+                    "date": "2025-01-02",
+                    "price": 2_000_000,
+                    "propertyType": "Detached",
+                    "category": "A",
+                }]
+            },
+        )
+        cache.write_text(json.dumps({
+            "version": 1,
+            "postcodes": {
+                "KT100AA": {"updatedAt": timestamp(), "rows": []}
+            },
+        }), encoding="utf-8")
+        argv = [
+            "collect_title_history.py",
+            "--input", str(current_base),
+            "--output", str(output),
+            "--cache", str(cache),
+            "--seed-feed", str(self.sales_path),
+            "--deployment-mode", "commercial",
+            "--refresh-days", "28",
+        ]
+        with patch.object(sys, "argv", argv), patch(
+            "collect_title_history.fetch_batch"
+        ) as fetch:
+            collect_title_history_main()
+        fetch.assert_not_called()
+        text = output.read_text(encoding="utf-8")
+        histories = json.loads(
+            text.split("window.SURREY_SALES_HISTORY = ", 1)[1].split(";", 1)[0]
+        )
+        self.assertEqual(
+            histories[self.property_one]["transactions"][0]["id"],
+            "hmlr-sale-one",
+        )
 
     def test_force_refresh_can_consume_the_just_fetched_cache(self):
         status, _reason, rows, checked_at = cache_coverage(

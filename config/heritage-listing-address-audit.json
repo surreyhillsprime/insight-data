@@ -26,8 +26,8 @@
     "Use official NHLE geometry to refine map location only after property identity is confirmed.",
     "No direct NHLE match is not legal proof that a property is unlisted or outside listed-building curtilage."
   ],
-  "canonicalPropertyCount": 3968,
-  "canonicalPropertyDigest": "0247782109a347539b0c03b4decaf4d6f8e665f15e3fe7eed63c79899fb41090",
+  "canonicalPropertyCount": 3967,
+  "canonicalPropertyDigest": "7952de7536ddadac03c9da1609b6e95e6031209e374bcc698d58d8ece00fd3c7",
   "officialAddressRecordsScreened": 6624,
   "officialUniqueListEntriesScreened": 6624,
   "candidatePropertyCount": 1415,
@@ -42,7 +42,7 @@
   "confirmedPairDigest": "6bea6c9e05ef87979fcb72dd157673d6609630ad2f0aed231960d3fb6ef4132e",
   "documentedNoDirectPropertyCount": 43,
   "genericNoDirectPropertyCount": 3760,
-  "unknownPropertyCount": 23,
+  "unknownPropertyCount": 22,
   "confirmedMappings": [
     {
       "propertyRecordId": "property:1 THE MANSION COBHAM PARK COBHAM KT11 3LE|KT113LE",
@@ -2658,15 +2658,6 @@
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
-      "propertyRecordId": "property:42 CHERRY TREE LANE GODALMING GU7 3RS|GU73RS",
-      "address": "42, CHERRY TREE LANE, GODALMING, GU7 3RS",
-      "postcode": "GU7 3RS",
-      "listEntryNumbers": [],
-      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
-      "reviewedAt": "2026-08-02",
-      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
-    },
-    {
       "propertyRecordId": "property:5 TORLAND DRIVE OXSHOTT LEATHERHEAD KT22 0SA|KT220SA",
       "address": "5, TORLAND DRIVE, OXSHOTT, LEATHERHEAD, KT22 0SA",
       "postcode": "KT22 0SA",
@@ -2831,6 +2822,18 @@
   ],
   "retiredMappings": [
     {
+      "propertyRecordId": "property:42 CHERRY TREE LANE GODALMING GU7 3RS|GU73RS",
+      "address": "42, CHERRY TREE LANE, GODALMING, GU7 3RS",
+      "postcode": "GU7 3RS",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown.",
+      "status": "unknown",
+      "retiredAt": "2026-08-02",
+      "retirementReason": "Canonical property identity absent from the current £2m+ base feed; evidence retained for audit history."
+    },
+    {
       "propertyRecordId": "property:BERESFORD COURT WESTERHAM ROAD OXTED RH8 0SL|RH80SL",
       "address": "BERESFORD COURT, WESTERHAM ROAD, OXTED, RH8 0SL",
       "postcode": "RH8 0SL",
@@ -2863,10 +2866,10 @@
   "universeReconciliation": {
     "schemaVersion": 1,
     "reconciledAt": "2026-08-02",
-    "previousPropertyCount": 3947,
-    "currentPropertyCount": 3968,
-    "addedPropertyCount": 23,
-    "removedPropertyCount": 2,
+    "previousPropertyCount": 3968,
+    "currentPropertyCount": 3967,
+    "addedPropertyCount": 0,
+    "removedPropertyCount": 1,
     "newIdentityPolicy": "explicit_unknown_pending_review",
     "removedIdentityPolicy": "retained_in_retired_mappings"
   }

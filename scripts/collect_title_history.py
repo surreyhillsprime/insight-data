@@ -125,6 +125,7 @@ def load_seed_history(path, refresh_days, *, allow_local=False):
         source,
         allow_local=allow_local,
         maximum_age_days=refresh_days,
+        allow_unbound_commercial=True,
     )
     return assignment(source.read_text(encoding="utf-8"), "SURREY_SALES_HISTORY")
 
@@ -417,7 +418,7 @@ def main():
             refresh_days=(args.refresh_days if args.refresh_days > 0 else None),
         )
         seed_record = fresh_seed.get(key) if postcode in selected else None
-        if coverage_status != "complete" and seed_record:
+        if seed_record:
             record = dict(seed_record)
             record.update({
                 "propertyRecordId": key,

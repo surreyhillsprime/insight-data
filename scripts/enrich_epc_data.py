@@ -615,6 +615,17 @@ def terminal_cache_accounting(transactions, cache, refresh_days):
     }
 
 
+def terminal_cache_can_reconcile(accounting, transaction_count):
+    """Allow metadata-only alignment when every current row is resolved in cache."""
+
+    return (
+        accounting.get("requested") == transaction_count
+        and accounting.get("resolved") == transaction_count
+        and accounting.get("pending") == 0
+        and accounting.get("errors") == 0
+    )
+
+
 def enrich_transactions(transactions, cache, token, args):
     records = cache.setdefault("records", {})
     candidate_cache = {}
@@ -764,9 +775,11 @@ def main():
         return 0
     if not token:
         print(f"No {args.token_env} found; API lookups will be skipped.")
-        if not args.dry_run:
+        if not args.dry_run and not terminal_cache_can_reconcile(initial_accounting, len(transactions)):
             print("Add the GOV.UK EPC bearer token before running a write sweep.", file=sys.stderr)
             return 2
+        if not args.dry_run:
+            print("Every current transaction is resolved in the cache; reconciling publication metadata without API access.")
 
     enriched, stats, reasons, aborted_reason = enrich_transactions(transactions, cache, token, args)
     matched = sum(1 for item in enriched if numeric(item.get("pricePerSqft")))
