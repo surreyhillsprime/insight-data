@@ -10,6 +10,7 @@ permissions:
 
 concurrency:
   group: insight-data-refresh
+  queue: max
   cancel-in-progress: false
 
 jobs:
@@ -95,5 +96,38 @@ jobs:
             echo "No planning-history or Today changes to commit."
           else
             git commit -m "Update planning history and Today opportunities"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            for attempt in 1 2 3; do
+              git fetch origin "$GITHUB_REF_NAME"
+              if ! git rebase --autostash "origin/$GITHUB_REF_NAME"; then
+                git rebase --abort || true
+                echo "::error::Concurrent publication conflicted with the planning refresh."
+                exit 1
+              fi
+              if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/planning-history.js outputs/today-feed.js; then
+                echo "::error::Planning refresh contains conflicts after rebasing."
+                exit 1
+              fi
+              python3 scripts/validate_planning_feed.py \
+                outputs/planning-history.js \
+                --base-feed outputs/surrey-transactions.js \
+                --minimum-properties-with-history 3204 \
+                --minimum-applications 21180 \
+                --maximum-age-days 8
+              python3 scripts/build_property_records.py \
+                --transactions outputs/surrey-transactions.js \
+                --sales-history outputs/sales-history.js \
+                --planning-history outputs/planning-history.js \
+                --output /tmp/insight-property-records.js
+              python3 scripts/validate_property_records.py \
+                /tmp/insight-property-records.js \
+                --transactions outputs/surrey-transactions.js
+              python3 scripts/validate_today_feed.py outputs/today-feed.js
+              if git push origin "HEAD:$GITHUB_REF_NAME"; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "::error::Planning refresh could not publish after 3 attempts."
+                exit 1
+              fi
+            done
           fi

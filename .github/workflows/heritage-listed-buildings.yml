@@ -11,6 +11,7 @@ permissions:
 
 concurrency:
   group: insight-data-refresh
+  queue: max
   cancel-in-progress: false
 
 jobs:
@@ -27,14 +28,21 @@ jobs:
           git fetch origin "$GITHUB_REF_NAME"
           git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
 
-      - name: Test listed-building data contract
-        run: PYTHONPATH=scripts python3 -m unittest tests.test_listed_buildings
+      - name: Reconcile the reviewed property universe fail-closed
+        run: |
+          python3 scripts/reconcile_heritage_address_audit.py --write
+          python3 scripts/build_heritage_address_ledger.py
 
       - name: Refresh Historic England listed-building evidence
         run: python3 scripts/enrich_listed_buildings.py
 
-      - name: Validate listed-building publication
-        run: python3 scripts/enrich_listed_buildings.py --validate-only
+      - name: Test and validate listed-building publication
+        run: |
+          PYTHONPATH=scripts python3 -m unittest \
+            tests.test_heritage_audit_reconciliation \
+            tests.test_listed_buildings
+          python3 scripts/build_heritage_address_ledger.py --check
+          python3 scripts/enrich_listed_buildings.py --validate-only
 
       - name: Commit updated evidence
         run: |
@@ -50,10 +58,36 @@ jobs:
             exit 1
           fi
           python3 scripts/enrich_listed_buildings.py --validate-only
-          git add outputs/surrey-transactions.js
+          git add \
+            config/heritage-listing-address-audit.json \
+            config/heritage-listing-overrides.json \
+            outputs/surrey-transactions.js
           if git diff --cached --quiet; then
             echo "No semantic Historic England changes to commit."
           else
             git commit -m "Update INSIGHT listed-building evidence"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            for attempt in 1 2 3; do
+              git fetch origin "$GITHUB_REF_NAME"
+              if ! git rebase --autostash "origin/$GITHUB_REF_NAME"; then
+                git rebase --abort || true
+                echo "::error::Concurrent publication conflicted with the heritage refresh."
+                exit 1
+              fi
+              if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/surrey-transactions.js; then
+                echo "::error::Heritage refresh contains conflicts after rebasing."
+                exit 1
+              fi
+              PYTHONPATH=scripts python3 -m unittest \
+                tests.test_heritage_audit_reconciliation \
+                tests.test_listed_buildings
+              python3 scripts/build_heritage_address_ledger.py --check
+              python3 scripts/enrich_listed_buildings.py --validate-only
+              if git push origin "HEAD:$GITHUB_REF_NAME"; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "::error::Heritage refresh could not publish after 3 attempts."
+                exit 1
+              fi
+            done
           fi

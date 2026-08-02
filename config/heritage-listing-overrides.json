@@ -1,7 +1,7 @@
 {
   "$schema": "./heritage-listing-overrides.schema.json",
   "schemaVersion": 1,
-  "updatedAt": "2026-07-28",
+  "updatedAt": "2026-08-02",
   "productionRequired": true,
   "mappings": [
     {
@@ -563,6 +563,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:1 THE BOROUGH BROCKHAM BETCHWORTH RH3 7NB|RH37NB",
+      "address": "1, THE BOROUGH, BROCKHAM, BETCHWORTH, RH3 7NB",
+      "postcode": "RH3 7NB",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:1 THE MANSION COBHAM PARK COBHAM KT11 3LE|KT113LE",
@@ -1616,6 +1626,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:112 SILVERDALE AVENUE WALTON ON THAMES KT12 1EQ|KT121EQ",
+      "address": "112, SILVERDALE AVENUE, WALTON-ON-THAMES, KT12 1EQ",
+      "postcode": "KT12 1EQ",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:116 SILVERDALE AVENUE WALTON ON THAMES KT12 1EQ|KT121EQ",
@@ -5893,6 +5913,16 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
+      "propertyRecordId": "property:20 WATER LANE COBHAM KT11 2PB|KT112PB",
+      "address": "20, WATER LANE, COBHAM, KT11 2PB",
+      "postcode": "KT11 2PB",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:20A NEW ROAD ESHER KT10 9PG|KT109PG",
       "address": "20A, NEW ROAD, ESHER, KT10 9PG",
       "postcode": "KT10 9PG",
@@ -9092,6 +9122,16 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
+      "propertyRecordId": "property:33 RIVER MOUNT WALTON ON THAMES KT12 2PR|KT122PR",
+      "address": "33, RIVER MOUNT, WALTON-ON-THAMES, KT12 2PR",
+      "postcode": "KT12 2PR",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:33 ST MARYS ROAD LONG DITTON SURBITON KT6 5HB|KT65HB",
       "address": "33, ST MARYS ROAD, LONG DITTON, SURBITON, KT6 5HB",
       "postcode": "KT6 5HB",
@@ -10445,6 +10485,16 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
+      "propertyRecordId": "property:42 CHERRY TREE LANE GODALMING GU7 3RS|GU73RS",
+      "address": "42, CHERRY TREE LANE, GODALMING, GU7 3RS",
+      "postcode": "GU7 3RS",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:42 CRANLEY ROAD HERSHAM WALTON ON THAMES KT12 5BL|KT125BL",
       "address": "42, CRANLEY ROAD, HERSHAM, WALTON-ON-THAMES, KT12 5BL",
       "postcode": "KT12 5BL",
@@ -11511,6 +11561,16 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
+      "propertyRecordId": "property:5 TORLAND DRIVE OXSHOTT LEATHERHEAD KT22 0SA|KT220SA",
+      "address": "5, TORLAND DRIVE, OXSHOTT, LEATHERHEAD, KT22 0SA",
+      "postcode": "KT22 0SA",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:5 VIRGINIA AVENUE VIRGINIA WATER GU25 4RY|GU254RY",
       "address": "5, VIRGINIA AVENUE, VIRGINIA WATER, GU25 4RY",
       "postcode": "GU25 4RY",
@@ -12042,6 +12102,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:6 ASHBURNHAM PARK ESHER KT10 9TW|KT109TW",
+      "address": "6, ASHBURNHAM PARK, ESHER, KT10 9TW",
+      "postcode": "KT10 9TW",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:6 BADGERS HILL VIRGINIA WATER GU25 4SB|GU254SB",
@@ -13107,6 +13177,16 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
+      "propertyRecordId": "property:7 FORT ROAD GUILDFORD GU1 3TB|GU13TB",
+      "address": "7, FORT ROAD, GUILDFORD, GU1 3TB",
+      "postcode": "GU1 3TB",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:7 FOX WOOD WALTON ON THAMES KT12 4BS|KT124BS",
       "address": "7, FOX WOOD, WALTON-ON-THAMES, KT12 4BS",
       "postcode": "KT12 4BS",
@@ -13608,6 +13688,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:77 MASSETTS ROAD HORLEY RH6 7EB|RH67EB",
+      "address": "77, MASSETTS ROAD, HORLEY, RH6 7EB",
+      "postcode": "RH6 7EB",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:79 FAIRMILE LANE COBHAM KT11 2DG|KT112DG",
@@ -16428,6 +16518,16 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
+      "propertyRecordId": "property:BEAUMONT LODGE EAST ROAD WEYBRIDGE KT13 0LE|KT130LE",
+      "address": "BEAUMONT LODGE, EAST ROAD, WEYBRIDGE, KT13 0LE",
+      "postcode": "KT13 0LE",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:BEDDINGTON HOUSE EGMONT PARK ROAD WALTON ON THE HILL TADWORTH KT20 7QG|KT207QG",
       "address": "BEDDINGTON HOUSE, EGMONT PARK ROAD, WALTON ON THE HILL, TADWORTH, KT20 7QG",
       "postcode": "KT20 7QG",
@@ -16686,19 +16786,6 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
-    },
-    {
-      "propertyRecordId": "property:BERESFORD COURT WESTERHAM ROAD OXTED RH8 0SL|RH80SL",
-      "address": "BERESFORD COURT, WESTERHAM ROAD, OXTED, RH8 0SL",
-      "postcode": "RH8 0SL",
-      "status": "confirmed_listed",
-      "listEntryNumbers": [
-        "1029786"
-      ],
-      "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
-      "reviewedAt": "2026-07-28",
-      "note": "Canonical statutory address exact.",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029786"
     },
     {
       "propertyRecordId": "property:BERESFORD HOUSE 9 WATER LANE COBHAM KT11 2PA|KT112PA",
@@ -19949,6 +20036,16 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
+      "propertyRecordId": "property:CONNISTON PARK VIEW ROAD WOLDINGHAM CATERHAM CR3 7DJ|CR37DJ",
+      "address": "CONNISTON, PARK VIEW ROAD, WOLDINGHAM, CATERHAM, CR3 7DJ",
+      "postcode": "CR3 7DJ",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:CONSTANTIA SOUTH ROAD ST GEORGES HILL WEYBRIDGE KT13 0NA|KT130NA",
       "address": "CONSTANTIA, SOUTH ROAD, ST GEORGES HILL, WEYBRIDGE, KT13 0NA",
       "postcode": "KT13 0NA",
@@ -20952,6 +21049,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:DITTON HOUSE WESTON GREEN ROAD THAMES DITTON KT7 0HY|KT70HY",
+      "address": "DITTON HOUSE, WESTON GREEN ROAD, THAMES DITTON, KT7 0HY",
+      "postcode": "KT7 0HY",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:DOLPHINS BRACKEN CLOSE WONERSH GUILDFORD GU5 0QS|GU50QS",
@@ -24361,6 +24468,16 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
+      "propertyRecordId": "property:HAVANA HOUSE 2 CRANLEY ROAD HERSHAM WALTON ON THAMES KT12 5BP|KT125BP",
+      "address": "HAVANA HOUSE, 2, CRANLEY ROAD, HERSHAM, WALTON-ON-THAMES, KT12 5BP",
+      "postcode": "KT12 5BP",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:HAVERSTOCK HOUSE 1 KEEPERS WALK VIRGINIA WATER GU25 4RU|GU254RU",
       "address": "HAVERSTOCK HOUSE, 1, KEEPERS WALK, VIRGINIA WATER, GU25 4RU",
       "postcode": "GU25 4RU",
@@ -27405,6 +27522,16 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
+      "propertyRecordId": "property:LANGHAM PARK VIEW ROAD WOLDINGHAM CATERHAM CR3 7DJ|CR37DJ",
+      "address": "LANGHAM, PARK VIEW ROAD, WOLDINGHAM, CATERHAM, CR3 7DJ",
+      "postcode": "CR3 7DJ",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:LANGLEY HOUSE CHURCH LANE OXTED RH8 9LH|RH89LH",
       "address": "LANGLEY HOUSE, CHURCH LANE, OXTED, RH8 9LH",
       "postcode": "RH8 9LH",
@@ -28063,6 +28190,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:LITTLE OAKS CHALK LANE ASHTEAD KT21 1DJ|KT211DJ",
+      "address": "LITTLE OAKS, CHALK LANE, ASHTEAD, KT21 1DJ",
+      "postcode": "KT21 1DJ",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:LITTLE OAKS WOODLAND WAY KINGSWOOD TADWORTH KT20 6NX|KT206NX",
@@ -28768,6 +28905,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:MANOR COTTAGE ALDERBROOK ROAD SMITHWOOD COMMON CRANLEIGH GU6 8QX|GU68QX",
+      "address": "MANOR COTTAGE, ALDERBROOK ROAD, SMITHWOOD COMMON, CRANLEIGH, GU6 8QX",
+      "postcode": "GU6 8QX",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:MANOR COTTAGE MANOR LANE SHAMLEY GREEN GUILDFORD GU5 0FD|GU50FD",
@@ -30234,6 +30381,16 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
+      "propertyRecordId": "property:NORTH DOWNS HOUSE THE RIDGE WOLDINGHAM CATERHAM CR3 7AH|CR37AH",
+      "address": "NORTH DOWNS HOUSE, THE RIDGE, WOLDINGHAM, CATERHAM, CR3 7AH",
+      "postcode": "CR3 7AH",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:NORTH DRIVE LODGE NORTH DRIVE VIRGINIA WATER VIRGINIA WATER GU25 4NL|GU254NL",
       "address": "NORTH DRIVE LODGE, NORTH DRIVE, VIRGINIA WATER, VIRGINIA WATER, GU25 4NL",
       "postcode": "GU25 4NL",
@@ -30535,6 +30692,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:OAKMONT LONGCROSS ROAD LONGCROSS CHERTSEY KT16 0AH|KT160AH",
+      "address": "OAKMONT, LONGCROSS ROAD, LONGCROSS, CHERTSEY, KT16 0AH",
+      "postcode": "KT16 0AH",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:OAKRIDGE 3 ABBOTSWOOD DRIVE WEYBRIDGE KT13 0LT|KT130LT",
@@ -34572,16 +34739,6 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
-      "propertyRecordId": "property:ST AUSTINS HAMMONDSWOOD ROAD FRENSHAM FARNHAM GU10 3EH|GU103EH",
-      "address": "ST AUSTINS, HAMMONDSWOOD ROAD, FRENSHAM, FARNHAM, GU10 3EH",
-      "postcode": "GU10 3EH",
-      "status": "no_direct_match",
-      "listEntryNumbers": [],
-      "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
-      "reviewedAt": "2026-07-28",
-      "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
-    },
-    {
       "propertyRecordId": "property:ST ELMO BURGH HEATH ROAD EPSOM KT17 4LS|KT174LS",
       "address": "ST ELMO, BURGH HEATH ROAD, EPSOM, KT17 4LS",
       "postcode": "KT17 4LS",
@@ -34749,6 +34906,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:STILL WATERS PINE WALK EAST HORSLEY LEATHERHEAD KT24 5AG|KT245AG",
+      "address": "STILL WATERS, PINE WALK, EAST HORSLEY, LEATHERHEAD, KT24 5AG",
+      "postcode": "KT24 5AG",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:STOKE HOUSE STOKESHEATH ROAD OXSHOTT LEATHERHEAD KT22 0PS|KT220PS",
@@ -35045,6 +35212,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:SUNRAY FARM WEST HILL ELSTEAD GODALMING GU8 6DQ|GU86DQ",
+      "address": "SUNRAY FARM, WEST HILL, ELSTEAD, GODALMING, GU8 6DQ",
+      "postcode": "GU8 6DQ",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:SUNRIDGE GRUB STREET OXTED RH8 0SH|RH80SH",
@@ -36587,6 +36764,16 @@
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
     },
     {
+      "propertyRecordId": "property:THE SHACK 15 CROSSWAY WALTON ON THAMES KT12 3JA|KT123JA",
+      "address": "THE SHACK, 15, CROSSWAY, WALTON-ON-THAMES, KT12 3JA",
+      "postcode": "KT12 3JA",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:THE SHIELING 8 EATON PARK ROAD COBHAM KT11 2JH|KT112JH",
       "address": "THE SHIELING, 8, EATON PARK ROAD, COBHAM, KT11 2JH",
       "postcode": "KT11 2JH",
@@ -37277,6 +37464,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:TUSCAN HOUSE EAST ROAD WEYBRIDGE KT13 0LF|KT130LF",
+      "address": "TUSCAN HOUSE, EAST ROAD, WEYBRIDGE, KT13 0LF",
+      "postcode": "KT13 0LF",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:TUSCAN HOUSE EAST ROAD WEYBRIDGE WEYBRIDGE KT13 0LF|KT130LF",
@@ -39326,6 +39523,16 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:WOODHAY WHITE LANE GUILDFORD GU4 8PU|GU48PU",
+      "address": "WOODHAY, WHITE LANE, GUILDFORD, GU4 8PU",
+      "postcode": "GU4 8PU",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:WOODHAYES 5 ASHLEY DRIVE WALTON ON THAMES KT12 1JL|KT121JL",

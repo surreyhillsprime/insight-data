@@ -154,13 +154,15 @@ def normalise_cached_constraint_result(cached):
     return data
 
 
-def constraints_for_item(item, lat, lon, cache, args):
+def constraints_for_item(item, lat, lon, cache, args, *, run_state=None):
     key = constraints_cache_key(item)
     store = cache.setdefault("planningConstraints", {})
     cached = store.get(key)
     if cache_fresh(cached, args.refresh_days * 24 * 60 * 60):
         normalised = normalise_cached_constraint_result(cached)
         if normalised is not None:
+            if isinstance(run_state, dict):
+                run_state["cacheLoaded"] = True
             return normalised
     params = {
         "latitude": f"{lat:.7f}",
@@ -175,6 +177,8 @@ def constraints_for_item(item, lat, lon, cache, args):
         retries=args.retries,
         user_agent="INSIGHT weekly planning constraints",
     )
+    if isinstance(run_state, dict):
+        run_state["sourceLoaded"] = True
     by_dataset = {}
     for entity in entity_list(payload):
         dataset = clean(entity.get("dataset"))
@@ -239,17 +243,21 @@ def try_transformer():
     return Transformer.from_crs("EPSG:27700", "EPSG:4326", always_xy=True)
 
 
-def school_rows(cache, args):
+def school_rows(cache, args, *, run_state=None):
     source = os.environ.get("SCHOOLS_CSV_URL", "").strip()
     local = str(DEFAULT_SCHOOLS_CACHE)
     text = ""
     if source:
         text = read_schools_csv(source, args)
         if text:
+            if isinstance(run_state, dict):
+                run_state["remoteLoaded"] = True
             DEFAULT_SCHOOLS_CACHE.parent.mkdir(parents=True, exist_ok=True)
             DEFAULT_SCHOOLS_CACHE.write_text(text, encoding="utf-8")
     if not text:
         text = read_schools_csv(local, args)
+        if text and isinstance(run_state, dict):
+            run_state["localLoaded"] = True
     if not text:
         return []
 
@@ -337,7 +345,16 @@ def enrich_transactions(transactions, cache, args):
     enriched = []
     stats = Counter()
     disabled = set()
-    schools = [] if args.disable_schools else school_rows(cache, args)
+    school_load_state = {}
+    schools = (
+        []
+        if args.disable_schools
+        else school_rows(cache, args, run_state=school_load_state)
+    )
+    if school_load_state.get("remoteLoaded"):
+        stats["schoolRemoteSourceLoads"] = 1
+    if school_load_state.get("localLoaded"):
+        stats["schoolLocalSourceLoads"] = 1
     if schools:
         print(f"Loaded {len(schools)} school rows.")
     elif not args.disable_schools:
@@ -346,14 +363,26 @@ def enrich_transactions(transactions, cache, args):
 
     for index, item in enumerate(transactions, start=1):
         output = dict(item)
+        missing_only = getattr(args, "missing_only", False)
+        needs_constraints = (
+            not missing_only or not planning_constraint_lookup_succeeded(item)
+        )
+        needs_schools = (
+            not missing_only or not isinstance(item.get("ofsted"), dict)
+        )
+        needs_coordinates = needs_constraints or needs_schools
+        did_lookup = False
         if limit and index > limit:
             enriched.append(output)
             continue
-        if "geocode" in disabled:
+        if not needs_coordinates:
+            lat, lon = coordinates_from_item(output)
+        elif "geocode" in disabled:
             lat, lon = coordinates_from_item(output)
         else:
             try:
                 lat, lon, coord_data = ensure_coordinates(item, cache, args)
+                did_lookup = True
                 if coord_data:
                     output.update(coord_data)
                     stats["postcodes"] += 1
@@ -364,13 +393,32 @@ def enrich_transactions(transactions, cache, args):
                     disabled.add("geocode")
                 lat, lon = None, None
 
-        if lat is not None and lon is not None and "planningConstraints" not in disabled and not args.disable_planning_constraints:
+        if (
+            needs_constraints
+            and lat is not None
+            and lon is not None
+            and "planningConstraints" not in disabled
+            and not args.disable_planning_constraints
+        ):
             try:
-                constraints = constraints_for_item(item, lat, lon, cache, args)
+                constraint_run_state = {}
+                constraints = constraints_for_item(
+                    item,
+                    lat,
+                    lon,
+                    cache,
+                    args,
+                    run_state=constraint_run_state,
+                )
+                did_lookup = True
                 if constraints:
                     output.update(constraints)
                     if planning_constraint_lookup_succeeded(constraints):
                         stats["planningConstraintResponses"] += 1
+                        if constraint_run_state.get("sourceLoaded"):
+                            stats["planningConstraintSourceResponses"] += 1
+                        if constraint_run_state.get("cacheLoaded"):
+                            stats["planningConstraintCacheResponses"] += 1
                     if planning_constraint_has_positive_result(constraints):
                         stats["planningConstraints"] += 1
             except Exception as exc:
@@ -379,19 +427,101 @@ def enrich_transactions(transactions, cache, args):
                 if args.max_source_errors and stats["planningConstraintErrors"] >= args.max_source_errors:
                     disabled.add("planningConstraints")
 
-        if lat is not None and lon is not None and schools and not args.disable_schools:
+        if (
+            needs_schools
+            and lat is not None
+            and lon is not None
+            and schools
+            and not args.disable_schools
+        ):
             school_data = schools_for_item(lat, lon, schools, args)
             if school_data:
                 output.update(school_data)
                 stats["schools"] += 1
 
         enriched.append(output)
-        if args.pause:
+        if args.pause and did_lookup:
             time.sleep(args.pause)
         if index % args.progress_every == 0:
             print(f"Processed {index}/{len(transactions)} properties; weekly fields so far: {dict(stats)}", flush=True)
 
     return enriched, stats, bool(schools)
+
+
+def weekly_context_metadata(
+    previous,
+    enriched,
+    stats,
+    *,
+    missing_only,
+    schools_loaded,
+    aligned_at,
+):
+    """Describe a full refresh or gap-fill without overstating source currency."""
+
+    previous = previous if isinstance(previous, dict) else {}
+    planning_coverage = planning_constraint_coverage_counts(enriched)
+    planning_aligned = int(stats.get("planningConstraintResponses", 0))
+    school_records = sum(1 for item in enriched if item.get("ofsted"))
+    school_aligned = int(stats.get("schools", 0))
+
+    if missing_only:
+        full_refresh_at = clean(
+            previous.get("fullRefreshAt") or previous.get("updatedAt")
+        )
+        alignment_mode = "missing-only-gap-fill"
+    else:
+        full_refresh_at = aligned_at
+        alignment_mode = "full-refresh"
+
+    metadata = {
+        "alignmentMode": alignment_mode,
+        "alignedAt": aligned_at,
+        "planningConstraints": {
+            "source": "Planning Data API",
+            "records": planning_coverage["successfulResponses"],
+            **planning_coverage,
+            "coverageMode": "explicit-per-row-success",
+            "loaded": planning_coverage["successfulResponses"] > 0,
+            "sourceLoadedThisRun": (
+                stats.get("planningConstraintSourceResponses", 0) > 0
+            ),
+            "sourceRefreshedThisRun": (
+                stats.get("planningConstraintSourceResponses", 0) > 0
+            ),
+            "cacheLoadedThisRun": (
+                stats.get("planningConstraintCacheResponses", 0) > 0
+            ),
+            "recordsAlignedThisRun": planning_aligned,
+            "recordsRetained": max(
+                0,
+                planning_coverage["successfulResponses"] - planning_aligned,
+            ),
+        },
+        "schools": {
+            "source": "DfE / Ofsted school data",
+            "records": school_records,
+            # Preserve the established publication-coverage meaning of loaded,
+            # while the explicit per-run fields below disclose source access.
+            "loaded": schools_loaded or school_records > 0,
+            "sourceLoadedThisRun": bool(
+                stats.get("schoolRemoteSourceLoads", 0)
+                or stats.get("schoolLocalSourceLoads", 0)
+            ),
+            "sourceRefreshedThisRun": (
+                stats.get("schoolRemoteSourceLoads", 0) > 0
+            ),
+            "cacheLoadedThisRun": (
+                stats.get("schoolLocalSourceLoads", 0) > 0
+            ),
+            "recordsAlignedThisRun": school_aligned,
+            "recordsRetained": max(0, school_records - school_aligned),
+        },
+    }
+    if full_refresh_at:
+        metadata["updatedAt"] = full_refresh_at
+        metadata["fullRefreshAt"] = full_refresh_at
+    return metadata
 
 
 def parse_args():
@@ -409,6 +539,11 @@ def parse_args():
     parser.add_argument("--geocode-refresh-days", type=int, default=365, help="Postcode coordinate cache lifetime.")
     parser.add_argument("--school-radius-m", type=int, default=4000, help="Nearby school radius.")
     parser.add_argument("--max-schools-per-property", type=int, default=5, help="Store this many nearby schools.")
+    parser.add_argument(
+        "--missing-only",
+        action="store_true",
+        help="Retain complete row context and enrich only missing producer fields.",
+    )
     parser.add_argument("--disable-planning-constraints", action="store_true", help="Skip Planning Data constraints.")
     parser.add_argument("--disable-schools", action="store_true", help="Skip school enrichment.")
     parser.add_argument("--dry-run", action="store_true", help="Do not write outputs.")
@@ -426,21 +561,15 @@ def main():
     if args.dry_run:
         return 0
 
-    planning_constraint_coverage = planning_constraint_coverage_counts(enriched)
-    meta["weeklyContext"] = {
-        "updatedAt": utc_now(),
-        "planningConstraints": {
-            "source": "Planning Data API",
-            "records": planning_constraint_coverage["successfulResponses"],
-            **planning_constraint_coverage,
-            "coverageMode": "explicit-per-row-success",
-        },
-        "schools": {
-            "source": "DfE / Ofsted school data",
-            "records": sum(1 for item in enriched if item.get("ofsted")),
-            "loaded": schools_loaded or any(item.get("ofsted") for item in enriched),
-        },
-    }
+    aligned_at = utc_now()
+    meta["weeklyContext"] = weekly_context_metadata(
+        meta.get("weeklyContext"),
+        enriched,
+        stats,
+        missing_only=args.missing_only,
+        schools_loaded=schools_loaded,
+        aligned_at=aligned_at,
+    )
     write_cache(args.cache, cache, CACHE_VERSION)
     write_js(args.write_js, enriched, meta)
     print(f"Updated {args.write_js}")

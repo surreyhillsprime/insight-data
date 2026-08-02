@@ -338,12 +338,13 @@ def validate(
             )
 
     if base_feed:
+        base_rows = read_base_feed(base_feed)
         (
             expected_properties,
             expected_transactions,
             transaction_properties,
             expected_fingerprint,
-        ) = base_feed_identity(read_base_feed(base_feed))
+        ) = base_feed_identity(base_rows)
         if set(canonical) != expected_properties:
             raise ValueError(
                 "Sales-history canonical property coverage is stale or outside the base feed"
@@ -357,6 +358,34 @@ def validate(
                 if aliases[transaction_id].get("propertyRecordId") != property_id:
                     raise ValueError(
                         "Sales-history transaction alias points at a different base property"
+                    )
+            published_signatures = {
+                property_id: {
+                    (
+                        str(sale.get("date") or "")[:10],
+                        int(float(sale.get("price", 0))),
+                    )
+                    for sale in record.get("transactions", [])
+                }
+                for property_id, record in canonical.items()
+                if record.get("coverageStatus") == "complete"
+            }
+            for row in base_rows:
+                property_id = str(row.get("propertyRecordId") or "")
+                date = str(row.get("date") or "")[:10]
+                try:
+                    price = int(float(row.get("price", 0)))
+                except (TypeError, ValueError):
+                    price = 0
+                if (
+                    date
+                    and price > 0
+                    and property_id in published_signatures
+                    and (date, price) not in published_signatures[property_id]
+                ):
+                    raise ValueError(
+                        "Complete sales-history record omits a sale proven by the "
+                        f"canonical base feed: {property_id}"
                     )
             if metadata["baseFeedFingerprint"] != expected_fingerprint:
                 raise ValueError(

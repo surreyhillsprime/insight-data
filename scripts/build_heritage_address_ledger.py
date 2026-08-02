@@ -141,8 +141,8 @@ def build_payload(transactions, audit):
             "postcode": postcode,
             "status": decision["status"],
             "listEntryNumbers": decision["listEntryNumbers"],
-            "reviewedBy": audit["reviewedBy"],
-            "reviewedAt": audit["reviewedAt"],
+            "reviewedBy": clean(decision.get("reviewedBy")) or audit["reviewedBy"],
+            "reviewedAt": clean(decision.get("reviewedAt")) or audit["reviewedAt"],
             "note": note,
         }
         if decision["status"] == "confirmed_listed":
@@ -158,7 +158,9 @@ def build_payload(transactions, audit):
     return {
         "$schema": "./heritage-listing-overrides.schema.json",
         "schemaVersion": 1,
-        "updatedAt": audit["reviewedAt"],
+        "updatedAt": clean(
+            (audit.get("universeReconciliation") or {}).get("reconciledAt")
+        ) or audit["reviewedAt"],
         "productionRequired": True,
         "mappings": mappings,
     }

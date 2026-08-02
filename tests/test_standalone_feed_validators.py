@@ -227,8 +227,8 @@ class StandaloneFeedValidatorTests(unittest.TestCase):
         self.assertIn("secrets.PLANNING_DATA_SOURCE", workflow)
         self.assertIn("vars.PLANNING_SOURCE_NAME", workflow)
         self.assertIn("vars.PLANNING_SOURCE_LICENCE_URL", workflow)
-        self.assertEqual(workflow.count("--minimum-applications 21180"), 2)
-        self.assertEqual(workflow.count("--base-feed outputs/surrey-transactions.js"), 2)
+        self.assertEqual(workflow.count("--minimum-applications 21180"), 3)
+        self.assertEqual(workflow.count("--base-feed outputs/surrey-transactions.js"), 3)
         completeness = (
             ROOT / ".github" / "workflows" / "data-completeness.yml"
         ).read_text(encoding="utf-8")

@@ -10,6 +10,7 @@ permissions:
 
 concurrency:
   group: insight-data-refresh
+  queue: max
   cancel-in-progress: false
 
 jobs:
@@ -25,13 +26,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Check estate-aware base feed
-        run: python3 scripts/check_data_completeness.py --strict-metadata
+      - name: Check producer prerequisites
+        run: python3 scripts/check_data_completeness.py --base-only
       - name: Restore resumable postcode cache
         uses: actions/cache/restore@v4
         with:
           path: work/title-history-cache.json
-          key: title-history-${{ github.run_id }}
+          key: title-history-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: title-history-
       - name: Build complete Price Paid history feed
         run: >-
@@ -39,6 +40,7 @@ jobs:
           --input outputs/surrey-transactions.js
           --output outputs/sales-history.js
           --cache work/title-history-cache.json
+          --seed-feed outputs/sales-history.js
           --deployment-mode commercial
           --refresh-days 28
           --workers 3
@@ -57,7 +59,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: work/title-history-cache.json
-          key: title-history-${{ github.run_id }}
+          key: title-history-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Commit changed feed
         run: |
           git config user.name "insight-data-bot"
@@ -95,5 +97,39 @@ jobs:
             echo "No sales-history or Today changes to commit."
           else
             git commit -m "Update complete sales history and Today opportunities"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            for attempt in 1 2 3; do
+              git fetch origin "$GITHUB_REF_NAME"
+              if ! git rebase --autostash "origin/$GITHUB_REF_NAME"; then
+                git rebase --abort || true
+                echo "::error::Concurrent publication conflicted with the sales-history refresh."
+                exit 1
+              fi
+              if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/sales-history.js outputs/today-feed.js; then
+                echo "::error::Sales-history refresh contains conflicts after rebasing."
+                exit 1
+              fi
+              python3 scripts/validate_sales_history_feed.py \
+                outputs/sales-history.js \
+                --base-feed outputs/surrey-transactions.js \
+                --minimum-properties-with-history 3942 \
+                --minimum-transactions 6735 \
+                --maximum-properties-unavailable 4 \
+                --maximum-age-days 45
+              python3 scripts/build_property_records.py \
+                --transactions outputs/surrey-transactions.js \
+                --sales-history outputs/sales-history.js \
+                --planning-history outputs/planning-history.js \
+                --output /tmp/insight-property-records.js
+              python3 scripts/validate_property_records.py \
+                /tmp/insight-property-records.js \
+                --transactions outputs/surrey-transactions.js
+              python3 scripts/validate_today_feed.py outputs/today-feed.js
+              if git push origin "HEAD:$GITHUB_REF_NAME"; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "::error::Sales-history refresh could not publish after 3 attempts."
+                exit 1
+              fi
+            done
           fi

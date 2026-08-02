@@ -26,24 +26,39 @@
     "Use official NHLE geometry to refine map location only after property identity is confirmed.",
     "No direct NHLE match is not legal proof that a property is unlisted or outside listed-building curtilage."
   ],
-  "canonicalPropertyCount": 3947,
-  "canonicalPropertyDigest": "55d16ab7967c4859790492bea57da79542729678f038cb3e0b8790a875cd187d",
+  "canonicalPropertyCount": 3968,
+  "canonicalPropertyDigest": "0247782109a347539b0c03b4decaf4d6f8e665f15e3fe7eed63c79899fb41090",
   "officialAddressRecordsScreened": 6624,
   "officialUniqueListEntriesScreened": 6624,
   "candidatePropertyCount": 1415,
   "candidatePairCount": 5218,
-  "confirmedPropertyCount": 143,
-  "confirmedUniqueListEntryCount": 140,
+  "confirmedPropertyCount": 142,
+  "confirmedUniqueListEntryCount": 139,
   "confirmedGradeCounts": {
     "I": 3,
-    "II": 132,
+    "II": 131,
     "II*": 8
   },
-  "confirmedPairDigest": "dbbb9cddaf70663727f95e23e9522a31ee2eb20fbde3f746a213ccc05d3a6f0a",
+  "confirmedPairDigest": "6bea6c9e05ef87979fcb72dd157673d6609630ad2f0aed231960d3fb6ef4132e",
   "documentedNoDirectPropertyCount": 43,
-  "genericNoDirectPropertyCount": 3761,
-  "unknownPropertyCount": 0,
+  "genericNoDirectPropertyCount": 3760,
+  "unknownPropertyCount": 23,
   "confirmedMappings": [
+    {
+      "propertyRecordId": "property:1 THE MANSION COBHAM PARK COBHAM KT11 3LE|KT113LE",
+      "address": "1, THE MANSION, COBHAM PARK, COBHAM, KT11 3LE",
+      "postcode": "KT11 3LE",
+      "listEntryNumbers": [
+        "1030211"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1030211",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1030211",
+        "https://emaps.elmbridge.gov.uk/ebc_planning.aspx?requesttype=parsetemplate&template=PlanningDetailsTab.tmplt&basepage=ebc_planning.aspx&Filter=^APPLICATION_NUMBER^='2017/0498'"
+      ],
+      "note": "The transacted unit is within the divided Cobham Park mansion. Historic England identifies the designated mansion and Elmbridge records direct listed-building consent at No. 1."
+    },
     {
       "propertyRecordId": "property:14 WARWICKS BENCH GUILDFORD GU1 3TG|GU13TG",
       "address": "14, WARWICKS BENCH, GUILDFORD, GU1 3TG",
@@ -129,6 +144,21 @@
       "note": "Canonical statutory address exact."
     },
     {
+      "propertyRecordId": "property:21 QUEEN STREET GOMSHALL GUILDFORD GU5 9LU|GU59LU",
+      "address": "21, QUEEN STREET, GOMSHALL, GUILDFORD, GU5 9LU",
+      "postcode": "GU5 9LU",
+      "listEntryNumbers": [
+        "1377792"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377792",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377792",
+        "https://publicaccess.guildford.gov.uk/online-applications/applicationDetails.do?keyVal=_GUILD_DCAPR_205208&activeTab=summary"
+      ],
+      "note": "Repeated direct listed-building consents at 21 Queen Street establish the current address identity of the building designated as Monk's House."
+    },
+    {
       "propertyRecordId": "property:3 CASTLE HILL GUILDFORD GU1 3SX|GU13SX",
       "address": "3, CASTLE HILL, GUILDFORD, GU1 3SX",
       "postcode": "GU1 3SX",
@@ -143,6 +173,21 @@
       "note": "Canonical statutory address exact."
     },
     {
+      "propertyRecordId": "property:39 PEWLEY HILL GUILDFORD GU1 3SN|GU13SN",
+      "address": "39, PEWLEY HILL, GUILDFORD, GU1 3SN",
+      "postcode": "GU1 3SN",
+      "listEntryNumbers": [
+        "1377890"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377890",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377890",
+        "https://publicaccess.guildford.gov.uk/online-applications/applicationDetails.do?keyVal=_GUILD_DCAPR_193041&activeTab=summary"
+      ],
+      "note": "Guildford's direct listed-building-consent history at 39 Pewley Hill establishes the current numbered identity of Semaphore House."
+    },
+    {
       "propertyRecordId": "property:45 WAVERLEY LANE FARNHAM GU9 8BH|GU98BH",
       "address": "45, WAVERLEY LANE, FARNHAM, GU9 8BH",
       "postcode": "GU9 8BH",
@@ -155,6 +200,21 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1258086"
       ],
       "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:49 BELL ROAD EAST MOLESEY KT8 0SS|KT80SS",
+      "address": "49, BELL ROAD, EAST MOLESEY, KT8 0SS",
+      "postcode": "KT8 0SS",
+      "listEntryNumbers": [
+        "1377445"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377445",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377445",
+        "https://emaps.elmbridge.gov.uk/ebc_planning.aspx?requesttype=parsetemplate&template=PlanningDetailsTab.tmplt&basepage=ebc_planning.aspx&Filter=^APPLICATION_NUMBER^='2025/1204'"
+      ],
+      "note": "Historic England records the divided Manor House and Quillets Royal; Elmbridge's exact-address records identify No. 49 as the Old Manor House unit."
     },
     {
       "propertyRecordId": "property:55 QUARRY STREET GUILDFORD GU1 3UA|GU13UA",
@@ -280,20 +340,6 @@
       "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1044401",
       "evidenceUrls": [
         "https://historicengland.org.uk/listing/the-list/list-entry/1044401"
-      ],
-      "note": "Canonical statutory address exact."
-    },
-    {
-      "propertyRecordId": "property:BERESFORD COURT WESTERHAM ROAD OXTED RH8 0SL|RH80SL",
-      "address": "BERESFORD COURT, WESTERHAM ROAD, OXTED, RH8 0SL",
-      "postcode": "RH8 0SL",
-      "listEntryNumbers": [
-        "1029786"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029786",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1029786"
       ],
       "note": "Canonical statutory address exact."
     },
@@ -438,6 +484,21 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1277974"
       ],
       "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:CHINTHURST COURT CHINTHURST LANE BRAMLEY GUILDFORD GU5 0DR|GU50DR",
+      "address": "CHINTHURST COURT, CHINTHURST LANE, BRAMLEY, GUILDFORD, GU5 0DR",
+      "postcode": "GU5 0DR",
+      "listEntryNumbers": [
+        "1029491"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029491",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029491",
+        "https://publicaccess.guildford.gov.uk/online-applications/files/BF60608AC89AFEDD52D7D6B3943E3083/pdf/14_P_02399-HERITAGE_STATEMENT-755658.pdf"
+      ],
+      "note": "The official planning heritage statement says Chinthurst Court comprises the Grade II-listed C17 building previously known as Chinthurst Farm Cottage and reproduces NHLE 1029491."
     },
     {
       "propertyRecordId": "property:CHINTHURST FARMHOUSE CHINTHURST LANE BRAMLEY GUILDFORD GU5 0DR|GU50DR",
@@ -592,6 +653,21 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1029645"
       ],
       "note": "Canonical statutory address exact."
+    },
+    {
+      "propertyRecordId": "property:EAST HOUSE HAWKSHILL PLACE ESHER KT10 9HY|KT109HY",
+      "address": "EAST HOUSE, HAWKSHILL PLACE, ESHER, KT10 9HY",
+      "postcode": "KT10 9HY",
+      "listEntryNumbers": [
+        "1392723"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1392723",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1392723",
+        "https://emaps.elmbridge.gov.uk/ebc_planning.aspx?requesttype=parsetemplate&template=PlanningDetailsTab.tmplt&basepage=ebc_planning.aspx&Filter=^APPLICATION_NUMBER^='2025/1983'"
+      ],
+      "note": "Historic England explicitly records Hawkshill Place as divided into The Towers, Middle House and East House; Elmbridge records the exact East House address."
     },
     {
       "propertyRecordId": "property:EASTWATER HOUSE SNOWDENHAM LANE BRAMLEY GUILDFORD GU5 0DB|GU50DB",
@@ -832,6 +908,20 @@
       "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
     },
     {
+      "propertyRecordId": "property:HAZEL HALL POND LANE PEASLAKE GUILDFORD GU5 9RS|GU59RS",
+      "address": "HAZEL HALL, POND LANE, PEASLAKE, GUILDFORD, GU5 9RS",
+      "postcode": "GU5 9RS",
+      "listEntryNumbers": [
+        "1029480"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029480",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029480"
+      ],
+      "note": "Historic England's official entry for Hazel Hill including former stables records the former listing identity as Hazel Hall with stables."
+    },
+    {
       "propertyRecordId": "property:HAZELHURST BUNCH LANE HASLEMERE GU27 1AJ|GU271AJ",
       "address": "HAZELHURST, BUNCH LANE, HASLEMERE, GU27 1AJ",
       "postcode": "GU27 1AJ",
@@ -846,6 +936,21 @@
       "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
     },
     {
+      "propertyRecordId": "property:HAZELHURST FARM TITHEBARNS LANE SEND WOKING GU23 7LE|GU237LE",
+      "address": "HAZELHURST FARM, TITHEBARNS LANE, SEND, WOKING, GU23 7LE",
+      "postcode": "GU23 7LE",
+      "listEntryNumbers": [
+        "1188919"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1188919",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1188919",
+        "https://publicaccess.guildford.gov.uk/online-applications/applicationDetails.do?keyVal=_GUILD_DCAPR_163741&activeTab=summary"
+      ],
+      "note": "Repeated direct listed-building consents and official application geometry at Hazelhurst Farm identify the residence designated as Hazelhurst Cottage."
+    },
+    {
       "propertyRecordId": "property:HIGH CANFOLD FARM BARHATCH LANE CRANLEIGH CRANLEIGH GU6 7NH|GU67NH",
       "address": "HIGH CANFOLD FARM, BARHATCH LANE, CRANLEIGH, CRANLEIGH, GU6 7NH",
       "postcode": "GU6 7NH",
@@ -858,6 +963,21 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1189596"
       ],
       "note": "Official NHLE address and current authority documents confirm the present property name or road-name alias."
+    },
+    {
+      "propertyRecordId": "property:HIGHBURY BARN PURSERS LANE PEASLAKE GUILDFORD GU5 9RG|GU59RG",
+      "address": "HIGHBURY BARN, PURSERS LANE, PEASLAKE, GUILDFORD, GU5 9RG",
+      "postcode": "GU5 9RG",
+      "listEntryNumbers": [
+        "1029457"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029457",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029457",
+        "https://docs.planning.org.uk/20240118/126/_GUILD_DCAPR_205640/0hdwruxfjsibjcz0.pdf"
+      ],
+      "note": "The official planning heritage statement identifies Highbury Barn, formerly Pursers Farm Barns, as the converted property containing the barn specifically designated under NHLE 1029457."
     },
     {
       "propertyRecordId": "property:HOLDFAST COTTAGE HOLDFAST LANE HASLEMERE GU27 2EY|GU272EY",
@@ -900,6 +1020,21 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1029471"
       ],
       "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:LITTLE WARREN FARM ONE TREE HILL ROAD GUILDFORD GU4 8PL|GU48PL",
+      "address": "LITTLE WARREN FARM, ONE TREE HILL ROAD, GUILDFORD, GU4 8PL",
+      "postcode": "GU4 8PL",
+      "listEntryNumbers": [
+        "1377889"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377889",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1377889",
+        "https://docs.planning.org.uk/20240105/126/_GUILD_DCAPR_205424/edh0gtzabb525j9f.pdf"
+      ],
+      "note": "The official planning heritage statement identifies the converted Grade II listed main dwelling and its listed-barn origin; the site geometry aligns with NHLE 1377889."
     },
     {
       "propertyRecordId": "property:LITTLETON FARMHOUSE LITTLETON LANE GUILDFORD GU3 1HW|GU31HW",
@@ -957,6 +1092,21 @@
         "https://waverley.inconsult.uk/gf2.ti/f/1334658/119022789.1/PDF/-/Buildings%20and%20Structures%20of%20Architectural%20and%20Historic%20Interest%20in%20the%20Parish%20of%20Ewhurst_%20Surrey.pdf"
       ],
       "note": "Waverley's official heritage record identifies Losely on Holmbury Road with the same rounded grid reference as the legacy Three Mile Road entry."
+    },
+    {
+      "propertyRecordId": "property:MANOR HOUSE SUTTON PARK SUTTON GREEN GUILDFORD GU4 7QL|GU47QL",
+      "address": "MANOR HOUSE, SUTTON PARK, SUTTON GREEN, GUILDFORD, GU4 7QL",
+      "postcode": "GU4 7QL",
+      "listEntryNumbers": [
+        "1236932"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1236932",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1236932",
+        "https://caps.woking.gov.uk/online-applications/applicationDetails.do?keyVal=SACBMWRUKVB00&activeTab=summary"
+      ],
+      "note": "Historic England's statutory address and Woking's direct listed-building consent identify the current Manor House property."
     },
     {
       "propertyRecordId": "property:MANOR HOUSE THE GREEN CHIDDINGFOLD GODALMING GU8 4TU|GU84TU",
@@ -1167,6 +1317,21 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1044633"
       ],
       "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
+    },
+    {
+      "propertyRecordId": "property:PARK FARM DOWNSIDE ROAD DOWNSIDE COBHAM KT11 3LZ|KT113LZ",
+      "address": "PARK FARM, DOWNSIDE ROAD, DOWNSIDE, COBHAM, KT11 3LZ",
+      "postcode": "KT11 3LZ",
+      "listEntryNumbers": [
+        "1294557"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1294557",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1294557",
+        "https://emaps.elmbridge.gov.uk/ebc_planning.aspx?requesttype=parsetemplate&template=PlanningDetailsTab.tmplt&basepage=ebc_planning.aspx&Filter=^APPLICATION_NUMBER^='2008/1360'"
+      ],
+      "note": "Elmbridge's exact-site history uses both Park Farm and Park Cottage at the same Downside Road property and records direct listed-building consent."
     },
     {
       "propertyRecordId": "property:PEAR TREE COTTAGE THE COMMON CRANLEIGH GU6 8QA|GU68QA",
@@ -1718,6 +1883,21 @@
       "note": "Initial exact/current-name audit confirmed the canonical property against the official NHLE entry."
     },
     {
+      "propertyRecordId": "property:WENTWORTH COURT RIDGEMEAD ROAD ENGLEFIELD GREEN EGHAM TW20 0YD|TW200YD",
+      "address": "WENTWORTH COURT, RIDGEMEAD ROAD, ENGLEFIELD GREEN, EGHAM, TW20 0YD",
+      "postcode": "TW20 0YD",
+      "listEntryNumbers": [
+        "1378071"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1378071",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1378071",
+        "https://planning.runnymede.gov.uk/Northgate/PlanningExplorer/Generic/StdDetails.aspx?DAURI=PLANNING&FT=PlanningApplicationDetails&PARAM0=368740&PT=PlanningApplicationsOn-Line&PUBLIC=Y&TYPE=PL%2FPlanningPK.xml"
+      ],
+      "note": "Runnymede records direct listed-building consent at Wentworth Court, and the building's documented former identity is Ridgemead House."
+    },
+    {
       "propertyRecordId": "property:WEST END HOUSE WEST END LANE FRENSHAM FARNHAM GU10 3EP|GU103EP",
       "address": "WEST END HOUSE, WEST END LANE, FRENSHAM, FARNHAM, GU10 3EP",
       "postcode": "GU10 3EP",
@@ -1870,200 +2050,6 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1392383"
       ],
       "note": "Canonical statutory address exact."
-    },
-    {
-      "propertyRecordId": "property:1 THE MANSION COBHAM PARK COBHAM KT11 3LE|KT113LE",
-      "address": "1, THE MANSION, COBHAM PARK, COBHAM, KT11 3LE",
-      "postcode": "KT11 3LE",
-      "listEntryNumbers": [
-        "1030211"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1030211",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1030211",
-        "https://emaps.elmbridge.gov.uk/ebc_planning.aspx?requesttype=parsetemplate&template=PlanningDetailsTab.tmplt&basepage=ebc_planning.aspx&Filter=^APPLICATION_NUMBER^='2017/0498'"
-      ],
-      "note": "The transacted unit is within the divided Cobham Park mansion. Historic England identifies the designated mansion and Elmbridge records direct listed-building consent at No. 1."
-    },
-    {
-      "propertyRecordId": "property:21 QUEEN STREET GOMSHALL GUILDFORD GU5 9LU|GU59LU",
-      "address": "21, QUEEN STREET, GOMSHALL, GUILDFORD, GU5 9LU",
-      "postcode": "GU5 9LU",
-      "listEntryNumbers": [
-        "1377792"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377792",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1377792",
-        "https://publicaccess.guildford.gov.uk/online-applications/applicationDetails.do?keyVal=_GUILD_DCAPR_205208&activeTab=summary"
-      ],
-      "note": "Repeated direct listed-building consents at 21 Queen Street establish the current address identity of the building designated as Monk's House."
-    },
-    {
-      "propertyRecordId": "property:39 PEWLEY HILL GUILDFORD GU1 3SN|GU13SN",
-      "address": "39, PEWLEY HILL, GUILDFORD, GU1 3SN",
-      "postcode": "GU1 3SN",
-      "listEntryNumbers": [
-        "1377890"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377890",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1377890",
-        "https://publicaccess.guildford.gov.uk/online-applications/applicationDetails.do?keyVal=_GUILD_DCAPR_193041&activeTab=summary"
-      ],
-      "note": "Guildford's direct listed-building-consent history at 39 Pewley Hill establishes the current numbered identity of Semaphore House."
-    },
-    {
-      "propertyRecordId": "property:49 BELL ROAD EAST MOLESEY KT8 0SS|KT80SS",
-      "address": "49, BELL ROAD, EAST MOLESEY, KT8 0SS",
-      "postcode": "KT8 0SS",
-      "listEntryNumbers": [
-        "1377445"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377445",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1377445",
-        "https://emaps.elmbridge.gov.uk/ebc_planning.aspx?requesttype=parsetemplate&template=PlanningDetailsTab.tmplt&basepage=ebc_planning.aspx&Filter=^APPLICATION_NUMBER^='2025/1204'"
-      ],
-      "note": "Historic England records the divided Manor House and Quillets Royal; Elmbridge's exact-address records identify No. 49 as the Old Manor House unit."
-    },
-    {
-      "propertyRecordId": "property:CHINTHURST COURT CHINTHURST LANE BRAMLEY GUILDFORD GU5 0DR|GU50DR",
-      "address": "CHINTHURST COURT, CHINTHURST LANE, BRAMLEY, GUILDFORD, GU5 0DR",
-      "postcode": "GU5 0DR",
-      "listEntryNumbers": [
-        "1029491"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029491",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1029491",
-        "https://publicaccess.guildford.gov.uk/online-applications/files/BF60608AC89AFEDD52D7D6B3943E3083/pdf/14_P_02399-HERITAGE_STATEMENT-755658.pdf"
-      ],
-      "note": "The official planning heritage statement says Chinthurst Court comprises the Grade II-listed C17 building previously known as Chinthurst Farm Cottage and reproduces NHLE 1029491."
-    },
-    {
-      "propertyRecordId": "property:EAST HOUSE HAWKSHILL PLACE ESHER KT10 9HY|KT109HY",
-      "address": "EAST HOUSE, HAWKSHILL PLACE, ESHER, KT10 9HY",
-      "postcode": "KT10 9HY",
-      "listEntryNumbers": [
-        "1392723"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1392723",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1392723",
-        "https://emaps.elmbridge.gov.uk/ebc_planning.aspx?requesttype=parsetemplate&template=PlanningDetailsTab.tmplt&basepage=ebc_planning.aspx&Filter=^APPLICATION_NUMBER^='2025/1983'"
-      ],
-      "note": "Historic England explicitly records Hawkshill Place as divided into The Towers, Middle House and East House; Elmbridge records the exact East House address."
-    },
-    {
-      "propertyRecordId": "property:HAZEL HALL POND LANE PEASLAKE GUILDFORD GU5 9RS|GU59RS",
-      "address": "HAZEL HALL, POND LANE, PEASLAKE, GUILDFORD, GU5 9RS",
-      "postcode": "GU5 9RS",
-      "listEntryNumbers": [
-        "1029480"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029480",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1029480"
-      ],
-      "note": "Historic England's official entry for Hazel Hill including former stables records the former listing identity as Hazel Hall with stables."
-    },
-    {
-      "propertyRecordId": "property:HAZELHURST FARM TITHEBARNS LANE SEND WOKING GU23 7LE|GU237LE",
-      "address": "HAZELHURST FARM, TITHEBARNS LANE, SEND, WOKING, GU23 7LE",
-      "postcode": "GU23 7LE",
-      "listEntryNumbers": [
-        "1188919"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1188919",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1188919",
-        "https://publicaccess.guildford.gov.uk/online-applications/applicationDetails.do?keyVal=_GUILD_DCAPR_163741&activeTab=summary"
-      ],
-      "note": "Repeated direct listed-building consents and official application geometry at Hazelhurst Farm identify the residence designated as Hazelhurst Cottage."
-    },
-    {
-      "propertyRecordId": "property:HIGHBURY BARN PURSERS LANE PEASLAKE GUILDFORD GU5 9RG|GU59RG",
-      "address": "HIGHBURY BARN, PURSERS LANE, PEASLAKE, GUILDFORD, GU5 9RG",
-      "postcode": "GU5 9RG",
-      "listEntryNumbers": [
-        "1029457"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029457",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1029457",
-        "https://docs.planning.org.uk/20240118/126/_GUILD_DCAPR_205640/0hdwruxfjsibjcz0.pdf"
-      ],
-      "note": "The official planning heritage statement identifies Highbury Barn, formerly Pursers Farm Barns, as the converted property containing the barn specifically designated under NHLE 1029457."
-    },
-    {
-      "propertyRecordId": "property:LITTLE WARREN FARM ONE TREE HILL ROAD GUILDFORD GU4 8PL|GU48PL",
-      "address": "LITTLE WARREN FARM, ONE TREE HILL ROAD, GUILDFORD, GU4 8PL",
-      "postcode": "GU4 8PL",
-      "listEntryNumbers": [
-        "1377889"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1377889",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1377889",
-        "https://docs.planning.org.uk/20240105/126/_GUILD_DCAPR_205424/edh0gtzabb525j9f.pdf"
-      ],
-      "note": "The official planning heritage statement identifies the converted Grade II listed main dwelling and its listed-barn origin; the site geometry aligns with NHLE 1377889."
-    },
-    {
-      "propertyRecordId": "property:MANOR HOUSE SUTTON PARK SUTTON GREEN GUILDFORD GU4 7QL|GU47QL",
-      "address": "MANOR HOUSE, SUTTON PARK, SUTTON GREEN, GUILDFORD, GU4 7QL",
-      "postcode": "GU4 7QL",
-      "listEntryNumbers": [
-        "1236932"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1236932",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1236932",
-        "https://caps.woking.gov.uk/online-applications/applicationDetails.do?keyVal=SACBMWRUKVB00&activeTab=summary"
-      ],
-      "note": "Historic England's statutory address and Woking's direct listed-building consent identify the current Manor House property."
-    },
-    {
-      "propertyRecordId": "property:PARK FARM DOWNSIDE ROAD DOWNSIDE COBHAM KT11 3LZ|KT113LZ",
-      "address": "PARK FARM, DOWNSIDE ROAD, DOWNSIDE, COBHAM, KT11 3LZ",
-      "postcode": "KT11 3LZ",
-      "listEntryNumbers": [
-        "1294557"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1294557",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1294557",
-        "https://emaps.elmbridge.gov.uk/ebc_planning.aspx?requesttype=parsetemplate&template=PlanningDetailsTab.tmplt&basepage=ebc_planning.aspx&Filter=^APPLICATION_NUMBER^='2008/1360'"
-      ],
-      "note": "Elmbridge's exact-site history uses both Park Farm and Park Cottage at the same Downside Road property and records direct listed-building consent."
-    },
-    {
-      "propertyRecordId": "property:WENTWORTH COURT RIDGEMEAD ROAD ENGLEFIELD GREEN EGHAM TW20 0YD|TW200YD",
-      "address": "WENTWORTH COURT, RIDGEMEAD ROAD, ENGLEFIELD GREEN, EGHAM, TW20 0YD",
-      "postcode": "TW20 0YD",
-      "listEntryNumbers": [
-        "1378071"
-      ],
-      "grade": "II",
-      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1378071",
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1378071",
-        "https://planning.runnymede.gov.uk/Northgate/PlanningExplorer/Generic/StdDetails.aspx?DAURI=PLANNING&FT=PlanningApplicationDetails&PARAM0=368740&PT=PlanningApplicationsOn-Line&PUBLIC=Y&TYPE=PL%2FPlanningPK.xml"
-      ],
-      "note": "Runnymede records direct listed-building consent at Wentworth Court, and the building's documented former identity is Ridgemead House."
     }
   ],
   "noDirectMappings": [
@@ -2079,6 +2065,17 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1377465"
       ],
       "note": "The shortlisted NHLE entries designate ancillary structures rather than the transacted property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:16 ARNISON ROAD EAST MOLESEY KT8 9JJ|KT89JJ",
+      "address": "16, ARNISON ROAD, EAST MOLESEY, KT8 9JJ",
+      "postcode": "KT8 9JJ",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [],
+      "evidenceUrls": [
+        "https://emaps.elmbridge.gov.uk/ebc_planning.aspx?requesttype=parsetemplate&template=PlanningDetailsTab.tmplt&basepage=ebc_planning.aspx&Filter=^APPLICATION_NUMBER^='LBC/1986/0016'"
+      ],
+      "note": "One legacy 1986 listed-building-consent record does not establish a direct NHLE designation, while the current address, official list names and map contain no supported direct identity. Possible attached or curtilage treatment is not determined."
     },
     {
       "propertyRecordId": "property:16 CLAREMONT DRIVE ESHER KT10 9LU|KT109LU",
@@ -2144,6 +2141,20 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1377465"
       ],
       "note": "The shortlisted NHLE entries designate ancillary structures rather than the transacted property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:54 GATTON ROAD REIGATE RH2 0HL|RH20HL",
+      "address": "54, GATTON ROAD, REIGATE, RH2 0HL",
+      "postcode": "RH2 0HL",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1260400"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1260400",
+        "https://www.reigate-banstead.gov.uk/download/downloads/id/380/view_the_list_of_buildings_of_architectural_and_historic_interest.pdf"
+      ],
+      "note": "NHLE 1260400 directly designates Quarry Hill at Nos. 48-52. The authority schedule records No. 54 Rear of Quarryhill as an II c attached or curtilage component, not as a separate statutory Grade II entry."
     },
     {
       "propertyRecordId": "property:8 CLAREMONT DRIVE ESHER KT10 9LU|KT109LU",
@@ -2223,6 +2234,20 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1029491"
       ],
       "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:CLANDON MANOR BACK LANE EAST CLANDON GUILDFORD GU4 7SA|GU47SA",
+      "address": "CLANDON MANOR, BACK LANE, EAST CLANDON, GUILDFORD, GU4 7SA",
+      "postcode": "GU4 7SA",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1295003"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1295003",
+        "https://www.guildford.gov.uk/media/875/East-Clandon-Character-Appraisal/pdf/EastClandonCharacterAppraisal.pdf?m=636074703372700000"
+      ],
+      "note": "Listed-building-consent history shows heritage control at Clandon Manor Farm, but no exact NHLE number is proven. NHLE 1295003 is Old Manor Farmhouse on The Street, a separately identified property about 178 metres away, and must not be inherited."
     },
     {
       "propertyRecordId": "property:COACH HOUSE GOWER ROAD WEYBRIDGE KT13 0HA|KT130HA",
@@ -2358,6 +2383,20 @@
       "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
     },
     {
+      "propertyRecordId": "property:PARK HOUSE FREDLEY PARK MICKLEHAM DORKING RH5 6DD|RH56DD",
+      "address": "PARK HOUSE, FREDLEY PARK, MICKLEHAM, DORKING, RH5 6DD",
+      "postcode": "RH5 6DD",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [
+        "1378058"
+      ],
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1378058",
+        "https://planning-records.uk/molevalley/2024/126850/"
+      ],
+      "note": "NHLE 1378058 designates Fredley Manor at a separate address and postcode. The apparent recent listed-building applications belong to The Coach House, Fredley Park, so the postcode-level planning match must not promote Park House."
+    },
+    {
       "propertyRecordId": "property:RIDGEWAY FARM SAILORS LANE THURSLEY GODALMING GU8 6QP|GU86QP",
       "address": "RIDGEWAY FARM, SAILORS LANE, THURSLEY, GODALMING, GU8 6QP",
       "postcode": "GU8 6QP",
@@ -2369,6 +2408,18 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1260844"
       ],
       "note": "Documents identify a separate property. No direct NHLE match is asserted; this is not a curtilage opinion."
+    },
+    {
+      "propertyRecordId": "property:SOUTH HALL CASTLE HILL GUILDFORD GU1 3SX|GU13SX",
+      "address": "SOUTH HALL, CASTLE HILL, GUILDFORD, GU1 3SX",
+      "postcode": "GU1 3SX",
+      "listEntryNumbers": [],
+      "rejectedListEntryNumbers": [],
+      "evidenceUrls": [
+        "https://www.guildford.gov.uk/newlocalplan/CHttpHandler.ashx?id=21346&p=0",
+        "https://www.guildfordsociety.org.uk/GDAShortlistConservationproject.html"
+      ],
+      "note": "Guildford's official Local Heritage List identifies South Hall, formerly South Bank, as a locally listed house. No direct national NHLE entry was found; a withdrawn listed-building-consent application does not establish statutory designation."
     },
     {
       "propertyRecordId": "property:SOUTH LODGE THE CHASE OXSHOTT LEATHERHEAD KT22 0HY|KT220HY",
@@ -2567,72 +2618,256 @@
         "https://historicengland.org.uk/listing/the-list/list-entry/1029900"
       ],
       "note": "NHLE 1029900 is The Old Cottage in Lingfield; the generic name and road similarity do not identify Wold Cottage. The status means no direct NHLE match, not legal proof of being unlisted."
-    },
-    {
-      "propertyRecordId": "property:16 ARNISON ROAD EAST MOLESEY KT8 9JJ|KT89JJ",
-      "address": "16, ARNISON ROAD, EAST MOLESEY, KT8 9JJ",
-      "postcode": "KT8 9JJ",
-      "listEntryNumbers": [],
-      "rejectedListEntryNumbers": [],
-      "evidenceUrls": [
-        "https://emaps.elmbridge.gov.uk/ebc_planning.aspx?requesttype=parsetemplate&template=PlanningDetailsTab.tmplt&basepage=ebc_planning.aspx&Filter=^APPLICATION_NUMBER^='LBC/1986/0016'"
-      ],
-      "note": "One legacy 1986 listed-building-consent record does not establish a direct NHLE designation, while the current address, official list names and map contain no supported direct identity. Possible attached or curtilage treatment is not determined."
-    },
-    {
-      "propertyRecordId": "property:54 GATTON ROAD REIGATE RH2 0HL|RH20HL",
-      "address": "54, GATTON ROAD, REIGATE, RH2 0HL",
-      "postcode": "RH2 0HL",
-      "listEntryNumbers": [],
-      "rejectedListEntryNumbers": [
-        "1260400"
-      ],
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1260400",
-        "https://www.reigate-banstead.gov.uk/download/downloads/id/380/view_the_list_of_buildings_of_architectural_and_historic_interest.pdf"
-      ],
-      "note": "NHLE 1260400 directly designates Quarry Hill at Nos. 48-52. The authority schedule records No. 54 Rear of Quarryhill as an II c attached or curtilage component, not as a separate statutory Grade II entry."
-    },
-    {
-      "propertyRecordId": "property:CLANDON MANOR BACK LANE EAST CLANDON GUILDFORD GU4 7SA|GU47SA",
-      "address": "CLANDON MANOR, BACK LANE, EAST CLANDON, GUILDFORD, GU4 7SA",
-      "postcode": "GU4 7SA",
-      "listEntryNumbers": [],
-      "rejectedListEntryNumbers": [
-        "1295003"
-      ],
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1295003",
-        "https://www.guildford.gov.uk/media/875/East-Clandon-Character-Appraisal/pdf/EastClandonCharacterAppraisal.pdf?m=636074703372700000"
-      ],
-      "note": "Listed-building-consent history shows heritage control at Clandon Manor Farm, but no exact NHLE number is proven. NHLE 1295003 is Old Manor Farmhouse on The Street, a separately identified property about 178 metres away, and must not be inherited."
-    },
-    {
-      "propertyRecordId": "property:PARK HOUSE FREDLEY PARK MICKLEHAM DORKING RH5 6DD|RH56DD",
-      "address": "PARK HOUSE, FREDLEY PARK, MICKLEHAM, DORKING, RH5 6DD",
-      "postcode": "RH5 6DD",
-      "listEntryNumbers": [],
-      "rejectedListEntryNumbers": [
-        "1378058"
-      ],
-      "evidenceUrls": [
-        "https://historicengland.org.uk/listing/the-list/list-entry/1378058",
-        "https://planning-records.uk/molevalley/2024/126850/"
-      ],
-      "note": "NHLE 1378058 designates Fredley Manor at a separate address and postcode. The apparent recent listed-building applications belong to The Coach House, Fredley Park, so the postcode-level planning match must not promote Park House."
-    },
-    {
-      "propertyRecordId": "property:SOUTH HALL CASTLE HILL GUILDFORD GU1 3SX|GU13SX",
-      "address": "SOUTH HALL, CASTLE HILL, GUILDFORD, GU1 3SX",
-      "postcode": "GU1 3SX",
-      "listEntryNumbers": [],
-      "rejectedListEntryNumbers": [],
-      "evidenceUrls": [
-        "https://www.guildford.gov.uk/newlocalplan/CHttpHandler.ashx?id=21346&p=0",
-        "https://www.guildfordsociety.org.uk/GDAShortlistConservationproject.html"
-      ],
-      "note": "Guildford's official Local Heritage List identifies South Hall, formerly South Bank, as a locally listed house. No direct national NHLE entry was found; a withdrawn listed-building-consent application does not establish statutory designation."
     }
   ],
-  "unknownMappings": []
+  "unknownMappings": [
+    {
+      "propertyRecordId": "property:1 THE BOROUGH BROCKHAM BETCHWORTH RH3 7NB|RH37NB",
+      "address": "1, THE BOROUGH, BROCKHAM, BETCHWORTH, RH3 7NB",
+      "postcode": "RH3 7NB",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:112 SILVERDALE AVENUE WALTON ON THAMES KT12 1EQ|KT121EQ",
+      "address": "112, SILVERDALE AVENUE, WALTON-ON-THAMES, KT12 1EQ",
+      "postcode": "KT12 1EQ",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:20 WATER LANE COBHAM KT11 2PB|KT112PB",
+      "address": "20, WATER LANE, COBHAM, KT11 2PB",
+      "postcode": "KT11 2PB",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:33 RIVER MOUNT WALTON ON THAMES KT12 2PR|KT122PR",
+      "address": "33, RIVER MOUNT, WALTON-ON-THAMES, KT12 2PR",
+      "postcode": "KT12 2PR",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:42 CHERRY TREE LANE GODALMING GU7 3RS|GU73RS",
+      "address": "42, CHERRY TREE LANE, GODALMING, GU7 3RS",
+      "postcode": "GU7 3RS",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:5 TORLAND DRIVE OXSHOTT LEATHERHEAD KT22 0SA|KT220SA",
+      "address": "5, TORLAND DRIVE, OXSHOTT, LEATHERHEAD, KT22 0SA",
+      "postcode": "KT22 0SA",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:6 ASHBURNHAM PARK ESHER KT10 9TW|KT109TW",
+      "address": "6, ASHBURNHAM PARK, ESHER, KT10 9TW",
+      "postcode": "KT10 9TW",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:7 FORT ROAD GUILDFORD GU1 3TB|GU13TB",
+      "address": "7, FORT ROAD, GUILDFORD, GU1 3TB",
+      "postcode": "GU1 3TB",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:77 MASSETTS ROAD HORLEY RH6 7EB|RH67EB",
+      "address": "77, MASSETTS ROAD, HORLEY, RH6 7EB",
+      "postcode": "RH6 7EB",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:BEAUMONT LODGE EAST ROAD WEYBRIDGE KT13 0LE|KT130LE",
+      "address": "BEAUMONT LODGE, EAST ROAD, WEYBRIDGE, KT13 0LE",
+      "postcode": "KT13 0LE",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:CONNISTON PARK VIEW ROAD WOLDINGHAM CATERHAM CR3 7DJ|CR37DJ",
+      "address": "CONNISTON, PARK VIEW ROAD, WOLDINGHAM, CATERHAM, CR3 7DJ",
+      "postcode": "CR3 7DJ",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:DITTON HOUSE WESTON GREEN ROAD THAMES DITTON KT7 0HY|KT70HY",
+      "address": "DITTON HOUSE, WESTON GREEN ROAD, THAMES DITTON, KT7 0HY",
+      "postcode": "KT7 0HY",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:HAVANA HOUSE 2 CRANLEY ROAD HERSHAM WALTON ON THAMES KT12 5BP|KT125BP",
+      "address": "HAVANA HOUSE, 2, CRANLEY ROAD, HERSHAM, WALTON-ON-THAMES, KT12 5BP",
+      "postcode": "KT12 5BP",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:LANGHAM PARK VIEW ROAD WOLDINGHAM CATERHAM CR3 7DJ|CR37DJ",
+      "address": "LANGHAM, PARK VIEW ROAD, WOLDINGHAM, CATERHAM, CR3 7DJ",
+      "postcode": "CR3 7DJ",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:LITTLE OAKS CHALK LANE ASHTEAD KT21 1DJ|KT211DJ",
+      "address": "LITTLE OAKS, CHALK LANE, ASHTEAD, KT21 1DJ",
+      "postcode": "KT21 1DJ",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:MANOR COTTAGE ALDERBROOK ROAD SMITHWOOD COMMON CRANLEIGH GU6 8QX|GU68QX",
+      "address": "MANOR COTTAGE, ALDERBROOK ROAD, SMITHWOOD COMMON, CRANLEIGH, GU6 8QX",
+      "postcode": "GU6 8QX",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:NORTH DOWNS HOUSE THE RIDGE WOLDINGHAM CATERHAM CR3 7AH|CR37AH",
+      "address": "NORTH DOWNS HOUSE, THE RIDGE, WOLDINGHAM, CATERHAM, CR3 7AH",
+      "postcode": "CR3 7AH",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:OAKMONT LONGCROSS ROAD LONGCROSS CHERTSEY KT16 0AH|KT160AH",
+      "address": "OAKMONT, LONGCROSS ROAD, LONGCROSS, CHERTSEY, KT16 0AH",
+      "postcode": "KT16 0AH",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:STILL WATERS PINE WALK EAST HORSLEY LEATHERHEAD KT24 5AG|KT245AG",
+      "address": "STILL WATERS, PINE WALK, EAST HORSLEY, LEATHERHEAD, KT24 5AG",
+      "postcode": "KT24 5AG",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:SUNRAY FARM WEST HILL ELSTEAD GODALMING GU8 6DQ|GU86DQ",
+      "address": "SUNRAY FARM, WEST HILL, ELSTEAD, GODALMING, GU8 6DQ",
+      "postcode": "GU8 6DQ",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:THE SHACK 15 CROSSWAY WALTON ON THAMES KT12 3JA|KT123JA",
+      "address": "THE SHACK, 15, CROSSWAY, WALTON-ON-THAMES, KT12 3JA",
+      "postcode": "KT12 3JA",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:TUSCAN HOUSE EAST ROAD WEYBRIDGE KT13 0LF|KT130LF",
+      "address": "TUSCAN HOUSE, EAST ROAD, WEYBRIDGE, KT13 0LF",
+      "postcode": "KT13 0LF",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:WOODHAY WHITE LANE GUILDFORD GU4 8PU|GU48PU",
+      "address": "WOODHAY, WHITE LANE, GUILDFORD, GU4 8PU",
+      "postcode": "GU4 8PU",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    }
+  ],
+  "retiredMappings": [
+    {
+      "propertyRecordId": "property:BERESFORD COURT WESTERHAM ROAD OXTED RH8 0SL|RH80SL",
+      "address": "BERESFORD COURT, WESTERHAM ROAD, OXTED, RH8 0SL",
+      "postcode": "RH8 0SL",
+      "listEntryNumbers": [
+        "1029786"
+      ],
+      "grade": "II",
+      "evidenceUrl": "https://historicengland.org.uk/listing/the-list/list-entry/1029786",
+      "evidenceUrls": [
+        "https://historicengland.org.uk/listing/the-list/list-entry/1029786"
+      ],
+      "note": "Canonical statutory address exact.",
+      "status": "confirmed_listed",
+      "retiredAt": "2026-08-02",
+      "retirementReason": "Canonical property identity absent from the current £2m+ base feed; evidence retained for audit history."
+    },
+    {
+      "propertyRecordId": "property:ST AUSTINS HAMMONDSWOOD ROAD FRENSHAM FARNHAM GU10 3EH|GU103EH",
+      "address": "ST AUSTINS, HAMMONDSWOOD ROAD, FRENSHAM, FARNHAM, GU10 3EH",
+      "postcode": "GU10 3EH",
+      "status": "no_direct_match",
+      "listEntryNumbers": [],
+      "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
+      "reviewedAt": "2026-07-28",
+      "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage.",
+      "retiredAt": "2026-08-02",
+      "retirementReason": "Canonical property identity absent from the current £2m+ base feed; evidence retained for audit history."
+    }
+  ],
+  "universeReconciliation": {
+    "schemaVersion": 1,
+    "reconciledAt": "2026-08-02",
+    "previousPropertyCount": 3947,
+    "currentPropertyCount": 3968,
+    "addedPropertyCount": 23,
+    "removedPropertyCount": 2,
+    "newIdentityPolicy": "explicit_unknown_pending_review",
+    "removedIdentityPolicy": "retained_in_retired_mappings"
+  }
 }

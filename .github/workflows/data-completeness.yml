@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: insight-data-refresh
+  queue: max
+  cancel-in-progress: false
+
 jobs:
   validate:
     runs-on: ubuntu-latest

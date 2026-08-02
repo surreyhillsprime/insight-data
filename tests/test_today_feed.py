@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from today_feed import build_today_feed, canonical_json  # noqa: E402
+from today_feed import build_today_feed, canonical_json, default_clock  # noqa: E402
 from validate_today_feed import (  # noqa: E402
     read_today_feed,
     validate_today_feed,
@@ -252,6 +252,13 @@ class TodayFeedTests(unittest.TestCase):
             as_of="2026-07-25",
             generated_at="2026-07-25T08:00:00Z",
         )
+
+    def test_default_clock_uses_london_civil_date_at_month_rollover(self):
+        as_of, generated_at = default_clock({
+            "generatedAt": "2026-07-31T23:05:00Z",
+        })
+        self.assertEqual(as_of, date(2026, 8, 1))
+        self.assertEqual(generated_at, "2026-07-31T23:05:00Z")
 
     def test_feed_is_deterministic_and_excludes_year_only_planning(self):
         records, news = self.fixture()

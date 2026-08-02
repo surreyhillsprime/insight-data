@@ -14,6 +14,7 @@ import math
 import re
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -812,7 +813,8 @@ def default_clock(property_metadata: Mapping[str, Any]) -> tuple[date, str]:
         or datetime(1970, 1, 1, tzinfo=timezone.utc)
     )
     generated_at = generated.replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    return generated.date(), generated_at
+    london_date = generated.astimezone(ZoneInfo("Europe/London")).date()
+    return london_date, generated_at
 
 
 def build_today_feed(
