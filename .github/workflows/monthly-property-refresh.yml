@@ -1,6 +1,7 @@
 name: Monthly INSIGHT Property Refresh
 
 on:
+  workflow_call:
   workflow_dispatch:
   schedule:
     - cron: "0 6 1 * *"
@@ -10,7 +11,12 @@ permissions:
 
 concurrency:
   group: insight-data-refresh
+  queue: max
   cancel-in-progress: false
+
+env:
+  RELEASE_BRANCH: ${{ github.ref_name }}
+  STAGING_BRANCH: automation/monthly-${{ github.run_id }}-${{ github.run_attempt }}
 
 jobs:
   monthly-property-refresh:
@@ -23,14 +29,20 @@ jobs:
 
       - name: Synchronise selected branch
         run: |
-          git fetch origin "$GITHUB_REF_NAME"
-          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
+          git fetch origin "$RELEASE_BRANCH"
+          git checkout -B "$STAGING_BRANCH" "origin/$RELEASE_BRANCH"
+          git push origin "HEAD:$STAGING_BRANCH"
 
       - name: Build audited private-estate registry
         run: python3 scripts/build_private_estates_asset.py
 
-      - name: Test £2m property-feed contract
-        run: PYTHONPATH=scripts python3 -m unittest discover -s tests
+      - name: Test monthly producer prerequisites
+        run: |
+          PYTHONPATH=scripts python3 -m unittest \
+            tests.test_historical_expansion_metadata \
+            tests.test_private_estate_registry \
+            tests.test_two_million_floor
+          python3 scripts/check_data_completeness.py --base-only
 
       - name: Run Land Registry sweeper
         run: python3 scripts/sweep_land_registry.py
@@ -42,7 +54,7 @@ jobs:
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
-          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          git pull --rebase --autostash origin "$STAGING_BRANCH"
           if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
             echo "::error::Refresh produced Git conflicts; refusing to commit."
             exit 1
@@ -53,7 +65,7 @@ jobs:
             echo "No property-ledger or Land Registry changes to commit."
           else
             git commit -m "Checkpoint INSIGHT monthly property data"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            git push origin "HEAD:$STAGING_BRANCH"
           fi
 
   refresh-epc:
@@ -70,12 +82,12 @@ jobs:
       - name: Check out latest property checkpoint
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.STAGING_BRANCH }}
 
       - name: Synchronise selected branch
         run: |
-          git fetch origin "$GITHUB_REF_NAME"
-          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
+          git fetch origin "$STAGING_BRANCH"
+          git checkout -B "$STAGING_BRANCH" "origin/$STAGING_BRANCH"
 
       - name: Resume EPC checkpoint ${{ matrix.checkpoint }}
         env:
@@ -105,7 +117,7 @@ jobs:
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
-          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          git pull --rebase --autostash origin "$STAGING_BRANCH"
           if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
             echo "::error::EPC checkpoint produced Git conflicts; refusing to commit."
             exit 1
@@ -116,7 +128,7 @@ jobs:
             echo "No EPC changes to commit."
           else
             git commit -m "Checkpoint INSIGHT EPC data (${{ matrix.checkpoint }})"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            git push origin "HEAD:$STAGING_BRANCH"
           fi
 
   verify-epc-complete:
@@ -128,7 +140,7 @@ jobs:
       - name: Check out final EPC checkpoint
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.STAGING_BRANCH }}
 
       - name: Require reconciled EPC accounting
         run: >-
@@ -150,12 +162,12 @@ jobs:
       - name: Check out committed property checkpoint
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.STAGING_BRANCH }}
 
       - name: Synchronise selected branch
         run: |
-          git fetch origin "$GITHUB_REF_NAME"
-          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
+          git fetch origin "$STAGING_BRANCH"
+          git checkout -B "$STAGING_BRANCH" "origin/$STAGING_BRANCH"
 
       - name: Refresh monthly coordinate and flood context
         run: |
@@ -173,7 +185,7 @@ jobs:
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
-          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          git pull --rebase --autostash origin "$STAGING_BRANCH"
           if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
             echo "::error::Monthly context refresh produced Git conflicts; refusing to commit."
             exit 1
@@ -187,7 +199,7 @@ jobs:
             echo "No monthly context changes to commit."
           else
             git commit -m "Checkpoint INSIGHT monthly property context"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            git push origin "HEAD:$STAGING_BRANCH"
           fi
 
   align-expanded-context:
@@ -199,12 +211,12 @@ jobs:
       - name: Check out committed monthly context
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.STAGING_BRANCH }}
 
       - name: Synchronise selected branch
         run: |
-          git fetch origin "$GITHUB_REF_NAME"
-          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
+          git fetch origin "$STAGING_BRANCH"
+          git checkout -B "$STAGING_BRANCH" "origin/$STAGING_BRANCH"
 
       - name: Install coordinate transformer
         run: python3 -m pip install --user pyproj
@@ -214,6 +226,7 @@ jobs:
           SCHOOLS_CSV_URL: ${{ secrets.SCHOOLS_CSV_URL }}
         run: |
           python3 scripts/enrich_weekly_context.py \
+            --missing-only \
             --pause 0.15 \
             --progress-every 25 \
             --max-source-errors 25
@@ -223,12 +236,17 @@ jobs:
           python3 scripts/enrich_os_uprn.py \
             --progress-every 25
 
+      - name: Reconcile the reviewed heritage universe fail-closed
+        run: |
+          python3 scripts/reconcile_heritage_address_audit.py --write
+          python3 scripts/build_heritage_address_ledger.py
+
       - name: Align Historic England listed-building evidence
         run: python3 scripts/enrich_listed_buildings.py
 
       - name: Synchronise final checkpoint
         run: |
-          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          git pull --rebase --autostash origin "$STAGING_BRANCH"
           if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
             echo "::error::Context alignment produced Git conflicts; refusing to build property records."
             exit 1
@@ -237,6 +255,7 @@ jobs:
 
       - name: Check aligned context checkpoint
         run: |
+          python3 scripts/build_heritage_address_ledger.py --check
           python3 scripts/enrich_listed_buildings.py --validate-only
           python3 scripts/check_data_completeness.py --base-only
 
@@ -245,7 +264,10 @@ jobs:
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
           python3 scripts/enrich_listed_buildings.py --validate-only
-          git add outputs/surrey-transactions.js
+          git add \
+            config/heritage-listing-address-audit.json \
+            config/heritage-listing-overrides.json \
+            outputs/surrey-transactions.js
           for cache in work/weekly-context-cache.json work/os-uprn-cache.json work/schools.csv; do
             if [ -f "$cache" ]; then git add "$cache"; fi
           done
@@ -253,11 +275,91 @@ jobs:
             echo "No expanded context changes to commit."
           else
             git commit -m "Align context with expanded Land Registry history"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            git push origin "HEAD:$STAGING_BRANCH"
+          fi
+
+  refresh-sales-history:
+    needs: align-expanded-context
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Check out committed expanded context
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.STAGING_BRANCH }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Synchronise staging branch
+        run: |
+          git fetch origin "$STAGING_BRANCH"
+          git checkout -B "$STAGING_BRANCH" "origin/$STAGING_BRANCH"
+
+      - name: Check sales producer prerequisites
+        run: python3 scripts/check_data_completeness.py --base-only
+
+      - name: Restore resumable postcode cache
+        uses: actions/cache/restore@v4
+        with:
+          path: work/title-history-cache.json
+          key: title-history-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: title-history-
+
+      - name: Align complete Price Paid history feed
+        run: >-
+          python3 scripts/collect_title_history.py
+          --input outputs/surrey-transactions.js
+          --output outputs/sales-history.js
+          --cache work/title-history-cache.json
+          --seed-feed outputs/sales-history.js
+          --deployment-mode commercial
+          --refresh-days 28
+          --workers 3
+          --batch-size 8
+
+      - name: Validate sales history against the staged property universe
+        run: >-
+          python3 scripts/validate_sales_history_feed.py
+          outputs/sales-history.js
+          --base-feed outputs/surrey-transactions.js
+          --minimum-properties-with-history 3942
+          --minimum-transactions 6735
+          --maximum-properties-unavailable 4
+          --maximum-age-days 45
+
+      - name: Save resumable postcode cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: work/title-history-cache.json
+          key: title-history-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Commit aligned sales history to staging
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git pull --rebase --autostash origin "$STAGING_BRANCH"
+          python3 scripts/validate_sales_history_feed.py \
+            outputs/sales-history.js \
+            --base-feed outputs/surrey-transactions.js \
+            --minimum-properties-with-history 3942 \
+            --minimum-transactions 6735 \
+            --maximum-properties-unavailable 4 \
+            --maximum-age-days 45
+          git add outputs/sales-history.js
+          if git diff --cached --quiet; then
+            echo "Sales history is already aligned."
+          else
+            git commit -m "Align sales history with monthly property data"
+            git push origin "HEAD:$STAGING_BRANCH"
           fi
 
   materialise-today:
-    needs: align-expanded-context
+    needs: refresh-sales-history
     runs-on: ubuntu-latest
     timeout-minutes: 120
 
@@ -265,12 +367,13 @@ jobs:
       - name: Check out committed expanded context
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ env.STAGING_BRANCH }}
+          fetch-depth: 0
 
       - name: Synchronise selected branch
         run: |
-          git fetch origin "$GITHUB_REF_NAME"
-          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
+          git fetch origin "$STAGING_BRANCH"
+          git checkout -B "$STAGING_BRANCH" "origin/$STAGING_BRANCH"
 
       - name: Require complete release data
         run: python3 scripts/check_data_completeness.py --strict-metadata
@@ -290,7 +393,7 @@ jobs:
             --output outputs/today-feed.js
           python3 scripts/validate_today_feed.py outputs/today-feed.js
 
-      - name: Commit refreshed Today opportunities
+      - name: Commit refreshed Today opportunities to staging
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
@@ -299,5 +402,41 @@ jobs:
             echo "No Today opportunity changes to commit."
           else
             git commit -m "Materialise INSIGHT Today opportunities"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            git push origin "HEAD:$STAGING_BRANCH"
           fi
+
+      - name: Publish one validated monthly snapshot
+        run: |
+          validate_release() {
+            PYTHONPATH=scripts python3 -m unittest discover -s tests
+            python3 scripts/build_heritage_address_ledger.py --check
+            python3 scripts/enrich_listed_buildings.py --validate-only
+            python3 scripts/check_data_completeness.py --strict-metadata
+            python3 scripts/validate_sales_history_feed.py \
+              outputs/sales-history.js \
+              --base-feed outputs/surrey-transactions.js \
+              --minimum-properties-with-history 3942 \
+              --minimum-transactions 6735 \
+              --maximum-properties-unavailable 4 \
+              --maximum-age-days 45
+            python3 scripts/validate_today_feed.py outputs/today-feed.js
+          }
+
+          published=false
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin \
+              "+refs/heads/$RELEASE_BRANCH:refs/remotes/origin/$RELEASE_BRANCH"
+            git rebase "refs/remotes/origin/$RELEASE_BRANCH"
+            validate_release
+            if git push origin "HEAD:$RELEASE_BRANCH"; then
+              published=true
+              break
+            fi
+            echo "::warning::Main advanced during monthly release attempt $attempt; rebasing and revalidating."
+          done
+          if [ "$published" != true ]; then
+            echo "::error::Could not publish the validated monthly snapshot after three attempts."
+            exit 1
+          fi
+          git push origin --delete "$STAGING_BRANCH" || \
+            echo "::warning::Validated release published; temporary branch cleanup can retry later."

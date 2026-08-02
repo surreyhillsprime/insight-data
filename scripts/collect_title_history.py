@@ -30,8 +30,10 @@ from validate_sales_history_feed import (
     REDISTRIBUTION_RIGHTS,
     SOURCE_LICENCE_URL,
     SOURCE_NAME,
+    assignment,
     base_feed_identity,
     sha256_json,
+    validate as validate_sales_publication,
 )
 
 
@@ -54,7 +56,7 @@ def property_key(item):
 
 
 def cache_is_fresh(record, refresh_days):
-    if not record or refresh_days <= 0:
+    if not record or record.get("lastError") or refresh_days <= 0:
         return False
     try:
         updated = datetime.fromisoformat(record.get("updatedAt", "").replace("Z", "+00:00"))
@@ -63,7 +65,71 @@ def cache_is_fresh(record, refresh_days):
     return (datetime.now(timezone.utc) - updated).total_seconds() < refresh_days * 86400
 
 
-def cache_coverage(postcode, selected, cache_record):
+def seed_record_is_fresh(
+    record,
+    property_id,
+    refresh_days,
+    *,
+    required_sales=(),
+    now=None,
+):
+    """Return whether a published complete record is safe to reuse as a seed."""
+
+    if (
+        not isinstance(record, dict)
+        or record.get("propertyRecordId") != property_id
+        or record.get("coverageStatus") != "complete"
+        or not isinstance(record.get("transactions"), list)
+        or refresh_days <= 0
+    ):
+        return False
+    try:
+        updated = datetime.fromisoformat(
+            clean(record.get("updatedAt")).replace("Z", "+00:00")
+        )
+    except (TypeError, ValueError):
+        return False
+    if updated.tzinfo is None:
+        return False
+    published_signatures = {
+        (
+            clean(sale.get("date"))[:10],
+            int(float(sale.get("price", 0))),
+        )
+        for sale in record["transactions"]
+        if isinstance(sale, dict)
+    }
+    required_signatures = {
+        (
+            clean(sale.get("date"))[:10],
+            int(float(sale.get("price", 0))),
+        )
+        for sale in required_sales
+        if isinstance(sale, dict)
+    }
+    if not required_signatures <= published_signatures:
+        return False
+    current = now or datetime.now(timezone.utc)
+    return (current - updated.astimezone(timezone.utc)).total_seconds() < refresh_days * 86400
+
+
+def load_seed_history(path, refresh_days, *, allow_local=False):
+    if not path:
+        return {}
+    source = Path(path)
+    if not source.exists():
+        return {}
+    if refresh_days <= 0:
+        return {}
+    validate_sales_publication(
+        source,
+        allow_local=allow_local,
+        maximum_age_days=refresh_days,
+    )
+    return assignment(source.read_text(encoding="utf-8"), "SURREY_SALES_HISTORY")
+
+
+def cache_coverage(postcode, selected, cache_record, *, refresh_days=None):
     """Return one truthful property lookup state from a postcode cache record."""
 
     rows = cache_record.get("rows", []) if isinstance(cache_record, dict) else []
@@ -78,6 +144,13 @@ def cache_coverage(postcode, selected, cache_record):
         return (
             "not_checked",
             "Excluded by the requested postcode or limit filter",
+            [],
+            "",
+        )
+    if refresh_days is not None and not cache_is_fresh(cache_record, refresh_days):
+        return (
+            "unavailable",
+            "Price Paid postcode cache is stale and could not be refreshed",
             [],
             "",
         )
@@ -169,6 +242,25 @@ def transaction_from_row(row):
     }
 
 
+def transaction_from_base(row):
+    """Publish the minimum official sale already proven by the base ledger."""
+
+    price = int(float(row.get("price", 0)))
+    return {
+        "id": clean(row.get("id")) or (
+            f"{clean(row.get('address'))}|{clean(row.get('date'))[:10]}|{price}"
+        ),
+        "address": clean(row.get("address")).upper(),
+        "postcode": clean(row.get("postcode")).upper(),
+        "price": price,
+        "priceText": clean(row.get("priceText")) or price_text(price),
+        "date": clean(row.get("date"))[:10],
+        "propertyType": clean(row.get("propertyType")),
+        "category": clean(row.get("category")),
+        "source": SOURCE_NAME,
+    }
+
+
 def write_output(path, history, meta):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -203,6 +295,14 @@ def main():
     parser.add_argument("--input", default=str(DEFAULT_INPUT_JS))
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT))
     parser.add_argument("--cache", default=str(DEFAULT_CACHE))
+    parser.add_argument(
+        "--seed-feed",
+        default="",
+        help=(
+            "Reuse still-fresh complete canonical records from an existing publication; "
+            "only new or stale postcodes are fetched."
+        ),
+    )
     parser.add_argument("--postcode", action="append", default=[])
     parser.add_argument("--limit-postcodes", type=int, default=0)
     parser.add_argument("--batch-size", type=int, default=8)
@@ -235,9 +335,41 @@ def main():
 
     cache = load_cache(args.cache, CACHE_VERSION)
     store = cache.setdefault("postcodes", {})
-    pending = [key for key in selected if not cache_is_fresh(store.get(key), args.refresh_days)]
+    seed_history = load_seed_history(
+        args.seed_feed,
+        args.refresh_days,
+        allow_local=args.deployment_mode == "local",
+    )
+    fresh_seed = {
+        key: seed_history.get(key)
+        for key in properties
+        if seed_record_is_fresh(
+            seed_history.get(key),
+            key,
+            args.refresh_days,
+            required_sales=current_sales[key],
+        )
+    }
+    properties_by_postcode = defaultdict(list)
+    for key, item in properties.items():
+        postcode = normalise_postcode(item.get("postcode"))
+        if postcode:
+            properties_by_postcode[postcode].append(key)
+    pending = [
+        postcode
+        for postcode in selected
+        if not cache_is_fresh(store.get(postcode), args.refresh_days)
+        and not all(
+            property_id in fresh_seed
+            for property_id in properties_by_postcode[postcode]
+        )
+    ]
     batches = list(chunks(pending, max(1, args.batch_size)))
-    print(f"Price Paid history: {len(properties)} properties, {len(selected)} postcodes, {len(pending)} to fetch.", flush=True)
+    print(
+        f"Price Paid history: {len(properties)} properties, {len(selected)} postcodes, "
+        f"{len(fresh_seed)} fresh seed records, {len(pending)} postcodes to fetch.",
+        flush=True,
+    )
 
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as executor:
         futures = {
@@ -278,7 +410,84 @@ def main():
             coverage_reason,
             rows,
             cache_checked_at,
-        ) = cache_coverage(postcode, selected, cache_record)
+        ) = cache_coverage(
+            postcode,
+            selected,
+            cache_record,
+            refresh_days=(args.refresh_days if args.refresh_days > 0 else None),
+        )
+        seed_record = fresh_seed.get(key) if postcode in selected else None
+        if coverage_status != "complete" and seed_record:
+            record = dict(seed_record)
+            record.update({
+                "propertyRecordId": key,
+                "address": item.get("address", ""),
+                "postcode": item.get("postcode", ""),
+            })
+            coverage_status = "complete"
+            coverage_reason = ""
+            cache_checked_at = clean(record.get("updatedAt"))
+            sales = record["transactions"]
+        else:
+            canonical = target
+            match_method = "exact-address"
+            exact_rows = [row for row in rows if address_key(build_address(row)) == target]
+            if not exact_rows:
+                known_signatures = {
+                    (str(sale.get("date", ""))[:10], int(float(sale.get("price", 0))))
+                    for sale in current_sales[key]
+                }
+                anchors = [
+                    row for row in rows
+                    if (clean(row.get("date"))[:10], int(float(row.get("price", 0)))) in known_signatures
+                ]
+                if anchors:
+                    anchor = max(
+                        anchors,
+                        key=lambda row: address_score(item.get("address"), build_address(row)),
+                    )
+                    canonical = address_key(build_address(anchor))
+                    match_method = "known-sale-anchor"
+            matched_rows = [
+                row for row in rows
+                if address_key(build_address(row)) == canonical
+            ]
+            sales = [transaction_from_row(row) for row in matched_rows]
+            if coverage_status == "complete":
+                published_signatures = {
+                    (sale["date"], sale["price"]) for sale in sales
+                }
+                base_fallbacks = [
+                    transaction_from_base(sale)
+                    for sale in current_sales[key]
+                    if (
+                        clean(sale.get("date"))[:10],
+                        int(float(sale.get("price", 0))),
+                    ) not in published_signatures
+                ]
+                if base_fallbacks:
+                    sales.extend(base_fallbacks)
+                    match_method += "+canonical-base"
+            unique = {sale["id"]: sale for sale in sales}
+            sales = sorted(unique.values(), key=lambda sale: sale["date"], reverse=True)
+            record = {
+                "propertyRecordId": key,
+                "address": item.get("address", ""),
+                "postcode": item.get("postcode", ""),
+                "coverageStatus": coverage_status,
+                "totalTransactions": len(sales),
+                "latestTransaction": sales[0] if sales else None,
+                "transactions": sales,
+                "matchMethod": match_method,
+                "source": SOURCE_NAME,
+                "updatedAt": (
+                    cache_checked_at
+                    if coverage_status == "complete"
+                    else collected_at
+                ),
+            }
+            if coverage_reason:
+                record["coverageReason"] = coverage_reason
         if coverage_status == "complete":
             properties_checked += 1
             complete_check_times.append(cache_checked_at)
@@ -286,44 +495,6 @@ def main():
             properties_not_checked += 1
         else:
             properties_unavailable += 1
-        canonical = target
-        match_method = "exact-address"
-        exact_rows = [row for row in rows if address_key(build_address(row)) == target]
-        if not exact_rows:
-            known_signatures = {
-                (str(sale.get("date", ""))[:10], int(float(sale.get("price", 0))))
-                for sale in current_sales[key]
-            }
-            anchors = [
-                row for row in rows
-                if (clean(row.get("date"))[:10], int(float(row.get("price", 0)))) in known_signatures
-            ]
-            if anchors:
-                anchor = max(anchors, key=lambda row: address_score(item.get("address"), build_address(row)))
-                canonical = address_key(build_address(anchor))
-                match_method = "known-sale-anchor"
-        matched_rows = [row for row in rows if address_key(build_address(row)) == canonical]
-        sales = [transaction_from_row(row) for row in matched_rows]
-        unique = {sale["id"]: sale for sale in sales}
-        sales = sorted(unique.values(), key=lambda sale: sale["date"], reverse=True)
-        record = {
-            "propertyRecordId": key,
-            "address": item.get("address", ""),
-            "postcode": item.get("postcode", ""),
-            "coverageStatus": coverage_status,
-            "totalTransactions": len(sales),
-            "latestTransaction": sales[0] if sales else None,
-            "transactions": sales,
-            "matchMethod": match_method,
-            "source": SOURCE_NAME,
-            "updatedAt": (
-                cache_checked_at
-                if coverage_status == "complete"
-                else collected_at
-            ),
-        }
-        if coverage_reason:
-            record["coverageReason"] = coverage_reason
         history[key] = record
         for transaction_id in transaction_ids[key]:
             if transaction_id:

@@ -10,6 +10,7 @@ permissions:
 
 concurrency:
   group: insight-data-refresh
+  queue: max
   cancel-in-progress: false
 
 jobs:
@@ -44,10 +45,60 @@ jobs:
             exit 1
           fi
 
-      - name: Check data completeness
-        run: python3 scripts/check_data_completeness.py
+      - name: Check refreshed flood producer output
+        run: python3 scripts/check_data_completeness.py --base-only
+
+      - name: Commit updated flood context
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          if git diff --name-only --diff-filter=U | grep -q .; then
+            echo "::error::Flood refresh produced unresolved Git conflicts."
+            exit 1
+          fi
+          if grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
+            echo "::error::Flood feed contains Git conflict markers."
+            exit 1
+          fi
+          git add outputs/surrey-transactions.js
+          if git diff --cached --quiet; then
+            echo "No daily flood-context changes to commit."
+          else
+            git commit -m "Update INSIGHT daily flood context"
+            for attempt in 1 2 3; do
+              git fetch origin "$GITHUB_REF_NAME"
+              if ! git rebase --autostash "origin/$GITHUB_REF_NAME"; then
+                git rebase --abort || true
+                echo "::error::Concurrent publication conflicted with the flood refresh."
+                exit 1
+              fi
+              if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/surrey-transactions.js; then
+                echo "::error::Flood refresh contains conflicts after rebasing."
+                exit 1
+              fi
+              python3 scripts/check_data_completeness.py --base-only
+              if git push origin "HEAD:$GITHUB_REF_NAME"; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "::error::Flood refresh could not publish after 3 attempts."
+                exit 1
+              fi
+            done
+          fi
+
+      - name: Check whether all Today dependencies are release-ready
+        id: release
+        run: |
+          if python3 scripts/check_data_completeness.py --strict-metadata; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Flood context was published, but Today remains on its last validated snapshot until a dependent producer repairs itself."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Materialise current Today opportunities
+        if: steps.release.outputs.ready == 'true'
         run: |
           python3 scripts/build_property_records.py \
             --transactions outputs/surrey-transactions.js \
@@ -62,46 +113,38 @@ jobs:
             --output outputs/today-feed.js
           python3 scripts/validate_today_feed.py outputs/today-feed.js
 
-      - name: Commit updated flood context and opportunities
+      - name: Commit updated Today opportunities
+        if: steps.release.outputs.ready == 'true'
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
           if git diff --name-only --diff-filter=U | grep -q .; then
-            echo "::error::Refresh produced unresolved Git conflicts; refusing to commit."
+            echo "::error::Today refresh produced unresolved Git conflicts; refusing to commit."
             exit 1
           fi
-          if grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js outputs/today-feed.js; then
-            echo "::error::Feed contains Git conflict markers; refusing to commit."
+          if grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/today-feed.js; then
+            echo "::error::Today feed contains Git conflict markers; refusing to commit."
             exit 1
           fi
-          PYTHONPATH=scripts python3 - <<'PY'
-          from pathlib import Path
-          from insight_data_utils import FEED_SCHEMA_VERSION, read_js
-
-          path = Path("outputs/surrey-transactions.js")
-          text = path.read_text(encoding="utf-8")
-          transactions, summary, meta = read_js(path)
-          assert text.count("window.SURREY_LAND_REG_") == 3, "feed must contain exactly three assignments"
-          assert transactions and isinstance(summary, dict), "feed data is incomplete"
-          assert meta.get("schemaVersion") == FEED_SCHEMA_VERSION, "feed schemaVersion is stale"
-          PY
-          git add outputs/surrey-transactions.js outputs/today-feed.js
+          git add outputs/today-feed.js
           if git diff --cached --quiet; then
-            echo "No daily flood-context or opportunity changes to commit."
+            echo "No Today opportunity changes to commit."
           else
-            git commit -m "Update INSIGHT daily context and opportunities"
+            git commit -m "Update INSIGHT Today opportunities"
             for attempt in 1 2 3; do
               git fetch origin "$GITHUB_REF_NAME"
               if ! git rebase --autostash "origin/$GITHUB_REF_NAME"; then
                 git rebase --abort || true
-                echo "::error::Concurrent publication conflicted with the daily refresh."
+                echo "::error::Concurrent publication conflicted with the Today refresh."
                 exit 1
               fi
+              python3 scripts/check_data_completeness.py --strict-metadata
+              python3 scripts/validate_today_feed.py outputs/today-feed.js
               if git push origin "HEAD:$GITHUB_REF_NAME"; then
                 break
               fi
               if [ "$attempt" -eq 3 ]; then
-                echo "::error::Daily refresh could not publish after 3 attempts."
+                echo "::error::Today refresh could not publish after 3 attempts."
                 exit 1
               fi
             done

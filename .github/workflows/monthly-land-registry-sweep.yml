@@ -1,4 +1,4 @@
-name: Legacy Manual INSIGHT Sweep
+name: Manual INSIGHT Property Refresh
 
 on:
   workflow_dispatch:
@@ -6,86 +6,7 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: insight-data-refresh
-  cancel-in-progress: false
-
 jobs:
-  update-insight-data:
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Synchronise selected branch
-        run: |
-          git fetch origin "$GITHUB_REF_NAME"
-          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
-
-      - name: Build audited private-estate registry
-        run: python3 scripts/build_private_estates_asset.py
-
-      - name: Run Land Registry sweeper
-        run: python3 scripts/sweep_land_registry.py
-
-      - name: Enrich with EPC floor areas
-        env:
-          EPC_BEARER_TOKEN: ${{ secrets.EPC_BEARER_TOKEN }}
-        run: |
-          if [ -z "$EPC_BEARER_TOKEN" ]; then
-            echo "::error::No EPC_BEARER_TOKEN secret configured. Add the GOV.UK EPC bearer token in Settings -> Secrets and variables -> Actions."
-            exit 1
-          fi
-          python3 scripts/enrich_epc_data.py \
-            --refresh-days 0 \
-            --fail-under-matches 1 \
-            --fail-if-no-matches-after 150 \
-            --max-run-minutes 105 \
-            --max-errors 75 \
-            --request-timeout 15 \
-            --request-retries 6 \
-            --max-certificate-fetches 3 \
-            --pause 0.75 \
-            --allow-partial-success \
-            --progress-every 25
-
-      - name: Enrich with optional property context
-        run: |
-          python3 scripts/enrich_property_context.py \
-            --missing-only \
-            --disable-osm \
-            --pause 0.15 \
-            --progress-every 25 \
-            --max-source-errors 20
-
-      - name: Check base estate-aware feed
-        # This legacy job refreshes the ledger, EPC and monthly context only.
-        # The combined Monthly INSIGHT Property Refresh owns the strict
-        # weekly/daily/OS alignment gate for an expanded property universe.
-        run: python3 scripts/check_data_completeness.py --base-only
-
-      - name: Commit updated data
-        run: |
-          git config user.name "INSIGHT data bot"
-          git config user.email "insight-data-bot@users.noreply.github.com"
-          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
-          if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<< |=======|>>>>>>> )' outputs/surrey-transactions.js; then
-            echo "::error::Refresh produced Git conflicts; refusing to commit."
-            exit 1
-          fi
-          PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import FEED_SCHEMA_VERSION,read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==FEED_SCHEMA_VERSION'
-          git add outputs/surrey-transactions.js outputs/private-estates.js work/land-reg-surrey-2m-1995.csv work/land-reg-surrey-2m-1995-2009.csv work/land-reg-surrey-2m-2010.csv
-          if [ -f work/epc-cache.json ]; then
-            git add work/epc-cache.json
-          fi
-          if [ -f work/property-context-cache.json ]; then
-            git add work/property-context-cache.json
-          fi
-          if git diff --cached --quiet; then
-            echo "No INSIGHT data changes to commit."
-          else
-            git commit -m "Update INSIGHT property data"
-            git push origin "HEAD:$GITHUB_REF_NAME"
-          fi
+  atomic-property-refresh:
+    uses: ./.github/workflows/monthly-property-refresh.yml
+    secrets: inherit

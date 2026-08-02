@@ -10,6 +10,7 @@ permissions:
 
 concurrency:
   group: insight-data-refresh
+  queue: max
   cancel-in-progress: false
 
 jobs:
@@ -76,5 +77,25 @@ jobs:
             echo "No weekly INSIGHT changes to commit."
           else
             git commit -m "Update INSIGHT weekly context"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            for attempt in 1 2 3; do
+              git fetch origin "$GITHUB_REF_NAME"
+              if ! git rebase --autostash "origin/$GITHUB_REF_NAME"; then
+                git rebase --abort || true
+                echo "::error::Concurrent publication conflicted with the weekly-context refresh."
+                exit 1
+              fi
+              if git diff --name-only --diff-filter=U | grep -q . || grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/surrey-transactions.js; then
+                echo "::error::Weekly-context refresh contains conflicts after rebasing."
+                exit 1
+              fi
+              python3 scripts/check_data_completeness.py
+              PYTHONPATH=scripts python3 -c 'from pathlib import Path; from insight_data_utils import FEED_SCHEMA_VERSION,read_js; p=Path("outputs/surrey-transactions.js"); t=p.read_text(); rows,summary,meta=read_js(p); assert t.count("window.SURREY_LAND_REG_")==3 and rows and isinstance(summary,dict) and meta.get("schemaVersion")==FEED_SCHEMA_VERSION'
+              if git push origin "HEAD:$GITHUB_REF_NAME"; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "::error::Weekly-context refresh could not publish after 3 attempts."
+                exit 1
+              fi
+            done
           fi

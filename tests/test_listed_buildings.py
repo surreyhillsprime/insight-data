@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import enrich_listed_buildings as heritage  # noqa: E402
 import check_data_completeness as completeness  # noqa: E402
+from build_heritage_address_ledger import sha256_lines  # noqa: E402
 from enrich_weekly_context import (  # noqa: E402
     CONSTRAINT_DATASETS,
     constraints_for_item,
@@ -1409,12 +1410,7 @@ class HistoricEnglandContractTests(unittest.TestCase):
             )
         )
         mappings = payload["mappings"]
-        self.assertEqual(len(mappings), 3_947)
-        self.assertEqual(len({item["propertyRecordId"] for item in mappings}), 3_947)
-        self.assertEqual(
-            Counter(item["status"] for item in mappings),
-            Counter({"confirmed_listed": 143, "no_direct_match": 3_804}),
-        )
+        mapping_ids = {item["propertyRecordId"] for item in mappings}
         self.assertTrue(
             all(
                 item["listEntryNumbers"]
@@ -1435,16 +1431,43 @@ class HistoricEnglandContractTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
-        self.assertEqual(audit["canonicalPropertyCount"], 3_947)
-        self.assertEqual(audit["confirmedPropertyCount"], 143)
-        self.assertEqual(audit["confirmedUniqueListEntryCount"], 140)
+        self.assertEqual(len(mappings), audit["canonicalPropertyCount"])
+        self.assertEqual(len(mapping_ids), audit["canonicalPropertyCount"])
         self.assertEqual(
-            audit["confirmedGradeCounts"],
-            {"I": 3, "II": 132, "II*": 8},
+            Counter(item["status"] for item in mappings),
+            Counter({
+                "confirmed_listed": audit["confirmedPropertyCount"],
+                "no_direct_match": (
+                    audit["documentedNoDirectPropertyCount"]
+                    + audit["genericNoDirectPropertyCount"]
+                ),
+                "unknown": audit["unknownPropertyCount"],
+            }),
         )
-        self.assertEqual(audit["documentedNoDirectPropertyCount"], 43)
-        self.assertEqual(audit["genericNoDirectPropertyCount"], 3_761)
-        self.assertEqual(audit["unknownPropertyCount"], 0)
+        retired_confirmed = [
+            item
+            for item in audit.get("retiredMappings", [])
+            if item["status"] == "confirmed_listed"
+        ]
+        reviewed_confirmed = audit["confirmedMappings"] + retired_confirmed
+        self.assertEqual(
+            len(reviewed_confirmed),
+            143,
+            "Every confirmed decision in the reviewed corpus must remain active or retired",
+        )
+        self.assertEqual(
+            len({
+                number
+                for item in reviewed_confirmed
+                for number in item["listEntryNumbers"]
+            }),
+            140,
+            "Retiring a property must not erase its confirmed statutory evidence",
+        )
+        self.assertEqual(
+            sum(audit["confirmedGradeCounts"].values()),
+            audit["confirmedPropertyCount"],
+        )
         audit_pairs = sorted(
             f"{item['propertyRecordId']}|{number}"
             for item in audit["confirmedMappings"]
@@ -1459,16 +1482,27 @@ class HistoricEnglandContractTests(unittest.TestCase):
         self.assertEqual(audit_pairs, ledger_pairs)
         self.assertEqual(
             audit["confirmedPairDigest"],
-            "dbbb9cddaf70663727f95e23e9522a31ee2eb20fbde3f746a213ccc05d3a6f0a",
+            sha256_lines(audit_pairs),
         )
         transactions, _summary, _metadata = read_js(
             ROOT / "outputs" / "surrey-transactions.js"
         )
         current_property_ids = set(heritage.build_properties(transactions))
-        self.assertTrue(
-            {item["propertyRecordId"] for item in mappings}
-            <= current_property_ids
+        self.assertEqual(mapping_ids, current_property_ids)
+        self.assertEqual(
+            audit["canonicalPropertyDigest"],
+            sha256_lines(current_property_ids),
         )
+        retired = {
+            item["propertyRecordId"]: item
+            for item in audit.get("retiredMappings", [])
+        }
+        beresford = retired.get(
+            "property:BERESFORD COURT WESTERHAM ROAD OXTED RH8 0SL|RH80SL"
+        )
+        self.assertIsNotNone(beresford)
+        self.assertEqual(beresford["status"], "confirmed_listed")
+        self.assertEqual(beresford["listEntryNumbers"], ["1029786"])
 
     def test_publication_removes_legacy_weekly_planning_data_heritage_metadata(self):
         row = transaction()
@@ -1509,9 +1543,45 @@ class HistoricEnglandContractTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn('cron: "15 8 * * *"', daily)
         self.assertIn("group: insight-data-refresh", daily)
+        self.assertLess(
+            daily.index("reconcile_heritage_address_audit.py --write"),
+            daily.index("python3 scripts/enrich_listed_buildings.py"),
+        )
         self.assertIn("enrich_listed_buildings.py --validate-only", daily)
         self.assertEqual(daily.rstrip().splitlines()[-1].strip(), "fi")
         self.assertIn("python3 scripts/enrich_listed_buildings.py", monthly)
+        self.assertLess(
+            monthly.index("reconcile_heritage_address_audit.py --write"),
+            monthly.index("python3 scripts/enrich_listed_buildings.py"),
+        )
+        self.assertIn(
+            "STAGING_BRANCH: automation/monthly-${{ github.run_id }}-${{ github.run_attempt }}",
+            monthly,
+        )
+        self.assertIn('git push origin "HEAD:$RELEASE_BRANCH"', monthly)
+        sweep_index = monthly.index("python3 scripts/sweep_land_registry.py")
+        self.assertNotIn(
+            "unittest discover -s tests",
+            monthly[:sweep_index],
+        )
+        self.assertIn(
+            "check_data_completeness.py --base-only",
+            monthly[:sweep_index],
+        )
+        final_checkout = monthly.index(
+            "- name: Check out committed expanded context",
+            monthly.index("materialise-today:"),
+        )
+        final_publish = monthly.index("- name: Publish one validated monthly snapshot")
+        self.assertIn("fetch-depth: 0", monthly[final_checkout:final_publish])
+        self.assertIn(
+            "+refs/heads/$RELEASE_BRANCH:refs/remotes/origin/$RELEASE_BRANCH",
+            monthly,
+        )
+        self.assertGreater(
+            monthly.index('git push origin "HEAD:$RELEASE_BRANCH"'),
+            monthly.index("check_data_completeness.py --strict-metadata"),
+        )
 
     def test_monthly_base_only_can_precede_heritage_alignment(self):
         existing = transaction()

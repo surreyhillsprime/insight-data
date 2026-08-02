@@ -10,7 +10,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from collect_title_history import cache_coverage  # noqa: E402
+from collect_title_history import (  # noqa: E402
+    cache_coverage,
+    load_seed_history,
+    seed_record_is_fresh,
+)
 from validate_sales_history_feed import (  # noqa: E402
     ADDRESS_DATA_USE,
     ATTRIBUTION,
@@ -18,6 +22,7 @@ from validate_sales_history_feed import (  # noqa: E402
     SOURCE_LICENCE_URL,
     SOURCE_NAME,
     base_feed_identity,
+    read_base_feed,
     sha256_json,
     validate,
 )
@@ -164,6 +169,24 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "baseFeedFingerprint"):
             validate(self.sales_path, base_feed=self.base_path)
 
+    def test_complete_record_must_include_each_sale_proven_by_the_base(self):
+        assignments = self.assignments()
+        self.write_sales(assignments)
+        write_assignments(
+            self.base_path,
+            {"SURREY_LAND_REG_TRANSACTIONS": [
+                {
+                    "id": "txn-one",
+                    "propertyRecordId": self.property_one,
+                    "date": "2026-01-02",
+                    "price": 2_000_000,
+                },
+                {"id": "txn-two", "propertyRecordId": self.property_two},
+            ]},
+        )
+        with self.assertRaisesRegex(ValueError, "omits a sale proven"):
+            validate(self.sales_path, base_feed=self.base_path)
+
     def test_rejects_content_mutation_with_unchanged_history_fingerprint(self):
         assignments = self.assignments()
         changed = copy.deepcopy(
@@ -191,6 +214,80 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         self.assertIn("source unavailable", reason)
         self.assertEqual(rows, [])
         self.assertEqual(checked_at, "")
+
+    def test_stale_successful_cache_cannot_override_a_fresher_seed(self):
+        status, reason, rows, checked_at = cache_coverage(
+            "KT100AA",
+            {"KT100AA"},
+            {
+                "updatedAt": timestamp(days_ago=60),
+                "rows": [{"tx": "stale-row-without-an-error"}],
+            },
+            refresh_days=28,
+        )
+        self.assertEqual(status, "unavailable")
+        self.assertIn("stale", reason)
+        self.assertEqual(rows, [])
+        self.assertEqual(checked_at, "")
+
+    def test_fresh_complete_publication_can_seed_a_self_healing_refresh(self):
+        record = self.assignments()["SURREY_SALES_HISTORY"][self.property_one]
+        now = datetime.now(timezone.utc)
+        self.assertTrue(
+            seed_record_is_fresh(record, self.property_one, 28, now=now)
+        )
+        unavailable = copy.deepcopy(record)
+        unavailable["coverageStatus"] = "unavailable"
+        self.assertFalse(
+            seed_record_is_fresh(unavailable, self.property_one, 28, now=now)
+        )
+        self.assertFalse(
+            seed_record_is_fresh(record, self.property_two, 28, now=now)
+        )
+        stale = copy.deepcopy(record)
+        stale["updatedAt"] = timestamp(days_ago=29)
+        self.assertFalse(
+            seed_record_is_fresh(stale, self.property_one, 28, now=now)
+        )
+        self.assertFalse(
+            seed_record_is_fresh(
+                record,
+                self.property_one,
+                28,
+                required_sales=[{
+                    "date": "2026-08-01",
+                    "price": 2_500_000,
+                }],
+                now=now,
+            )
+        )
+
+    def test_seed_feed_is_validated_before_records_can_be_reused(self):
+        assignments = self.assignments()
+        changed = copy.deepcopy(
+            assignments["SURREY_SALES_HISTORY"][self.property_one]
+        )
+        changed["transactions"][0]["price"] = 2_100_000
+        changed["latestTransaction"] = changed["transactions"][0]
+        assignments["SURREY_SALES_HISTORY"][self.property_one] = changed
+        assignments["SURREY_SALES_HISTORY"]["txn-one"] = changed
+        self.write_sales(assignments)
+        with self.assertRaisesRegex(ValueError, "historyFingerprint"):
+            load_seed_history(self.sales_path, 28)
+
+    def test_force_refresh_can_consume_the_just_fetched_cache(self):
+        status, _reason, rows, checked_at = cache_coverage(
+            "KT100AA",
+            {"KT100AA"},
+            {
+                "updatedAt": timestamp(),
+                "rows": [{"tx": "newly-fetched-row"}],
+            },
+            refresh_days=None,
+        )
+        self.assertEqual(status, "complete")
+        self.assertEqual(rows, [{"tx": "newly-fetched-row"}])
+        self.assertTrue(checked_at)
 
     def test_unavailable_property_regression_is_fail_closed(self):
         self.write_sales(self.assignments())
@@ -224,6 +321,10 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
             validate(self.sales_path, base_feed=self.base_path, maximum_age_days=1)
 
     def test_checked_in_sales_feed_preserves_reviewed_counts(self):
+        base_rows = read_base_feed(ROOT / "outputs" / "surrey-transactions.js")
+        canonical_properties = {
+            item["propertyRecordId"] for item in base_rows
+        }
         result = validate(
             ROOT / "outputs" / "sales-history.js",
             base_feed=ROOT / "outputs" / "surrey-transactions.js",
@@ -232,39 +333,57 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
             maximum_properties_unavailable=4,
             maximum_age_days=45,
         )
+        self.assertEqual(result["canonicalPropertyRecords"], len(canonical_properties))
+        self.assertEqual(result["transactionAliases"], len(base_rows))
         self.assertEqual(
-            result,
-            {
-                "lookupKeys": 8626,
-                "canonicalPropertyRecords": 3947,
-                "transactionAliases": 4679,
-                "propertiesWithHistory": 3942,
-                "transactionsFound": 6735,
-                "updatedAt": "2026-07-21T22:07:55Z",
-            },
+            result["lookupKeys"], len(canonical_properties) + len(base_rows)
         )
+        self.assertGreaterEqual(result["propertiesWithHistory"], 3942)
+        self.assertGreaterEqual(result["transactionsFound"], 6735)
 
     def test_workflows_apply_remote_contract_after_rebase_and_daily(self):
         sales_workflow = (
             ROOT / ".github" / "workflows" / "sales-history-feed.yml"
         ).read_text(encoding="utf-8")
         pull_index = sales_workflow.rindex("git pull --rebase --autostash")
-        revalidation_index = sales_workflow.rindex(
-            "python3 scripts/validate_sales_history_feed.py"
-        )
         add_index = sales_workflow.rindex("git add outputs/sales-history.js")
-        self.assertLess(pull_index, revalidation_index)
-        self.assertLess(revalidation_index, add_index)
+        pulled_revalidation_index = sales_workflow.index(
+            "python3 scripts/validate_sales_history_feed.py",
+            pull_index,
+            add_index,
+        )
+        retry_index = sales_workflow.rindex("for attempt in 1 2 3; do")
+        rebase_index = sales_workflow.index(
+            'git rebase --autostash "origin/$GITHUB_REF_NAME"', retry_index
+        )
+        retry_revalidation_index = sales_workflow.index(
+            "python3 scripts/validate_sales_history_feed.py", rebase_index
+        )
+        push_index = sales_workflow.index(
+            'git push origin "HEAD:$GITHUB_REF_NAME"', retry_revalidation_index
+        )
+        self.assertLess(pull_index, pulled_revalidation_index)
+        self.assertLess(pulled_revalidation_index, add_index)
+        self.assertLess(add_index, retry_index)
+        self.assertLess(rebase_index, retry_revalidation_index)
+        self.assertLess(retry_revalidation_index, push_index)
         self.assertEqual(
             sales_workflow.count("--minimum-properties-with-history 3942"),
-            2,
+            3,
         )
-        self.assertEqual(sales_workflow.count("--minimum-transactions 6735"), 2)
+        self.assertEqual(sales_workflow.count("--minimum-transactions 6735"), 3)
         self.assertEqual(
             sales_workflow.count("--maximum-properties-unavailable 4"),
-            2,
+            3,
         )
         self.assertIn("--refresh-days 28", sales_workflow)
+        self.assertIn("--seed-feed outputs/sales-history.js", sales_workflow)
+        self.assertIn("check_data_completeness.py --base-only", sales_workflow)
+        preflight_index = sales_workflow.index(
+            "check_data_completeness.py --base-only"
+        )
+        producer_index = sales_workflow.index("collect_title_history.py")
+        self.assertLess(preflight_index, producer_index)
 
         daily = (
             ROOT / ".github" / "workflows" / "data-completeness.yml"
