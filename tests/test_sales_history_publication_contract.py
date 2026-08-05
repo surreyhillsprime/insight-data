@@ -15,6 +15,7 @@ from collect_title_history import (  # noqa: E402
     cache_coverage,
     load_seed_history,
     main as collect_title_history_main,
+    migrate_existing_history,
     seed_record_is_fresh,
 )
 from validate_sales_history_feed import (  # noqa: E402
@@ -149,6 +150,79 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         )
         self.assertEqual(result["canonicalPropertyRecords"], 2)
         self.assertEqual(result["transactionAliases"], 2)
+
+    def test_rejects_property_denominator_coverage_regression(self):
+        self.write_sales(self.assignments())
+        with self.assertRaisesRegex(ValueError, "property-denominator"):
+            validate(
+                self.sales_path,
+                base_feed=self.base_path,
+                minimum_property_coverage_percent=51,
+            )
+
+    def test_history_migration_unions_old_property_alias_records(self):
+        canonical_id = "property:CHIMNEYS YAFFLE ROAD WEYBRIDGE KT13 0QF|KT130QF"
+        transactions = [
+            {
+                "id": "lr-old",
+                "propertyRecordId": canonical_id,
+                "address": "CHIMNEYS, YAFFLE ROAD, WEYBRIDGE, KT13 0QF",
+                "postcode": "KT13 0QF",
+            },
+            {
+                "id": "lr-new",
+                "propertyRecordId": canonical_id,
+                "address": "CHIMNEYS, YAFFLE ROAD, WEYBRIDGE, KT13 0QF",
+                "postcode": "KT13 0QF",
+            },
+        ]
+        old_ids = [
+            "property:CHIMNEYS YAFFLE ROAD WEYBRIDGE WEYBRIDGE KT13 0QF|KT130QF",
+            canonical_id,
+        ]
+        prior_history = {}
+        for index, (transaction_id, old_id) in enumerate(
+            zip(("lr-old", "lr-new"), old_ids),
+            start=1,
+        ):
+            sale = {
+                "id": f"hmlr-{index}",
+                "address": (
+                    "CHIMNEYS, YAFFLE ROAD, WEYBRIDGE, WEYBRIDGE, KT13 0QF"
+                    if index == 1
+                    else "CHIMNEYS, YAFFLE ROAD, WEYBRIDGE, KT13 0QF"
+                ),
+                "postcode": "KT13 0QF",
+                "price": index * 1_000_000,
+                "date": f"200{index}-01-01",
+                "source": SOURCE_NAME,
+            }
+            record = {
+                "propertyRecordId": old_id,
+                "coverageStatus": "complete",
+                "transactions": [sale],
+                "updatedAt": self.checked_at,
+                "matchMethod": "exact-address",
+            }
+            prior_history[old_id] = record
+            prior_history[transaction_id] = record
+
+        history, metadata = migrate_existing_history(
+            transactions,
+            prior_history,
+            {"sourceCheckedAt": self.checked_at},
+            "commercial",
+        )
+
+        self.assertEqual(history[canonical_id]["totalTransactions"], 2)
+        self.assertEqual(
+            history[canonical_id]["matchMethod"],
+            "canonical-property-address-alias-union",
+        )
+        self.assertIs(history["lr-old"], history[canonical_id])
+        self.assertIs(history["lr-new"], history[canonical_id])
+        self.assertEqual(metadata["canonicalPropertyRecords"], 1)
+        self.assertEqual(metadata["transactionsFound"], 2)
 
     def test_rejects_same_count_base_identity_pair_mutation(self):
         assignments = self.assignments()
@@ -394,7 +468,7 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         result = validate(
             ROOT / "outputs" / "sales-history.js",
             base_feed=ROOT / "outputs" / "surrey-transactions.js",
-            minimum_properties_with_history=3942,
+            minimum_property_coverage_percent=99,
             minimum_transactions=6735,
             maximum_properties_unavailable=4,
             maximum_age_days=45,
@@ -404,7 +478,10 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         self.assertEqual(
             result["lookupKeys"], len(canonical_properties) + len(base_rows)
         )
-        self.assertGreaterEqual(result["propertiesWithHistory"], 3942)
+        self.assertGreaterEqual(
+            result["propertiesWithHistory"] * 100,
+            len(canonical_properties) * 99,
+        )
         self.assertGreaterEqual(result["transactionsFound"], 6735)
 
     def test_workflows_apply_remote_contract_after_rebase_and_daily(self):
@@ -434,7 +511,7 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         self.assertLess(rebase_index, retry_revalidation_index)
         self.assertLess(retry_revalidation_index, push_index)
         self.assertEqual(
-            sales_workflow.count("--minimum-properties-with-history 3942"),
+            sales_workflow.count("--minimum-property-coverage-percent 99"),
             3,
         )
         self.assertEqual(sales_workflow.count("--minimum-transactions 6735"), 3)
@@ -455,12 +532,12 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
             ROOT / ".github" / "workflows" / "data-completeness.yml"
         ).read_text(encoding="utf-8")
         self.assertIn("scripts/validate_sales_history_feed.py", daily)
-        self.assertIn("--minimum-properties-with-history 3942", daily)
+        self.assertIn("--minimum-property-coverage-percent 99", daily)
         self.assertIn("--minimum-transactions 6735", daily)
         self.assertIn("--maximum-properties-unavailable 4", daily)
         self.assertIn("scripts/validate_planning_feed.py", daily)
-        self.assertIn("--minimum-properties-with-history 3204", daily)
-        self.assertIn("--minimum-applications 21180", daily)
+        self.assertIn("--minimum-property-coverage-percent 79", daily)
+        self.assertIn("--minimum-applications 20000", daily)
 
 
 if __name__ == "__main__":

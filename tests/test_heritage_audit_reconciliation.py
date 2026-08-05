@@ -113,6 +113,90 @@ class HeritageAuditReconciliationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "digest"):
             validate_baseline(audit, self.ledger)
 
+    def test_exact_source_variant_ledger_migrates_and_resolves_reviewed_status(self):
+        audit = copy.deepcopy(self.audit)
+        audit["confirmedMappings"] = []
+        audit["unknownMappings"] = [{
+            "propertyRecordId": self.first,
+            "address": "FIRST HOUSE, TEST ROAD, ESHER, KT10 0AA",
+            "postcode": "KT10 0AA",
+            "listEntryNumbers": [],
+            "reviewedBy": "Automated fail-closed reconciliation",
+            "reviewedAt": "2026-08-02",
+            "note": "Pending review.",
+        }]
+        audit["confirmedPropertyCount"] = 0
+        audit["confirmedUniqueListEntryCount"] = 0
+        audit["confirmedGradeCounts"] = {"I": 0, "II": 0, "II*": 0}
+        audit["confirmedPairDigest"] = sha256_lines([])
+        audit["genericNoDirectPropertyCount"] = 1
+        audit["unknownPropertyCount"] = 1
+        ledger = copy.deepcopy(self.ledger)
+        ledger[self.first].update({
+            "status": "unknown",
+            "listEntryNumbers": [],
+            "reviewedBy": "Automated fail-closed reconciliation",
+            "reviewedAt": "2026-08-02",
+            "note": "Pending review.",
+        })
+        ledger[self.first].pop("evidenceUrl")
+        properties = {
+            self.third: {"item": {
+                "address": "THIRD HOUSE, TEST ROAD, ESHER, KT10 0AC",
+                "postcode": "KT10 0AC",
+            }},
+        }
+        address_canonicalisation = {
+            "sourceAddressVariantProperties": 1,
+            "sourceAddressVariantCount": 2,
+            "sourceAddressVariants": {
+                self.third: [
+                    {
+                        "propertyRecordId": self.first,
+                        "address": "FIRST HOUSE, TEST ROAD, ESHER, KT10 0AA",
+                        "postcode": "KT100AA",
+                    },
+                    {
+                        "propertyRecordId": self.second,
+                        "address": "SECOND HOUSE, TEST ROAD, ESHER, KT10 0AB",
+                        "postcode": "KT100AB",
+                    },
+                ],
+            },
+        }
+
+        result = reconcile_payload(
+            audit,
+            ledger,
+            properties,
+            reconciled_at="2026-08-05",
+            max_change_fraction=1.0,
+            address_canonicalisation=address_canonicalisation,
+        )
+
+        self.assertEqual(result["canonicalPropertyCount"], 1)
+        self.assertEqual(result["confirmedPropertyCount"], 0)
+        self.assertEqual(result["documentedNoDirectPropertyCount"], 1)
+        self.assertEqual(result["genericNoDirectPropertyCount"], 0)
+        self.assertEqual(result["unknownPropertyCount"], 0)
+        self.assertEqual(
+            result["noDirectMappings"][0]["propertyRecordId"],
+            self.third,
+        )
+        self.assertEqual(len(result["retiredMappings"]), 2)
+        self.assertTrue(all(
+            item["canonicalPropertyRecordId"] == self.third
+            for item in result["retiredMappings"]
+        ))
+        self.assertEqual(
+            result["universeReconciliation"]["sourceAddressVariantCount"],
+            2,
+        )
+        self.assertEqual(
+            result["universeReconciliation"]["identityAliasesCollapsed"],
+            1,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

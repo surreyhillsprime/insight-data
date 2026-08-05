@@ -164,7 +164,128 @@ def match_applications(item, postcode_index, uprn_index, minimum_score):
     return matches, "postcode-and-address", best_score
 
 
-def enrich(transactions, applications, minimum_score=0.72):
+def application_identity(application):
+    """Return the licensed-source identity used to union alias-view matches."""
+
+    return (
+        clean(application.get("authority")).lower(),
+        clean(application.get("reference")).lower(),
+    )
+
+
+def declared_address_views(item, source_address_variants):
+    """Return canonical plus producer-declared legacy address lookup views."""
+
+    property_id = clean(item.get("propertyRecordId")) or property_match_key(item)
+    variants = source_address_variants.get(property_id, [])
+    if not isinstance(variants, list):
+        raise ValueError(
+            f"Source-address variants for {property_id} must be an array"
+        )
+    views = [(dict(item), False)]
+    seen = {
+        (
+            clean(item.get("address")).upper(),
+            normalise_postcode(item.get("postcode")),
+        )
+    }
+    for variant in variants:
+        if not isinstance(variant, dict):
+            raise ValueError(
+                f"Source-address variant for {property_id} must be an object"
+            )
+        address = clean(variant.get("address"))
+        postcode = normalise_postcode(variant.get("postcode"))
+        if not address:
+            raise ValueError(
+                f"Source-address variant for {property_id} has no address"
+            )
+        identity = (address.upper(), postcode)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        legacy = dict(item)
+        legacy.update({
+            "address": address,
+            "postcode": postcode,
+            # A legacy address view is authorised by the producer ledger, not
+            # by assuming that the current row's UPRN belongs to old wording.
+            "uprn": "",
+            "ordnanceSurvey": {},
+        })
+        views.append((legacy, True))
+    return views
+
+
+def match_declared_property_views(
+    item,
+    postcode_index,
+    uprn_index,
+    minimum_score,
+    source_address_variants,
+):
+    """Union canonical and exact declared-variant matches once per source id."""
+
+    matched = {}
+    canonical_method = ""
+    canonical_matched = False
+    variant_added = False
+    best_score = 0.0
+    for view, is_variant in declared_address_views(
+        item,
+        source_address_variants,
+    ):
+        matches, method, confidence = match_applications(
+            view,
+            postcode_index,
+            uprn_index,
+            minimum_score,
+        )
+        if matches and not is_variant:
+            canonical_method = method
+            canonical_matched = True
+        best_score = max(best_score, confidence)
+        for application in matches:
+            identity = application_identity(application)
+            candidate_score = float(
+                application.get("matchConfidence", confidence) or 0
+            )
+            previous = matched.get(identity)
+            if previous is None:
+                matched[identity] = (candidate_score, dict(application))
+                variant_added = variant_added or is_variant
+            elif candidate_score > previous[0]:
+                matched[identity] = (candidate_score, dict(application))
+
+    applications = [value[1] for value in matched.values()]
+    applications.sort(
+        key=lambda application: (
+            application_date(application),
+            application_identity(application),
+        ),
+        reverse=True,
+    )
+    if variant_added:
+        method = (
+            f"{canonical_method}+declared-source-address-variants"
+            if canonical_matched
+            else "declared-source-address-variant"
+        )
+    else:
+        method = canonical_method or "postcode-and-address"
+    return applications, method, best_score
+
+
+def enrich(
+    transactions,
+    applications,
+    minimum_score=0.72,
+    *,
+    source_address_variants=None,
+):
+    source_address_variants = source_address_variants or {}
+    if not isinstance(source_address_variants, dict):
+        raise ValueError("Source-address variant ledger must be an object")
     postcode_index = defaultdict(list)
     uprn_index = defaultdict(list)
     unique = {}
@@ -192,9 +313,15 @@ def enrich(transactions, applications, minimum_score=0.72):
     checked_at = utc_now()
     for item in transactions:
         output = dict(item)
-        key = property_match_key(item)
+        key = clean(item.get("propertyRecordId")) or property_match_key(item)
         if key not in property_matches:
-            property_matches[key] = match_applications(item, postcode_index, uprn_index, minimum_score)
+            property_matches[key] = match_declared_property_views(
+                item,
+                postcode_index,
+                uprn_index,
+                minimum_score,
+                source_address_variants,
+            )
             stats["propertiesChecked"] += 1
         matches, method, confidence = property_matches[key]
         if matches:

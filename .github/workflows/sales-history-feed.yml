@@ -50,7 +50,7 @@ jobs:
           python3 scripts/validate_sales_history_feed.py
           outputs/sales-history.js
           --base-feed outputs/surrey-transactions.js
-          --minimum-properties-with-history 3942
+          --minimum-property-coverage-percent 99
           --minimum-transactions 6735
           --maximum-properties-unavailable 4
           --maximum-age-days 45
@@ -72,7 +72,7 @@ jobs:
           python3 scripts/validate_sales_history_feed.py \
             outputs/sales-history.js \
             --base-feed outputs/surrey-transactions.js \
-            --minimum-properties-with-history 3942 \
+            --minimum-property-coverage-percent 99 \
             --minimum-transactions 6735 \
             --maximum-properties-unavailable 4 \
             --maximum-age-days 45
@@ -111,7 +111,7 @@ jobs:
               python3 scripts/validate_sales_history_feed.py \
                 outputs/sales-history.js \
                 --base-feed outputs/surrey-transactions.js \
-                --minimum-properties-with-history 3942 \
+                --minimum-property-coverage-percent 99 \
                 --minimum-transactions 6735 \
                 --maximum-properties-unavailable 4 \
                 --maximum-age-days 45

@@ -18,6 +18,8 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
+from insight_data_utils import structured_delivery_point_key
+
 
 SCHEMA_VERSION = 1
 GENERATOR_VERSION = "property-records-4"
@@ -98,7 +100,8 @@ def clean(value: Any) -> str:
 def normalise_address(value: Any) -> str:
     """Return the v1 canonical full-address token string."""
 
-    return re.sub(r"[^A-Z0-9]+", " ", clean(value).upper()).strip()
+    text = re.sub(r"['\u2018\u2019\u02bc]", "", clean(value).upper())
+    return re.sub(r"[^A-Z0-9]+", " ", text).strip()
 
 
 def normalise_postcode(value: Any) -> str:
@@ -126,6 +129,9 @@ def property_record_id(item: Mapping[str, Any]) -> str:
     nearest/unconfirmed UPRN as identity.
     """
 
+    published = clean(item.get("propertyRecordId"))
+    if published.startswith("property:"):
+        return published
     address = normalise_address(item.get("address"))
     postcode = normalise_postcode(_postcode_display(item))
     if not address:
@@ -2706,6 +2712,19 @@ def build_property_records(
     planning_history = dict(planning_history or {})
     planning_meta = dict(planning_meta or {})
     prior_by_id = _normalise_prior_records(prior_records)
+    prior_by_delivery_point: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+    for prior_record in prior_by_id.values():
+        profile = (
+            prior_record.get("profile")
+            if isinstance(prior_record.get("profile"), Mapping)
+            else {}
+        )
+        delivery_point = structured_delivery_point_key({
+            **dict(profile),
+            "postcode": prior_record.get("postcode"),
+        })
+        if delivery_point:
+            prior_by_delivery_point[delivery_point].append(prior_record)
     as_of_value = _normalise_as_of(as_of, transactions, transaction_meta)
     generated_at_value = _normalise_generated_at(generated_at)
     configured_price_floor = _integer(transaction_meta.get("priceFloor"))
@@ -2932,7 +2951,38 @@ def build_property_records(
             "story": story,
         }
         fingerprint = record_fingerprint(record)
-        previous = prior_by_id.get(property_id)
+        prior_candidates = list(
+            prior_by_delivery_point.get(structured_delivery_point_key(latest), [])
+        )
+        exact_prior = prior_by_id.get(property_id)
+        if exact_prior and all(
+            candidate is not exact_prior for candidate in prior_candidates
+        ):
+            prior_candidates.append(exact_prior)
+        previous = None
+        if prior_candidates:
+            previous = max(
+                prior_candidates,
+                key=lambda candidate: (
+                    _integer(candidate.get("recordVersion")) or 1,
+                    clean(candidate.get("updatedAt")),
+                    len(candidate.get("events"))
+                    if isinstance(candidate.get("events"), list)
+                    else 0,
+                ),
+            )
+            previous = dict(previous)
+            created_dates = sorted(
+                clean(candidate.get("createdAt"))
+                for candidate in prior_candidates
+                if clean(candidate.get("createdAt"))
+            )
+            if created_dates:
+                previous["createdAt"] = created_dates[0]
+            previous["recordVersion"] = max(
+                _integer(candidate.get("recordVersion")) or 1
+                for candidate in prior_candidates
+            )
         if previous:
             record["createdAt"] = clean(previous.get("createdAt")) or generated_at_value
             if clean(previous.get("fingerprint")) == fingerprint:

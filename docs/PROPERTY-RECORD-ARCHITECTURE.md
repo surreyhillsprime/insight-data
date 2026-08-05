@@ -64,9 +64,12 @@ An empty address is rejected. If the postcode field is missing, the builder
 first extracts a valid postcode at the end of the full address; if none exists,
 it uses the explicit fail-closed `NOPOSTCODE` sentinel. This keeps the source
 transaction visible without merging it into any postcode-known property. A
-later postcode correction, or any other identity change, must be handled as an
-explicit alias/migration exercise rather than silently folded into a monthly
-run.
+later postcode correction, redundant locality or reviewed property rename is
+handled by the shared structured canonicaliser and evidence-reviewed alias
+registry. Every retired full-address identity is published in the compact
+`sourceAddressVariants` ledger so dependent evidence can migrate
+deterministically. Ambiguous variants continue to fail closed as separate
+properties.
 
 Every Land Registry transaction ID must belong to exactly one property record.
 That invariant is recomputed by the validator.
