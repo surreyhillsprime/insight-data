@@ -23,9 +23,13 @@ from pathlib import Path
 
 from private_estates import classify_estate, load_compiled_registry
 from insight_data_utils import (
+    ADDRESS_CANONICALISATION_VERSION,
     FEED_SCHEMA_VERSION,
     PROPERTY_RECORD_SCHEMA_VERSION,
+    canonical_display_address,
+    canonicalise_property_addresses,
     property_record_id,
+    valid_address_canonicalisation_ledger,
     write_js as write_canonical_js,
 )
 from transaction_exclusions import (
@@ -61,7 +65,8 @@ BASE_METADATA_FIELDS = {
     "estateTypeSummary", "estateRegistryVersion", "estateClassifierMode",
     "estateClassificationMode", "estateStructuredFieldCoverage",
     "estateActiveDefinitionCount", "estateActiveRuleCount",
-    "propertyRecordSchemaVersion", "canonicalPropertyRecords", "propertyIdentityMode", "transactionExclusions",
+    "propertyRecordSchemaVersion", "canonicalPropertyRecords", "propertyIdentityMode",
+    "transactionExclusions", "addressCanonicalisation",
 }
 
 CANONICAL_DISTRICTS = {
@@ -143,17 +148,7 @@ def build_address(row):
     # the primary object in a display address. Prefer the structured source
     # fields whenever they exist so a legacy flattened address cannot override
     # the authoritative components retained for estate classification.
-    parts = [
-        clean(row.get("saon")),
-        clean(row.get("paon")),
-        clean(row.get("street")),
-        clean(row.get("locality")),
-        clean(row.get("town")),
-        clean(row.get("postcode")),
-    ]
-    if any(parts[:4]):
-        return ", ".join(part for part in parts if part)
-    return clean(row.get("address"))
+    return canonical_display_address(row)
 
 
 def sparql_query(start_date=CURRENT_START_DATE, end_date=""):
@@ -475,6 +470,22 @@ def preserve_existing_enrichments(transactions, metadata, existing_transactions,
         enriched.append({**extras, **item})
     inherited_meta = {key: value for key, value in existing_metadata.items() if key not in BASE_METADATA_FIELDS}
     metadata = {**inherited_meta, **metadata}
+    address_stats_candidates = [
+        candidate
+        for candidate in (
+            metadata.get("addressCanonicalisation"),
+            existing_metadata.get("addressCanonicalisation"),
+        )
+        if valid_address_canonicalisation_ledger(candidate)
+    ]
+    if address_stats_candidates:
+        metadata["addressCanonicalisation"] = dict(max(
+            address_stats_candidates,
+            key=lambda candidate: (
+                candidate.get("sourceAddressIdentities", 0),
+                candidate.get("sourceAddressVariantCount", 0),
+            ),
+        ))
     new_transactions_at_expansion = len(transactions) - preserved
     metadata["historicalExpansion"] = {
         "coverageFrom": START_DATE,
@@ -503,7 +514,7 @@ def stable_transaction_id(address, postcode, price, date, property_type, categor
     return "lr-" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
 
 
-def normalise_rows(rows):
+def normalise_rows(rows, include_address_stats=False):
     transactions = []
     seen = set()
     raw_count = len(rows)
@@ -563,11 +574,22 @@ def normalise_rows(rows):
         }
         if find_transaction_exclusion(exclusion_candidate, exclusion_ledger):
             continue
-        key = (address.upper(), postcode, price, date, property_type, category)
+        prior_id = clean(row.get("id"))
+        valid_prior_id = bool(re.fullmatch(r"lr-[0-9a-f]{20}", prior_id))
+        transaction_id = (
+            prior_id
+            if valid_prior_id
+            else stable_transaction_id(address, postcode, price, date, property_type, category)
+        )
+        key = ("id", transaction_id) if valid_prior_id else (
+            address.upper(), postcode, price, date, property_type, category
+        )
         if key in seen:
             continue
         seen.add(key)
         transactions.append({
+            "id": transaction_id,
+            "propertyRecordId": property_record_id(address_row),
             "market": market,
             "district": district,
             "address": address.upper(),
@@ -594,10 +616,8 @@ def normalise_rows(rows):
             "category": category,
         })
     transactions.sort(key=lambda item: (item["date"], item["price"], item["address"]), reverse=True)
+    transactions, address_stats = canonicalise_property_addresses(transactions)
     for item in transactions:
-        item["id"] = stable_transaction_id(
-            item["address"], item["postcode"], item["price"], item["date"], item["propertyType"], item["category"]
-        )
         item["propertyRecordId"] = property_record_id(item)
     ordered = []
     for item in transactions:
@@ -629,6 +649,8 @@ def normalise_rows(rows):
             "kind": item["kind"],
             "category": item["category"],
         })
+    if include_address_stats:
+        return raw_count, ordered, address_stats
     return raw_count, ordered
 
 
@@ -689,6 +711,10 @@ def metadata(raw_count, transactions):
         "propertyRecordSchemaVersion": PROPERTY_RECORD_SCHEMA_VERSION,
         "canonicalPropertyRecords": len({item["propertyRecordId"] for item in transactions}),
         "propertyIdentityMode": "full-normalised-address-plus-postcode-fail-closed",
+        "addressCanonicalisation": {
+            "version": ADDRESS_CANONICALISATION_VERSION,
+            "identityKey": "normalised-saon-paon-street-or-locality-postcode",
+        },
         "estateSummary": dict(estates),
         "estateIdSummary": dict(estate_ids),
         "estateTypeSummary": dict(estate_types),
@@ -709,7 +735,7 @@ def metadata(raw_count, transactions):
 def write_processed_csv(path, transactions):
     path.parent.mkdir(parents=True, exist_ok=True)
     fields = [
-        "propertyRecordId", "address", "paon", "saon", "street", "locality", "town", "postcode", "district",
+        "id", "propertyRecordId", "address", "paon", "saon", "street", "locality", "town", "postcode", "district",
         "propertyType", "estateId", "estate", "estateClassification", "estateType", "estateRuleId",
         "estateRegistryVersion", "estateEvidenceStatus", "estateReviewStatus",
         "price", "date", "market", "category",
@@ -721,8 +747,8 @@ def write_processed_csv(path, transactions):
             writer.writerow({field: item[field] for field in fields})
 
 
-def write_js(path, transactions, meta):
-    write_canonical_js(path, transactions, meta)
+def write_js(path, transactions, meta, address_stats=None):
+    write_canonical_js(path, transactions, meta, address_stats=address_stats)
 
 
 def parse_args():
@@ -777,7 +803,7 @@ def main():
                     "Official refresh failed and the fallback CSV lacks structured HMLR address fields"
                 ) from exc
 
-    raw_count, transactions = normalise_rows(rows)
+    raw_count, transactions, address_stats = normalise_rows(rows, include_address_stats=True)
     meta = metadata(raw_count, transactions)
     transactions, meta = preserve_existing_enrichments(transactions, meta, existing_transactions, existing_metadata)
     print(f"Source: {source}")
@@ -789,8 +815,20 @@ def main():
         return 0
 
     write_processed_csv(Path(args.write_csv), transactions)
-    write_js(Path(args.write_js), transactions, meta)
+    if Path(args.write_csv).resolve() == DEFAULT_CSV.resolve():
+        write_processed_csv(
+            HISTORICAL_CSV,
+            [item for item in transactions if item.get("date", "") < CURRENT_START_DATE],
+        )
+        write_processed_csv(
+            CURRENT_CSV,
+            [item for item in transactions if item.get("date", "") >= CURRENT_START_DATE],
+        )
+    write_js(Path(args.write_js), transactions, meta, address_stats=address_stats)
     print(f"Updated {args.write_csv}")
+    if Path(args.write_csv).resolve() == DEFAULT_CSV.resolve():
+        print(f"Updated {HISTORICAL_CSV}")
+        print(f"Updated {CURRENT_CSV}")
     print(f"Updated {args.write_js}")
     return 0
 

@@ -1448,6 +1448,7 @@ class HistoricEnglandContractTests(unittest.TestCase):
             item
             for item in audit.get("retiredMappings", [])
             if item["status"] == "confirmed_listed"
+            and not item.get("canonicalPropertyRecordId")
         ]
         reviewed_confirmed = audit["confirmedMappings"] + retired_confirmed
         self.assertEqual(

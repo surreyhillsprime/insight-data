@@ -71,6 +71,7 @@ def validate(
     *,
     base_feed=None,
     minimum_properties_with_history=0,
+    minimum_property_coverage_percent=0,
     minimum_applications=0,
     maximum_age_days=45,
     allow_blocked=False,
@@ -233,6 +234,20 @@ def validate(
             "Planning publication regressed below the reviewed property-history floor: "
             f"{properties_with_history:,} < {minimum_properties_with_history:,}"
         )
+    if not 0 <= minimum_property_coverage_percent <= 100:
+        raise ValueError(
+            "Planning minimum property coverage percent must be between 0 and 100"
+        )
+    if (
+        canonical
+        and properties_with_history * 100
+        < len(canonical) * minimum_property_coverage_percent
+    ):
+        actual_percent = properties_with_history * 100 / len(canonical)
+        raise ValueError(
+            "Planning publication regressed below the reviewed property-denominator "
+            f"coverage floor: {actual_percent:.1f}% < {minimum_property_coverage_percent:g}%"
+        )
     if declared_applications < minimum_applications:
         raise ValueError(
             "Planning publication regressed below the reviewed application floor: "
@@ -315,6 +330,7 @@ def main():
     parser.add_argument("path", nargs="?", default="outputs/planning-history.js")
     parser.add_argument("--base-feed", default="")
     parser.add_argument("--minimum-properties-with-history", type=int, default=0)
+    parser.add_argument("--minimum-property-coverage-percent", type=float, default=0)
     parser.add_argument("--minimum-applications", type=int, default=0)
     parser.add_argument("--maximum-age-days", type=int, default=45)
     parser.add_argument(
@@ -330,6 +346,7 @@ def main():
         args.path,
         base_feed=args.base_feed or None,
         minimum_properties_with_history=args.minimum_properties_with_history,
+        minimum_property_coverage_percent=args.minimum_property_coverage_percent,
         minimum_applications=args.minimum_applications,
         maximum_age_days=args.maximum_age_days,
         allow_blocked=args.allow_blocked,

@@ -22,6 +22,16 @@ reviewed field allowlist. EPC certificate identifiers and matched addresses,
 match diagnostics, OpenStreetMap payloads, Companies House payloads, and
 property-level planning history remain outside the public transaction ledger.
 
+Address identity is canonicalised across the complete transaction snapshot
+before publication. Exact structured HMLR delivery points, guarded complete
+house-number signatures and the small reviewed registry in
+`config/property-address-aliases.json` may consolidate source variants; flats,
+redevelopment plots and ambiguous nearby titles remain separate. Metadata
+retains every superseded source identity in
+`addressCanonicalisation.sourceAddressVariants`, allowing downstream history
+and reviewed evidence to migrate deterministically without fuzzy matching.
+See `docs/ADDRESS-IDENTITY-AUDIT-2026-08-05.md`.
+
 ## Install INSIGHT
 
 The current public-safe INSIGHT v2.0.0 (build 37) macOS package is published at:

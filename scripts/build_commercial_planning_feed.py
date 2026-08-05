@@ -211,13 +211,17 @@ def main():
     args = parse_args()
     if not args.source_licence_url.startswith("https://"):
         raise ValueError("The licensed planning source must provide an HTTPS licence URL")
-    transactions, _summary, _meta = read_js(args.input_js)
+    transactions, _summary, base_meta = read_js(args.input_js)
+    address_meta = base_meta.get("addressCanonicalisation")
+    address_meta = address_meta if isinstance(address_meta, dict) else {}
+    source_address_variants = address_meta.get("sourceAddressVariants", {})
     source_rows = read_source(args.source)
     checked_at = utc_now()
     enriched, source_stats = enrich(
         transactions,
         source_rows,
         args.minimum_address_score,
+        source_address_variants=source_address_variants,
     )
     histories, canonical, coverage = build_histories(
         transactions,

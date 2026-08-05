@@ -111,6 +111,7 @@ def validate(
     base_feed=None,
     allow_local=False,
     minimum_properties_with_history=0,
+    minimum_property_coverage_percent=0,
     minimum_transactions=0,
     maximum_properties_unavailable=None,
     maximum_age_days=MAX_FRESHNESS_WINDOW_DAYS,
@@ -324,6 +325,20 @@ def validate(
                 "Sales-history publication regressed below the reviewed property-history "
                 f"floor: {properties_with_history:,} < {minimum_properties_with_history:,}"
             )
+        if not 0 <= minimum_property_coverage_percent <= 100:
+            raise ValueError(
+                "Sales-history minimum property coverage percent must be between 0 and 100"
+            )
+        if (
+            canonical
+            and properties_with_history * 100
+            < len(canonical) * minimum_property_coverage_percent
+        ):
+            actual_percent = properties_with_history * 100 / len(canonical)
+            raise ValueError(
+                "Sales-history publication regressed below the reviewed property-denominator "
+                f"coverage floor: {actual_percent:.1f}% < {minimum_property_coverage_percent:g}%"
+            )
         if transactions_found < minimum_transactions:
             raise ValueError(
                 "Sales-history publication regressed below the reviewed transaction floor: "
@@ -443,6 +458,7 @@ def main():
     parser.add_argument("--allow-local", action="store_true")
     parser.add_argument("--base-feed", default="")
     parser.add_argument("--minimum-properties-with-history", type=int, default=0)
+    parser.add_argument("--minimum-property-coverage-percent", type=float, default=0)
     parser.add_argument("--minimum-transactions", type=int, default=0)
     parser.add_argument("--maximum-properties-unavailable", type=int)
     parser.add_argument(
@@ -456,6 +472,7 @@ def main():
         base_feed=args.base_feed or None,
         allow_local=args.allow_local,
         minimum_properties_with_history=args.minimum_properties_with_history,
+        minimum_property_coverage_percent=args.minimum_property_coverage_percent,
         minimum_transactions=args.minimum_transactions,
         maximum_properties_unavailable=args.maximum_properties_unavailable,
         maximum_age_days=args.maximum_age_days,

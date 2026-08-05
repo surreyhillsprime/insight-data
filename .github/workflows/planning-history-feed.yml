@@ -57,8 +57,8 @@ jobs:
           python3 scripts/validate_planning_feed.py
           outputs/planning-history.js
           --base-feed outputs/surrey-transactions.js
-          --minimum-properties-with-history 3204
-          --minimum-applications 21180
+          --minimum-property-coverage-percent 79
+          --minimum-applications 20000
           --maximum-age-days 8
       - name: Commit changed feed
         run: |
@@ -72,8 +72,8 @@ jobs:
           python3 scripts/validate_planning_feed.py \
             outputs/planning-history.js \
             --base-feed outputs/surrey-transactions.js \
-            --minimum-properties-with-history 3204 \
-            --minimum-applications 21180 \
+            --minimum-property-coverage-percent 79 \
+            --minimum-applications 20000 \
             --maximum-age-days 8
           python3 scripts/build_property_records.py \
             --transactions outputs/surrey-transactions.js \
@@ -110,8 +110,8 @@ jobs:
               python3 scripts/validate_planning_feed.py \
                 outputs/planning-history.js \
                 --base-feed outputs/surrey-transactions.js \
-                --minimum-properties-with-history 3204 \
-                --minimum-applications 21180 \
+                --minimum-property-coverage-percent 79 \
+                --minimum-applications 20000 \
                 --maximum-age-days 8
               python3 scripts/build_property_records.py \
                 --transactions outputs/surrey-transactions.js \

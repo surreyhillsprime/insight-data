@@ -14,9 +14,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT_JS = ROOT / "outputs" / "surrey-transactions.js"
+PROPERTY_ADDRESS_ALIASES_PATH = ROOT / "config" / "property-address-aliases.json"
 POSTCODES_API = "https://api.postcodes.io/postcodes/"
 FEED_SCHEMA_VERSION = 3
 PROPERTY_RECORD_SCHEMA_VERSION = 1
+ADDRESS_CANONICALISATION_VERSION = "structured-delivery-point-v1"
 _POSTCODE_AT_END_RE = re.compile(r"\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\s*$", re.I)
 
 # This is the public row contract, not merely a schema hint. New top-level
@@ -104,14 +106,369 @@ def normalise_postcode(value):
 def canonical_address(value):
     """Return the fail-closed full-address identity shared by INSIGHT feeds."""
 
-    return re.sub(r"[^A-Z0-9]+", " ", clean(value).upper()).strip()
+    text = re.sub(r"['\u2018\u2019\u02bc]", "", clean(value).upper())
+    return re.sub(r"[^A-Z0-9]+", " ", text).strip()
+
+
+def canonical_display_address(item):
+    """Return a structured display address without repeated locality noise.
+
+    Historic HMLR rows sometimes repeat the postal town in both ``locality``
+    and ``town`` (for example ``WEYBRIDGE, WEYBRIDGE``).  That is a source
+    formatting variation, not a distinct delivery point, so it must not enter
+    the canonical address or property identity.
+    """
+
+    if not isinstance(item, dict):
+        return clean(item)
+    saon = clean(item.get("saon"))
+    paon = clean(item.get("paon"))
+    street = clean(item.get("street"))
+    locality = clean(item.get("locality"))
+    town = clean(item.get("town"))
+    postcode = clean(item.get("postcode"))
+    if locality and canonical_address(locality) == canonical_address(town):
+        locality = ""
+    parts = [saon, paon, street, locality, town, postcode]
+    if any(parts[:4]):
+        return ", ".join(part for part in parts if part)
+    return clean(item.get("address"))
+
+
+def structured_delivery_point_key(item):
+    """Return a conservative locality-independent HMLR delivery-point key.
+
+    PAON, SAON, street and postcode identify the structured delivery point.
+    Locality and postal-town wording are deliberately excluded because HMLR
+    has changed or omitted those descriptive fields between repeat sales.
+    Sparse rows fail closed and return an empty key.
+    """
+
+    if not isinstance(item, dict):
+        return ""
+    saon = canonical_address(item.get("saon"))
+    paon = canonical_address(item.get("paon"))
+    street = canonical_address(item.get("street"))
+    route = street or canonical_address(item.get("locality"))
+    postcode = normalise_postcode(item.get("postcode"))
+    if not paon or not route or not postcode:
+        return ""
+    return "|".join((saon, paon, route, postcode))
+
+
+def numbered_delivery_point_key(item):
+    """Return a guarded house-number alias key for named/unnamed PAON drift.
+
+    The complete numeric signature is retained.  Thus ``TOROSA, 30`` and
+    ``30`` can align, while ``PLOT 1, 12`` cannot align with bare ``12``.
+    """
+
+    if not isinstance(item, dict):
+        return ""
+    paon = canonical_address(item.get("paon"))
+    numeric_signature = tuple(
+        re.findall(r"(?<![A-Z0-9])\d+[A-Z]?(?![A-Z0-9])", paon)
+    )
+    saon = canonical_address(item.get("saon"))
+    street = canonical_address(item.get("street"))
+    route = street or canonical_address(item.get("locality"))
+    postcode = normalise_postcode(item.get("postcode"))
+    if not numeric_signature or not route or not postcode:
+        return ""
+    return "|".join((saon, ",".join(numeric_signature), route, postcode))
+
+
+def reviewed_property_address_aliases(path=PROPERTY_ADDRESS_ALIASES_PATH):
+    """Load and strictly validate the small reviewed cross-identity registry."""
+
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if payload.get("schemaVersion") != 1 or not isinstance(payload.get("groups"), list):
+        raise ValueError("Property-address alias registry is missing schemaVersion 1 groups")
+    seen_members = set()
+    for group in payload["groups"]:
+        members = group.get("members") if isinstance(group, dict) else None
+        canonical = group.get("canonicalPropertyId") if isinstance(group, dict) else None
+        if (
+            not isinstance(members, list)
+            or len(members) < 2
+            or not all(isinstance(value, str) and value.startswith("property:") for value in members)
+            or canonical not in members
+        ):
+            raise ValueError("Property-address alias group is malformed")
+        overlap = seen_members.intersection(members)
+        if overlap:
+            raise ValueError("Property-address alias member occurs in multiple groups: " + ", ".join(sorted(overlap)))
+        seen_members.update(members)
+    return payload
+
+
+def reviewed_alias_postcodes_by_canonical_property(path=PROPERTY_ADDRESS_ALIASES_PATH):
+    """Return every reviewed historic postcode needed for a full history lookup."""
+
+    payload = reviewed_property_address_aliases(path)
+    result = {}
+    for group in payload["groups"]:
+        postcodes = {
+            normalise_postcode(member.rpartition("|")[2])
+            for member in group["members"]
+            if member.rpartition("|")[1] and member.rpartition("|")[2] != "NOPOSTCODE"
+        }
+        result[group["canonicalPropertyId"]] = tuple(sorted(postcodes))
+    return result
+
+
+def canonicalise_property_addresses(transactions):
+    """Canonicalise address variants across a complete transaction snapshot.
+
+    Exact structured delivery points, guarded named/numbered PAON variants and
+    the small evidence-reviewed alias registry are considered.  The most
+    informative address variant is selected deterministically and applied to
+    every repeat sale.  This keeps full canonical addresses while preventing
+    administrative wording changes and verified renames from creating phantom
+    properties.
+    """
+
+    rows = [dict(item) for item in transactions]
+    original_rows = [dict(item) for item in rows]
+    legacy_property_id_by_index = [
+        clean(item.get("propertyRecordId"))
+        if clean(item.get("propertyRecordId")).startswith("property:")
+        else (
+            f"property:{canonical_address(item.get('address'))}|{normalise_postcode(item.get('postcode')) or 'NOPOSTCODE'}"
+            if canonical_address(item.get("address")) else ""
+        )
+        for item in rows
+    ]
+    legacy_property_ids = {value for value in legacy_property_id_by_index if value}
+    redundant_localities = sum(
+        bool(canonical_address(item.get("locality")))
+        and canonical_address(item.get("locality")) == canonical_address(item.get("town"))
+        for item in rows
+    )
+    groups = {}
+    for index, item in enumerate(rows):
+        key = structured_delivery_point_key(item)
+        if key:
+            groups.setdefault(key, []).append(index)
+    structured_alias_groups = sum(
+        len({legacy_property_id_by_index[index] for index in indexes if legacy_property_id_by_index[index]}) > 1
+        for indexes in groups.values()
+    )
+    structured_aliases_collapsed = sum(
+        max(
+            0,
+            len({legacy_property_id_by_index[index] for index in indexes if legacy_property_id_by_index[index]}) - 1,
+        )
+        for indexes in groups.values()
+    )
+
+    def donor_rank(index):
+        candidate = rows[index]
+        locality = clean(candidate.get("locality"))
+        town = clean(candidate.get("town"))
+        informative_locality = bool(
+            locality and canonical_address(locality) != canonical_address(town)
+        )
+        paon_tokens = canonical_address(candidate.get("paon")).split()
+        named_paon = any(
+            not re.fullmatch(r"\d+[A-Z]?", token)
+            for token in paon_tokens
+        )
+        return (
+            named_paon,
+            informative_locality,
+            bool(town),
+            clean(candidate.get("date"))[:10],
+            canonical_display_address(candidate),
+        )
+
+    def apply_group(indexes):
+        donor = rows[max(indexes, key=donor_rank)]
+        canonical_fields = {
+            key: clean(donor.get(key))
+            for key in ("saon", "paon", "street", "locality", "town", "postcode")
+        }
+        if (
+            canonical_fields["locality"]
+            and canonical_address(canonical_fields["locality"])
+            == canonical_address(canonical_fields["town"])
+        ):
+            canonical_fields["locality"] = ""
+        for index in indexes:
+            rows[index].update(canonical_fields)
+            rows[index]["address"] = canonical_display_address(rows[index]).upper()
+
+    for indexes in groups.values():
+        apply_group(indexes)
+
+    numbered_groups = {}
+    for index, item in enumerate(rows):
+        key = numbered_delivery_point_key(item)
+        if key:
+            numbered_groups.setdefault(key, []).append(index)
+    applied_numbered_groups = 0
+    for indexes in numbered_groups.values():
+        property_ids = {property_record_id(rows[index]) for index in indexes}
+        if len(property_ids) < 2:
+            continue
+        # Fail closed on contradictory source classifications or two different
+        # sale facts on the same date.  These conditions suggest separate units,
+        # redevelopment plots or a source error rather than a harmless alias.
+        conflicts = any(
+            len({clean(rows[index].get(field)).upper() for index in indexes if clean(rows[index].get(field))}) > 1
+            for field in ("district", "market", "propertyType", "estateId")
+        )
+        sale_dates = {}
+        for index in indexes:
+            date = clean(rows[index].get("date"))[:10]
+            fact = (
+                rows[index].get("price"),
+                clean(rows[index].get("propertyType")).upper(),
+                clean(rows[index].get("category")).upper(),
+            )
+            sale_dates.setdefault(date, set()).add(fact)
+        if conflicts or any(len(facts) > 1 for facts in sale_dates.values()):
+            continue
+        apply_group(indexes)
+        applied_numbered_groups += 1
+
+    alias_registry = reviewed_property_address_aliases()
+    applied_reviewed_groups = 0
+    for group in alias_registry["groups"]:
+        members = set(group["members"])
+        indexes = [
+            index for index, legacy_id in enumerate(legacy_property_id_by_index)
+            if legacy_id in members
+        ]
+        present_members = {legacy_property_id_by_index[index] for index in indexes}
+        canonical_indexes = [
+            index for index in indexes
+            if legacy_property_id_by_index[index] == group["canonicalPropertyId"]
+        ]
+        if len(present_members) < 2 or not canonical_indexes:
+            continue
+        canonical_index = max(canonical_indexes, key=donor_rank)
+        canonical_fields = {
+            key: clean(rows[canonical_index].get(key))
+            for key in ("saon", "paon", "street", "locality", "town", "postcode")
+        }
+        if (
+            canonical_fields["locality"]
+            and canonical_address(canonical_fields["locality"])
+            == canonical_address(canonical_fields["town"])
+        ):
+            canonical_fields["locality"] = ""
+        for index in indexes:
+            rows[index].update(canonical_fields)
+            rows[index]["address"] = canonical_display_address(rows[index]).upper()
+        applied_reviewed_groups += 1
+
+    # Structured canonicalisation cannot safely infer identity for sparse rows,
+    # but it can still remove an exact locality/town repetition from display.
+    grouped_indexes = {index for indexes in groups.values() for index in indexes}
+    for index, item in enumerate(rows):
+        if index in grouped_indexes:
+            continue
+        locality = clean(item.get("locality"))
+        town = clean(item.get("town"))
+        if locality and canonical_address(locality) == canonical_address(town):
+            item["locality"] = ""
+            item["address"] = canonical_display_address(item).upper()
+
+    compared_fields = ("address", "saon", "paon", "street", "locality", "town", "postcode")
+    changed_rows = sum(
+        tuple(clean(before.get(key)) for key in compared_fields)
+        != tuple(clean(after.get(key)) for key in compared_fields)
+        for before, after in zip(original_rows, rows)
+    )
+
+    canonical_property_ids = {
+        property_record_id(item)
+        for item in rows
+        if property_record_id(item)
+    }
+    source_variant_candidates = {}
+    for index, (original, canonical) in enumerate(zip(original_rows, rows)):
+        canonical_property_id = property_record_id(canonical)
+        legacy_property_id = legacy_property_id_by_index[index]
+        source_address = (
+            clean(original.get("address")) or canonical_display_address(original)
+        ).upper()
+        source_postcode = normalise_postcode(original.get("postcode"))
+        if (
+            canonical_property_id
+            and legacy_property_id
+            and canonical_address(source_address)
+        ):
+            candidate = {
+                "propertyRecordId": legacy_property_id,
+                "address": source_address,
+                "postcode": source_postcode,
+                "_rank": (
+                    legacy_property_id == canonical_property_id,
+                    clean(original.get("date"))[:10],
+                    canonical_address(source_address),
+                ),
+            }
+            variants = source_variant_candidates.setdefault(canonical_property_id, {})
+            prior = variants.get(legacy_property_id)
+            if prior is None or candidate["_rank"] > prior["_rank"]:
+                variants[legacy_property_id] = candidate
+
+    # Retain every source identity which no longer exists in the final
+    # canonical set. This is the complete retired-ID mapping, not merely the
+    # net reduction in property count: a rewrite can replace one legacy ID
+    # with one new canonical ID without changing the total, but planning
+    # history still needs the retired address as lookup evidence.
+    source_address_variants = {}
+    for canonical_property_id, variants in sorted(source_variant_candidates.items()):
+        aliases = []
+        for legacy_property_id in sorted(variants):
+            if legacy_property_id == canonical_property_id:
+                continue
+            aliases.append({
+                key: value
+                for key, value in variants[legacy_property_id].items()
+                if key != "_rank"
+            })
+        if aliases:
+            source_address_variants[canonical_property_id] = aliases
+    source_address_variant_count = sum(
+        len(variants) for variants in source_address_variants.values()
+    )
+    stats = {
+        "version": ADDRESS_CANONICALISATION_VERSION,
+        "identityKey": "normalised-saon-paon-street-or-locality-postcode",
+        "rows": len(rows),
+        "rowsCanonicalised": changed_rows,
+        "redundantLocalitiesRemoved": redundant_localities,
+        "structuredPropertyGroups": len(groups),
+        "structuredAliasGroups": structured_alias_groups,
+        "structuredAliasesCollapsed": structured_aliases_collapsed,
+        "numberedAliasGroups": applied_numbered_groups,
+        "reviewedAliasRegistryVersion": alias_registry["version"],
+        "reviewedAliasGroups": applied_reviewed_groups,
+        "sourceAddressIdentities": len(legacy_property_ids),
+        "canonicalProperties": len(canonical_property_ids),
+        "identityAliasesCollapsed": max(0, len(legacy_property_ids) - len(canonical_property_ids)),
+        "sourceAddressVariantProperties": len(source_address_variants),
+        "sourceAddressVariantCount": source_address_variant_count,
+        "sourceAddressVariants": source_address_variants,
+    }
+    return rows, stats
 
 
 def property_record_id(item):
     """Return the canonical property id without trusting approximate UPRNs."""
 
     if isinstance(item, dict):
+        # Identity is the producer-canonicalised full display address.  The
+        # batch canonicaliser rewrites that field before publication; keeping
+        # this helper address-led also makes independent validation catch a
+        # stale or contradictory structured projection.
         address = canonical_address(item.get("address"))
+        if not address:
+            address = canonical_address(canonical_display_address(item))
         postcode = normalise_postcode(item.get("postcode"))
         if not postcode:
             match = _POSTCODE_AT_END_RE.search(clean(item.get("address")).upper())
@@ -365,9 +722,110 @@ def finalise_historical_expansion(meta, *, final_pass_complete):
     return metadata
 
 
-def write_js(path, transactions, meta):
+def valid_address_canonicalisation_ledger(candidate):
+    return (
+        isinstance(candidate, dict)
+        and candidate.get("version") == ADDRESS_CANONICALISATION_VERSION
+        and isinstance(candidate.get("canonicalProperties"), int)
+        and isinstance(candidate.get("sourceAddressIdentities"), int)
+        and candidate["sourceAddressIdentities"] >= candidate["canonicalProperties"]
+        and candidate.get("identityAliasesCollapsed")
+        == candidate["sourceAddressIdentities"] - candidate["canonicalProperties"]
+        and isinstance(candidate.get("sourceAddressVariants"), dict)
+        and all(
+            isinstance(variants, list)
+            for variants in candidate["sourceAddressVariants"].values()
+        )
+        and candidate.get("sourceAddressVariantProperties")
+        == len(candidate["sourceAddressVariants"])
+        and candidate.get("sourceAddressVariantCount")
+        == sum(len(variants) for variants in candidate["sourceAddressVariants"].values())
+    )
+
+
+def valid_address_canonicalisation_stats(candidate, row_count, canonical_property_count):
+    return (
+        valid_address_canonicalisation_ledger(candidate)
+        and candidate.get("rows") == row_count
+        and candidate.get("canonicalProperties") == canonical_property_count
+    )
+
+
+def merge_address_canonicalisation_stats(computed, candidates, transactions):
+    current_ids = {item["propertyRecordId"] for item in transactions}
+    row_count = len(transactions)
+    canonical_count = len(current_ids)
+    all_candidates = [computed, *candidates]
+    current_candidates = [
+        candidate
+        for candidate in all_candidates
+        if valid_address_canonicalisation_stats(
+            candidate,
+            row_count,
+            canonical_count,
+        )
+    ]
+    base = dict(max(
+        current_candidates,
+        default=computed,
+        key=lambda candidate: (
+            candidate.get("sourceAddressIdentities", 0),
+            candidate.get("sourceAddressVariantCount", 0),
+        ),
+    ))
+    merged = {}
+    legacy_targets = {}
+    collapsed = int(base.get("identityAliasesCollapsed") or 0)
+    for candidate in all_candidates:
+        if not valid_address_canonicalisation_ledger(candidate):
+            continue
+        candidate_variants = candidate["sourceAddressVariants"]
+        if set(candidate_variants).issubset(current_ids):
+            collapsed = max(
+                collapsed,
+                int(candidate.get("identityAliasesCollapsed") or 0),
+            )
+        for canonical_id, variants in candidate_variants.items():
+            if canonical_id not in current_ids:
+                continue
+            target_variants = merged.setdefault(canonical_id, {})
+            for variant in variants:
+                if not isinstance(variant, dict):
+                    raise ValueError("Address canonicalisation variant must be an object")
+                legacy_id = clean(variant.get("propertyRecordId"))
+                if (
+                    not legacy_id.startswith("property:")
+                    or legacy_id in current_ids
+                    or legacy_id == canonical_id
+                ):
+                    raise ValueError("Address canonicalisation legacy ID is active or malformed")
+                prior_target = legacy_targets.setdefault(legacy_id, canonical_id)
+                if prior_target != canonical_id:
+                    raise ValueError("Address canonicalisation legacy ID maps to multiple properties")
+                target_variants.setdefault(legacy_id, dict(variant))
+    merged_variants = {
+        canonical_id: [variants[key] for key in sorted(variants)]
+        for canonical_id, variants in sorted(merged.items())
+        if variants
+    }
+    base.update({
+        "rows": row_count,
+        "canonicalProperties": canonical_count,
+        "sourceAddressIdentities": canonical_count + collapsed,
+        "identityAliasesCollapsed": collapsed,
+        "sourceAddressVariantProperties": len(merged_variants),
+        "sourceAddressVariantCount": sum(
+            len(variants) for variants in merged_variants.values()
+        ),
+        "sourceAddressVariants": merged_variants,
+    })
+    return base
+
+
+def write_js(path, transactions, meta, address_stats=None):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    transactions, computed_address_stats = canonicalise_property_addresses(transactions)
     canonical_transactions = []
     for item in transactions:
         output = dict(item)
@@ -378,6 +836,11 @@ def write_js(path, transactions, meta):
     meta["propertyRecordSchemaVersion"] = PROPERTY_RECORD_SCHEMA_VERSION
     meta["canonicalPropertyRecords"] = len({item["propertyRecordId"] for item in canonical_transactions})
     meta["propertyIdentityMode"] = "full-normalised-address-plus-postcode-fail-closed"
+    meta["addressCanonicalisation"] = merge_address_canonicalisation_stats(
+        computed_address_stats,
+        (address_stats, meta.get("addressCanonicalisation")),
+        canonical_transactions,
+    )
     content = "\n".join(
         [
             "window.SURREY_LAND_REG_TRANSACTIONS = " + json.dumps(canonical_transactions, separators=(",", ":")) + ";",

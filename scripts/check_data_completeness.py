@@ -8,15 +8,22 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from insight_data_utils import (
+    ADDRESS_CANONICALISATION_VERSION,
     DEFAULT_INPUT_JS,
     FEED_SCHEMA_VERSION,
     PROPERTY_RECORD_SCHEMA_VERSION,
+    canonical_address,
+    canonical_display_address,
     clean,
+    normalise_postcode,
+    numbered_delivery_point_key,
     planning_constraint_coverage_counts,
     planning_constraint_lookup_succeeded,
     property_record_id,
     publication_contract_failures,
     read_js,
+    reviewed_property_address_aliases,
+    structured_delivery_point_key,
 )
 from private_estates import classify_estate, load_compiled_registry
 from enrich_listed_buildings import (
@@ -334,6 +341,123 @@ def historical_expansion_failures(items, meta, *, strict_metadata=False):
     return failures
 
 
+def address_identity_failures(items, meta):
+    """Replay canonical address identity and its complete legacy-ID ledger."""
+
+    failures = []
+    expected_ids = [property_record_id(item) for item in items]
+    canonical_ids = set(expected_ids)
+    address_meta = meta.get("addressCanonicalisation")
+    if (
+        not isinstance(address_meta, dict)
+        or address_meta.get("version") != ADDRESS_CANONICALISATION_VERSION
+    ):
+        return ["Address identity: canonicalisation metadata is missing or unsupported"]
+    if address_meta.get("rows") != len(items):
+        failures.append("Address identity: canonicalisation row count is stale")
+    if address_meta.get("canonicalProperties") != len(canonical_ids):
+        failures.append("Address identity: canonical property count is stale")
+
+    aliases = reviewed_property_address_aliases()
+    if address_meta.get("reviewedAliasRegistryVersion") != aliases.get("version"):
+        failures.append("Address identity: reviewed alias registry version is stale")
+    variants_by_property = address_meta.get("sourceAddressVariants")
+    if not isinstance(variants_by_property, dict):
+        return failures + ["Address identity: source-address variant ledger is missing"]
+
+    legacy_ids = set()
+    variant_count = 0
+    represented_by_property = {}
+    for canonical_id, variants in variants_by_property.items():
+        if (
+            canonical_id not in canonical_ids
+            or not isinstance(variants, list)
+            or not variants
+        ):
+            failures.append("Address identity: source variant target is stale")
+            continue
+        for variant in variants:
+            if (
+                not isinstance(variant, dict)
+                or set(variant) != {"propertyRecordId", "address", "postcode"}
+            ):
+                failures.append("Address identity: source variant entry is malformed")
+                continue
+            legacy_id = variant.get("propertyRecordId")
+            address = variant.get("address")
+            postcode = variant.get("postcode")
+            legacy_body, separator, legacy_postcode = (
+                legacy_id.removeprefix("property:").rpartition("|")
+                if isinstance(legacy_id, str) and legacy_id.startswith("property:")
+                else ("", "", "")
+            )
+            if (
+                not legacy_body
+                or not separator
+                or legacy_id in canonical_ids
+                or legacy_id in legacy_ids
+                or not isinstance(address, str)
+                or not address
+                or address != address.upper()
+                or not isinstance(postcode, str)
+                or postcode != normalise_postcode(postcode)
+                or legacy_postcode != (postcode or "NOPOSTCODE")
+            ):
+                failures.append("Address identity: source variant entry is not canonical")
+                continue
+            legacy_ids.add(legacy_id)
+            represented_by_property.setdefault(canonical_id, set()).add(legacy_id)
+            variant_count += 1
+    if (
+        address_meta.get("sourceAddressVariantProperties")
+        != len(variants_by_property)
+        or address_meta.get("sourceAddressVariantCount") != variant_count
+        or variant_count < address_meta.get("identityAliasesCollapsed", 0)
+    ):
+        failures.append("Address identity: source variant ledger counts are stale")
+    for group in aliases["groups"]:
+        canonical_id = group["canonicalPropertyId"]
+        if canonical_id not in canonical_ids:
+            continue
+        represented = {canonical_id}
+        represented.update(represented_by_property.get(canonical_id, set()))
+        if not set(group["members"]).issubset(represented):
+            failures.append(
+                "Address identity: reviewed aliases are missing for "
+                + canonical_id
+            )
+
+    repeated = [
+        item.get("id")
+        for item in items
+        if canonical_address(item.get("locality"))
+        and canonical_address(item.get("locality"))
+        == canonical_address(item.get("town"))
+    ]
+    if repeated:
+        failures.append("Address identity: display rows repeat locality as town")
+    if any(
+        str(item.get("address") or "") != canonical_display_address(item).upper()
+        for item in items
+    ):
+        failures.append("Address identity: one or more display addresses are not canonical")
+
+    for key_function, label in (
+        (structured_delivery_point_key, "structured delivery point"),
+        (numbered_delivery_point_key, "guarded numbered delivery point"),
+    ):
+        properties_by_key = {}
+        for item in items:
+            key = key_function(item)
+            if key:
+                properties_by_key.setdefault(key, set()).add(item["propertyRecordId"])
+        if any(len(property_ids) > 1 for property_ids in properties_by_key.values()):
+            failures.append(
+                f"Address identity: one {label} maps to multiple canonical properties"
+            )
+    return failures
+
+
 def render(rows, failures, warnings, meta):
     lines = [
         "# INSIGHT data completeness",
@@ -411,6 +535,7 @@ def main():
         failures.append("Property identity: canonical property count is stale")
     if meta.get("propertyIdentityMode") != "full-normalised-address-plus-postcode-fail-closed":
         failures.append("Property identity: feed does not declare the fail-closed identity mode")
+    failures.extend(address_identity_failures(items, meta))
 
     transaction_dates = sorted(clean(item.get("date")) for item in items if clean(item.get("date")))
     if not transaction_dates or not transaction_dates[0].startswith("1995-"):

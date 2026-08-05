@@ -20,6 +20,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from insight_data_utils import DEFAULT_INPUT_JS, clean, load_cache, normalise_postcode, read_js, utc_now, write_cache
+from insight_data_utils import (
+    canonical_address,
+    parse_window_json,
+    property_record_id,
+    reviewed_alias_postcodes_by_canonical_property,
+    structured_delivery_point_key,
+)
 from enrich_planning_history import address_score
 from sweep_land_registry import SPARQL_ENDPOINT, build_address, category_label, price_text, property_label
 from validate_sales_history_feed import (
@@ -46,13 +53,31 @@ LOCAL_MARKER = ".insight-local-only"
 
 
 def address_key(value):
-    return re.sub(r"[^A-Z0-9]+", " ", clean(value).upper()).strip()
+    return canonical_address(value)
+
+
+def postcode_display(value):
+    """Format one normalised UK postcode for the HMLR query."""
+
+    normalised = normalise_postcode(value)
+    match = re.fullmatch(r"([A-Z]{1,2}\d[A-Z\d]?)(\d[A-Z]{2})", normalised)
+    return f"{match.group(1)} {match.group(2)}" if match else normalised
+
+
+def canonical_history_display_address(value):
+    """Remove adjacent duplicate address components without erasing old names."""
+
+    parts = [clean(part) for part in str(value or "").split(",") if clean(part)]
+    output = []
+    for part in parts:
+        if output and canonical_address(output[-1]) == canonical_address(part):
+            continue
+        output.append(part)
+    return ", ".join(output).upper()
 
 
 def property_key(item):
-    if clean(item.get("propertyRecordId")):
-        return clean(item.get("propertyRecordId"))
-    return f"property:{address_key(item.get('address'))}|{normalise_postcode(item.get('postcode'))}"
+    return property_record_id(item)
 
 
 def cache_is_fresh(record, refresh_days):
@@ -262,6 +287,82 @@ def transaction_from_base(row):
     }
 
 
+def matched_history_rows(item, rows, known_sales, source_address_variants=()):
+    """Match reviewed aliases without treating a shared sale fact as identity."""
+
+    target = address_key(item.get("address"))
+    delivery_point = structured_delivery_point_key(item)
+    delivery_rows = {
+        clean(row.get("tx")) or id(row): row
+        for row in rows
+        if delivery_point and structured_delivery_point_key(row) == delivery_point
+    }
+    source_variant_addresses = {
+        address_key(variant.get("address"))
+        for variant in source_address_variants
+        if isinstance(variant, dict) and address_key(variant.get("address"))
+    }
+    reviewed_addresses = source_variant_addresses | {target}
+    anchor_addresses = set()
+    for sale in known_sales:
+        sale_id = clean(sale.get("id"))
+        signature = (
+            clean(sale.get("date"))[:10],
+            int(float(sale.get("price", 0))),
+        )
+        candidates = [
+            row
+            for row in rows
+            if sale_id and clean(row.get("tx")) == sale_id
+        ]
+        if not candidates:
+            candidates = [
+                row
+                for row in rows
+                if (
+                    clean(row.get("date"))[:10],
+                    int(float(row.get("price", 0))),
+                ) == signature
+            ]
+        reviewed_candidates = [
+            row
+            for row in candidates
+            if address_key(build_address(row)) in reviewed_addresses
+        ]
+        candidates = reviewed_candidates or candidates
+        if not candidates:
+            continue
+        expected_address = clean(sale.get("address")) or clean(item.get("address"))
+        anchor = max(
+            candidates,
+            key=lambda row: (
+                address_score(expected_address, build_address(row)),
+                address_key(build_address(row)) == target,
+                address_key(build_address(row)),
+                clean(row.get("tx")),
+            ),
+        )
+        anchor_address = address_key(build_address(anchor))
+        if anchor_address:
+            anchor_addresses.add(anchor_address)
+    alias_rows = {
+        clean(row.get("tx")) or id(row): row
+        for row in rows
+        if address_key(build_address(row))
+        in anchor_addresses | source_variant_addresses | {target}
+    }
+    matched = {**delivery_rows, **alias_rows}
+    if delivery_rows and len(matched) > len(delivery_rows):
+        method = "structured-delivery-point-plus-known-sale-aliases"
+    elif delivery_rows:
+        method = "structured-delivery-point"
+    elif anchor_addresses:
+        method = "known-sale-address-aliases"
+    else:
+        method = "exact-address"
+    return list(matched.values()), method
+
+
 def write_output(path, history, meta):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -284,6 +385,162 @@ def write_output(path, history, meta):
     os.replace(temporary_path, path)
     if meta.get("deploymentMode") == "local":
         (path.parent / LOCAL_MARKER).touch(exist_ok=True)
+
+
+def read_history_output(path):
+    text = Path(path).read_text(encoding="utf-8")
+    return (
+        parse_window_json(text, "SURREY_SALES_HISTORY", {}),
+        parse_window_json(text, "SURREY_SALES_HISTORY_META", {}),
+    )
+
+
+def migrate_existing_history(transactions, prior_history, prior_meta, deployment_mode):
+    """Re-key a complete history without reinterpreting its source evidence."""
+
+    properties = {}
+    transaction_ids = defaultdict(list)
+    prior_records_by_property = defaultdict(dict)
+    for item in transactions:
+        key = property_key(item)
+        properties.setdefault(key, item)
+        transaction_id = clean(item.get("id"))
+        if not transaction_id:
+            continue
+        transaction_ids[key].append(transaction_id)
+        prior_record = prior_history.get(transaction_id)
+        if not isinstance(prior_record, dict):
+            raise ValueError(f"Prior sales history has no transaction alias for {transaction_id}")
+        prior_key = clean(prior_record.get("propertyRecordId"))
+        if not prior_key.startswith("property:"):
+            raise ValueError(f"Prior sales history alias {transaction_id} has no canonical record")
+        canonical_record = prior_history.get(prior_key)
+        if canonical_record != prior_record:
+            raise ValueError(f"Prior sales history alias {transaction_id} does not equal its canonical record")
+        prior_records_by_property[key][prior_key] = prior_record
+
+    history = {}
+    for key, item in properties.items():
+        source_records = list(prior_records_by_property.get(key, {}).values())
+        if not source_records:
+            raise ValueError(f"No prior sales-history evidence maps to {key}")
+        complete_records = [
+            record for record in source_records
+            if record.get("coverageStatus") in {"complete", "partial"}
+        ]
+        selected_records = complete_records or source_records
+        transactions_by_id = {}
+        for record in selected_records:
+            for sale in record.get("transactions") or []:
+                source_id = clean(sale.get("id"))
+                if not source_id:
+                    raise ValueError(f"Prior sales history for {key} contains a transaction without a source id")
+                migrated_sale = dict(sale)
+                migrated_sale["address"] = canonical_history_display_address(sale.get("address"))
+                transactions_by_id[source_id] = migrated_sale
+        sales = sorted(
+            transactions_by_id.values(),
+            key=lambda sale: (clean(sale.get("date")), clean(sale.get("id"))),
+            reverse=True,
+        )
+        coverage_status = "complete" if complete_records else "unavailable"
+        updated_at = min(
+            (clean(record.get("updatedAt")) for record in selected_records if clean(record.get("updatedAt"))),
+            default=clean(prior_meta.get("sourceCheckedAt")) or utc_now(),
+        )
+        record = {
+            "propertyRecordId": key,
+            "address": item.get("address", ""),
+            "postcode": item.get("postcode", ""),
+            "totalTransactions": len(sales),
+            "latestTransaction": sales[0] if sales else None,
+            "transactions": sales,
+            "matchMethod": (
+                "canonical-property-address-alias-union"
+                if len(source_records) > 1
+                else clean(source_records[0].get("matchMethod")) or "exact-address"
+            ),
+            "coverageStatus": coverage_status,
+            "coverageFrom": "1995",
+            "source": SOURCE_NAME,
+            "updatedAt": updated_at,
+        }
+        if coverage_status == "unavailable":
+            reasons = sorted({
+                clean(source.get("coverageReason"))
+                for source in source_records
+                if clean(source.get("coverageReason"))
+            })
+            record["coverageReason"] = "; ".join(reasons) or "Prior Price Paid lookup unavailable"
+        history[key] = record
+        for transaction_id in transaction_ids[key]:
+            history[transaction_id] = record
+
+    canonical_records = {key: history[key] for key in properties}
+    properties_checked = sum(record["coverageStatus"] == "complete" for record in canonical_records.values())
+    properties_unavailable = sum(record["coverageStatus"] == "unavailable" for record in canonical_records.values())
+    properties_with_history = sum(bool(record["transactions"]) for record in canonical_records.values())
+    transactions_found = sum(len(record["transactions"]) for record in canonical_records.values())
+    published_source_ids = [
+        clean(sale.get("id"))
+        for record in canonical_records.values()
+        for sale in record["transactions"]
+    ]
+    if len(published_source_ids) != len(set(published_source_ids)):
+        raise ValueError("Migrated sales history maps one source transaction to multiple properties")
+
+    _property_ids, _transaction_ids, _transaction_properties, base_fingerprint = base_feed_identity(transactions)
+    generated_at = utc_now()
+    meta = {
+        "schemaVersion": 1,
+        "source": SOURCE_NAME,
+        "coverageFrom": "1995",
+        "deploymentMode": deployment_mode,
+        "updatedAt": generated_at,
+        "propertiesRequested": len(properties),
+        "propertiesChecked": properties_checked,
+        "propertiesUnavailable": properties_unavailable,
+        "propertiesNotChecked": 0,
+        "propertiesWithHistory": properties_with_history,
+        "transactionsFound": transactions_found,
+        "note": "Price Paid transaction history only; not the legal title register, ownership, deeds or charges.",
+    }
+    if deployment_mode == "commercial":
+        source_checked_at = clean(prior_meta.get("sourceCheckedAt")) or min(
+            (
+                record["updatedAt"]
+                for record in canonical_records.values()
+                if record["coverageStatus"] == "complete"
+            ),
+            default=generated_at,
+        )
+        meta.update({
+            "publicationStatus": "complete",
+            "coverageMode": "full-available-price-paid-history",
+            "coverageStatus": "complete-accounted",
+            "sourceCheckedAt": source_checked_at,
+            "freshnessWindowDays": MAX_FRESHNESS_WINDOW_DAYS,
+            "sourceLicenceUrl": SOURCE_LICENCE_URL,
+            "redistributionRights": REDISTRIBUTION_RIGHTS,
+            "addressDataUse": ADDRESS_DATA_USE,
+            "attribution": ATTRIBUTION,
+            "propertiesCheckedNoHistory": sum(
+                record["coverageStatus"] == "complete" and not record["transactions"]
+                for record in canonical_records.values()
+            ),
+            "canonicalPropertyRecords": len(canonical_records),
+            "transactionAliases": len(transaction_ids_from_history := {
+                transaction_id
+                for values in transaction_ids.values()
+                for transaction_id in values
+            }),
+            "lookupKeys": len(history),
+            "baseFeedFingerprint": base_fingerprint,
+            "historyFingerprint": sha256_json(history),
+        })
+        if len(transaction_ids_from_history) != len(transactions):
+            raise ValueError("Migrated sales history transaction aliases do not cover the base feed")
+    return history, meta
 
 
 def chunks(values, size):
@@ -312,27 +569,61 @@ def main():
     parser.add_argument("--timeout", type=int, default=90)
     parser.add_argument("--pause", type=float, default=0.2)
     parser.add_argument("--deployment-mode", choices=("local", "commercial"), default="local")
+    parser.add_argument(
+        "--migrate-from-history",
+        default="",
+        help="Re-key an existing complete sales-history feed without querying HMLR.",
+    )
+    parser.add_argument(
+        "--cache-only",
+        action="store_true",
+        help="Rebuild only from the exact existing cache; never fetch or mutate it.",
+    )
     args = parser.parse_args()
 
-    transactions, _summary, _meta = read_js(args.input)
+    transactions, _summary, base_meta = read_js(args.input)
+    if args.migrate_from_history:
+        prior_history, prior_meta = read_history_output(args.migrate_from_history)
+        history, meta = migrate_existing_history(
+            transactions,
+            prior_history,
+            prior_meta,
+            args.deployment_mode,
+        )
+        write_output(args.output, history, meta)
+        print(json.dumps(meta, indent=2), flush=True)
+        return
     properties = {}
+    property_postcodes = defaultdict(set)
     transaction_ids = defaultdict(list)
     current_sales = defaultdict(list)
     for item in transactions:
         key = property_key(item)
         properties.setdefault(key, item)
+        if normalise_postcode(item.get("postcode")):
+            property_postcodes[key].add(normalise_postcode(item.get("postcode")))
         transaction_ids[key].append(str(item.get("id", "")))
         current_sales[key].append(item)
 
+    address_canonicalisation = base_meta.get("addressCanonicalisation") or {}
+    source_variants_by_property = address_canonicalisation.get("sourceAddressVariants") or {}
+    if not isinstance(source_variants_by_property, dict):
+        source_variants_by_property = {}
+
+    for key, postcodes in reviewed_alias_postcodes_by_canonical_property().items():
+        if key in properties:
+            property_postcodes[key].update(postcodes)
+
     requested = {normalise_postcode(value) for value in args.postcode if normalise_postcode(value)}
     postcode_labels = {}
-    for item in properties.values():
-        normalised = normalise_postcode(item.get("postcode"))
-        if normalised and (not requested or normalised in requested):
-            postcode_labels.setdefault(normalised, clean(item.get("postcode")).upper())
+    for postcodes in property_postcodes.values():
+        for normalised in postcodes:
+            if normalised and (not requested or normalised in requested):
+                postcode_labels.setdefault(normalised, postcode_display(normalised))
     selected = sorted(postcode_labels)
     if args.limit_postcodes > 0:
         selected = selected[:args.limit_postcodes]
+    selected_set = set(selected)
 
     cache = load_cache(args.cache, CACHE_VERSION)
     store = cache.setdefault("postcodes", {})
@@ -352,11 +643,10 @@ def main():
         )
     }
     properties_by_postcode = defaultdict(list)
-    for key, item in properties.items():
-        postcode = normalise_postcode(item.get("postcode"))
-        if postcode:
+    for key, postcodes in property_postcodes.items():
+        for postcode in postcodes:
             properties_by_postcode[postcode].append(key)
-    pending = [
+    pending = [] if args.cache_only else [
         postcode
         for postcode in selected
         if not cache_is_fresh(store.get(postcode), args.refresh_days)
@@ -390,7 +680,8 @@ def main():
                     previous = store.setdefault(key, {})
                     previous["lastError"] = f"{type(error).__name__}: {error}"
             completed += len(batch)
-            write_cache(args.cache, cache, CACHE_VERSION)
+            if not args.cache_only:
+                write_cache(args.cache, cache, CACHE_VERSION)
             print(f"Fetched {completed}/{len(pending)} postcodes.", flush=True)
             if args.pause:
                 time.sleep(args.pause)
@@ -403,21 +694,12 @@ def main():
     collected_at = utc_now()
     complete_check_times = []
     for key, item in properties.items():
-        postcode = normalise_postcode(item.get("postcode"))
-        target = address_key(item.get("address"))
-        cache_record = store.get(postcode, {}) if postcode else {}
-        (
-            coverage_status,
-            coverage_reason,
-            rows,
-            cache_checked_at,
-        ) = cache_coverage(
-            postcode,
-            selected,
-            cache_record,
-            refresh_days=(args.refresh_days if args.refresh_days > 0 else None),
+        postcodes = sorted(property_postcodes.get(key, ()))
+        seed_record = (
+            fresh_seed.get(key)
+            if postcodes and all(postcode in selected_set for postcode in postcodes)
+            else None
         )
-        seed_record = fresh_seed.get(key) if postcode in selected else None
         if seed_record:
             record = dict(seed_record)
             record.update({
@@ -430,29 +712,54 @@ def main():
             cache_checked_at = clean(record.get("updatedAt"))
             sales = record["transactions"]
         else:
-            canonical = target
-            match_method = "exact-address"
-            exact_rows = [row for row in rows if address_key(build_address(row)) == target]
-            if not exact_rows:
-                known_signatures = {
-                    (str(sale.get("date", ""))[:10], int(float(sale.get("price", 0))))
-                    for sale in current_sales[key]
-                }
-                anchors = [
-                    row for row in rows
-                    if (clean(row.get("date"))[:10], int(float(row.get("price", 0)))) in known_signatures
-                ]
-                if anchors:
-                    anchor = max(
-                        anchors,
-                        key=lambda row: address_score(item.get("address"), build_address(row)),
-                    )
-                    canonical = address_key(build_address(anchor))
-                    match_method = "known-sale-anchor"
-            matched_rows = [
-                row for row in rows
-                if address_key(build_address(row)) == canonical
+            cache_records = [store.get(postcode, {}) for postcode in postcodes]
+            coverage_views = [
+                cache_coverage(
+                    postcode,
+                    selected,
+                    record,
+                    refresh_days=(args.refresh_days if args.refresh_days > 0 else None),
+                )
+                for postcode, record in zip(postcodes, cache_records)
             ]
+            if not postcodes:
+                coverage_status = "unavailable"
+                coverage_reason = "No postcode in the source Price Paid record"
+                rows = []
+                cache_checked_at = ""
+            elif any(view[0] == "not_checked" for view in coverage_views):
+                coverage_status = "not_checked"
+                coverage_reason = (
+                    "One or more current or reviewed historic postcodes were "
+                    "excluded by the requested filter"
+                )
+                rows = []
+                cache_checked_at = ""
+            elif any(view[0] != "complete" for view in coverage_views):
+                coverage_status = "unavailable"
+                coverage_reason = "; ".join(
+                    sorted({view[1] for view in coverage_views if view[1]})
+                ) or "Price Paid postcode lookup unavailable"
+                rows = []
+                cache_checked_at = ""
+            else:
+                coverage_status = "complete"
+                coverage_reason = ""
+                rows = [
+                    row
+                    for view in coverage_views
+                    for row in view[2]
+                ]
+                cache_checked_at = min(
+                    (view[3] for view in coverage_views if view[3]),
+                    default=collected_at,
+                )
+            matched_rows, match_method = matched_history_rows(
+                item,
+                rows,
+                current_sales[key],
+                source_variants_by_property.get(key, ()),
+            )
             sales = [transaction_from_row(row) for row in matched_rows]
             if coverage_status == "complete":
                 published_signatures = {
@@ -470,7 +777,11 @@ def main():
                     sales.extend(base_fallbacks)
                     match_method += "+canonical-base"
             unique = {sale["id"]: sale for sale in sales}
-            sales = sorted(unique.values(), key=lambda sale: sale["date"], reverse=True)
+            sales = sorted(
+                unique.values(),
+                key=lambda sale: (sale["date"], sale["id"]),
+                reverse=True,
+            )
             record = {
                 "propertyRecordId": key,
                 "address": item.get("address", ""),
@@ -480,6 +791,7 @@ def main():
                 "latestTransaction": sales[0] if sales else None,
                 "transactions": sales,
                 "matchMethod": match_method,
+                "coverageFrom": "1995",
                 "source": SOURCE_NAME,
                 "updatedAt": (
                     cache_checked_at
