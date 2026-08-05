@@ -28,10 +28,21 @@ from insight_view import (  # noqa: E402
 from validate_insight_view import validate as validate_asset  # noqa: E402
 
 
+class PublishedInsightViewTests(unittest.TestCase):
+    def test_published_view_satisfies_the_live_contract(self):
+        view, metadata = validate_asset(ROOT / "outputs" / "insight-view.js")
+
+        self.assertEqual(metadata["asOf"], view["briefingDate"])
+        self.assertEqual(metadata["datasetFingerprint"], view["fingerprint"])
+
+
 class InsightViewTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.snapshot_path = ROOT / "config" / "insight-view-snapshot.json"
+        # Freeze every input coupled to the dated 2026-07-31 unit assertions.
+        cls.snapshot_path = (
+            ROOT / "tests" / "fixtures" / "insight-view-snapshot.json"
+        )
         cls.snapshot = load_snapshot(cls.snapshot_path)
 
     def build(self, briefing_date="2026-07-31", generated_at="2026-07-31T10:10:00Z"):
