@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://insight.local/schemas/property-uprn-links.schema.json",
+  "title": "INSIGHT property to UPRN evidence links",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "releaseId",
+    "generatedAt",
+    "canonicalIdentityMode",
+    "identityWarning",
+    "sources",
+    "linksByProperty"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "releaseId": {"type": "string", "pattern": "^property-uprn-links-\\d{4}-\\d{2}-\\d{2}-[0-9a-f]{12}$"},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "canonicalIdentityMode": {"const": "full-normalised-address-plus-postcode-fail-closed"},
+    "identityWarning": {"const": "UPRN evidence never creates, merges or replaces canonical INSIGHT property identity"},
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sourceId", "name", "sourceSnapshot", "checkedAt", "coordinateBasis", "licenceOrEntitlement", "redistributionClassification"],
+        "properties": {
+          "sourceId": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]+$"},
+          "name": {"type": "string", "minLength": 1},
+          "sourceSnapshot": {"type": "string", "minLength": 1},
+          "checkedAt": {"type": "string", "format": "date-time"},
+          "coordinateBasis": {"enum": ["authoritative_property_point", "authoritative_address_point", "reviewed_property_point"]},
+          "licenceOrEntitlement": {
+            "type": "object",
+            "required": ["type", "reference", "permitsPublicDerivedPublication"],
+            "properties": {
+              "type": {"enum": ["open_licence", "commercial_entitlement"]},
+              "reference": {"type": "string", "minLength": 1},
+              "permitsPublicDerivedPublication": {"const": true}
+            },
+            "additionalProperties": false
+          },
+          "redistributionClassification": {"enum": ["public_open_data", "licensed_for_insight_publication"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "linksByProperty": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/link"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "link": {
+      "type": "object",
+      "required": [
+        "propertyId",
+        "sourceId",
+        "uprn",
+        "matchStatus",
+        "evidenceTier",
+        "longitude",
+        "latitude",
+        "coordinateSource",
+        "sourceSnapshot",
+        "checkedAt",
+        "limitations"
+      ],
+      "properties": {
+        "propertyId": {"type": "string", "pattern": "^property:.+\\|[A-Z0-9]+$"},
+        "sourceId": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]+$"},
+        "uprn": {"type": "string", "pattern": "^\\d+$"},
+        "matchStatus": {"enum": ["confirmed_address_match", "reviewed_accepted"]},
+        "evidenceTier": {"enum": ["authoritative_address_source", "reviewed"]},
+        "longitude": {"type": "number", "minimum": -8.75, "maximum": 2.1},
+        "latitude": {"type": "number", "minimum": 49.8, "maximum": 60.95},
+        "coordinateSource": {"type": "string", "minLength": 1},
+        "sourceSnapshot": {"type": "string", "minLength": 1},
+        "checkedAt": {"type": "string", "format": "date-time"},
+        "sharedUprnReview": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["status", "reviewId", "reviewedAt", "relatedPropertyIds", "rationale"],
+              "properties": {
+                "status": {"const": "approved_shared_hierarchy"},
+                "reviewId": {"type": "string", "minLength": 1},
+                "reviewedAt": {"type": "string", "format": "date-time"},
+                "relatedPropertyIds": {
+                  "type": "array",
+                  "minItems": 2,
+                  "uniqueItems": true,
+                  "items": {"type": "string", "pattern": "^property:.+\\|[A-Z0-9]+$"}
+                },
+                "rationale": {"type": "string", "minLength": 1}
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "limitations": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    }
+  }
+}

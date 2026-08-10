@@ -1,0 +1,105 @@
+name: Monthly INSIGHT HMLR INSPIRE Parcels
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - outputs/surrey-transactions.js
+      - outputs/property-uprn-links.js
+      - config/inspire-parcel-associations.json
+      - config/inspire-authorities.json
+      - config/inspire-association-transitions.json
+  schedule:
+    # HMLR publishes previous-month INSPIRE data on the first Sunday. Running
+    # each evening on days 1-9 catches that publication and provides retries.
+    - cron: "30 20 1-9 * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insight-data-refresh
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  refresh-inspire-parcels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Synchronise queued run with current branch
+        run: |
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned coordinate and schema validators
+        run: python3 -m pip install pyproj==3.6.1 jsonschema==4.23.0
+
+      - name: Acquire and verify the official OSTN15 grid
+        run: |
+          curl --fail --location --retry 3 --retry-all-errors \
+            https://cdn.proj.org/uk_os_OSTN15_NTv2_OSGBtoETRS.tif \
+            --output /tmp/uk_os_OSTN15_NTv2_OSGBtoETRS.tif
+          echo "5d6ed64d2119952c4c559fa1fccbc594b6520fc3ec3ef2fc10be13202c4384fa  /tmp/uk_os_OSTN15_NTv2_OSGBtoETRS.tif" | sha256sum --check --strict
+
+      - name: Download, audit and build Surrey parcel feed
+        run: |
+          PYTHONPATH=scripts python3 scripts/collect_inspire_parcels.py \
+            --download-current \
+            --download-dir /tmp/hmlr-inspire-surrey \
+            --ostn15-grid /tmp/uk_os_OSTN15_NTv2_OSGBtoETRS.tif
+
+      - name: Upload parcel lifecycle diagnostic on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: inspire-association-transition-required
+          path: work/inspire-association-transition-required.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Validate parcel and future UPRN contracts
+        run: |
+          PYTHONPATH=scripts python3 scripts/validate_inspire_parcels.py
+          PYTHONPATH=scripts python3 scripts/validate_property_uprn_links.py
+          PYTHONPATH=scripts python3 scripts/validate_inspire_parcel_review_queue.py
+          PYTHONPATH=scripts python3 scripts/validate_inspire_json_schemas.py
+
+      - name: Publish changed parcel feed
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git add outputs/inspire-parcels.js outputs/inspire-parcel-review-queue.js
+          if git diff --cached --quiet; then
+            echo "HMLR has not published a changed INSPIRE release."
+            exit 0
+          fi
+          git commit -m "Update HMLR INSPIRE parcel feed"
+          for attempt in 1 2 3; do
+            git fetch origin "$GITHUB_REF_NAME"
+            if ! git rebase "origin/$GITHUB_REF_NAME"; then
+              git rebase --abort || true
+              echo "::error::Concurrent publication conflicted with the INSPIRE refresh."
+              exit 1
+            fi
+            PYTHONPATH=scripts python3 scripts/validate_inspire_parcels.py
+            PYTHONPATH=scripts python3 scripts/validate_property_uprn_links.py
+            PYTHONPATH=scripts python3 scripts/validate_inspire_parcel_review_queue.py
+            PYTHONPATH=scripts python3 scripts/validate_inspire_json_schemas.py
+            if git push origin "HEAD:$GITHUB_REF_NAME"; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "::error::INSPIRE refresh could not publish after 3 attempts."
+              exit 1
+            fi
+          done

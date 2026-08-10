@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://insight.local/schemas/inspire-parcel-review-queue.schema.json",
+  "title": "INSIGHT UPRN-linked INSPIRE spatial onboarding outcomes",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "releaseId",
+    "generatedAt",
+    "canonicalIdentityMode",
+    "sourceSnapshot",
+    "queueSemantics",
+    "counts",
+    "candidatesByProperty",
+    "candidateParcelsById"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "releaseId": {"type": "string", "pattern": "^inspire-parcel-review-\\d{4}-\\d{2}-\\d{2}-[0-9a-f]{12}$"},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "canonicalIdentityMode": {"const": "full-normalised-address-plus-postcode-fail-closed"},
+    "sourceSnapshot": {"type": "string", "pattern": "^hmlr-inspire-\\d{4}-\\d{2}-\\d{2}$"},
+    "queueSemantics": {"const": "UPRN-linked spatial onboarding outcomes; only automatically_associated_indicative enters the parcel feed and never confirms title, exact UPRN identity or legal boundary"},
+    "counts": {
+      "type": "object",
+      "required": ["linksEvaluated", "automaticallyAssociatedIndicative", "reviewOrRejected"],
+      "properties": {
+        "linksEvaluated": {"type": "integer", "minimum": 0},
+        "automaticallyAssociatedIndicative": {"type": "integer", "minimum": 0},
+        "reviewOrRejected": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "candidatesByProperty": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/candidate"}
+    },
+    "candidateParcelsById": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/parcel"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "required": [
+        "propertyId",
+        "linkMatchStatus",
+        "linkEvidenceTier",
+        "coordinateSource",
+        "linkSourceSnapshot",
+        "candidateParcelIds",
+        "boundaryDistancesMetres",
+        "outcome",
+        "titleConfirmed",
+        "exactUprnIdentityConfirmed",
+        "legalBoundaryConfirmed"
+      ],
+      "properties": {
+        "propertyId": {"type": "string", "pattern": "^property:.+\\|[A-Z0-9]+$"},
+        "linkMatchStatus": {"enum": ["confirmed_address_match", "reviewed_accepted"]},
+        "linkEvidenceTier": {"enum": ["authoritative_address_source", "reviewed"]},
+        "coordinateSource": {"type": "string", "minLength": 1},
+        "linkSourceSnapshot": {"type": "string", "minLength": 1},
+        "candidateParcelIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^\\d+$"}
+        },
+        "boundaryDistancesMetres": {
+          "type": "object",
+          "patternProperties": {
+            "^\\d+$": {"type": "number", "minimum": 0}
+          },
+          "additionalProperties": false
+        },
+        "outcome": {
+          "enum": [
+            "automatically_associated_indicative",
+            "review_required_non_authoritative_link",
+            "rejected_no_containing_inspire_parcel",
+            "review_required_multiple_containing_parcels",
+            "review_required_boundary_proximity",
+            "review_required_parcel_already_associated",
+            "review_required_parcel_shared_by_new_links"
+          ]
+        },
+        "titleConfirmed": {"const": false},
+        "exactUprnIdentityConfirmed": {"const": false},
+        "legalBoundaryConfirmed": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "parcel": {
+      "type": "object",
+      "required": [
+        "inspireId",
+        "validFrom",
+        "beginLifespanVersion",
+        "authorities",
+        "areaSquareMetres",
+        "areaSquareFeet",
+        "areaAcres",
+        "areaBasis",
+        "isExactLegalExtent",
+        "centroid",
+        "bbox",
+        "geometry"
+      ],
+      "properties": {
+        "inspireId": {"type": "string", "pattern": "^\\d+$"},
+        "validFrom": {"type": "string", "minLength": 1},
+        "beginLifespanVersion": {"type": "string", "minLength": 1},
+        "authorities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "areaSquareMetres": {"type": "number", "exclusiveMinimum": 0},
+        "areaSquareFeet": {"type": "integer", "minimum": 1},
+        "areaAcres": {"type": "number", "exclusiveMinimum": 0},
+        "areaBasis": {"const": "planar area of the HMLR INSPIRE index polygon in EPSG:27700"},
+        "isExactLegalExtent": {"const": false},
+        "centroid": {"$ref": "#/$defs/position"},
+        "bbox": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {"type": "number"}
+        },
+        "geometry": {
+          "type": "object",
+          "required": ["type", "coordinates"],
+          "properties": {
+            "type": {"const": "Polygon"},
+            "coordinates": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "array",
+                "minItems": 4,
+                "items": {"$ref": "#/$defs/position"}
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "position": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {"type": "number", "minimum": -180, "maximum": 180},
+        {"type": "number", "minimum": -90, "maximum": 90}
+      ],
+      "items": false
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://insight.local/schemas/inspire-association-transitions.schema.json",
+  "title": "Reviewed transitions of published indicative parcel associations",
+  "type": "object",
+  "required": ["schemaVersion", "semantics", "records"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "semantics": {"const": "ordered append-only reviewed replacement or terminal removal of any previously published property-to-INSPIRE association"},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["transitionId", "propertyId", "previousParcelId", "priorAssociationReleaseId", "priorSourceSnapshot", "action", "replacementParcelId", "reviewedAt", "reviewedBy", "reason"],
+        "properties": {
+          "transitionId": {"type": "string", "pattern": "^inspire-transition-[a-z0-9_-]+$"},
+          "propertyId": {"type": "string", "pattern": "^property:.+\\|[A-Z0-9]+$"},
+          "previousParcelId": {"type": "string", "pattern": "^\\d+$"},
+          "priorAssociationReleaseId": {"type": "string", "pattern": "^inspire-parcels-\\d{4}-\\d{2}-\\d{2}-[0-9a-f]{12}$"},
+          "priorSourceSnapshot": {"type": "string", "pattern": "^hmlr-inspire-\\d{4}-\\d{2}-\\d{2}$"},
+          "action": {"enum": ["replace", "remove"]},
+          "replacementParcelId": {"type": ["string", "null"], "pattern": "^\\d+$"},
+          "reviewedAt": {"type": "string", "format": "date-time"},
+          "reviewedBy": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1}
+        },
+        "allOf": [
+          {"if": {"properties": {"action": {"const": "replace"}}}, "then": {"properties": {"replacementParcelId": {"type": "string", "pattern": "^\\d+$"}}}},
+          {"if": {"properties": {"action": {"const": "remove"}}}, "then": {"properties": {"replacementParcelId": {"const": null}}}}
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

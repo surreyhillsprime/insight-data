@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "source": "HM Land Registry INSPIRE Index Polygons",
+  "sourcePage": "https://use-land-property-data.service.gov.uk/datasets/inspire/download",
+  "publicationCadence": "first Sunday of each month; previous-month data",
+  "sourceCrs": "EPSG:27700",
+  "minimumDistinctInspireIds": 500000,
+  "knownSourceQuarantines": [
+    {
+      "inspireId": "53843805",
+      "authoritySlug": "Waverley_Borough_Council",
+      "reason": "zero-area interior ring",
+      "selected": false,
+      "firstObservedSnapshot": "2026-08-02"
+    }
+  ],
+  "authorities": [
+    {
+      "district": "Elmbridge",
+      "name": "Elmbridge Borough Council",
+      "slug": "Elmbridge_Borough_Council",
+      "baselineFeatures20260802": 57515,
+      "minimumFeatures": 54500
+    },
+    {
+      "district": "Epsom and Ewell",
+      "name": "Epsom and Ewell Borough Council",
+      "slug": "Epsom_and_Ewell_Borough_Council",
+      "baselineFeatures20260802": 29860,
+      "minimumFeatures": 28300
+    },
+    {
+      "district": "Guildford",
+      "name": "Guildford Borough Council",
+      "slug": "Guildford_Borough_Council",
+      "baselineFeatures20260802": 65455,
+      "minimumFeatures": 62000
+    },
+    {
+      "district": "Mole Valley",
+      "name": "Mole Valley District Council",
+      "slug": "Mole_Valley_District_Council",
+      "baselineFeatures20260802": 44505,
+      "minimumFeatures": 42200
+    },
+    {
+      "district": "Reigate and Banstead",
+      "name": "Reigate and Banstead Borough Council",
+      "slug": "Reigate_and_Banstead_Borough_Council",
+      "baselineFeatures20260802": 61243,
+      "minimumFeatures": 58000
+    },
+    {
+      "district": "Runnymede",
+      "name": "Runnymede Borough Council",
+      "slug": "Runnymede_Borough_Council",
+      "baselineFeatures20260802": 35196,
+      "minimumFeatures": 33300
+    },
+    {
+      "district": "Spelthorne",
+      "name": "Spelthorne Borough Council",
+      "slug": "Spelthorne_Borough_Council",
+      "baselineFeatures20260802": 40745,
+      "minimumFeatures": 38600
+    },
+    {
+      "district": "Surrey Heath",
+      "name": "Surrey Heath Borough Council",
+      "slug": "Surrey_Heath_Borough_Council",
+      "baselineFeatures20260802": 39187,
+      "minimumFeatures": 37100
+    },
+    {
+      "district": "Tandridge",
+      "name": "Tandridge District Council",
+      "slug": "Tandridge_District_Council",
+      "baselineFeatures20260802": 45528,
+      "minimumFeatures": 43100
+    },
+    {
+      "district": "Waverley",
+      "name": "Waverley Borough Council",
+      "slug": "Waverley_Borough_Council",
+      "baselineFeatures20260802": 63405,
+      "minimumFeatures": 60100
+    },
+    {
+      "district": "Woking",
+      "name": "Woking Borough Council",
+      "slug": "Woking_Borough_Council",
+      "baselineFeatures20260802": 42941,
+      "minimumFeatures": 40600
+    }
+  ]
+}

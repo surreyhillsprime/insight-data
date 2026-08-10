@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://insight.local/schemas/inspire-parcel-associations.schema.json",
+  "title": "INSIGHT property to HMLR INSPIRE indicative-parcel associations",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "registryVersion",
+    "canonicalIdentityMode",
+    "associationSemantics",
+    "sourceStudy",
+    "approvalBaseline",
+    "records"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "registryVersion": {"type": "string", "minLength": 1},
+    "canonicalIdentityMode": {"const": "full-normalised-address-plus-postcode-fail-closed"},
+    "associationSemantics": {"const": "indicative parcel association; not title, exact UPRN, ownership or legal-boundary confirmation"},
+    "sourceStudy": {"type": "object"},
+    "approvalBaseline": {
+      "type": "object",
+      "required": ["canonicalProperties", "automaticIndicative", "reviewedIndicative", "associatedProperties", "coveragePercent", "semantics"],
+      "properties": {
+        "canonicalProperties": {"type": "integer", "minimum": 1},
+        "automaticIndicative": {"type": "integer", "minimum": 0},
+        "reviewedIndicative": {"type": "integer", "minimum": 0},
+        "associatedProperties": {"type": "integer", "minimum": 0},
+        "coveragePercent": {"type": "number", "minimum": 0, "maximum": 100},
+        "semantics": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "records": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/association"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "association": {
+      "type": "object",
+      "required": [
+        "propertyId",
+        "inspireId",
+        "associationStatus",
+        "matchMethod",
+        "evidenceTier",
+        "spatialClassification",
+        "boundaryDistanceMetres",
+        "reviewDecision",
+        "titleConfirmed",
+        "exactUprnIdentityConfirmed",
+        "legalBoundaryConfirmed"
+      ],
+      "properties": {
+        "propertyId": {"type": "string", "pattern": "^property:.+\\|[A-Z0-9]+$"},
+        "inspireId": {"type": "string", "pattern": "^\\d+$"},
+        "associationStatus": {"enum": ["automatic_indicative", "reviewed_indicative"]},
+        "matchMethod": {"type": "string", "minLength": 1},
+        "evidenceTier": {"enum": ["transaction_linked_indicative", "calibrated_epc_indicative", "reviewed_indicative"]},
+        "spatialClassification": {"enum": ["unique_interior_clear", "unique_interior_edge"]},
+        "boundaryDistanceMetres": {"type": ["number", "null"], "minimum": 0},
+        "reviewDecision": {"type": ["object", "null"]},
+        "titleConfirmed": {"const": false},
+        "exactUprnIdentityConfirmed": {"const": false},
+        "legalBoundaryConfirmed": {"const": false}
+      },
+      "additionalProperties": false
+    }
+  }
+}
