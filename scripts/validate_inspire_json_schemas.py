@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import json
+import re
+from datetime import datetime
 from pathlib import Path
 
 from validate_inspire_parcels import parse_feed
@@ -14,13 +16,32 @@ from validate_property_uprn_links import parse_feed as parse_uprn_feed
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def is_utc_second_timestamp(value: object) -> bool:
+    """Deterministic date-time format check independent of optional packages."""
+
+    if not isinstance(value, str):
+        return True  # JSON Schema's type keyword reports non-string values.
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", value):
+        return False
+    try:
+        datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        return False
+    return True
+
+
 def validator():
     try:
         from jsonschema import Draft202012Validator, FormatChecker
     except ImportError:
         from json_schema_subset import validate
         return lambda instance, schema: validate(instance, schema)
-    return lambda instance, schema: Draft202012Validator(schema, format_checker=FormatChecker()).validate(instance)
+    checker = FormatChecker()
+    # Plain jsonschema does not install its optional RFC3339 dependency. In
+    # that environment an unregistered `date-time` format silently succeeds,
+    # so register INSIGHT's stricter UTC-seconds contract unconditionally.
+    checker.checks("date-time")(is_utc_second_timestamp)
+    return lambda instance, schema: Draft202012Validator(schema, format_checker=checker).validate(instance)
 
 
 def main() -> int:

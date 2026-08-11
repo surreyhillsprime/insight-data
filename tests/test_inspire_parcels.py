@@ -34,7 +34,7 @@ from validate_inspire_parcel_review_queue import (
     validation_failures as review_queue_failures,
 )
 from runtime_release import finalise_body, parse_runtime
-from validate_inspire_json_schemas import validator as schema_validator
+from validate_inspire_json_schemas import is_utc_second_timestamp, validator as schema_validator
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -631,6 +631,12 @@ class InspireReviewQueueContractTests(unittest.TestCase):
 
 
 class SharedContractFixtureTests(unittest.TestCase):
+    def test_schema_date_time_checker_does_not_depend_on_optional_rfc3339_package(self):
+        self.assertTrue(is_utc_second_timestamp("2026-08-10T12:00:00Z"))
+        self.assertFalse(is_utc_second_timestamp("not-a-date"))
+        self.assertFalse(is_utc_second_timestamp("2026-02-30T12:00:00Z"))
+        self.assertFalse(is_utc_second_timestamp("2026-08-10T12:00:00+00:00"))
+
     def test_frozen_raw_core_and_valid_invalid_uprn_corpus(self):
         fixture = json.loads((ROOT / "tests/fixtures/inspire-contract-fixtures.json").read_text())
         numeric = fixture["numericRawCoreFixture"]

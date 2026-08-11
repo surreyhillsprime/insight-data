@@ -109,9 +109,9 @@ def errors(instance, schema, root=None, path="$", schema_path="$schema"):
             result.append(f"{path}: does not match pattern")
         if schema.get("format") == "date-time":
             try:
-                parsed = datetime.fromisoformat(instance.replace("Z", "+00:00"))
-                if parsed.tzinfo is None:
+                if re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", instance) is None:
                     raise ValueError
+                datetime.strptime(instance, "%Y-%m-%dT%H:%M:%SZ")
             except ValueError:
                 result.append(f"{path}: invalid date-time")
     if isinstance(instance, (int, float)) and not isinstance(instance, bool):
