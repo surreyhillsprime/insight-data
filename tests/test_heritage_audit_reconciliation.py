@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from build_heritage_address_ledger import sha256_lines  # noqa: E402
 from reconcile_heritage_address_audit import (  # noqa: E402
     reconcile_payload,
+    source_identity_mapping,
     validate_baseline,
 )
 
@@ -196,6 +197,47 @@ class HeritageAuditReconciliationTests(unittest.TestCase):
             result["universeReconciliation"]["identityAliasesCollapsed"],
             1,
         )
+
+    def test_prior_retired_format_alias_rebases_through_a_new_canonical_name(self):
+        formatted_legacy = (
+            "property:FIRST HOUSE TEST ROAD ESHER ESHER KT10 0AA|KT100AA"
+        )
+        properties = {
+            self.third: {"item": {
+                "address": "THIRD HOUSE, TEST ROAD, ESHER, KT10 0AC",
+                "postcode": "KT10 0AC",
+            }},
+        }
+        address_canonicalisation = {
+            "sourceAddressVariantProperties": 1,
+            "sourceAddressVariantCount": 2,
+            "sourceAddressVariants": {
+                self.third: [
+                    {
+                        "propertyRecordId": self.first,
+                        "address": "FIRST HOUSE, TEST ROAD, ESHER, KT10 0AA",
+                        "postcode": "KT100AA",
+                    },
+                    {
+                        "propertyRecordId": formatted_legacy,
+                        "address": "FIRST HOUSE, TEST ROAD, ESHER, ESHER, KT10 0AA",
+                        "postcode": "KT100AA",
+                    },
+                ],
+            },
+        }
+        mapping, variant_count = source_identity_mapping(
+            address_canonicalisation,
+            properties,
+            self.ledger,
+            [{
+                "propertyRecordId": formatted_legacy,
+                "canonicalPropertyRecordId": self.first,
+            }],
+        )
+
+        self.assertEqual(mapping, {self.first: self.third})
+        self.assertEqual(variant_count, 2)
 
 
 if __name__ == "__main__":

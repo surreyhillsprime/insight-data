@@ -22,6 +22,8 @@ from insight_data_utils import (
     property_record_id,
     publication_contract_failures,
     read_js,
+    reviewed_alias_content_metadata,
+    reviewed_former_name_metadata,
     reviewed_property_address_aliases,
     structured_delivery_point_key,
 )
@@ -361,6 +363,11 @@ def address_identity_failures(items, meta):
     aliases = reviewed_property_address_aliases()
     if address_meta.get("reviewedAliasRegistryVersion") != aliases.get("version"):
         failures.append("Address identity: reviewed alias registry version is stale")
+    expected_alias_content = reviewed_alias_content_metadata(aliases, canonical_ids)
+    for key, expected in expected_alias_content.items():
+        if address_meta.get(key) != expected:
+            failures.append("Address identity: reviewed alias registry content is stale")
+            break
     variants_by_property = address_meta.get("sourceAddressVariants")
     if not isinstance(variants_by_property, dict):
         return failures + ["Address identity: source-address variant ledger is missing"]
@@ -424,6 +431,27 @@ def address_identity_failures(items, meta):
         if not set(group["members"]).issubset(represented):
             failures.append(
                 "Address identity: reviewed aliases are missing for "
+                + canonical_id
+            )
+
+    expected_former_names = reviewed_former_name_metadata(
+        aliases,
+        canonical_ids,
+    )
+    for key, expected in expected_former_names.items():
+        if address_meta.get(key) != expected:
+            failures.append(
+                "Address identity: reviewed former-name metadata is stale"
+            )
+            break
+    for canonical_id, former_members in expected_former_names[
+        "reviewedFormerNameMembers"
+    ].items():
+        if not set(former_members).issubset(
+            represented_by_property.get(canonical_id, set())
+        ):
+            failures.append(
+                "Address identity: reviewed former-name member is missing for "
                 + canonical_id
             )
 

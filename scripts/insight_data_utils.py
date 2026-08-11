@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Shared helpers for INSIGHT GitHub data refresh jobs."""
 
+import hashlib
 import json
 import math
 import re
@@ -184,24 +185,117 @@ def reviewed_property_address_aliases(path=PROPERTY_ADDRESS_ALIASES_PATH):
     """Load and strictly validate the small reviewed cross-identity registry."""
 
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
-    if payload.get("schemaVersion") != 1 or not isinstance(payload.get("groups"), list):
+    if (
+        payload.get("schemaVersion") != 1
+        or not isinstance(payload.get("groups"), list)
+        or not isinstance(payload.get("version"), str)
+        or not clean(payload.get("version"))
+        or not isinstance(payload.get("contentVersion"), str)
+        or not clean(payload.get("contentVersion"))
+        or not isinstance(payload.get("formerNamesVersion"), str)
+        or not clean(payload.get("formerNamesVersion"))
+    ):
         raise ValueError("Property-address alias registry is missing schemaVersion 1 groups")
     seen_members = set()
+    seen_group_ids = set()
     for group in payload["groups"]:
         members = group.get("members") if isinstance(group, dict) else None
         canonical = group.get("canonicalPropertyId") if isinstance(group, dict) else None
+        group_id = group.get("id") if isinstance(group, dict) else None
         if (
-            not isinstance(members, list)
+            not isinstance(group_id, str)
+            or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", group_id)
+            or group_id in seen_group_ids
+            or not isinstance(members, list)
             or len(members) < 2
             or not all(isinstance(value, str) and value.startswith("property:") for value in members)
             or canonical not in members
         ):
             raise ValueError("Property-address alias group is malformed")
+        seen_group_ids.add(group_id)
         overlap = seen_members.intersection(members)
         if overlap:
             raise ValueError("Property-address alias member occurs in multiple groups: " + ", ".join(sorted(overlap)))
         seen_members.update(members)
+
+        former_name_members = group.get("formerNameMembers")
+        if former_name_members is None:
+            continue
+        if (
+            not isinstance(former_name_members, list)
+            or not former_name_members
+            or len(former_name_members) != len(set(former_name_members))
+            or canonical in former_name_members
+            or not set(former_name_members).issubset(members)
+        ):
+            raise ValueError("Property-address alias former-name members are malformed")
     return payload
+
+
+def reviewed_alias_content_metadata(alias_registry, canonical_property_ids):
+    """Fingerprint the active identity mappings separately from compatibility."""
+
+    identity_groups = sorted(
+        (
+            {
+                "id": group["id"],
+                "canonicalPropertyId": group["canonicalPropertyId"],
+                "members": sorted(group["members"]),
+            }
+            for group in alias_registry["groups"]
+            if group["canonicalPropertyId"] in canonical_property_ids
+        ),
+        key=lambda group: group["id"],
+    )
+    encoded = json.dumps(
+        identity_groups,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return {
+        "reviewedAliasContentVersion": alias_registry["contentVersion"],
+        "reviewedAliasContentFingerprint": hashlib.sha256(encoded).hexdigest(),
+    }
+
+
+def reviewed_former_name_members_by_canonical_property(
+    path=PROPERTY_ADDRESS_ALIASES_PATH,
+):
+    """Return only explicit, reviewed former-name identities from the registry."""
+
+    payload = reviewed_property_address_aliases(path)
+    return {
+        group["canonicalPropertyId"]: list(group["formerNameMembers"])
+        for group in payload["groups"]
+        if group.get("formerNameMembers")
+    }
+
+
+def reviewed_former_name_metadata(alias_registry, canonical_property_ids):
+    """Build the additive, fail-closed former-name publication contract."""
+
+    members_by_property = {
+        group["canonicalPropertyId"]: list(group["formerNameMembers"])
+        for group in alias_registry["groups"]
+        if group.get("formerNameMembers")
+        and group["canonicalPropertyId"] in canonical_property_ids
+    }
+    encoded = json.dumps(
+        members_by_property,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return {
+        "reviewedFormerNamesVersion": alias_registry["formerNamesVersion"],
+        "reviewedFormerNameProperties": len(members_by_property),
+        "reviewedFormerNameMemberCount": sum(
+            len(members) for members in members_by_property.values()
+        ),
+        "reviewedFormerNameFingerprint": hashlib.sha256(encoded).hexdigest(),
+        "reviewedFormerNameMembers": dict(sorted(members_by_property.items())),
+    }
 
 
 def reviewed_alias_postcodes_by_canonical_property(path=PROPERTY_ADDRESS_ALIASES_PATH):
@@ -531,7 +625,6 @@ def canonicalise_property_addresses(transactions):
         applied_numbered_groups += 1
 
     alias_registry = reviewed_property_address_aliases()
-    applied_reviewed_groups = 0
     for group in alias_registry["groups"]:
         members = set(group["members"])
         indexes = [
@@ -559,7 +652,6 @@ def canonicalise_property_addresses(transactions):
         for index in indexes:
             rows[index].update(canonical_fields)
             rows[index]["address"] = canonical_display_address(rows[index]).upper()
-        applied_reviewed_groups += 1
 
     presentation_registry = reviewed_property_address_presentations()
     presentation_stats = apply_reviewed_property_address_presentations(
@@ -591,6 +683,14 @@ def canonicalise_property_addresses(transactions):
         for item in rows
         if property_record_id(item)
     }
+    former_name_stats = reviewed_former_name_metadata(
+        alias_registry,
+        canonical_property_ids,
+    )
+    alias_content_stats = reviewed_alias_content_metadata(
+        alias_registry,
+        canonical_property_ids,
+    )
     source_variant_candidates = {}
     for index, (original, canonical) in enumerate(zip(original_rows, rows)):
         canonical_property_id = property_record_id(canonical)
@@ -651,7 +751,12 @@ def canonicalise_property_addresses(transactions):
         "structuredAliasesCollapsed": structured_aliases_collapsed,
         "numberedAliasGroups": applied_numbered_groups,
         "reviewedAliasRegistryVersion": alias_registry["version"],
-        "reviewedAliasGroups": applied_reviewed_groups,
+        **alias_content_stats,
+        "reviewedAliasGroups": sum(
+            group["canonicalPropertyId"] in canonical_property_ids
+            for group in alias_registry["groups"]
+        ),
+        **former_name_stats,
         **presentation_stats,
         "sourceAddressIdentities": len(legacy_property_ids),
         "canonicalProperties": len(canonical_property_ids),
@@ -961,6 +1066,15 @@ def merge_address_canonicalisation_stats(computed, candidates, transactions):
     row_count = len(transactions)
     canonical_count = len(current_ids)
     all_candidates = [computed, *candidates]
+    fresh_candidates = [computed, *candidates[:1]]
+    fresh_source_identity_count = max(
+        (
+            candidate.get("sourceAddressIdentities", 0)
+            for candidate in fresh_candidates
+            if valid_address_canonicalisation_ledger(candidate)
+        ),
+        default=canonical_count,
+    )
     current_candidates = [
         candidate
         for candidate in all_candidates
@@ -1001,26 +1115,63 @@ def merge_address_canonicalisation_stats(computed, candidates, transactions):
             )
         },
     })
+    base.update({
+        key: computed[key]
+        for key in (
+            "reviewedAliasContentVersion",
+            "reviewedAliasContentFingerprint",
+            "reviewedFormerNamesVersion",
+            "reviewedFormerNameProperties",
+            "reviewedFormerNameMemberCount",
+            "reviewedFormerNameFingerprint",
+            "reviewedFormerNameMembers",
+        )
+    })
     merged = {}
     legacy_targets = {}
     collapsed = int(base.get("identityAliasesCollapsed") or 0)
     current_redirects = {}
-    if valid_address_canonicalisation_ledger(computed):
-        for canonical_id, variants in computed["sourceAddressVariants"].items():
+    for redirect_candidate in all_candidates:
+        if not valid_address_canonicalisation_ledger(redirect_candidate):
+            continue
+        for canonical_id, variants in redirect_candidate["sourceAddressVariants"].items():
             if canonical_id not in current_ids:
                 continue
             for variant in variants:
                 legacy_id = clean(variant.get("propertyRecordId"))
                 if legacy_id.startswith("property:") and legacy_id not in current_ids:
-                    current_redirects[legacy_id] = canonical_id
+                    prior_target = current_redirects.setdefault(legacy_id, canonical_id)
+                    if prior_target != canonical_id:
+                        raise ValueError(
+                            "Address canonicalisation legacy ID redirects to multiple properties"
+                        )
     for candidate in all_candidates:
         if not valid_address_canonicalisation_ledger(candidate):
             continue
         candidate_variants = candidate["sourceAddressVariants"]
-        if set(candidate_variants).issubset(current_ids):
+        retired_targets = {
+            candidate_canonical_id
+            for candidate_canonical_id in candidate_variants
+            if candidate_canonical_id not in current_ids
+            and current_redirects.get(candidate_canonical_id) in current_ids
+        }
+        if all(
+            candidate_canonical_id in current_ids
+            or candidate_canonical_id in retired_targets
+            for candidate_canonical_id in candidate_variants
+        ):
+            candidate_growth = max(
+                0,
+                fresh_source_identity_count
+                - int(candidate.get("canonicalProperties") or 0),
+            )
             collapsed = max(
                 collapsed,
-                int(candidate.get("identityAliasesCollapsed") or 0),
+                int(candidate.get("identityAliasesCollapsed") or 0)
+                + len(retired_targets),
+                int(candidate.get("sourceAddressIdentities") or 0)
+                + candidate_growth
+                - canonical_count,
             )
         for candidate_canonical_id, variants in candidate_variants.items():
             canonical_id = (

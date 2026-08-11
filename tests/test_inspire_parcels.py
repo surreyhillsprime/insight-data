@@ -291,10 +291,19 @@ class InspirePublicationTests(unittest.TestCase):
         expanded = set(self.canonical_ids) | {extra}
         self.assertEqual(registry_failures(self.registry, expanded), [])
         coverage = coverage_metadata(expanded, self.feed["associationsByProperty"])
-        self.assertEqual(coverage["canonicalProperties"], 3767)
+        self.assertEqual(coverage["canonicalProperties"], 3763)
         self.assertEqual(coverage["associatedProperties"], 3228)
-        self.assertEqual(coverage["unassociatedProperties"], 539)
-        self.assertLess(coverage["coveragePercent"], 85.7143)
+        self.assertEqual(coverage["unassociatedProperties"], 535)
+        self.assertLess(
+            coverage["coveragePercent"],
+            self.feed["coverage"]["coveragePercent"],
+        )
+
+    def test_reviewed_identity_deduplication_may_reduce_the_live_denominator(self):
+        baseline = self.registry["approvalBaseline"]
+
+        self.assertLess(len(self.canonical_ids), baseline["canonicalProperties"])
+        self.assertEqual(registry_failures(self.registry, self.canonical_ids), [])
 
     def test_raw_core_mutation_changes_release_digest(self):
         core = {key: deepcopy(value) for key, value in self.feed.items() if key not in {"generatedAt", "releaseId"}}

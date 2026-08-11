@@ -304,7 +304,7 @@ def bind_reviewed_heritage_ledger(transactions, metadata, overrides_path):
     return output
 
 
-def migrate_transaction(item):
+def migrate_transaction(item, *, backfill_coordinate_provenance=True):
     migrated = dict(item)
     prior_id = str(item.get("id") or "")
     migrated["id"] = (
@@ -328,7 +328,8 @@ def migrate_transaction(item):
         == "confirmed-nhle-designation-location"
     )
     if (
-        ("postcode" in precision or "centroid" in precision)
+        backfill_coordinate_provenance
+        and ("postcode" in precision or "centroid" in precision)
         and not confirmed_nhle_location
     ):
         migrated["coordinateSource"] = geocode.get("source") or "Postcodes.io"
@@ -353,8 +354,17 @@ def main():
     args = parser.parse_args()
 
     transactions, _summary, meta = read_js(args.input_js)
+    backfill_coordinate_provenance = (
+        meta.get("schemaVersion") != FEED_SCHEMA_VERSION
+    )
     canonical_transactions, address_stats = canonicalise_property_addresses(transactions)
-    migrated = [migrate_transaction(item) for item in canonical_transactions]
+    migrated = [
+        migrate_transaction(
+            item,
+            backfill_coordinate_provenance=backfill_coordinate_provenance,
+        )
+        for item in canonical_transactions
+    ]
     meta = dict(meta)
     meta["schemaVersion"] = FEED_SCHEMA_VERSION
     meta["propertyRecordSchemaVersion"] = PROPERTY_RECORD_SCHEMA_VERSION

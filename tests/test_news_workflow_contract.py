@@ -95,12 +95,14 @@ class NewsWorkflowContractTests(unittest.TestCase):
                 "python3 scripts/validate_planning_feed.py",
                 "python3 scripts/build_property_records.py",
                 "python3 scripts/validate_property_records.py",
+                "python3 scripts/build_today_feed.py",
                 "python3 scripts/validate_today_feed.py",
             ),
             "sales-history-feed.yml": (
                 "python3 scripts/validate_sales_history_feed.py",
                 "python3 scripts/build_property_records.py",
                 "python3 scripts/validate_property_records.py",
+                "python3 scripts/build_today_feed.py",
                 "python3 scripts/validate_today_feed.py",
             ),
             "heritage-listed-buildings.yml": (
@@ -131,6 +133,38 @@ class NewsWorkflowContractTests(unittest.TestCase):
                     validation_index = retry.index(validator)
                     self.assertLess(rebase_index, validation_index)
                     self.assertLess(validation_index, push_index)
+
+    def test_property_feed_publishers_rebuild_and_commit_today_after_rebase(self):
+        for name in (
+            "planning-history-feed.yml",
+            "sales-history-feed.yml",
+        ):
+            workflow = (ROOT / ".github" / "workflows" / name).read_text(
+                encoding="utf-8"
+            )
+            retry = workflow[workflow.rindex("for attempt in 1 2 3; do") :]
+            operations = (
+                'git rebase --autostash "origin/$GITHUB_REF_NAME"',
+                "python3 scripts/build_property_records.py",
+                "python3 scripts/validate_property_records.py",
+                "python3 scripts/build_today_feed.py",
+                "python3 scripts/validate_today_feed.py",
+                "git add outputs/today-feed.js",
+                "git commit --amend --no-edit",
+                'git push origin "HEAD:$GITHUB_REF_NAME"',
+            )
+            positions = []
+            for operation in operations:
+                with self.subTest(workflow=name, operation=operation):
+                    positions.append(retry.index(operation))
+            self.assertEqual(positions, sorted(positions), name)
+            self.assertIn(
+                "if ! git diff --cached --quiet; then\n"
+                "                git commit --amend --no-edit\n"
+                "              fi",
+                retry,
+                name,
+            )
 
     def test_daily_flood_retry_revalidates_the_rebased_base_feed(self):
         commit_index = self.daily_workflow.index(
