@@ -106,6 +106,7 @@ def source_identity_mapping(
         if isinstance(item, dict) and clean(item.get("propertyRecordId"))
     }
     mapping = {}
+    target_by_legacy = {}
     seen_legacy_ids = set()
     for canonical_id, variants in variants_by_canonical.items():
         if canonical_id not in properties:
@@ -151,21 +152,28 @@ def source_identity_mapping(
                     f"Address canonicalisation repeats legacy property ID {legacy_id}"
                 )
             seen_legacy_ids.add(legacy_id)
-            if legacy_id in ledger:
-                mapping[legacy_id] = canonical_id
-            elif (
-                legacy_id not in retired
-                or clean(retired[legacy_id].get("canonicalPropertyRecordId"))
-                != canonical_id
-            ):
-                raise ValueError(
-                    "Address canonicalisation legacy property ID is neither active "
-                    f"nor already retired to its canonical target: {legacy_id}"
-                )
+            target_by_legacy[legacy_id] = canonical_id
     if len(seen_legacy_ids) != declared_count:
         raise ValueError(
             "Address canonicalisation sourceAddressVariantCount does not match its ledger"
         )
+
+    for legacy_id, canonical_id in target_by_legacy.items():
+        if legacy_id in ledger:
+            mapping[legacy_id] = canonical_id
+            continue
+        retired_target = clean(
+            retired.get(legacy_id, {}).get("canonicalPropertyRecordId")
+        )
+        seen_targets = set()
+        while retired_target in target_by_legacy and retired_target not in seen_targets:
+            seen_targets.add(retired_target)
+            retired_target = target_by_legacy[retired_target]
+        if retired_target != canonical_id:
+            raise ValueError(
+                "Address canonicalisation legacy property ID is neither active "
+                f"nor already retired to its canonical target: {legacy_id}"
+            )
     return mapping, len(seen_legacy_ids)
 
 

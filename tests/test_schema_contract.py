@@ -109,7 +109,11 @@ class FeedSchemaContractTests(unittest.TestCase):
             for member in group["members"]
         ]
         self.assertEqual(payload["version"], "reviewed-property-address-aliases-2026-08-05")
-        self.assertEqual(len(payload["groups"]), 25)
+        self.assertEqual(
+            payload["contentVersion"],
+            "reviewed-property-address-alias-content-2026-08-11",
+        )
+        self.assertEqual(len(payload["groups"]), 29)
         self.assertEqual(len(members), len(set(members)))
 
     def test_checked_in_feed_publishes_complete_source_variant_ledger(self):
@@ -245,6 +249,19 @@ class FeedSchemaContractTests(unittest.TestCase):
         self.assertEqual(migrated["propertyRecordId"], property_record_id(row))
         self.assertEqual(migrated["coordinateSource"], "Postcodes.io")
         self.assertEqual(migrated["coordinatePrecision"], "postcode-centroid")
+
+    def test_current_schema_migration_can_preserve_existing_row_shape(self):
+        row = transaction(
+            geocode={"source": "Postcodes.io", "precision": "Postcode centroid"},
+        )
+
+        migrated = migrate_transaction(
+            row,
+            backfill_coordinate_provenance=False,
+        )
+
+        self.assertNotIn("coordinateSource", migrated)
+        self.assertNotIn("coordinatePrecision", migrated)
 
     def test_migration_preserves_existing_stable_transaction_id(self):
         row = transaction(id="lr-1234567890abcdef1234")

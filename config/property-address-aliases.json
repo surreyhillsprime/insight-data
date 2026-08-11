@@ -1,6 +1,8 @@
 {
   "schemaVersion": 1,
   "version": "reviewed-property-address-aliases-2026-08-05",
+  "contentVersion": "reviewed-property-address-alias-content-2026-08-11",
+  "formerNamesVersion": "reviewed-former-property-names-2026-08-11",
   "groups": [
     {
       "id": "hunters-mill-lane-gu10-3eb",
@@ -63,6 +65,9 @@
         "property:DERIDA ALBURY ROAD HERSHAM WALTON ON THAMES KT12 5DY|KT125DY",
         "property:ALBURY HOUSE 1 ALBURY ROAD HERSHAM WALTON ON THAMES KT12 5DY|KT125DY"
       ],
+      "formerNameMembers": [
+        "property:DERIDA ALBURY ROAD HERSHAM WALTON ON THAMES KT12 5DY|KT125DY"
+      ],
       "reason": "Reviewed rename; planning history moves from Derida/1 to Albury House at the same surveyed point."
     },
     {
@@ -71,6 +76,9 @@
       "members": [
         "property:WERFA EAST ROAD WEYBRIDGE WEYBRIDGE KT13 0LF|KT130LF",
         "property:GROSVENOR EAST ROAD WEYBRIDGE KT13 0LF|KT130LF"
+      ],
+      "formerNameMembers": [
+        "property:WERFA EAST ROAD WEYBRIDGE WEYBRIDGE KT13 0LF|KT130LF"
       ],
       "reason": "Reviewed rename; planning evidence explicitly identifies Grosvenor House as formerly Werfa."
     },
@@ -81,6 +89,9 @@
         "property:ARUN WAY GRANVILLE ROAD WEYBRIDGE KT13 0QG|KT130QG",
         "property:OAKVIEW GRANVILLE ROAD WEYBRIDGE KT13 0QG|KT130QG"
       ],
+      "formerNameMembers": [
+        "property:ARUN WAY GRANVILLE ROAD WEYBRIDGE KT13 0QG|KT130QG"
+      ],
       "reason": "Reviewed rename; chronological planning records change from Arun Way to Oakview at the same mapped site."
     },
     {
@@ -89,6 +100,9 @@
       "members": [
         "property:BRIDLE CLOSE WRENS HILL OXSHOTT LEATHERHEAD KT22 0HW|KT220HW",
         "property:SUMMERFELL WRENS HILL OXSHOTT LEATHERHEAD KT22 0HW|KT220HW"
+      ],
+      "formerNameMembers": [
+        "property:BRIDLE CLOSE WRENS HILL OXSHOTT LEATHERHEAD KT22 0HW|KT220HW"
       ],
       "reason": "Reviewed rename; chronological planning records and identical surveyed coordinates link Bridle Close to Summerfell."
     },
@@ -100,6 +114,10 @@
         "property:PISCES RODONA ROAD WEYBRIDGE KT13 0NP|KT130NP",
         "property:ABILITY HILLS RODONA ROAD WEYBRIDGE KT13 0NP|KT130NP"
       ],
+      "formerNameMembers": [
+        "property:PISCES RODONA ROAD WEYBRIDGE WEYBRIDGE KT13 0NP|KT130NP",
+        "property:PISCES RODONA ROAD WEYBRIDGE KT13 0NP|KT130NP"
+      ],
       "reason": "Reviewed rename; Pisces and Ability Hills share the same planning UPRN and thirteen planning references."
     },
     {
@@ -108,6 +126,9 @@
       "members": [
         "property:OAK TREE COTTAGE EAST ROAD WEYBRIDGE KT13 0LB|KT130LB",
         "property:WILTON HOUSE EAST ROAD ST GEORGES HILL WEYBRIDGE KT13 0LB|KT130LB"
+      ],
+      "formerNameMembers": [
+        "property:OAK TREE COTTAGE EAST ROAD WEYBRIDGE KT13 0LB|KT130LB"
       ],
       "reason": "Reviewed rename; planning chronology changes from Oak Tree House to Wilton House at the same mapped site."
     },
@@ -118,6 +139,9 @@
         "property:THREE OAKS ALBURY ROAD HERSHAM WALTON ON THAMES KT12 5DY|KT125DY",
         "property:15 ALBURY ROAD HERSHAM WALTON ON THAMES KT12 5DY|KT125DY"
       ],
+      "formerNameMembers": [
+        "property:THREE OAKS ALBURY ROAD HERSHAM WALTON ON THAMES KT12 5DY|KT125DY"
+      ],
       "reason": "Reviewed rename; all eight shared planning references identify the site as 15 Albury Road."
     },
     {
@@ -126,6 +150,9 @@
       "members": [
         "property:ARUNDEL LODGE EAST ROAD WEYBRIDGE WEYBRIDGE KT13 0LB|KT130LB",
         "property:WINSLOW HOUSE EAST ROAD WEYBRIDGE KT13 0LB|KT130LB"
+      ],
+      "formerNameMembers": [
+        "property:ARUNDEL LODGE EAST ROAD WEYBRIDGE WEYBRIDGE KT13 0LB|KT130LB"
       ],
       "reason": "Reviewed rename; seventeen shared planning references transition from Arundel Lodge to Winslow House at the same surveyed site."
     },
@@ -136,6 +163,9 @@
         "property:DEAUVILLE COURT EAST ROAD ST GEORGES HILL WEYBRIDGE KT13 0LF|KT130LF",
         "property:DEAUVILLE EAST ROAD WEYBRIDGE KT13 0LF|KT130LF"
       ],
+      "formerNameMembers": [
+        "property:DEAUVILLE COURT EAST ROAD ST GEORGES HILL WEYBRIDGE KT13 0LF|KT130LF"
+      ],
       "reason": "Reviewed name and locality change; the rare name root and identical sixteen-reference planning history identify one site."
     },
     {
@@ -144,6 +174,9 @@
       "members": [
         "property:ARUN BRIDGE MOLES HILL OXSHOTT LEATHERHEAD KT22 0QB|KT220QB",
         "property:TAFTIOG MOLES HILL OXSHOTT LEATHERHEAD KT22 0QB|KT220QB"
+      ],
+      "formerNameMembers": [
+        "property:ARUN BRIDGE MOLES HILL OXSHOTT LEATHERHEAD KT22 0QB|KT220QB"
       ],
       "reason": "Reviewed rename; seven shared planning references connect Arun Bridge and Taftiog at the exact surveyed point."
     },
@@ -154,6 +187,9 @@
         "property:WILLOW BEND MOLES HILL OXSHOTT LEATHERHEAD KT22 0QB|KT220QB",
         "property:WILLOW HOUSE MOLES HILL OXSHOTT LEATHERHEAD KT22 0QB|KT220QB"
       ],
+      "formerNameMembers": [
+        "property:WILLOW BEND MOLES HILL OXSHOTT LEATHERHEAD KT22 0QB|KT220QB"
+      ],
       "reason": "Reviewed rename; thirteen shared planning references connect Willow Bend and Willow House at the same site."
     },
     {
@@ -162,6 +198,9 @@
       "members": [
         "property:BURFORD HOUSE EYHURST CLOSE KINGSWOOD TADWORTH KT20 6NR|KT206NR",
         "property:KINGSWOOD HOUSE EYHURST CLOSE KINGSWOOD TADWORTH KT20 6NR|KT206NR"
+      ],
+      "formerNameMembers": [
+        "property:BURFORD HOUSE EYHURST CLOSE KINGSWOOD TADWORTH KT20 6NR|KT206NR"
       ],
       "reason": "Reviewed rename; seven identical planning references and the same 6,243 sq ft EPC evidence identify one property."
     },
@@ -172,6 +211,9 @@
         "property:TANDEM HOUSE QUEENS DRIVE OXSHOTT LEATHERHEAD KT22 0PH|KT220PH",
         "property:BELLE HOUSE QUEENS DRIVE OXSHOTT LEATHERHEAD KT22 0PH|KT220PH"
       ],
+      "formerNameMembers": [
+        "property:TANDEM HOUSE QUEENS DRIVE OXSHOTT LEATHERHEAD KT22 0PH|KT220PH"
+      ],
       "reason": "Reviewed rename; three identical planning references and the same 8,783 sq ft EPC evidence identify one property."
     },
     {
@@ -180,6 +222,9 @@
       "members": [
         "property:DARIEN SEVEN HILLS ROAD COBHAM KT11 1EU|KT111EU",
         "property:ALKEBULAN SEVEN HILLS ROAD COBHAM KT11 1EU|KT111EU"
+      ],
+      "formerNameMembers": [
+        "property:DARIEN SEVEN HILLS ROAD COBHAM KT11 1EU|KT111EU"
       ],
       "reason": "Reviewed rename; planning chronology transitions from Darien to Alkebulan within nine metres on the same road and postcode."
     },
@@ -190,6 +235,9 @@
         "property:ARDENNES COTTAGE TOR LANE WEYBRIDGE WEYBRIDGE KT13 0NS|KT130NS",
         "property:ONDINE TOR LANE WEYBRIDGE KT13 0NS|KT130NS"
       ],
+      "formerNameMembers": [
+        "property:ARDENNES COTTAGE TOR LANE WEYBRIDGE WEYBRIDGE KT13 0NS|KT130NS"
+      ],
       "reason": "Reviewed rename; nine shared planning references connect Ardennes Cottage and Ondine at the same mapped site."
     },
     {
@@ -198,6 +246,9 @@
       "members": [
         "property:FERNLEIGH BROOM WAY WEYBRIDGE KT13 9TQ|KT139TQ",
         "property:VERONA BROOM WAY WEYBRIDGE KT13 9TQ|KT139TQ"
+      ],
+      "formerNameMembers": [
+        "property:FERNLEIGH BROOM WAY WEYBRIDGE KT13 9TQ|KT139TQ"
       ],
       "reason": "Reviewed replacement and rename; four shared planning references bridge Fernleigh to Verona and EPC areas remain near-identical."
     },
@@ -208,6 +259,9 @@
         "property:GLENBURN CAVENDISH ROAD WEYBRIDGE KT13 0JY|KT130JY",
         "property:BONNIN CAVENDISH ROAD WEYBRIDGE KT13 0JY|KT130JY"
       ],
+      "formerNameMembers": [
+        "property:GLENBURN CAVENDISH ROAD WEYBRIDGE KT13 0JY|KT130JY"
+      ],
       "reason": "Reviewed replacement and rename; seven shared planning references record the replacement at Glenburn before the Bonnin sale."
     },
     {
@@ -216,6 +270,9 @@
       "members": [
         "property:MARKINCH EAST ROAD WEYBRIDGE KT13 0LD|KT130LD",
         "property:CLARINGTON HOUSE EAST ROAD WEYBRIDGE KT13 0LD|KT130LD"
+      ],
+      "formerNameMembers": [
+        "property:MARKINCH EAST ROAD WEYBRIDGE KT13 0LD|KT130LD"
       ],
       "reason": "Reviewed replacement and rename; six shared planning references record the replacement at Markinch before the Clarington House sale."
     },
@@ -226,7 +283,58 @@
         "property:OAKLEY HOUSE OAK GRANGE ROAD WEST CLANDON GUILDFORD GU4 7UB|GU47UB",
         "property:THE BELL HOUSE OAK GRANGE ROAD WEST CLANDON GUILDFORD GU4 7UB|GU47UB"
       ],
+      "formerNameMembers": [
+        "property:OAKLEY HOUSE OAK GRANGE ROAD WEST CLANDON GUILDFORD GU4 7UB|GU47UB"
+      ],
       "reason": "Reviewed rename; four shared planning references and the EPC chronology connect Oakley House to The Bell House."
+    },
+    {
+      "id": "arasan-manor-ravenscroft-road-kt13-0nx",
+      "canonicalPropertyId": "property:ARASAN MANOR RAVENSCROFT ROAD WEYBRIDGE KT13 0NX|KT130NX",
+      "members": [
+        "property:CHILTON HOUSE RAVENSCROFT ROAD WEYBRIDGE KT13 0NX|KT130NX",
+        "property:ARASAN MANOR RAVENSCROFT ROAD WEYBRIDGE KT13 0NX|KT130NX"
+      ],
+      "formerNameMembers": [
+        "property:CHILTON HOUSE RAVENSCROFT ROAD WEYBRIDGE KT13 0NX|KT130NX"
+      ],
+      "reason": "Reviewed rename; Elmbridge records Chilton House as the historical LPI and Arasan Manor as the approved LPI for UPRN 100061347035."
+    },
+    {
+      "id": "brooke-house-queens-drive-kt22-0pf",
+      "canonicalPropertyId": "property:BROOKE HOUSE QUEENS DRIVE OXSHOTT LEATHERHEAD KT22 0PF|KT220PF",
+      "members": [
+        "property:BALMORAL QUEENS DRIVE OXSHOTT LEATHERHEAD KT22 0PF|KT220PF",
+        "property:BROOKE HOUSE QUEENS DRIVE OXSHOTT LEATHERHEAD KT22 0PF|KT220PF"
+      ],
+      "formerNameMembers": [
+        "property:BALMORAL QUEENS DRIVE OXSHOTT LEATHERHEAD KT22 0PF|KT220PF"
+      ],
+      "reason": "Reviewed rename; Elmbridge records Balmoral as the historical LPI and Brooke House as the approved LPI for UPRN 10013119444."
+    },
+    {
+      "id": "chapters-old-avenue-kt13-0qb",
+      "canonicalPropertyId": "property:CHAPTERS OLD AVENUE WEYBRIDGE KT13 0QB|KT130QB",
+      "members": [
+        "property:FORTUNE MANOR OLD AVENUE WEYBRIDGE KT13 0QB|KT130QB",
+        "property:CHAPTERS OLD AVENUE WEYBRIDGE KT13 0QB|KT130QB"
+      ],
+      "formerNameMembers": [
+        "property:FORTUNE MANOR OLD AVENUE WEYBRIDGE KT13 0QB|KT130QB"
+      ],
+      "reason": "Reviewed rename; Elmbridge records Fortune Manor as the historical LPI and Chapters as the approved LPI for UPRN 100061346504."
+    },
+    {
+      "id": "dunmore-west-road-kt13-0lz",
+      "canonicalPropertyId": "property:DUNMORE WEST ROAD WEYBRIDGE KT13 0LZ|KT130LZ",
+      "members": [
+        "property:THIRLSTONE WEST ROAD ST GEORGES HILL WEYBRIDGE KT13 0LZ|KT130LZ",
+        "property:DUNMORE WEST ROAD WEYBRIDGE KT13 0LZ|KT130LZ"
+      ],
+      "formerNameMembers": [
+        "property:THIRLSTONE WEST ROAD ST GEORGES HILL WEYBRIDGE KT13 0LZ|KT130LZ"
+      ],
+      "reason": "Reviewed site lineage; Elmbridge records Thirlstone as the historical LPI and Dunmore as the approved LPI for UPRN 100061348214, with planning evidence recording demolition and replacement."
     }
   ]
 }

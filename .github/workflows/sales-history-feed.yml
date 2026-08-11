@@ -123,7 +123,18 @@ jobs:
               python3 scripts/validate_property_records.py \
                 /tmp/insight-property-records.js \
                 --transactions outputs/surrey-transactions.js
+              python3 scripts/build_today_feed.py \
+                --property-records /tmp/insight-property-records.js \
+                --output outputs/today-feed.js
               python3 scripts/validate_today_feed.py outputs/today-feed.js
+              if grep -Eq '^(<<<<<<<|=======|>>>>>>>)' outputs/today-feed.js; then
+                echo "::error::Today feed contains conflicts after rebasing."
+                exit 1
+              fi
+              git add outputs/today-feed.js
+              if ! git diff --cached --quiet; then
+                git commit --amend --no-edit
+              fi
               if git push origin "HEAD:$GITHUB_REF_NAME"; then
                 break
               fi

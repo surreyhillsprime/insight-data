@@ -46,6 +46,57 @@ class HistoricalExpansionMetadataTests(unittest.TestCase):
         self.assertEqual(historical["newTransactionsAtExpansion"], 1)
         self.assertEqual(historical["newTransactionsPendingEnrichment"], 1)
 
+    def test_exact_transaction_id_wins_when_sale_fact_key_is_duplicated(self):
+        shared = {
+            "address": "FORTUNE HOUSE, KNOWLE LANE, CRANLEIGH, GU6 8JP",
+            "postcode": "GU6 8JP",
+            "price": 2_000_000,
+            "date": "2020-01-01",
+            "propertyType": "Detached",
+            "category": "A",
+        }
+        first = {**shared, "id": "first", "floorAreaSqft": 904, "epcRating": "E"}
+        second = {**shared, "id": "second", "floorAreaSqft": 4_650, "epcRating": "F"}
+
+        rows, _metadata = preserve_existing_enrichments(
+            [{**shared, "id": "first"}],
+            {},
+            [first, second],
+            {},
+        )
+
+        self.assertEqual(rows[0]["floorAreaSqft"], 904)
+        self.assertEqual(rows[0]["epcRating"], "E")
+
+    def test_existing_transaction_does_not_gain_missing_property_level_enrichment(self):
+        exact = {
+            "id": "exact",
+            "address": "8 HOLTWOOD ROAD, OXSHOTT, LEATHERHEAD, KT22 0QJ",
+            "postcode": "KT22 0QJ",
+            "price": 2_000_000,
+            "date": "2010-01-01",
+            "propertyType": "Detached",
+            "category": "A",
+        }
+        donor = {
+            **exact,
+            "id": "donor",
+            "price": 3_000_000,
+            "date": "2020-01-01",
+            "floorAreaSqft": 3_466,
+            "epcRating": "B",
+        }
+
+        rows, _metadata = preserve_existing_enrichments(
+            [dict(exact)],
+            {},
+            [exact, donor],
+            {},
+        )
+
+        self.assertNotIn("floorAreaSqft", rows[0])
+        self.assertNotIn("epcRating", rows[0])
+
     def test_final_full_pass_preserves_initial_cohort_and_clears_pending(self):
         result = finalise_historical_expansion(
             metadata(),

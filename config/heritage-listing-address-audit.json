@@ -26,8 +26,8 @@
     "Use official NHLE geometry to refine map location only after property identity is confirmed.",
     "No direct NHLE match is not legal proof that a property is unlisted or outside listed-building curtilage."
   ],
-  "canonicalPropertyCount": 3766,
-  "canonicalPropertyDigest": "8a678dc5e1b36674f6d8c85a0b32b0faeb192297d436dfc88315a97241fb87f7",
+  "canonicalPropertyCount": 3762,
+  "canonicalPropertyDigest": "3355e3ed94aa0dd995ecd53b05cb70e66f140ae74df34504a4e3370fc9e05190",
   "officialAddressRecordsScreened": 6624,
   "officialUniqueListEntriesScreened": 6624,
   "candidatePropertyCount": 1415,
@@ -41,7 +41,7 @@
   },
   "confirmedPairDigest": "d61394c612481fcedbf06f4215d87036ce73a5273a71602ca8346465393a61f4",
   "documentedNoDirectPropertyCount": 44,
-  "genericNoDirectPropertyCount": 3559,
+  "genericNoDirectPropertyCount": 3555,
   "unknownPropertyCount": 21,
   "confirmedMappings": [
     {
@@ -4957,6 +4957,19 @@
       "canonicalPropertyRecordId": "property:BALMORAL HOUSE 12 BROCK WAY VIRGINIA WATER GU25 4SD|GU254SD"
     },
     {
+      "propertyRecordId": "property:BALMORAL QUEENS DRIVE OXSHOTT LEATHERHEAD KT22 0PF|KT220PF",
+      "address": "BALMORAL, QUEENS DRIVE, OXSHOTT, LEATHERHEAD, KT22 0PF",
+      "postcode": "KT22 0PF",
+      "listEntryNumbers": [],
+      "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
+      "reviewedAt": "2026-07-28",
+      "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage.",
+      "status": "no_direct_match",
+      "retiredAt": "2026-08-11",
+      "retirementReason": "Reviewed address identity consolidated into canonical property property:BROOKE HOUSE QUEENS DRIVE OXSHOTT LEATHERHEAD KT22 0PF|KT220PF; evidence retained for audit history.",
+      "canonicalPropertyRecordId": "property:BROOKE HOUSE QUEENS DRIVE OXSHOTT LEATHERHEAD KT22 0PF|KT220PF"
+    },
+    {
       "propertyRecordId": "property:BELVEDERE HOUSE EATON PARK ROAD COBHAM COBHAM KT11 2JJ|KT112JJ",
       "address": "BELVEDERE HOUSE, EATON PARK ROAD, COBHAM, COBHAM, KT11 2JJ",
       "postcode": "KT11 2JJ",
@@ -5284,6 +5297,19 @@
       "retiredAt": "2026-08-05",
       "retirementReason": "Reviewed address identity consolidated into canonical property property:CHESTNUT HOUSE GORSE HILL ROAD VIRGINIA WATER GU25 4AS|GU254AS; evidence retained for audit history.",
       "canonicalPropertyRecordId": "property:CHESTNUT HOUSE GORSE HILL ROAD VIRGINIA WATER GU25 4AS|GU254AS"
+    },
+    {
+      "propertyRecordId": "property:CHILTON HOUSE RAVENSCROFT ROAD WEYBRIDGE KT13 0NX|KT130NX",
+      "address": "CHILTON HOUSE, RAVENSCROFT ROAD, WEYBRIDGE, KT13 0NX",
+      "postcode": "KT13 0NX",
+      "listEntryNumbers": [],
+      "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
+      "reviewedAt": "2026-07-28",
+      "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage.",
+      "status": "no_direct_match",
+      "retiredAt": "2026-08-11",
+      "retirementReason": "Reviewed address identity consolidated into canonical property property:ARASAN MANOR RAVENSCROFT ROAD WEYBRIDGE KT13 0NX|KT130NX; evidence retained for audit history.",
+      "canonicalPropertyRecordId": "property:ARASAN MANOR RAVENSCROFT ROAD WEYBRIDGE KT13 0NX|KT130NX"
     },
     {
       "propertyRecordId": "property:CHILTON HOUSE RAVENSCROFT ROAD WEYBRIDGE WEYBRIDGE KT13 0NX|KT130NX",
@@ -5869,6 +5895,19 @@
       "retiredAt": "2026-08-05",
       "retirementReason": "Reviewed address identity consolidated into canonical property property:FORTUNE HOUSE KNOWLE LANE CRANLEIGH GU6 8JP|GU68JP; evidence retained for audit history.",
       "canonicalPropertyRecordId": "property:FORTUNE HOUSE KNOWLE LANE CRANLEIGH GU6 8JP|GU68JP"
+    },
+    {
+      "propertyRecordId": "property:FORTUNE MANOR OLD AVENUE WEYBRIDGE KT13 0QB|KT130QB",
+      "address": "FORTUNE MANOR, OLD AVENUE, WEYBRIDGE, KT13 0QB",
+      "postcode": "KT13 0QB",
+      "listEntryNumbers": [],
+      "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
+      "reviewedAt": "2026-07-28",
+      "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage.",
+      "status": "no_direct_match",
+      "retiredAt": "2026-08-11",
+      "retirementReason": "Reviewed address identity consolidated into canonical property property:CHAPTERS OLD AVENUE WEYBRIDGE KT13 0QB|KT130QB; evidence retained for audit history.",
+      "canonicalPropertyRecordId": "property:CHAPTERS OLD AVENUE WEYBRIDGE KT13 0QB|KT130QB"
     },
     {
       "propertyRecordId": "property:FORTUNE MANOR OLD AVENUE WEYBRIDGE WEYBRIDGE KT13 0QB|KT130QB",
@@ -7377,6 +7416,19 @@
       "canonicalPropertyRecordId": "property:THE RISE BEECHWOOD ROAD VIRGINIA WATER GU25 4JP|GU254JP"
     },
     {
+      "propertyRecordId": "property:THIRLSTONE WEST ROAD ST GEORGES HILL WEYBRIDGE KT13 0LZ|KT130LZ",
+      "address": "THIRLSTONE, WEST ROAD, ST GEORGES HILL, WEYBRIDGE, KT13 0LZ",
+      "postcode": "KT13 0LZ",
+      "listEntryNumbers": [],
+      "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
+      "reviewedAt": "2026-07-28",
+      "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage.",
+      "status": "no_direct_match",
+      "retiredAt": "2026-08-11",
+      "retirementReason": "Reviewed address identity consolidated into canonical property property:DUNMORE WEST ROAD WEYBRIDGE KT13 0LZ|KT130LZ; evidence retained for audit history.",
+      "canonicalPropertyRecordId": "property:DUNMORE WEST ROAD WEYBRIDGE KT13 0LZ|KT130LZ"
+    },
+    {
       "propertyRecordId": "property:THREE OAKS ALBURY ROAD HERSHAM WALTON ON THAMES KT12 5DY|KT125DY",
       "address": "THREE OAKS, ALBURY ROAD, HERSHAM, WALTON-ON-THAMES, KT12 5DY",
       "postcode": "KT12 5DY",
@@ -7780,11 +7832,11 @@
     "schemaVersion": 1,
     "reconciledAt": "2026-08-11",
     "previousPropertyCount": 3766,
-    "currentPropertyCount": 3766,
+    "currentPropertyCount": 3762,
     "addedPropertyCount": 0,
     "removedPropertyCount": 0,
-    "sourceAddressVariantCount": 375,
-    "identityAliasesCollapsed": 201,
+    "sourceAddressVariantCount": 379,
+    "identityAliasesCollapsed": 205,
     "newIdentityPolicy": "explicit_unknown_pending_review",
     "removedIdentityPolicy": "retained_in_retired_mappings",
     "addressIdentityPolicy": "producer-source-address-variant-ledger-only",

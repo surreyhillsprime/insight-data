@@ -426,12 +426,19 @@ def order_insensitive_address_key(item):
 
 
 def preserve_existing_enrichments(transactions, metadata, existing_transactions, existing_metadata):
-    existing_by_key = {stable_transaction_key(item): item for item in existing_transactions}
+    existing_by_id = {
+        clean(item.get("id")): item
+        for item in existing_transactions
+        if clean(item.get("id"))
+    }
+    existing_by_key = defaultdict(list)
     existing_by_source_key = defaultdict(list)
     existing_by_address_tokens = defaultdict(list)
+    transaction_key_counts = Counter(stable_transaction_key(item) for item in transactions)
     transaction_source_counts = Counter(source_transaction_key(item) for item in transactions)
     transaction_address_token_counts = Counter(order_insensitive_address_key(item) for item in transactions)
     for item in existing_transactions:
+        existing_by_key[stable_transaction_key(item)].append(item)
         existing_by_source_key[source_transaction_key(item)].append(item)
         existing_by_address_tokens[order_insensitive_address_key(item)].append(item)
     existing_by_property = {}
@@ -442,7 +449,12 @@ def preserve_existing_enrichments(transactions, metadata, existing_transactions,
     property_reused = 0
     enriched = []
     for item in transactions:
-        exact = existing_by_key.get(stable_transaction_key(item), {})
+        exact = existing_by_id.get(clean(item.get("id")), {})
+        if not exact:
+            stable_key = stable_transaction_key(item)
+            candidates = existing_by_key.get(stable_key, [])
+            if len(candidates) == 1 and transaction_key_counts[stable_key] == 1:
+                exact = candidates[0]
         if not exact:
             source_key = source_transaction_key(item)
             candidates = existing_by_source_key.get(source_key, [])
@@ -453,7 +465,11 @@ def preserve_existing_enrichments(transactions, metadata, existing_transactions,
             candidates = existing_by_address_tokens.get(address_token_key, [])
             if len(candidates) == 1 and transaction_address_token_counts[address_token_key] == 1:
                 exact = candidates[0]
-        property_donor = existing_by_property.get(stable_property_key(item), {})
+        property_donor = (
+            {}
+            if exact
+            else existing_by_property.get(stable_property_key(item), {})
+        )
         previous = {**property_donor, **exact}
         donor_extra_keys = {key for key in property_donor if key not in BASE_TRANSACTION_FIELDS}
         exact_extra_keys = {key for key in exact if key not in BASE_TRANSACTION_FIELDS}

@@ -37,6 +37,18 @@
       "reviewedAt": "2026-08-11T11:46:22Z",
       "reviewedBy": "INSIGHT owner-reviewed canonical address migration",
       "reason": "The owner-reviewed Coromandel presentation retires the prior 33 Fairmile Avenue property ID; the unchanged parcel association is republished under the new canonical key."
+    },
+    {
+      "transitionId": "inspire-transition-thirlstone-dunmore-canonical-id-20260811",
+      "propertyId": "property:THIRLSTONE WEST ROAD ST GEORGES HILL WEYBRIDGE KT13 0LZ|KT130LZ",
+      "previousParcelId": "33483728",
+      "priorAssociationReleaseId": "inspire-parcels-2026-08-02-c977de09450d",
+      "priorSourceSnapshot": "hmlr-inspire-2026-08-02",
+      "action": "remove",
+      "replacementParcelId": null,
+      "reviewedAt": "2026-08-11T13:53:55Z",
+      "reviewedBy": "INSIGHT reviewed property-name lineage migration",
+      "reason": "The reviewed Dunmore and Thirlstone site lineage retires the historical Thirlstone property ID; the unchanged indicative parcel association is republished under the current Dunmore key."
     }
   ]
 }
