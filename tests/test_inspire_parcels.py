@@ -26,6 +26,7 @@ from validate_inspire_parcels import (
     feed_failures,
     parse_feed,
     registry_failures,
+    retired_property_ids_from_metadata,
 )
 from validate_property_uprn_links import validation_failures as uprn_failures
 from validate_inspire_parcel_review_queue import (
@@ -146,8 +147,9 @@ class InspirePublicationTests(unittest.TestCase):
         cls.registry = json.loads(cls.registry_path.read_text())
         cls.authorities = json.loads(cls.authorities_path.read_text())
         cls.transitions = json.loads(cls.transitions_path.read_text())["records"]
-        transactions, _summary, _metadata = read_js(cls.transactions_path)
+        transactions, _summary, metadata = read_js(cls.transactions_path)
         cls.canonical_ids = {row["propertyRecordId"] for row in transactions}
+        cls.retired_property_ids = retired_property_ids_from_metadata(metadata)
 
     def test_registry_baseline_and_semantics(self):
         self.assertEqual(registry_failures(self.registry, self.canonical_ids), [])
@@ -170,8 +172,38 @@ class InspirePublicationTests(unittest.TestCase):
                 self.feed_path.stat().st_size,
                 hashlib.sha256(self.registry_path.read_bytes()).hexdigest(),
                 self.transitions,
+                self.retired_property_ids,
             ),
             [],
+        )
+
+    def test_identity_migration_transition_uses_a_retired_property_id(self):
+        canonical_property_id = (
+            "property:COROMANDEL 33 FAIRMILE AVENUE COBHAM KT11 2JA|KT112JA"
+        )
+        transition = next(
+            item
+            for item in self.transitions
+            if item["transitionId"] == "inspire-transition-coromandel-canonical-id-20260811"
+        )
+        self.assertEqual(
+            transition["propertyId"],
+            "property:33 FAIRMILE AVENUE COBHAM KT11 2JA|KT112JA",
+        )
+        self.assertIn(transition["propertyId"], self.retired_property_ids)
+        self.assertEqual(transition["action"], "remove")
+        self.assertIsNone(transition["replacementParcelId"])
+        registry_record = next(
+            item
+            for item in self.registry["records"]
+            if item["propertyId"] == canonical_property_id
+        )
+        self.assertEqual(registry_record["inspireId"], "34084671")
+        self.assertEqual(
+            self.feed["associationsByProperty"][canonical_property_id][
+                "primaryParcelId"
+            ],
+            "34084671",
         )
 
     def test_reviewed_parent_parcel_replacements_are_public_transitions(self):

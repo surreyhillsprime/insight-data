@@ -15,11 +15,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT_JS = ROOT / "outputs" / "surrey-transactions.js"
 PROPERTY_ADDRESS_ALIASES_PATH = ROOT / "config" / "property-address-aliases.json"
+PROPERTY_ADDRESS_PRESENTATIONS_PATH = ROOT / "config" / "property-address-presentations.json"
 POSTCODES_API = "https://api.postcodes.io/postcodes/"
 FEED_SCHEMA_VERSION = 3
 PROPERTY_RECORD_SCHEMA_VERSION = 1
 ADDRESS_CANONICALISATION_VERSION = "structured-delivery-point-v1"
 _POSTCODE_AT_END_RE = re.compile(r"\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\s*$", re.I)
+_ADDRESS_PRESENTATION_FIELDS = ("saon", "paon", "street", "locality", "town", "postcode")
 
 # This is the public row contract, not merely a schema hint. New top-level
 # fields must be reviewed here before any workflow can publish them.
@@ -217,6 +219,202 @@ def reviewed_alias_postcodes_by_canonical_property(path=PROPERTY_ADDRESS_ALIASES
     return result
 
 
+def reviewed_property_address_presentations(path=PROPERTY_ADDRESS_PRESENTATIONS_PATH):
+    """Load fail-closed owner-reviewed address-presentation overrides.
+
+    These overrides are deliberately separate from the cross-identity alias
+    registry. They may add a reviewed house name to one already identified
+    delivery point, but cannot alter its unit, route, locality, town or
+    postcode. Both configured property IDs are derived from the structured
+    fields so a typo cannot silently rekey another property.
+    """
+
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if (
+        set(payload) != {"schemaVersion", "version", "presentations"}
+        or payload.get("schemaVersion") != 1
+        or not isinstance(payload.get("version"), str)
+        or not clean(payload.get("version"))
+        or not isinstance(payload.get("presentations"), list)
+    ):
+        raise ValueError(
+            "Property-address presentation registry is missing schemaVersion 1 presentations"
+        )
+
+    seen_ids = set()
+    seen_property_ids = set()
+    for presentation in payload["presentations"]:
+        if not isinstance(presentation, dict) or set(presentation) != {
+            "id",
+            "sourcePropertyId",
+            "canonicalPropertyId",
+            "sourceFields",
+            "canonicalFields",
+            "review",
+        }:
+            raise ValueError("Property-address presentation entry is malformed")
+        presentation_id = presentation["id"]
+        if (
+            not isinstance(presentation_id, str)
+            or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", presentation_id)
+            or presentation_id in seen_ids
+        ):
+            raise ValueError("Property-address presentation ID is malformed or duplicated")
+        seen_ids.add(presentation_id)
+
+        source_fields = presentation["sourceFields"]
+        canonical_fields = presentation["canonicalFields"]
+        for label, fields in (
+            ("sourceFields", source_fields),
+            ("canonicalFields", canonical_fields),
+        ):
+            if (
+                not isinstance(fields, dict)
+                or set(fields) != set(_ADDRESS_PRESENTATION_FIELDS)
+                or not all(
+                    isinstance(fields[field], str)
+                    and fields[field] == clean(fields[field])
+                    for field in _ADDRESS_PRESENTATION_FIELDS
+                )
+                or not all(fields[field] for field in ("paon", "street", "town", "postcode"))
+            ):
+                raise ValueError(f"Property-address presentation {label} is malformed")
+
+        source_property_id = presentation["sourcePropertyId"]
+        canonical_property_id = presentation["canonicalPropertyId"]
+        expected_source_id = property_record_id({
+            **source_fields,
+            "address": canonical_display_address(source_fields).upper(),
+        })
+        expected_canonical_id = property_record_id({
+            **canonical_fields,
+            "address": canonical_display_address(canonical_fields).upper(),
+        })
+        if (
+            source_property_id != expected_source_id
+            or canonical_property_id != expected_canonical_id
+            or source_property_id == canonical_property_id
+            or source_property_id in seen_property_ids
+            or canonical_property_id in seen_property_ids
+        ):
+            raise ValueError(
+                "Property-address presentation property IDs do not match unique configured fields"
+            )
+        seen_property_ids.update((source_property_id, canonical_property_id))
+
+        unchanged_fields = set(_ADDRESS_PRESENTATION_FIELDS) - {"paon"}
+        if any(
+            canonical_address(source_fields[field])
+            != canonical_address(canonical_fields[field])
+            for field in unchanged_fields
+        ):
+            raise ValueError(
+                "Property-address presentation may only add a reviewed name to PAON"
+            )
+        source_paon = clean(source_fields["paon"]).upper()
+        canonical_paon = clean(canonical_fields["paon"]).upper()
+        if (
+            not re.fullmatch(r"\d+[A-Z]?(?:-\d+[A-Z]?)?", source_paon)
+            or not canonical_paon.endswith(", " + source_paon)
+            or not clean(canonical_paon[: -(len(source_paon) + 2)])
+        ):
+            raise ValueError(
+                "Property-address presentation must add a house name before the unchanged number"
+            )
+
+        review = presentation["review"]
+        if (
+            not isinstance(review, dict)
+            or set(review) != {"status", "date", "basis", "scope"}
+            or review.get("status") != "owner-reviewed"
+            or not isinstance(review.get("date"), str)
+            or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", review["date"])
+            or not all(
+                isinstance(review.get(field), str) and clean(review[field])
+                for field in ("basis", "scope")
+            )
+        ):
+            raise ValueError(
+                "Property-address presentation must contain an owner-reviewed decision"
+            )
+    return payload
+
+
+def apply_reviewed_property_address_presentations(rows, registry):
+    """Apply validated single-property presentations and return audit stats."""
+
+    def normalised_field(field, value):
+        if field == "postcode":
+            return normalise_postcode(value)
+        return canonical_address(value)
+
+    matched_properties = 0
+    matched_rows = 0
+    rekeyed_properties = 0
+    rewritten_rows = 0
+    for presentation in registry["presentations"]:
+        source_property_id = presentation["sourcePropertyId"]
+        canonical_property_id = presentation["canonicalPropertyId"]
+        indexes_by_id = {source_property_id: [], canonical_property_id: []}
+        for index, item in enumerate(rows):
+            current_id = property_record_id(item)
+            if current_id in indexes_by_id:
+                indexes_by_id[current_id].append(index)
+        indexes = indexes_by_id[source_property_id] + indexes_by_id[canonical_property_id]
+        if not indexes:
+            continue
+
+        matched_properties += 1
+        matched_rows += len(indexes)
+        if indexes_by_id[source_property_id]:
+            rekeyed_properties += 1
+        for current_id, current_indexes in indexes_by_id.items():
+            expected_fields = (
+                presentation["sourceFields"]
+                if current_id == source_property_id
+                else presentation["canonicalFields"]
+            )
+            for index in current_indexes:
+                mismatches = [
+                    field
+                    for field in _ADDRESS_PRESENTATION_FIELDS
+                    if normalised_field(field, rows[index].get(field))
+                    != normalised_field(field, expected_fields[field])
+                ]
+                if mismatches:
+                    raise ValueError(
+                        f"Property-address presentation {presentation['id']} target fields "
+                        "do not match: " + ", ".join(mismatches)
+                    )
+
+        canonical_fields = presentation["canonicalFields"]
+        for index in indexes:
+            before = tuple(
+                clean(rows[index].get(field))
+                for field in ("address", *_ADDRESS_PRESENTATION_FIELDS)
+            )
+            rows[index].update(canonical_fields)
+            rows[index]["address"] = canonical_display_address(rows[index]).upper()
+            if property_record_id(rows[index]) != canonical_property_id:
+                raise ValueError(
+                    f"Property-address presentation {presentation['id']} produced an unexpected property ID"
+                )
+            after = tuple(
+                clean(rows[index].get(field))
+                for field in ("address", *_ADDRESS_PRESENTATION_FIELDS)
+            )
+            rewritten_rows += before != after
+
+    return {
+        "reviewedPresentationRegistryVersion": registry["version"],
+        "reviewedPresentationEntries": len(registry["presentations"]),
+        "reviewedPresentationProperties": matched_properties,
+        "reviewedPresentationRows": matched_rows,
+        "reviewedPresentationPropertiesRekeyed": rekeyed_properties,
+        "reviewedPresentationRowsRewritten": rewritten_rows,
+    }
+
+
 def canonicalise_property_addresses(transactions):
     """Canonicalise address variants across a complete transaction snapshot.
 
@@ -363,6 +561,12 @@ def canonicalise_property_addresses(transactions):
             rows[index]["address"] = canonical_display_address(rows[index]).upper()
         applied_reviewed_groups += 1
 
+    presentation_registry = reviewed_property_address_presentations()
+    presentation_stats = apply_reviewed_property_address_presentations(
+        rows,
+        presentation_registry,
+    )
+
     # Structured canonicalisation cannot safely infer identity for sparse rows,
     # but it can still remove an exact locality/town repetition from display.
     grouped_indexes = {index for indexes in groups.values() for index in indexes}
@@ -448,6 +652,7 @@ def canonicalise_property_addresses(transactions):
         "numberedAliasGroups": applied_numbered_groups,
         "reviewedAliasRegistryVersion": alias_registry["version"],
         "reviewedAliasGroups": applied_reviewed_groups,
+        **presentation_stats,
         "sourceAddressIdentities": len(legacy_property_ids),
         "canonicalProperties": len(canonical_property_ids),
         "identityAliasesCollapsed": max(0, len(legacy_property_ids) - len(canonical_property_ids)),
@@ -773,9 +978,41 @@ def merge_address_canonicalisation_stats(computed, candidates, transactions):
             candidate.get("sourceAddressVariantCount", 0),
         ),
     ))
+    presentation_version = computed.get("reviewedPresentationRegistryVersion")
+    presentation_candidates = [
+        candidate
+        for candidate in all_candidates
+        if valid_address_canonicalisation_ledger(candidate)
+        and candidate.get("reviewedPresentationRegistryVersion") == presentation_version
+    ]
+    base.update({
+        "reviewedPresentationRegistryVersion": presentation_version,
+        "reviewedPresentationEntries": computed.get("reviewedPresentationEntries", 0),
+        **{
+            key: max(
+                (candidate.get(key, 0) for candidate in presentation_candidates),
+                default=0,
+            )
+            for key in (
+                "reviewedPresentationProperties",
+                "reviewedPresentationRows",
+                "reviewedPresentationPropertiesRekeyed",
+                "reviewedPresentationRowsRewritten",
+            )
+        },
+    })
     merged = {}
     legacy_targets = {}
     collapsed = int(base.get("identityAliasesCollapsed") or 0)
+    current_redirects = {}
+    if valid_address_canonicalisation_ledger(computed):
+        for canonical_id, variants in computed["sourceAddressVariants"].items():
+            if canonical_id not in current_ids:
+                continue
+            for variant in variants:
+                legacy_id = clean(variant.get("propertyRecordId"))
+                if legacy_id.startswith("property:") and legacy_id not in current_ids:
+                    current_redirects[legacy_id] = canonical_id
     for candidate in all_candidates:
         if not valid_address_canonicalisation_ledger(candidate):
             continue
@@ -785,7 +1022,12 @@ def merge_address_canonicalisation_stats(computed, candidates, transactions):
                 collapsed,
                 int(candidate.get("identityAliasesCollapsed") or 0),
             )
-        for canonical_id, variants in candidate_variants.items():
+        for candidate_canonical_id, variants in candidate_variants.items():
+            canonical_id = (
+                candidate_canonical_id
+                if candidate_canonical_id in current_ids
+                else current_redirects.get(candidate_canonical_id)
+            )
             if canonical_id not in current_ids:
                 continue
             target_variants = merged.setdefault(canonical_id, {})

@@ -17,7 +17,7 @@ from sweep_land_registry import main as sweep_main  # noqa: E402
 
 
 class AddressCanonicalisationRerunTests(unittest.TestCase):
-    def test_no_fetch_local_csv_rerun_preserves_published_source_ledger(self):
+    def test_no_fetch_local_csv_rerun_preserves_reviewed_rekey_and_source_ledger(self):
         source_feed = ROOT / "outputs" / "surrey-transactions.js"
         source_csv = ROOT / "work" / "land-reg-surrey-2m-1995.csv"
         _rows, _summary, source_meta = read_js(source_feed)
@@ -44,6 +44,12 @@ class AddressCanonicalisationRerunTests(unittest.TestCase):
                 self.assertEqual(sweep_main(), 0)
             _rows, _summary, rerun_meta = read_js(rerun_feed)
 
+            # A second unchanged run must preserve both the reviewed rekey and
+            # the richer pre-migration ledger exactly.
+            with patch.object(sys, "argv", argv), redirect_stdout(StringIO()):
+                self.assertEqual(sweep_main(), 0)
+            _rows, _summary, stable_meta = read_js(rerun_feed)
+
             with rerun_csv.open(newline="", encoding="utf-8") as handle:
                 fieldnames = csv.DictReader(handle).fieldnames
             new_row = {field: "" for field in fieldnames}
@@ -68,27 +74,55 @@ class AddressCanonicalisationRerunTests(unittest.TestCase):
                 self.assertEqual(sweep_main(), 0)
             _rows, _summary, grown_meta = read_js(rerun_feed)
 
+        rerun_stats = rerun_meta["addressCanonicalisation"]
+        self.assertEqual(stable_meta["addressCanonicalisation"], rerun_stats)
+        self.assertEqual(rerun_stats["rows"], source_stats["rows"])
         self.assertEqual(
-            rerun_meta["addressCanonicalisation"],
-            source_stats,
+            rerun_stats["canonicalProperties"],
+            source_stats["canonicalProperties"],
         )
+        self.assertEqual(
+            rerun_stats["sourceAddressIdentities"],
+            source_stats["sourceAddressIdentities"],
+        )
+        self.assertEqual(
+            rerun_stats["identityAliasesCollapsed"],
+            source_stats["identityAliasesCollapsed"],
+        )
+        self.assertEqual(
+            rerun_stats["sourceAddressVariantCount"],
+            source_stats["sourceAddressVariantCount"],
+        )
+        coromandel_id = (
+            "property:COROMANDEL 33 FAIRMILE AVENUE COBHAM KT11 2JA|KT112JA"
+        )
+        self.assertIn(coromandel_id, rerun_stats["sourceAddressVariants"])
+        self.assertIn(
+            "property:33 FAIRMILE AVENUE COBHAM KT11 2JA|KT112JA",
+            {
+                variant["propertyRecordId"]
+                for variant in rerun_stats["sourceAddressVariants"][coromandel_id]
+            },
+        )
+        self.assertEqual(rerun_stats["reviewedPresentationPropertiesRekeyed"], 1)
+        self.assertEqual(rerun_stats, source_stats)
         grown_stats = grown_meta["addressCanonicalisation"]
         self.assertEqual(
             grown_stats["sourceAddressVariants"],
-            source_stats["sourceAddressVariants"],
+            rerun_stats["sourceAddressVariants"],
         )
         self.assertEqual(
             grown_stats["identityAliasesCollapsed"],
             source_stats["identityAliasesCollapsed"],
         )
-        self.assertEqual(grown_stats["rows"], source_stats["rows"] + 1)
+        self.assertEqual(grown_stats["rows"], rerun_stats["rows"] + 1)
         self.assertEqual(
             grown_stats["canonicalProperties"],
-            source_stats["canonicalProperties"] + 1,
+            rerun_stats["canonicalProperties"] + 1,
         )
         self.assertEqual(
             grown_stats["sourceAddressIdentities"],
-            source_stats["sourceAddressIdentities"] + 1,
+            rerun_stats["sourceAddressIdentities"] + 1,
         )
 
 

@@ -139,7 +139,38 @@ def registry_failures(registry: dict, canonical_ids: set[str]) -> list[str]:
     return failures
 
 
-def feed_failures(feed: dict, registry: dict, authorities: dict, canonical_ids: set[str], feed_bytes: int, registry_sha256: str | None = None, configured_transitions: list[dict] | None = None) -> list[str]:
+def retired_property_ids_from_metadata(metadata: dict) -> set[str]:
+    """Return fail-closed retired canonical IDs from the base-feed ledger."""
+
+    address_meta = metadata.get("addressCanonicalisation")
+    variants_by_property = (
+        address_meta.get("sourceAddressVariants")
+        if isinstance(address_meta, dict)
+        else None
+    )
+    if not isinstance(variants_by_property, dict):
+        return set()
+    retired = set()
+    for variants in variants_by_property.values():
+        if not isinstance(variants, list):
+            continue
+        for variant in variants:
+            property_id = variant.get("propertyRecordId") if isinstance(variant, dict) else None
+            if isinstance(property_id, str) and property_id.startswith("property:"):
+                retired.add(property_id)
+    return retired
+
+
+def feed_failures(
+    feed: dict,
+    registry: dict,
+    authorities: dict,
+    canonical_ids: set[str],
+    feed_bytes: int,
+    registry_sha256: str | None = None,
+    configured_transitions: list[dict] | None = None,
+    retired_property_ids: set[str] | None = None,
+) -> list[str]:
     failures = []
     if feed_bytes > MAX_FEED_BYTES:
         failures.append(f"parcel feed is {feed_bytes:,} bytes; maximum is {MAX_FEED_BYTES:,}")
@@ -172,6 +203,7 @@ def feed_failures(feed: dict, registry: dict, authorities: dict, canonical_ids: 
         transitions = []
     if configured_transitions is not None and transitions != configured_transitions:
         failures.append("published association transitions differ from reviewed configuration")
+    transition_property_ids = canonical_ids | (retired_property_ids or set())
     required_transition_fields = {
         "transitionId", "propertyId", "previousParcelId", "priorAssociationReleaseId",
         "priorSourceSnapshot", "action", "replacementParcelId", "reviewedAt",
@@ -187,8 +219,10 @@ def feed_failures(feed: dict, registry: dict, authorities: dict, canonical_ids: 
         transition_id = transition.get("transitionId")
         if set(transition) != required_transition_fields:
             failures.append(f"{property_id}: association transition fields do not match the public contract")
-        if property_id not in canonical_ids:
-            failures.append(f"{property_id}: association transition has unknown canonical identity")
+        if property_id not in transition_property_ids:
+            failures.append(
+                f"{property_id}: association transition has no active or retired canonical identity"
+            )
         if not re.fullmatch(r"inspire-transition-[a-z0-9_-]+", str(transition_id or "")):
             failures.append(f"{property_id}: association transition ID is invalid")
         elif transition_id in seen_transition_ids:
@@ -434,15 +468,25 @@ def main() -> int:
     parser.add_argument("--transactions", type=Path, default=DEFAULT_TRANSACTIONS)
     parser.add_argument("--association-transitions", type=Path, default=DEFAULT_ASSOCIATION_TRANSITIONS)
     args = parser.parse_args()
-    transactions, _summary, _metadata = read_js(args.transactions)
+    transactions, _summary, metadata = read_js(args.transactions)
     canonical_ids = {row.get("propertyRecordId") for row in transactions if row.get("propertyRecordId")}
+    retired_property_ids = retired_property_ids_from_metadata(metadata)
     registry = json.loads(args.registry.read_text(encoding="utf-8"))
     authorities = json.loads(args.authorities.read_text(encoding="utf-8"))
     configured_transitions = json.loads(args.association_transitions.read_text(encoding="utf-8")).get("records") or []
     feed = parse_feed(args.feed)
     failures = registry_failures(registry, canonical_ids)
     registry_sha256 = hashlib.sha256(args.registry.read_bytes()).hexdigest()
-    failures.extend(feed_failures(feed, registry, authorities, canonical_ids, args.feed.stat().st_size, registry_sha256, configured_transitions))
+    failures.extend(feed_failures(
+        feed,
+        registry,
+        authorities,
+        canonical_ids,
+        args.feed.stat().st_size,
+        registry_sha256,
+        configured_transitions,
+        retired_property_ids,
+    ))
     if failures:
         for failure in failures:
             print(f"ERROR: {failure}")
