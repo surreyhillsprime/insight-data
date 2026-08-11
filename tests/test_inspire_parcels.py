@@ -140,10 +140,12 @@ class InspirePublicationTests(unittest.TestCase):
         cls.feed_path = ROOT / "outputs" / "inspire-parcels.js"
         cls.registry_path = ROOT / "config" / "inspire-parcel-associations.json"
         cls.authorities_path = ROOT / "config" / "inspire-authorities.json"
+        cls.transitions_path = ROOT / "config" / "inspire-association-transitions.json"
         cls.transactions_path = ROOT / "outputs" / "surrey-transactions.js"
         cls.feed = parse_feed(cls.feed_path)
         cls.registry = json.loads(cls.registry_path.read_text())
         cls.authorities = json.loads(cls.authorities_path.read_text())
+        cls.transitions = json.loads(cls.transitions_path.read_text())["records"]
         transactions, _summary, _metadata = read_js(cls.transactions_path)
         cls.canonical_ids = {row["propertyRecordId"] for row in transactions}
 
@@ -160,9 +162,63 @@ class InspirePublicationTests(unittest.TestCase):
 
     def test_checked_in_feed_passes_full_contract(self):
         self.assertEqual(
-            feed_failures(self.feed, self.registry, self.authorities, self.canonical_ids, self.feed_path.stat().st_size),
+            feed_failures(
+                self.feed,
+                self.registry,
+                self.authorities,
+                self.canonical_ids,
+                self.feed_path.stat().st_size,
+                hashlib.sha256(self.registry_path.read_bytes()).hexdigest(),
+                self.transitions,
+            ),
             [],
         )
+
+    def test_reviewed_parent_parcel_replacements_are_public_transitions(self):
+        expected = {
+            "property:COUCHMORE HOUSE LITTLEWORTH ROAD ESHER KT10 9TN|KT109TN": {
+                "parcel": "34359650",
+                "oldParcel": "34360203",
+                "area": 5191.38,
+                "squareFeet": 55880,
+                "acres": 1.2828,
+                "centroid": [-0.3461646, 51.3756511],
+                "bbox": [-0.34660869, 51.37512151, -0.34576131, 51.37612235],
+                "boundary": 13.425,
+            },
+            "property:MAGPIE MANOR CHURCH ROAD CLAYGATE ESHER KT10 0JP|KT100JP": {
+                "parcel": "34439175",
+                "oldParcel": "34433086",
+                "area": 1510.53,
+                "squareFeet": 16259,
+                "acres": 0.3733,
+                "centroid": [-0.3376192, 51.3583163],
+                "bbox": [-0.3380629, 51.35808051, -0.33721, 51.35856849],
+                "boundary": 9.2563,
+            },
+        }
+        transitions_by_property = {transition["propertyId"]: transition for transition in self.transitions}
+        for property_id, values in expected.items():
+            with self.subTest(property_id=property_id):
+                transition = transitions_by_property[property_id]
+                self.assertEqual(transition["action"], "replace")
+                self.assertEqual(transition["previousParcelId"], values["oldParcel"])
+                self.assertEqual(transition["replacementParcelId"], values["parcel"])
+                self.assertEqual(transition["priorAssociationReleaseId"], "inspire-parcels-2026-08-02-94e51b3bafeb")
+                association = self.feed["associationsByProperty"][property_id]
+                self.assertEqual(association["primaryParcelId"], values["parcel"])
+                self.assertEqual(association["associationStatus"], "reviewed_indicative")
+                self.assertEqual(association["boundaryDistanceMetres"], values["boundary"])
+                self.assertNotIn(values["oldParcel"], self.feed["parcelsById"])
+                parcel = self.feed["parcelsById"][values["parcel"]]
+                self.assertEqual(parcel["areaSquareMetres"], values["area"])
+                self.assertEqual(parcel["areaSquareFeet"], values["squareFeet"])
+                self.assertEqual(parcel["areaAcres"], values["acres"])
+                self.assertEqual(parcel["centroid"], values["centroid"])
+                self.assertEqual(parcel["bbox"], values["bbox"])
+        self.assertEqual(self.feed["coverage"]["associatedProperties"], 3228)
+        self.assertEqual(self.feed["coverage"]["automaticIndicative"], 2870)
+        self.assertEqual(self.feed["coverage"]["reviewedIndicative"], 358)
 
     def test_feed_has_exact_approved_indexes_and_no_uprn(self):
         self.assertEqual(len(self.feed["associationsByProperty"]), 3228)

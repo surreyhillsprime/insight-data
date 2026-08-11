@@ -1,5 +1,30 @@
 {
   "schemaVersion": 1,
   "semantics": "ordered append-only reviewed replacement or terminal removal of any previously published property-to-INSPIRE association",
-  "records": []
+  "records": [
+    {
+      "transitionId": "inspire-transition-couchmore-house-parent-20260811",
+      "propertyId": "property:COUCHMORE HOUSE LITTLEWORTH ROAD ESHER KT10 9TN|KT109TN",
+      "previousParcelId": "34360203",
+      "priorAssociationReleaseId": "inspire-parcels-2026-08-02-94e51b3bafeb",
+      "priorSourceSnapshot": "hmlr-inspire-2026-08-02",
+      "action": "replace",
+      "replacementParcelId": "34359650",
+      "reviewedAt": "2026-08-11T09:11:01Z",
+      "reviewedBy": "INSIGHT reviewed parent-child correction",
+      "reason": "EPC and validated planning evidence identify the prior point and parcel as The Cottage Couchmore House; the parent Couchmore House UPRN point is uniquely and clearly contained by parcel 34359650."
+    },
+    {
+      "transitionId": "inspire-transition-magpie-manor-parent-20260811",
+      "propertyId": "property:MAGPIE MANOR CHURCH ROAD CLAYGATE ESHER KT10 0JP|KT100JP",
+      "previousParcelId": "34433086",
+      "priorAssociationReleaseId": "inspire-parcels-2026-08-02-94e51b3bafeb",
+      "priorSourceSnapshot": "hmlr-inspire-2026-08-02",
+      "action": "replace",
+      "replacementParcelId": "34439175",
+      "reviewedAt": "2026-08-11T09:11:01Z",
+      "reviewedBy": "INSIGHT reviewed parent-child correction",
+      "reason": "EPC and validated planning evidence identify the prior point and parcel as The Cottage Magpie Manor; the parent Magpie Manor UPRN point is uniquely and clearly contained by parcel 34439175."
+    }
+  ]
 }

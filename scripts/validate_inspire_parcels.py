@@ -124,7 +124,11 @@ def registry_failures(registry: dict, canonical_ids: set[str]) -> list[str]:
         failures.append(f"registry approval baseline has drifted: {baseline} != {expected_baseline}")
     if len(canonical_ids) < baseline.get("canonicalProperties", 0):
         failures.append("current canonical universe regressed below the approval baseline")
-    if status_counts["automatic_indicative"] < baseline.get("automaticIndicative", 0):
+    reviewed_surplus = max(
+        0,
+        status_counts["reviewed_indicative"] - baseline.get("reviewedIndicative", 0),
+    )
+    if status_counts["automatic_indicative"] + reviewed_surplus < baseline.get("automaticIndicative", 0):
         failures.append("automatic registry associations regressed below approval baseline")
     if status_counts["reviewed_indicative"] < baseline.get("reviewedIndicative", 0):
         failures.append("reviewed registry associations regressed below approval baseline")

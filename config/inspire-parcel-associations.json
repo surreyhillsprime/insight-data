@@ -23186,20 +23186,20 @@
     },
     {
       "associationStatus": "reviewed_indicative",
-      "boundaryDistanceMetres": 1.3205,
+      "boundaryDistanceMetres": 13.425,
       "evidenceTier": "reviewed_indicative",
       "exactUprnIdentityConfirmed": false,
-      "inspireId": "34360203",
+      "inspireId": "34359650",
       "legalBoundaryConfirmed": false,
       "matchMethod": "reviewed-uprn-point-to-inspire-polygon",
       "propertyId": "property:COUCHMORE HOUSE LITTLEWORTH ROAD ESHER KT10 9TN|KT109TN",
       "reviewDecision": {
         "decision": "approve_indicative_parcel",
-        "decisionBatch": "categories_1_and_2_bulk_approval",
-        "reviewedAt": "2026-08-10T19:47:49+00:00",
+        "decisionBatch": "parent_child_corrections_2026_08_11",
+        "reviewedAt": "2026-08-11T09:11:01Z",
         "semantics": "reviewed indicative parcel association only"
       },
-      "spatialClassification": "unique_interior_edge",
+      "spatialClassification": "unique_interior_clear",
       "titleConfirmed": false
     },
     {
@@ -32006,15 +32006,20 @@
       "titleConfirmed": false
     },
     {
-      "associationStatus": "automatic_indicative",
-      "boundaryDistanceMetres": 2.1861,
-      "evidenceTier": "transaction_linked_indicative",
+      "associationStatus": "reviewed_indicative",
+      "boundaryDistanceMetres": 9.2563,
+      "evidenceTier": "reviewed_indicative",
       "exactUprnIdentityConfirmed": false,
-      "inspireId": "34433086",
+      "inspireId": "34439175",
       "legalBoundaryConfirmed": false,
-      "matchMethod": "ppd-linked-uprn-unique-clear-containment",
+      "matchMethod": "reviewed-uprn-point-to-inspire-polygon",
       "propertyId": "property:MAGPIE MANOR CHURCH ROAD CLAYGATE ESHER KT10 0JP|KT100JP",
-      "reviewDecision": null,
+      "reviewDecision": {
+        "decision": "approve_indicative_parcel",
+        "decisionBatch": "parent_child_corrections_2026_08_11",
+        "reviewedAt": "2026-08-11T09:11:01Z",
+        "semantics": "reviewed indicative parcel association only"
+      },
       "spatialClassification": "unique_interior_clear",
       "titleConfirmed": false
     },
