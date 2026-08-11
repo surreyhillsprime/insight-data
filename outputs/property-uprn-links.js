@@ -1,0 +1,1 @@
+window.INSIGHT_PROPERTY_UPRN_LINKS = {"schemaVersion":1,"canonicalIdentityMode":"full-normalised-address-plus-postcode-fail-closed","identityWarning":"UPRN evidence never creates, merges or replaces canonical INSIGHT property identity","sources":[],"linksByProperty":{},"generatedAt":"2026-08-10T00:00:00Z","releaseId":"property-uprn-links-2026-08-10-217960e6d553"};

@@ -60,6 +60,7 @@ INSIGHT now uses separate refresh jobs so high-change sources stay fresh without
 | `monthly-property-refresh.yml` | 1st of each month at 06:00 UTC | Land Registry, EPC floor areas, GBP/sq ft, and live flood-alert context; OSM amenity publication remains disabled |
 | `sales-history-feed.yml` | 2nd of each month at 06:30 UTC | Complete HM Land Registry Price Paid history for properties in the base feed |
 | `six-week-os-refresh.yml` | Guarded Sunday schedule | OS Open UPRN matching and geometry/linkage improvement when an OS CSV is supplied |
+| `monthly-inspire-parcels.yml` | Evenings on days 1-9 of each month | Detects HMLR's first-Sunday INSPIRE release, audits all 11 Surrey files and republishes only approved indicative parcel associations |
 | `data-completeness.yml` | Daily at 11:00 UTC | Validates historic coverage, source-level minimums and enrichment metadata |
 
 `monthly-land-registry-sweep.yml` has been left as a manual legacy fallback only. The scheduled monthly job is now `monthly-property-refresh.yml`.
@@ -80,6 +81,82 @@ planning constraints, schools, recent planning intelligence, OS UPRN data and
 the dedicated Historic England designation layer with every newly added
 transaction before committing the shared feed.
 The base sweep preserves existing enrichment fields on unchanged transactions.
+
+## HMLR INSPIRE parcel feed
+
+`outputs/inspire-parcels.js` is a separate public runtime feed keyed by the
+existing canonical `propertyRecordId`. It contains only the approved
+property-to-parcel associations in
+`config/inspire-parcel-associations.json`; it does not mutate transaction
+identity or use a UPRN as an identity key. The approved implementation baseline is
+3,228 of 3,766 canonical properties (85.7143%): 2,871 conservative automatic
+indicative associations plus 357 user-reviewed indicative associations. Those
+numbers are provenance floors, not frozen production totals: every build reads
+the current canonical transaction feed, so a new unassociated property lowers
+the live percentage honestly until evidence links it.
+
+The transaction-linked automatic cohort uses Urban Big Data Centre (2023),
+*Price paid data to UPRN lookup*, University of Glasgow,
+https://doi.org/10.20394/agu7hprj. UBDC describes the January 1995 to January
+2022 resource as an Open Dataset; that linkage evidence is reused under the
+Open Government Licence v3.0 separately from HMLR INSPIRE's own OGL terms.
+
+The collector downloads all 11 Surrey local-authority ZIPs, reconciles their
+declared feature counts, deduplicates boundary-crossing INSPIRE IDs, rejects
+conflicting geometry, checks every ring and quarantines known source defects.
+Only associated polygons are published. HMLR INSPIRE covers freehold index
+polygons, not leasehold extents. The current 17 flat/maisonette associations
+therefore provide indicative superior/freehold parcel context only. Area is calculated from the
+original EPSG:27700 geometry with translated-coordinate arithmetic. Display
+geometry is converted using `pyproj` and the official OSTN15 grid pinned by
+SHA-256, then rounded, deduplicated and normalised to canonical GeoJSON
+winding. Raw HMLR ZIP and GML files are not committed.
+
+`areaSquareMetres`, `areaSquareFeet` and `areaAcres` describe the indicative
+HMLR INSPIRE index polygon. They are useful product filters, but are not a
+surveyed site area, title-plan extent or exact legal boundary. Association
+records therefore keep title, exact-UPRN and legal-boundary confirmations
+explicitly false.
+
+`outputs/property-uprn-links.js` is the independent future enrichment seam.
+It is empty and fail closed today. A future record must be keyed by the same
+canonical `propertyRecordId`, carry an explicit confirmed/reviewed match state
+and finite GB coordinates, declare its coordinate basis and licence/entitlement,
+and pass duplicate-UPRN review rules. An accepted authoritative link can add an
+automatic indicative association only when its point lies in exactly one
+previously unshared INSPIRE parcel and is more than two metres from every
+boundary. Every other result stays unassociated in the intentionally public
+`outputs/inspire-parcel-review-queue.js`. Previously published automatic UPRN
+associations are append-only unless an explicit reviewed record is added to
+`config/inspire-association-transitions.json`. The same ordered, append-only
+reviewed transition ledger governs any later replacement/removal caused by an
+HMLR parcel-ID lifecycle event; unreviewed changes fail closed. Repeated
+replacements for one property form a continuous parcel chain. Use `replace`
+when a reviewed successor exists: `remove` is deliberately terminal and a
+future restoration would require a separately reviewed contract migration. A UPRN may refine evidence
+or a display point; it can never create, merge or replace an INSIGHT property
+identity.
+
+The producer hashes the exact minified UTF-8 bytes of each deterministic core
+payload. It then appends `generatedAt` and `releaseId`, in that order, as the
+last two top-level fields. Validators strip those two exact trailing members
+and hash the untouched core bytes, avoiding cross-language numeric formatting
+differences. An unchanged core reuses its prior publication time and writes no
+timestamp-only commit; a changed association on the same HMLR snapshot gets a
+new content release and later publication time.
+
+The Surrey parcel feed is guarded below 16 MiB (the native loader remains
+guarded at 32 MiB). Expansion beyond Surrey must use a manifest of regional
+shards or vector tiles. It must not grow into one monolithic national JS file.
+
+Local reproducible validation:
+
+```text
+PYTHONPATH=scripts python3 scripts/validate_inspire_parcels.py
+PYTHONPATH=scripts python3 scripts/validate_property_uprn_links.py
+PYTHONPATH=scripts python3 scripts/validate_inspire_parcel_review_queue.py
+PYTHONPATH=scripts python3 scripts/validate_inspire_json_schemas.py
+```
 
 ## Listed-building evidence
 

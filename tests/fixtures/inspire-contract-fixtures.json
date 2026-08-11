@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "rawReleaseRule": "SHA-256 exact minified UTF-8 core JSON bytes; generatedAt then releaseId are appended as the final two top-level members and excluded from the digest",
+  "numericRawCoreFixture": {
+    "core": {
+      "schemaVersion": 1,
+      "numericProbe": {
+        "smallExponent": 1e-07,
+        "areaSquareMetres": 33804.9,
+        "coordinate": [
+          -0.39071577,
+          51.33777448
+        ]
+      }
+    },
+    "fullBody": "{\"schemaVersion\":1,\"numericProbe\":{\"smallExponent\":1e-07,\"areaSquareMetres\":33804.9,\"coordinate\":[-0.39071577,51.33777448]},\"generatedAt\":\"2026-08-10T12:00:00Z\",\"releaseId\":\"raw-core-fixture-2026-08-10-012cb6144c30\"}",
+    "expectedReleaseId": "raw-core-fixture-2026-08-10-012cb6144c30"
+  },
+  "uprnValid": {
+    "canonicalPropertyIds": [
+      "property:1 TEST ROAD GUILDFORD GU1 1AA|GU11AA"
+    ],
+    "payload": {
+      "schemaVersion": 1,
+      "canonicalIdentityMode": "full-normalised-address-plus-postcode-fail-closed",
+      "identityWarning": "UPRN evidence never creates, merges or replaces canonical INSIGHT property identity",
+      "sources": [
+        {
+          "sourceId": "addressbase",
+          "name": "AddressBase Premium",
+          "sourceSnapshot": "addressbase-2026-08",
+          "checkedAt": "2026-08-10T12:00:00Z",
+          "coordinateBasis": "authoritative_address_point",
+          "licenceOrEntitlement": {
+            "type": "commercial_entitlement",
+            "reference": "fixture entitlement",
+            "permitsPublicDerivedPublication": true
+          },
+          "redistributionClassification": "licensed_for_insight_publication"
+        }
+      ],
+      "linksByProperty": {
+        "property:1 TEST ROAD GUILDFORD GU1 1AA|GU11AA": {
+          "propertyId": "property:1 TEST ROAD GUILDFORD GU1 1AA|GU11AA",
+          "sourceId": "addressbase",
+          "uprn": "100000000001",
+          "matchStatus": "confirmed_address_match",
+          "evidenceTier": "authoritative_address_source",
+          "longitude": -0.5,
+          "latitude": 51.2,
+          "coordinateSource": "AddressBase Premium",
+          "sourceSnapshot": "addressbase-2026-08",
+          "checkedAt": "2026-08-10T12:00:00Z",
+          "limitations": []
+        }
+      },
+      "generatedAt": "2026-08-10T12:00:00Z",
+      "releaseId": "property-uprn-links-2026-08-10-6b97c08701f2"
+    },
+    "expectedReleaseId": "property-uprn-links-2026-08-10-6b97c08701f2"
+  },
+  "uprnInvalid": [
+    {
+      "name": "missing_link_source_id",
+      "payload": {
+        "schemaVersion": 1,
+        "canonicalIdentityMode": "full-normalised-address-plus-postcode-fail-closed",
+        "identityWarning": "UPRN evidence never creates, merges or replaces canonical INSIGHT property identity",
+        "sources": [
+          {
+            "sourceId": "addressbase",
+            "name": "AddressBase Premium",
+            "sourceSnapshot": "addressbase-2026-08",
+            "checkedAt": "2026-08-10T12:00:00Z",
+            "coordinateBasis": "authoritative_address_point",
+            "licenceOrEntitlement": {
+              "type": "commercial_entitlement",
+              "reference": "fixture entitlement",
+              "permitsPublicDerivedPublication": true
+            },
+            "redistributionClassification": "licensed_for_insight_publication"
+          }
+        ],
+        "linksByProperty": {
+          "property:1 TEST ROAD GUILDFORD GU1 1AA|GU11AA": {
+            "propertyId": "property:1 TEST ROAD GUILDFORD GU1 1AA|GU11AA",
+            "uprn": "100000000001",
+            "matchStatus": "confirmed_address_match",
+            "evidenceTier": "authoritative_address_source",
+            "longitude": -0.5,
+            "latitude": 51.2,
+            "coordinateSource": "AddressBase Premium",
+            "sourceSnapshot": "addressbase-2026-08",
+            "checkedAt": "2026-08-10T12:00:00Z",
+            "limitations": []
+          }
+        },
+        "generatedAt": "2026-08-10T12:00:00Z",
+        "releaseId": "property-uprn-links-2026-08-10-b4012fe76778"
+      }
+    },
+    {
+      "name": "non_explicit_match_status",
+      "payload": {
+        "schemaVersion": 1,
+        "canonicalIdentityMode": "full-normalised-address-plus-postcode-fail-closed",
+        "identityWarning": "UPRN evidence never creates, merges or replaces canonical INSIGHT property identity",
+        "sources": [
+          {
+            "sourceId": "addressbase",
+            "name": "AddressBase Premium",
+            "sourceSnapshot": "addressbase-2026-08",
+            "checkedAt": "2026-08-10T12:00:00Z",
+            "coordinateBasis": "authoritative_address_point",
+            "licenceOrEntitlement": {
+              "type": "commercial_entitlement",
+              "reference": "fixture entitlement",
+              "permitsPublicDerivedPublication": true
+            },
+            "redistributionClassification": "licensed_for_insight_publication"
+          }
+        ],
+        "linksByProperty": {
+          "property:1 TEST ROAD GUILDFORD GU1 1AA|GU11AA": {
+            "propertyId": "property:1 TEST ROAD GUILDFORD GU1 1AA|GU11AA",
+            "sourceId": "addressbase",
+            "uprn": "100000000001",
+            "matchStatus": "candidate",
+            "evidenceTier": "authoritative_address_source",
+            "longitude": -0.5,
+            "latitude": 51.2,
+            "coordinateSource": "AddressBase Premium",
+            "sourceSnapshot": "addressbase-2026-08",
+            "checkedAt": "2026-08-10T12:00:00Z",
+            "limitations": []
+          }
+        },
+        "generatedAt": "2026-08-10T12:00:00Z",
+        "releaseId": "property-uprn-links-2026-08-10-f329da2585bd"
+      }
+    },
+    {
+      "name": "invalid_checked_at",
+      "payload": {
+        "schemaVersion": 1,
+        "canonicalIdentityMode": "full-normalised-address-plus-postcode-fail-closed",
+        "identityWarning": "UPRN evidence never creates, merges or replaces canonical INSIGHT property identity",
+        "sources": [
+          {
+            "sourceId": "addressbase",
+            "name": "AddressBase Premium",
+            "sourceSnapshot": "addressbase-2026-08",
+            "checkedAt": "2026-08-10T12:00:00Z",
+            "coordinateBasis": "authoritative_address_point",
+            "licenceOrEntitlement": {
+              "type": "commercial_entitlement",
+              "reference": "fixture entitlement",
+              "permitsPublicDerivedPublication": true
+            },
+            "redistributionClassification": "licensed_for_insight_publication"
+          }
+        ],
+        "linksByProperty": {
+          "property:1 TEST ROAD GUILDFORD GU1 1AA|GU11AA": {
+            "propertyId": "property:1 TEST ROAD GUILDFORD GU1 1AA|GU11AA",
+            "sourceId": "addressbase",
+            "uprn": "100000000001",
+            "matchStatus": "confirmed_address_match",
+            "evidenceTier": "authoritative_address_source",
+            "longitude": -0.5,
+            "latitude": 51.2,
+            "coordinateSource": "AddressBase Premium",
+            "sourceSnapshot": "addressbase-2026-08",
+            "checkedAt": "not-a-date",
+            "limitations": []
+          }
+        },
+        "generatedAt": "2026-08-10T12:00:00Z",
+        "releaseId": "property-uprn-links-2026-08-10-667fbe0f1459"
+      }
+    },
+    {
+      "name": "non_publishable_source_rights",
+      "payload": {
+        "schemaVersion": 1,
+        "canonicalIdentityMode": "full-normalised-address-plus-postcode-fail-closed",
+        "identityWarning": "UPRN evidence never creates, merges or replaces canonical INSIGHT property identity",
+        "sources": [
+          {
+            "sourceId": "addressbase",
+            "name": "AddressBase Premium",
+            "sourceSnapshot": "addressbase-2026-08",
+            "checkedAt": "2026-08-10T12:00:00Z",
+            "coordinateBasis": "authoritative_address_point",
+            "licenceOrEntitlement": {
+              "type": "commercial_entitlement",
+              "reference": "fixture entitlement",
+              "permitsPublicDerivedPublication": false
+            },
+            "redistributionClassification": "internal_only_no_publication"
+          }
+        ],
+        "linksByProperty": {
+          "property:1 TEST ROAD GUILDFORD GU1 1AA|GU11AA": {
+            "propertyId": "property:1 TEST ROAD GUILDFORD GU1 1AA|GU11AA",
+            "sourceId": "addressbase",
+            "uprn": "100000000001",
+            "matchStatus": "confirmed_address_match",
+            "evidenceTier": "authoritative_address_source",
+            "longitude": -0.5,
+            "latitude": 51.2,
+            "coordinateSource": "AddressBase Premium",
+            "sourceSnapshot": "addressbase-2026-08",
+            "checkedAt": "2026-08-10T12:00:00Z",
+            "limitations": []
+          }
+        },
+        "generatedAt": "2026-08-10T12:00:00Z",
+        "releaseId": "property-uprn-links-2026-08-10-44571756e49a"
+      }
+    }
+  ]
+}

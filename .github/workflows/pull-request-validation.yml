@@ -19,8 +19,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install pinned JSON Schema validator
+        run: python3 -m pip install jsonschema==4.23.0
       - name: Test repository contracts
         run: PYTHONPATH=scripts python3 -m unittest discover -s tests
+      - name: Validate HMLR INSPIRE and future UPRN feeds
+        run: |
+          PYTHONPATH=scripts python3 scripts/validate_inspire_parcels.py
+          PYTHONPATH=scripts python3 scripts/validate_property_uprn_links.py
+          PYTHONPATH=scripts python3 scripts/validate_inspire_parcel_review_queue.py
+          PYTHONPATH=scripts python3 scripts/validate_inspire_json_schemas.py
       - name: Verify deterministic private-estate publication
         run: |
           python3 scripts/build_private_estates_asset.py
