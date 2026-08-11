@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "version": "owner-reviewed-property-address-presentations-2026-08-11",
+  "presentations": [
+    {
+      "id": "coromandel-33-fairmile-avenue-kt11-2ja",
+      "sourcePropertyId": "property:33 FAIRMILE AVENUE COBHAM KT11 2JA|KT112JA",
+      "canonicalPropertyId": "property:COROMANDEL 33 FAIRMILE AVENUE COBHAM KT11 2JA|KT112JA",
+      "sourceFields": {
+        "saon": "",
+        "paon": "33",
+        "street": "FAIRMILE AVENUE",
+        "locality": "",
+        "town": "COBHAM",
+        "postcode": "KT11 2JA"
+      },
+      "canonicalFields": {
+        "saon": "",
+        "paon": "COROMANDEL, 33",
+        "street": "FAIRMILE AVENUE",
+        "locality": "",
+        "town": "COBHAM",
+        "postcode": "KT11 2JA"
+      },
+      "review": {
+        "status": "owner-reviewed",
+        "date": "2026-08-11",
+        "basis": "Direct owner instruction to present the house name before its numbered street address.",
+        "scope": "This property only; no general promotion of private planning-derived names."
+      }
+    }
+  ]
+}

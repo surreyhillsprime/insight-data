@@ -1,7 +1,7 @@
 {
   "$schema": "./heritage-listing-overrides.schema.json",
   "schemaVersion": 1,
-  "updatedAt": "2026-08-05",
+  "updatedAt": "2026-08-11",
   "productionRequired": true,
   "mappings": [
     {
@@ -8425,16 +8425,6 @@
       "propertyRecordId": "property:33 ESHER PLACE AVENUE ESHER KT10 8PU|KT108PU",
       "address": "33, ESHER PLACE AVENUE, ESHER, KT10 8PU",
       "postcode": "KT10 8PU",
-      "status": "no_direct_match",
-      "listEntryNumbers": [],
-      "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
-      "reviewedAt": "2026-07-28",
-      "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
-    },
-    {
-      "propertyRecordId": "property:33 FAIRMILE AVENUE COBHAM KT11 2JA|KT112JA",
-      "address": "33, FAIRMILE AVENUE, COBHAM, KT11 2JA",
-      "postcode": "KT11 2JA",
       "status": "no_direct_match",
       "listEntryNumbers": [],
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
@@ -19039,6 +19029,16 @@
       "propertyRecordId": "property:CORNERWAYS WEST ROAD WEYBRIDGE KT13 0LY|KT130LY",
       "address": "CORNERWAYS, WEST ROAD, WEYBRIDGE, KT13 0LY",
       "postcode": "KT13 0LY",
+      "status": "no_direct_match",
+      "listEntryNumbers": [],
+      "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
+      "reviewedAt": "2026-07-28",
+      "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
+    },
+    {
+      "propertyRecordId": "property:COROMANDEL 33 FAIRMILE AVENUE COBHAM KT11 2JA|KT112JA",
+      "address": "COROMANDEL, 33, FAIRMILE AVENUE, COBHAM, KT11 2JA",
+      "postcode": "KT11 2JA",
       "status": "no_direct_match",
       "listEntryNumbers": [],
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",

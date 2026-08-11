@@ -25,6 +25,18 @@
       "reviewedAt": "2026-08-11T09:11:01Z",
       "reviewedBy": "INSIGHT reviewed parent-child correction",
       "reason": "EPC and validated planning evidence identify the prior point and parcel as The Cottage Magpie Manor; the parent Magpie Manor UPRN point is uniquely and clearly contained by parcel 34439175."
+    },
+    {
+      "transitionId": "inspire-transition-coromandel-canonical-id-20260811",
+      "propertyId": "property:33 FAIRMILE AVENUE COBHAM KT11 2JA|KT112JA",
+      "previousParcelId": "34084671",
+      "priorAssociationReleaseId": "inspire-parcels-2026-08-02-bb4bff7283d5",
+      "priorSourceSnapshot": "hmlr-inspire-2026-08-02",
+      "action": "remove",
+      "replacementParcelId": null,
+      "reviewedAt": "2026-08-11T11:46:22Z",
+      "reviewedBy": "INSIGHT owner-reviewed canonical address migration",
+      "reason": "The owner-reviewed Coromandel presentation retires the prior 33 Fairmile Avenue property ID; the unchanged parcel association is republished under the new canonical key."
     }
   ]
 }
