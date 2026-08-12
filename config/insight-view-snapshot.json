@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "collectedAt": "2026-08-12T03:09:59Z",
+  "collectedAt": "2026-08-12T04:59:25Z",
   "timeZone": "Europe/London",
   "policy": {
     "bankRate": 3.75,
@@ -42,7 +42,7 @@
     "rate": 4.79,
     "previousRate": 4.81,
     "observationDate": "2026-07-31",
-    "retrievedAt": "2026-08-12T03:09:59Z",
+    "retrievedAt": "2026-08-12T04:59:25Z",
     "qualifier": "BoE quoted rate · 75% LTV",
     "sourceUrl": "https://www.bankofengland.co.uk/boeapps/database/index.asp?EC=IUMBV34&Filter=N&From=Template&G0Xtop.x=1&G0Xtop.y=1&Travel=NIxSUx",
     "downloadUrl": "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom=01/Jan/2024&Dateto=now&SeriesCodes=IUMBV34&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N"
@@ -58,14 +58,12 @@
     "londonAnnualChange": -3.7,
     "londonPreviousAnnualChange": -2.3,
     "observationMonth": "2026-05",
-    "retrievedAt": "2026-08-11T23:22:45Z",
+    "retrievedAt": "2026-08-12T04:59:25Z",
     "provisional": true,
     "sourceUrl": "https://landregistry.data.gov.uk/data/ukhpi/region/united-kingdom/month.json?_pageSize=2&_sort=-refPeriodStart"
   },
   "collectionStatus": {
-    "mode": "last-known-good",
-    "staleSources": [
-      "hm-land-registry-uk-hpi"
-    ]
+    "mode": "live",
+    "staleSources": []
   }
 }
