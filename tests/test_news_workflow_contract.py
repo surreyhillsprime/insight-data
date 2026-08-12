@@ -17,7 +17,8 @@ class NewsWorkflowContractTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
     def test_cadence_and_concurrency_are_news_specific(self):
-        self.assertIn("cron: '17,47 * * * *'", self.workflow)
+        self.assertIn("cron: '0 6,18 * * *'", self.workflow)
+        self.assertIn('timezone: "Europe/London"', self.workflow)
         self.assertIn("repository_dispatch:", self.workflow)
         self.assertIn("types: [news-refresh]", self.workflow)
         self.assertIn("group: insight-news-refresh-${{ github.ref }}", self.workflow)
