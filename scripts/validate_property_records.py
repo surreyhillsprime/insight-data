@@ -49,7 +49,6 @@ COVERAGE_ALIASES = {
     "planning": ("planning", "planningHistory", "planning_history"),
     "epc": ("epc", "epcHistory", "epc_history"),
     "coordinates": ("coordinates",),
-    "currentFlood": ("currentFlood",),
     "planningConstraints": ("planningConstraints",),
     "listedBuilding": ("listedBuilding",),
     "schools": ("schools",),
@@ -549,20 +548,6 @@ def _validate_background_coverage_semantics(
         ):
             raise PropertyRecordValidationError(
                 f"{property_id}: approximate coordinate coverage lacks the postcode-centroid exactness limitation"
-            )
-
-    elif source == "currentFlood":
-        if status == "complete" and record_count != 1:
-            raise PropertyRecordValidationError(
-                f"{property_id}: complete current-flood coverage requires one dated observation"
-            )
-        if status == "checked_none":
-            raise PropertyRecordValidationError(
-                f"{property_id}: current flood-alert coverage must retain a zero-alert observation, not checked_none"
-            )
-        if "not a long-term property flood-risk assessment" not in limitations:
-            raise PropertyRecordValidationError(
-                f"{property_id}: current flood coverage must distinguish alerts from long-term property risk"
             )
 
     elif source == "planningConstraints":

@@ -53,11 +53,11 @@ INSIGHT now uses separate refresh jobs so high-change sources stay fresh without
 
 | Workflow | Runs | What it refreshes |
 | --- | --- | --- |
-| `daily-intelligence.yml` | Daily at 05:15 UTC | Recent planning applications near tracked properties; Companies House publication remains disabled |
+| `daily-intelligence.yml` | Daily at 05:15 UTC | Rebuilds Today opportunities from the latest validated property, sales and planning feeds |
 | `heritage-listed-buildings.yml` | Daily at 08:15 UTC | Official Historic England NHLE listed-building evidence, reviewed property mappings and explicit coverage states |
 | `weekly-context.yml` | Mondays at 07:15 UTC | Planning constraints, conservation/heritage overlays, and schools if a school CSV feed is supplied |
 | `planning-history-feed.yml` | Mondays at 06:45 UTC when licensed-source publication is enabled | Complete property-level planning histories from the approved redistribution source |
-| `monthly-property-refresh.yml` | 1st of each month at 06:00 UTC | Land Registry, EPC floor areas, GBP/sq ft, and live flood-alert context; OSM amenity publication remains disabled |
+| `monthly-property-refresh.yml` | 1st of each month at 06:00 UTC | Land Registry, EPC floor areas, GBP/sq ft, and postcode-coordinate context; OSM amenity publication remains disabled |
 | `sales-history-feed.yml` | 2nd of each month at 06:30 UTC | Complete HM Land Registry Price Paid history for properties in the base feed |
 | `six-week-os-refresh.yml` | Guarded Sunday schedule | OS Open UPRN matching and geometry/linkage improvement when an OS CSV is supplied |
 | `monthly-inspire-parcels.yml` | Evenings on days 1-9 of each month | Detects HMLR's first-Sunday INSPIRE release, audits all 11 Surrey files and republishes only approved indicative parcel associations |
@@ -68,7 +68,7 @@ INSIGHT now uses separate refresh jobs so high-change sources stay fresh without
 OpenStreetMap amenity payloads and Companies House payloads are deliberately
 disabled in public producer workflows pending an approved redistribution basis.
 This rights boundary does not reduce the £2m+ property universe processed by
-the active Land Registry, EPC, flood, planning, school, UPRN and estate streams.
+the active Land Registry, EPC, planning, school, UPRN and estate streams.
 
 Every active producer workflow runs `scripts/check_data_completeness.py` before
 committing its result. A separate daily audit runs the stricter metadata check
@@ -243,16 +243,16 @@ alerted immediately. A first run with no last-known-good heritage state also
 fails closed. Successful unchanged snapshots are left untouched to avoid
 timestamp-only Git commits.
 
-Planning uses two deliberately separate time horizons. The daily intelligence
-job remains a rolling 45-day alert search. The licensed planning-history feed
-imports each provider's complete available archive, records the earliest and
-latest application years supplied, and searches each distinct property only
-once even when it has several Land Registry transactions. The workflow is
-scheduled but deliberately fails closed unless an approved redistribution
-source and its public licence evidence are configured. EPC, constraints, flood,
-school and OS enrichment is applied across every property in the expanded feed
-using each source's full available or current coverage; those snapshot sources
-are not artificially backdated to 1995.
+Today opportunities are rebuilt daily from the latest validated property,
+sales and planning feeds. The licensed planning-history feed imports each
+provider's complete available archive, records the earliest and latest
+application years supplied, and searches each distinct property only once even
+when it has several Land Registry transactions. The workflow is scheduled but
+deliberately fails closed unless an approved redistribution source and its
+public licence evidence are configured. EPC, constraints, school and OS
+enrichment is applied across every property in the expanded feed using each
+source's full available or current coverage; those snapshot sources are not
+artificially backdated to 1995.
 
 `sales-history-feed.yml` publishes the separate complete Price Paid history
 feed each month. Its postcode cache is resumable and its output is

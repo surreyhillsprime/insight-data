@@ -65,7 +65,6 @@ PUBLIC_TRANSACTION_FIELDS = frozenset({
     "coordinateSource",
     "coordinatePrecision",
     "geocode",
-    "environmentAgency",
     "ordnanceSurvey",
     "uprn",
     "ofsted",
@@ -91,6 +90,7 @@ RESTRICTED_PUBLIC_TRANSACTION_FIELDS = frozenset({
     "companiesHouse",
     "planning",
     "planningHistory",
+    "environmentAgency",
 })
 
 
@@ -946,10 +946,7 @@ def recompute_coverage_metadata(transactions, meta):
         if postcodes:
             postcodes["matched"] = populated("geocode")
             context["postcodes"] = postcodes
-        environment = dict(context.get("environmentAgency") or {})
-        if environment:
-            environment["records"] = populated("environmentAgency")
-            context["environmentAgency"] = environment
+        context.pop("environmentAgency", None)
         context.pop("openStreetMap", None)
         meta["propertyContext"] = context
 

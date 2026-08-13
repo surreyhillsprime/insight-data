@@ -61,6 +61,7 @@ class PublicationContractTests(unittest.TestCase):
             "openStreetMap": {"source": "OpenStreetMap via Overpass API"},
             "companiesHouse": {"companyNumber": "01234567"},
             "planningHistory": [{"reference": "licensed-private-record"}],
+            "environmentAgency": {"floodStatus": "legacy live status"},
             "ofsted": {"source": "DfE / Ofsted school data", "nearestSchools": []},
             "historicEngland": {
                 "status": "no_direct_match",
@@ -79,7 +80,10 @@ class PublicationContractTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "feed.js"
             write_js(output, [row], {
-                "propertyContext": {"openStreetMap": {"records": 1}},
+                "propertyContext": {
+                    "openStreetMap": {"records": 1},
+                    "environmentAgency": {"records": 1},
+                },
                 "dailyIntelligence": {
                     "planning": {
                         "records": 99,
@@ -105,7 +109,9 @@ class PublicationContractTests(unittest.TestCase):
         self.assertNotIn("companiesHouse", rows[0])
         self.assertNotIn("epcHistory", rows[0])
         self.assertNotIn("planningHistory", rows[0])
+        self.assertNotIn("environmentAgency", rows[0])
         self.assertNotIn("openStreetMap", metadata["propertyContext"])
+        self.assertNotIn("environmentAgency", metadata["propertyContext"])
         self.assertNotIn("companiesHouse", metadata.get("dailyIntelligence", {}))
         self.assertNotIn("planning", metadata.get("dailyIntelligence", {}))
         self.assertEqual(rows[0]["ofsted"]["source"], "DfE Get Information about Schools (GIAS)")

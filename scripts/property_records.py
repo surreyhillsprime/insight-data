@@ -22,7 +22,7 @@ from insight_data_utils import structured_delivery_point_key
 
 
 SCHEMA_VERSION = 1
-GENERATOR_VERSION = "property-records-4"
+GENERATOR_VERSION = "property-records-5"
 PROPERTY_RECORDS_NAME = "SURREY_PROPERTY_RECORDS"
 PROPERTY_RECORDS_META_NAME = "SURREY_PROPERTY_RECORDS_META"
 DEFAULT_PRICE_FLOOR = 2_000_000
@@ -39,7 +39,6 @@ COVERAGE_STATES = {
 
 BACKGROUND_COVERAGE_SOURCES = (
     "coordinates",
-    "currentFlood",
     "planningConstraints",
     "listedBuilding",
     "schools",
@@ -646,7 +645,6 @@ def _property_context_target(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any
                 target[key] = copy.deepcopy(coordinate_row[key])
 
     for key in (
-        "environmentAgency",
         "planningConstraints",
         "historicEngland",
         "ofsted",
@@ -666,32 +664,6 @@ def _property_context_target(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any
     return target
 
 
-def _parse_timestamp(value: Any) -> datetime | None:
-    text = clean(value)
-    if not text:
-        return None
-    try:
-        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
-    return parsed.astimezone(timezone.utc)
-
-
-def _flood_observation_is_fresh(
-    context: Mapping[str, Any],
-    metadata: Mapping[str, Any],
-) -> bool:
-    observed = _parse_timestamp(context.get("observedAt") or context.get("updatedAt"))
-    checked = _parse_timestamp(metadata.get("freshnessCheckedAt") or metadata.get("updatedAt"))
-    maximum_age_hours = _number(metadata.get("maximumAgeHours"))
-    if observed is None or checked is None or maximum_age_hours is None or maximum_age_hours <= 0:
-        return False
-    age_hours = (checked - observed).total_seconds() / 3600
-    return 0 <= age_hours <= maximum_age_hours
-
-
 def _positive_constraint_fields(context: Mapping[str, Any]) -> list[str]:
     return [field for field in _CONSTRAINT_RESULT_FIELDS if context.get(field) not in (None, "", [], {})]
 
@@ -703,7 +675,6 @@ def _background_coverage_records(
 ) -> dict[str, dict[str, Any]]:
     property_context_meta = _mapping(transaction_meta.get("propertyContext"))
     postcode_meta = _mapping(property_context_meta.get("postcodes"))
-    flood_meta = _mapping(property_context_meta.get("environmentAgency"))
     weekly_meta = _mapping(transaction_meta.get("weeklyContext"))
     constraints_meta = _mapping(weekly_meta.get("planningConstraints"))
     schools_meta = _mapping(weekly_meta.get("schools"))
@@ -779,54 +750,6 @@ def _background_coverage_records(
     }
     if coordinate_pair:
         coordinates.update({"latitude": coordinate_pair[0], "longitude": coordinate_pair[1]})
-
-    flood = _mapping(target.get("environmentAgency"))
-    flood_fresh = bool(flood and _flood_observation_is_fresh(flood, flood_meta))
-    if flood:
-        flood_status = "complete" if flood_fresh else "partial"
-    elif not coordinate_pair:
-        flood_status = "unavailable"
-    elif flood_meta and (_integer(flood_meta.get("requestFailures")) or 0) > 0:
-        flood_status = "failed"
-    elif flood_meta:
-        flood_status = "not_checked"
-    else:
-        flood_status = "unavailable"
-    alert_count = max(0, _integer(flood.get("currentFloodAlertCount")) or 0)
-    flood_observed_at = clean(flood.get("observedAt") or flood.get("updatedAt"))
-    current_flood = {
-        "status": flood_status,
-        "complete": flood_status == "complete",
-        "coverageMode": "current-alert-radius-observation",
-        "source": clean(flood.get("source") or flood_meta.get("source")) or "Environment Agency Real Time flood-monitoring API",
-        "checkedAt": flood_observed_at or clean(flood_meta.get("freshnessCheckedAt") or property_context_meta.get("updatedAt")),
-        "coverageFrom": flood_observed_at[:10],
-        "coverageTo": flood_observed_at[:10] or as_of,
-        "recordCount": 1 if flood else 0,
-        "basis": (
-            f"Dated current-area observation recorded {alert_count} active flood alert{'s' if alert_count != 1 else ''} within the configured radius"
-            if flood
-            else "No dated current-area flood-alert observation is available"
-        ),
-        "limitations": [
-            "This is a time-specific current-alert observation, not a long-term property flood-risk assessment.",
-            "The radius is evaluated from the available mapping point; a postcode-centroid result is wider-area evidence, not exact-property evidence.",
-        ],
-        "resultStatus": (
-            "unknown"
-            if not flood
-            else (
-                "stale_observation"
-                if not flood_fresh
-                else ("current_alerts_observed" if alert_count else "no_current_alerts_observed")
-            )
-        ),
-        "alertCount": alert_count,
-        "floodStatus": clean(flood.get("floodStatus")),
-        "highestCurrentSeverity": clean(flood.get("highestCurrentSeverity")),
-        "searchRadius": clean(flood.get("searchRadius")),
-        "observedAt": flood_observed_at,
-    }
 
     constraints = _mapping(target.get("planningConstraints"))
     constraint_lookup_succeeded = clean(constraints.get("lookupStatus")).lower() in {"success", "successful"}
@@ -1016,7 +939,6 @@ def _background_coverage_records(
 
     return {
         "coordinates": coordinates,
-        "currentFlood": current_flood,
         "planningConstraints": planning_constraints,
         "listedBuilding": listed_building,
         "schools": schools,
@@ -2083,24 +2005,6 @@ def _property_story_context_signal(
             }
         )
 
-    current_flood = target.get("environmentAgency") if isinstance(target.get("environmentAgency"), Mapping) else {}
-    current_alert_count = max(0, _integer(current_flood.get("currentFloodAlertCount")) or 0)
-    if current_alert_count and coverage.get("currentFlood", {}).get("status") == "complete":
-        alert_noun = "alert" if current_alert_count == 1 else "alerts"
-        observed_date = clean(current_flood.get("observedAt") or current_flood.get("updatedAt"))[:10]
-        date_text = f" on {_format_date(observed_date)}" if observed_date else ""
-        candidates.append(
-            {
-                "score": 10,
-                "kind": "current_flood_alert",
-                "coverageSource": "currentFlood",
-                "text": (
-                    f"The Environment Agency's wider-area check recorded {current_alert_count} current flood {alert_noun} "
-                    f"within {clean(current_flood.get('searchRadius')) or 'the configured radius'}{date_text}."
-                ),
-            }
-        )
-
     if _valuation_point(target):
         stations = []
         for name, longitude, latitude, london, fastest_minutes in _STORY_STATIONS:
@@ -2201,7 +2105,7 @@ def _build_fact_packet(
         _fact(
             property_id,
             "background_source_coverage",
-            "Public background-source coverage is recorded separately for mapping, current flood alerts, static constraints, statutory listed-building evidence, schools, current nearby planning and OS UPRN candidates.",
+            "Public background-source coverage is recorded separately for mapping, static constraints, statutory listed-building evidence, schools, current nearby planning and OS UPRN candidates.",
             background_coverage_evidence,
             {
                 source_key: {
@@ -2658,7 +2562,6 @@ def _property_profile(
         "ofsted",
         "planningConstraints",
         "historicEngland",
-        "environmentAgency",
     )
     context = {
         key: copy.deepcopy(context_source[key])
@@ -2832,7 +2735,6 @@ def build_property_records(
                 "planningConstraints",
                 "historicEngland",
                 "ofsted",
-                "environmentAgency",
                 "ordnanceSurvey",
             )
             if latest.get(key) not in (None, "", [], {})
@@ -3034,7 +2936,6 @@ def build_property_records(
             if isinstance(transaction_meta.get("epcEnrichment"), dict)
             else "MHCLG EPC Register",
             "coordinates": clean(_mapping(_mapping(transaction_meta.get("propertyContext")).get("postcodes")).get("source")) or "Postcodes.io",
-            "currentFlood": clean(_mapping(_mapping(transaction_meta.get("propertyContext")).get("environmentAgency")).get("source")) or "Environment Agency Real Time flood-monitoring API",
             "planningConstraints": clean(_mapping(_mapping(transaction_meta.get("weeklyContext")).get("planningConstraints")).get("source")) or "Planning Data API",
             "listedBuilding": clean(_mapping(transaction_meta.get("heritageSync")).get("source"))
             or HISTORIC_ENGLAND_SOURCE,
