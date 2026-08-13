@@ -109,8 +109,9 @@ event timeline. Airport fields are preserved when a source feed supplies them;
 absence remains absence and must not be inferred.
 Where the record has usable coordinates, the persistent narrative and live
 renderer use the same bounded Surrey station and tracked-airport reference
-sets, distance gates and wording. Transient flood alerts remain live context;
-only mapped flood-zone/setting evidence is eligible for the permanent story.
+sets, distance gates and wording. Only mapped Planning Data flood-zone/setting
+evidence is eligible for the permanent story; transient flood alerts are not
+part of the public Property Record contract.
 
 Estate velocity and estate price metrics are aggregate facts, not property
 facts. The panel joins the existing estate aggregate by `profile.estateId` at

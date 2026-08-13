@@ -4,7 +4,6 @@
 import argparse
 import os
 from collections import Counter
-from datetime import datetime, timezone
 from pathlib import Path
 
 from insight_data_utils import (
@@ -43,15 +42,12 @@ MINIMUM_COVERAGE = {
     "Postcodes": 99.0,
     "Coordinates": 99.0,
     "EPC matches": 75.0,
-    "Fresh flood status": 99.0,
     "UPRN matches": 3.0,
     "School lookups": 99.0,
     "Planning constraint lookups": 99.0,
 }
 
 STRICT_ONLY_COVERAGE = frozenset({"Planning constraint lookups"})
-
-MAX_DYNAMIC_AGE_HOURS = 30
 
 ESTATE_CLASSIFICATION_FIELDS = (
     "estateId",
@@ -82,35 +78,12 @@ def nested(item, *keys):
     return value
 
 
-def timestamp_is_fresh(value, max_age_hours=MAX_DYNAMIC_AGE_HOURS, now=None):
-    try:
-        observed = datetime.fromisoformat(str(value or "").replace("Z", "+00:00"))
-    except (TypeError, ValueError):
-        return False
-    if observed.tzinfo is None:
-        observed = observed.replace(tzinfo=timezone.utc)
-    checked_at = now or datetime.now(timezone.utc)
-    age_hours = (checked_at - observed).total_seconds() / 3600
-    return 0 <= age_hours <= max_age_hours
-
-
-def flood_status_is_fresh(item, now=None):
-    context = item.get("environmentAgency")
-    if not isinstance(context, dict):
-        return False
-    return timestamp_is_fresh(
-        context.get("observedAt") or context.get("updatedAt"),
-        now=now,
-    )
-
-
 def coverage_rows(items, now=None):
     total = len(items)
     checks = {
         "Postcodes": lambda x: present(x.get("postcode")),
         "Coordinates": lambda x: isinstance(x.get("latitude"), (int, float)) and isinstance(x.get("longitude"), (int, float)),
         "EPC matches": lambda x: x.get("epcMatched") is True,
-        "Fresh flood status": lambda x: flood_status_is_fresh(x, now=now),
         "UPRN matches": lambda x: present(x.get("uprn")) or present(nested(x, "ordnanceSurvey", "uprn")),
         "School lookups": lambda x: present(x.get("ofsted")),
         "Planning constraint lookups": planning_constraint_lookup_succeeded,
@@ -125,36 +98,6 @@ def coverage_rows(items, now=None):
         }
         for name, predicate in checks.items()
     ]
-
-
-def dynamic_context_failures(items, meta, now=None):
-    failures = []
-    flood_meta = nested(meta, "propertyContext", "environmentAgency")
-    flood_meta = flood_meta if isinstance(flood_meta, dict) else {}
-    flood_counts = Counter()
-    for item in items:
-        context = item.get("environmentAgency")
-        if not isinstance(context, dict):
-            flood_counts["missing"] += 1
-        elif flood_status_is_fresh(item, now=now):
-            flood_counts["fresh"] += 1
-        else:
-            flood_counts["stale"] += 1
-    expected_flood_meta = {
-        "freshRecords": flood_counts["fresh"],
-        "staleRecords": flood_counts["stale"],
-        "missingRecords": flood_counts["missing"],
-    }
-    for field, expected in expected_flood_meta.items():
-        if flood_meta.get(field) != expected:
-            failures.append(
-                f"Flood freshness metadata: {field} reports {flood_meta.get(field, 'missing')}, expected {expected}"
-            )
-    if flood_meta.get("maximumAgeHours") != MAX_DYNAMIC_AGE_HOURS:
-        failures.append(
-            f"Flood freshness metadata: maximumAgeHours must be {MAX_DYNAMIC_AGE_HOURS}"
-        )
-    return failures
 
 
 def static_context_failures(items, meta):
@@ -587,8 +530,6 @@ def main():
     )
 
     failures.extend(estate_failures(items, meta))
-    if not args.base_only:
-        failures.extend(dynamic_context_failures(items, meta))
     if args.strict_metadata and not args.base_only:
         failures.extend(static_context_failures(items, meta))
     failures.extend(publication_contract_failures(items))

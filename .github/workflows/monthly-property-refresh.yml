@@ -169,7 +169,7 @@ jobs:
           git fetch origin "$STAGING_BRANCH"
           git checkout -B "$STAGING_BRANCH" "origin/$STAGING_BRANCH"
 
-      - name: Refresh monthly coordinate and flood context
+      - name: Refresh monthly coordinate context
         run: |
           python3 scripts/enrich_property_context.py \
             --missing-only \

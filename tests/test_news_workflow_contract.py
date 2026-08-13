@@ -167,28 +167,29 @@ class NewsWorkflowContractTests(unittest.TestCase):
                 name,
             )
 
-    def test_daily_flood_retry_revalidates_the_rebased_base_feed(self):
+    def test_daily_today_retry_revalidates_after_rebase_without_live_flood(self):
         commit_index = self.daily_workflow.index(
-            'git commit -m "Update INSIGHT daily flood context"'
+            'git commit -m "Update INSIGHT Today opportunities"'
         )
         retry_index = self.daily_workflow.index(
             "for attempt in 1 2 3; do", commit_index
         )
         next_step_index = self.daily_workflow.index(
-            "- name: Check whether all Today dependencies are release-ready",
-            retry_index,
+            "if [ \"$attempt\" -eq 3 ]; then", retry_index
         )
         retry = self.daily_workflow[retry_index:next_step_index]
         rebase_index = retry.index(
             'git rebase --autostash "origin/$GITHUB_REF_NAME"'
         )
         validation_index = retry.index(
-            "python3 scripts/check_data_completeness.py --base-only"
+            "python3 scripts/check_data_completeness.py --strict-metadata"
         )
         push_index = retry.index('git push origin "HEAD:$GITHUB_REF_NAME"')
 
         self.assertLess(rebase_index, validation_index)
         self.assertLess(validation_index, push_index)
+        self.assertNotIn("enrich_property_context.py", self.daily_workflow)
+        self.assertNotIn("force-flood-refresh", self.daily_workflow)
 
     def test_long_data_producers_keep_the_full_shared_queue(self):
         shared = (

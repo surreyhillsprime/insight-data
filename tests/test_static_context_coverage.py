@@ -19,6 +19,7 @@ from insight_data_utils import (  # noqa: E402
     planning_constraint_coverage_counts,
     recompute_coverage_metadata,
 )
+from property_records import _property_story_context_signal  # noqa: E402
 
 
 def args(**overrides):
@@ -88,12 +89,28 @@ class StaticContextCoverageTests(unittest.TestCase):
     def test_property_context_release_gates_require_near_complete_lookup_coverage(self):
         for name in (
             "Coordinates",
-            "Fresh flood status",
             "School lookups",
             "Planning constraint lookups",
         ):
             self.assertEqual(MINIMUM_COVERAGE[name], 99.0)
         self.assertNotIn("Planning query responses", MINIMUM_COVERAGE)
+
+    def test_static_planning_flood_zone_remains_a_story_signal(self):
+        signal = _property_story_context_signal(
+            {
+                "planningConstraints": {
+                    "source": "Planning Data API",
+                    "lookupStatus": "successful",
+                    "floodRiskZone": "Flood risk zone: 208707/2, 91465/3",
+                },
+                "coordinatePrecision": "postcode-centroid",
+            },
+            {},
+        )
+
+        self.assertEqual(signal["kind"], "flood_risk")
+        self.assertEqual(signal["coverageSource"], "planningConstraints")
+        self.assertIn("mapped Flood Zone 3", signal["text"])
 
     def test_fresh_legacy_no_match_cache_becomes_an_explicit_successful_lookup(self):
         cache = {
