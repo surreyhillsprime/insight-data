@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "collectedAt": "2026-08-17T05:33:31Z",
+  "collectedAt": "2026-08-17T17:25:37Z",
   "timeZone": "Europe/London",
   "policy": {
     "bankRate": 3.75,
-    "observationDate": "2026-08-13",
+    "observationDate": "2026-08-14",
     "rateSeriesId": "IUDBEDR",
     "rateDownloadUrl": "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom=01/Jan/2024&Dateto=now&SeriesCodes=IUDBEDR&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N",
     "nextDecisionDate": "2026-09-17",
@@ -42,7 +42,7 @@
     "rate": 4.79,
     "previousRate": 4.81,
     "observationDate": "2026-07-31",
-    "retrievedAt": "2026-08-17T05:33:31Z",
+    "retrievedAt": "2026-08-17T17:25:37Z",
     "qualifier": "BoE quoted rate · 75% LTV",
     "sourceUrl": "https://www.bankofengland.co.uk/boeapps/database/index.asp?EC=IUMBV34&Filter=N&From=Template&G0Xtop.x=1&G0Xtop.y=1&Travel=NIxSUx",
     "downloadUrl": "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom=01/Jan/2024&Dateto=now&SeriesCodes=IUMBV34&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N"
@@ -58,7 +58,7 @@
     "londonAnnualChange": -3.7,
     "londonPreviousAnnualChange": -2.3,
     "observationMonth": "2026-05",
-    "retrievedAt": "2026-08-17T05:33:31Z",
+    "retrievedAt": "2026-08-17T17:25:37Z",
     "provisional": true,
     "sourceUrl": "https://landregistry.data.gov.uk/data/ukhpi/region/united-kingdom/month.json?_pageSize=2&_sort=-refPeriodStart"
   },
