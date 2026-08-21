@@ -107,12 +107,13 @@ def validate_today_feed(
         or criteria.get("everyQualifyingSignalCreatesPropertyOpportunity") is not True
         or criteria.get("opportunityGrouping") != "one-per-property"
         or criteria.get("hotMinimumIndependentSourceFamilies") != 2
+        or criteria.get("veryHotMinimumIndependentSourceFamilies") != 3
         or "newsMinimumScore" in criteria
         or "opportunityRequiresIndependentPropertySignals" in criteria
         or "opportunityRequiresIndependentSource" in criteria
     ):
         raise TodayFeedValidationError(
-            "Today metadata must exclude news and declare the one-opportunity-per-property Standard/Hot contract"
+            "Today metadata must exclude news and declare the one-opportunity-per-property Standard/Hot/Very Hot contract"
         )
     source_fingerprints = metadata.get("sourceFingerprints")
     source_generated_at = metadata.get("sourceGeneratedAt")
@@ -312,7 +313,13 @@ def validate_today_feed(
             for item in property_signals
             if item.get("kind")
         })
-        expected_level = "Hot" if len(source_families) >= 2 else "Standard"
+        expected_level = (
+            "Very Hot"
+            if len(source_families) >= 3
+            else "Hot"
+            if len(source_families) == 2
+            else "Standard"
+        )
         if (
             opportunity.get("independentSourceCount") != len(source_families)
             or opportunity.get("indicatorKindCount") != len(signal_kinds)
@@ -322,7 +329,7 @@ def validate_today_feed(
             )
         ):
             raise TodayFeedValidationError(
-                f"{identifier}: Standard/Hot indicator counts are inconsistent"
+                f"{identifier}: Standard/Hot/Very Hot indicator counts are inconsistent"
             )
         attributes = opportunity.get("attributes") or {}
         if (

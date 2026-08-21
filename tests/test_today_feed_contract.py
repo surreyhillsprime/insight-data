@@ -113,7 +113,7 @@ class TodayFeedContractTests(unittest.TestCase):
         self.assertEqual(self.feed.get("schemaVersion"), 2)
         self.assertEqual(self.metadata.get("schemaVersion"), 2)
         self.assertEqual(self.metadata.get("asOf"), self.feed.get("asOf"))
-        self.assertEqual(self.metadata.get("generatorVersion"), "today-feed-3")
+        self.assertEqual(self.metadata.get("generatorVersion"), "today-feed-4")
         self.assertRegex(
             str(self.metadata.get("generatedAt") or ""),
             r"^\d{4}-\d{2}-\d{2}T",
@@ -145,6 +145,12 @@ class TodayFeedContractTests(unittest.TestCase):
                 "hotMinimumIndependentSourceFamilies"
             ),
             2,
+        )
+        self.assertEqual(
+            (self.metadata.get("criteria") or {}).get(
+                "veryHotMinimumIndependentSourceFamilies"
+            ),
+            3,
         )
         self.assertEqual(
             (self.metadata.get("criteria") or {}).get("planningLookbackDays"),
@@ -213,7 +219,10 @@ class TodayFeedContractTests(unittest.TestCase):
                     self.assertIsInstance(item.get("corroborationIds"), list)
                     self.assertGreaterEqual(item.get("independentSourceCount", 0), 1)
                     self.assertGreaterEqual(item.get("indicatorKindCount", 0), 1)
-                    self.assertIn(item.get("opportunityLevel"), {"Standard", "Hot"})
+                    self.assertIn(
+                        item.get("opportunityLevel"),
+                        {"Standard", "Hot", "Very Hot"},
+                    )
                     direct = signals[item["directSignalId"]]
                     corroboration = [
                         signals[identifier]
@@ -240,7 +249,13 @@ class TodayFeedContractTests(unittest.TestCase):
                     )
                     self.assertEqual(
                         item["opportunityLevel"],
-                        "Hot" if item["independentSourceCount"] >= 2 else "Standard",
+                        (
+                            "Very Hot"
+                            if item["independentSourceCount"] >= 3
+                            else "Hot"
+                            if item["independentSourceCount"] == 2
+                            else "Standard"
+                        ),
                     )
                     self.assertEqual(
                         {

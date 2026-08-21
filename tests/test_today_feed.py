@@ -10,7 +10,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from today_feed import build_today_feed, canonical_json, default_clock  # noqa: E402
+from today_feed import (  # noqa: E402
+    build_today_feed,
+    canonical_json,
+    default_clock,
+    opportunities_from,
+)
 from validate_today_feed import (  # noqa: E402
     read_today_feed,
     validate_today_feed,
@@ -479,8 +484,63 @@ class TodayFeedTests(unittest.TestCase):
         )
         self.assertEqual(metadata["criteria"]["opportunityGrouping"], "one-per-property")
         self.assertEqual(metadata["criteria"]["hotMinimumIndependentSourceFamilies"], 2)
+        self.assertEqual(
+            metadata["criteria"]["veryHotMinimumIndependentSourceFamilies"],
+            3,
+        )
 
         validate_today_feed(feed, metadata, self.schema)
+
+    def test_opportunity_bands_are_one_two_and_three_plus_source_families(self):
+        property_id = "property:BAND TEST ESHER KT10 0AA|KT100AA"
+
+        def signal(index):
+            family, kind = (
+                ("epc", "epc_observation"),
+                ("planning", "property_planning"),
+                ("land_registry", "sale_age_milestone"),
+                ("fourth_source", "property_planning"),
+            )[index]
+            return {
+                "id": f"today-signal:band-{index}",
+                "rank": 90 - index,
+                "kind": kind,
+                "title": f"Band signal {index}",
+                "fact": f"Observed band signal {index}.",
+                "effectiveDate": f"2026-07-{20 - index:02d}",
+                "datePrecision": "day",
+                "sourceFamily": family,
+                "property": {
+                    "propertyId": property_id,
+                    "address": "BAND TEST, ESHER, KT10 0AA",
+                    "postcode": "KT10 0AA",
+                },
+                "coverage": coverage(family),
+                "limitations": [f"{family} limitation."],
+                "evidence": [{
+                    "evidenceId": f"evidence:band:{index}",
+                    "sourceId": f"source-{index}",
+                    "source": family,
+                    "effectiveDate": f"2026-07-{20 - index:02d}",
+                    "datePrecision": "day",
+                }],
+            }
+
+        for family_count, expected_level in (
+            (1, "Standard"),
+            (2, "Hot"),
+            (3, "Very Hot"),
+            (4, "Very Hot"),
+        ):
+            with self.subTest(family_count=family_count):
+                opportunity = opportunities_from(
+                    [signal(index) for index in range(family_count)]
+                )[0]
+                self.assertEqual(opportunity["independentSourceCount"], family_count)
+                self.assertEqual(opportunity["opportunityLevel"], expected_level)
+                self.assertTrue(
+                    opportunity["title"].startswith(f"{expected_level} opportunity")
+                )
 
     def test_duplicate_planning_reference_prefers_cleaner_canonical_match(self):
         records, _news = self.fixture()

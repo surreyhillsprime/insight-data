@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Build INSIGHT's deterministic, read-only Today evidence feed.
 
-Every signal-bearing property receives one opportunity. A single source family
-is Standard; two or more independent families add the Hot flag. Market News
-remains a separate context feed and cannot create or strengthen an opportunity.
+Every signal-bearing property receives one opportunity. One independent source
+family is Standard, two is Hot, and three or more is Very Hot. Market News stays
+a separate context feed and cannot create or strengthen an opportunity.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 
 SCHEMA_VERSION = 2
-GENERATOR_VERSION = "today-feed-3"
+GENERATOR_VERSION = "today-feed-4"
 TODAY_FEED_NAME = "INSIGHT_TODAY_FEED"
 TODAY_META_NAME = "INSIGHT_TODAY_META"
 LANE_ORDER = ("signals", "opportunities")
@@ -740,12 +740,17 @@ def opportunities_from(
             for item in corroboration
             if clean(item.get("sourceFamily"))
         })
-        level = "Hot" if len(source_families) >= 2 else "Standard"
-        rank = min(100, int(direct.get("rank") or 0) + (5 if level == "Hot" else 0))
+        if len(source_families) >= 3:
+            level = "Very Hot"
+        elif len(source_families) == 2:
+            level = "Hot"
+        else:
+            level = "Standard"
+        rank = min(100, int(direct.get("rank") or 0) + (5 if level != "Standard" else 0))
         evidence = evidence_union(property_signals)
-        if level == "Hot":
+        if level in {"Hot", "Very Hot"}:
             why = (
-                f"This Hot opportunity combines {len(property_signals)} qualifying property signals "
+                f"This {level} opportunity combines {len(property_signals)} qualifying property signals "
                 f"across {len(source_families)} independent indicator families."
             )
         else:
@@ -883,6 +888,7 @@ def build_today_feed(
             "everyQualifyingSignalCreatesPropertyOpportunity": True,
             "opportunityGrouping": "one-per-property",
             "hotMinimumIndependentSourceFamilies": 2,
+            "veryHotMinimumIndependentSourceFamilies": 3,
         },
         "summary": [
             {"id": lane, "label": SUMMARY_LABELS[lane], "count": counts[lane]}
@@ -892,7 +898,7 @@ def build_today_feed(
         "datasetFingerprint": hashlib.sha256(canonical_json(feed).encode("utf-8")).hexdigest(),
         "limitations": [
             "Today is a read-only evidence snapshot; it contains no user-managed fields.",
-            "Every qualifying signal is represented by one property-grouped opportunity; Standard has one source family and Hot has two or more.",
+            "Every qualifying signal is represented by one property-grouped opportunity; Standard has one source family, Hot has two, and Very Hot has three or more.",
             "Year-only source dates remain year-only and are never presented as newly submitted on a specific day.",
             COMMON_LIMITATION,
         ],
