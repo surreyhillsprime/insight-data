@@ -149,8 +149,8 @@ def load_seed_history(path, refresh_days, *, allow_local=False):
     validate_sales_publication(
         source,
         allow_local=allow_local,
-        maximum_age_days=refresh_days,
         allow_unbound_commercial=True,
+        allow_stale=True,
     )
     return assignment(source.read_text(encoding="utf-8"), "SURREY_SALES_HISTORY")
 
