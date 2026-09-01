@@ -41564,10 +41564,11 @@
     },
     "ARLINGTON HOUSE 33A LEIGH HILL ROAD COBHAM||2275000|2026-02-09": {
       "address": "ARLINGTON HOUSE, 33A, LEIGH HILL ROAD, COBHAM",
+      "candidateCount": 0,
       "postcode": "",
-      "reason": "The read operation timed out",
-      "searchedAt": "2026-09-01T10:33:42Z",
-      "status": "error"
+      "reason": "No domestic EPC certificates found for postcode",
+      "searchedAt": "2026-09-01T10:33:59Z",
+      "status": "no_match"
     },
     "ARMADALE LOWER HAMPTON ROAD SUNBURY ON THAMES TW16 5PR|TW165PR|2487500|2023-06-21": {
       "address": "ARMADALE, LOWER HAMPTON ROAD, SUNBURY-ON-THAMES, TW16 5PR",
@@ -107520,6 +107521,6 @@
       "status": "matched"
     }
   },
-  "updatedAt": "2026-09-01T10:33:42Z",
+  "updatedAt": "2026-09-01T10:34:00Z",
   "version": 3
 }
