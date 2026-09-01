@@ -116,6 +116,7 @@ def validate(
     maximum_properties_unavailable=None,
     maximum_age_days=MAX_FRESHNESS_WINDOW_DAYS,
     allow_unbound_commercial=False,
+    allow_stale=False,
 ):
     path = Path(path)
     if path.stat().st_size > MAX_FEED_BYTES:
@@ -285,7 +286,10 @@ def validate(
         effective_maximum_age = freshness_window
         if maximum_age_days > 0:
             effective_maximum_age = min(effective_maximum_age, maximum_age_days)
-        if age_seconds > effective_maximum_age * 86400:
+        # A structurally valid stale publication may be loaded only to
+        # bootstrap its own refresh. All provenance, identity, reconciliation,
+        # and future-timestamp checks above still apply.
+        if not allow_stale and age_seconds > effective_maximum_age * 86400:
             raise ValueError(
                 "Sales-history publication is stale: sourceCheckedAt exceeds "
                 f"{effective_maximum_age} days"

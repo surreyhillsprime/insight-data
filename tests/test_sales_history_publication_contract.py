@@ -24,6 +24,7 @@ from validate_sales_history_feed import (  # noqa: E402
     REDISTRIBUTION_RIGHTS,
     SOURCE_LICENCE_URL,
     SOURCE_NAME,
+    assignment,
     base_feed_identity,
     read_base_feed,
     sha256_json,
@@ -138,6 +139,18 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
 
     def write_sales(self, assignments):
         write_assignments(self.sales_path, assignments)
+
+    def make_seed_stale(self, assignments, days_ago=60):
+        stale_at = timestamp(days_ago=days_ago)
+        histories = assignments["SURREY_SALES_HISTORY"]
+        complete = copy.deepcopy(histories[self.property_one])
+        complete["updatedAt"] = stale_at
+        histories[self.property_one] = complete
+        histories["txn-one"] = complete
+        metadata = assignments["SURREY_SALES_HISTORY_META"]
+        metadata["sourceCheckedAt"] = stale_at
+        metadata["historyFingerprint"] = sha256_json(histories)
+        return stale_at
 
     def test_accepts_exact_canonical_and_transaction_identity_universe(self):
         self.write_sales(self.assignments())
@@ -338,8 +351,9 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
             )
         )
 
-    def test_seed_feed_is_validated_before_records_can_be_reused(self):
+    def test_stale_seed_with_tampered_history_is_rejected(self):
         assignments = self.assignments()
+        self.make_seed_stale(assignments)
         changed = copy.deepcopy(
             assignments["SURREY_SALES_HISTORY"][self.property_one]
         )
@@ -356,8 +370,9 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         history = load_seed_history(self.sales_path, 28)
         self.assertEqual(history[self.property_one]["coverageStatus"], "complete")
 
-    def test_unbound_seed_rejects_a_forged_base_identity(self):
+    def test_stale_unbound_seed_rejects_a_forged_base_identity(self):
         assignments = self.assignments()
+        self.make_seed_stale(assignments)
         assignments["SURREY_SALES_HISTORY_META"]["baseFeedFingerprint"] = "0" * 64
         assignments["SURREY_SALES_HISTORY_META"]["historyFingerprint"] = sha256_json(
             assignments["SURREY_SALES_HISTORY"]
@@ -365,6 +380,86 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         self.write_sales(assignments)
         with self.assertRaisesRegex(ValueError, "transaction aliases"):
             load_seed_history(self.sales_path, 28)
+
+    def test_valid_stale_seed_triggers_source_refresh(self):
+        assignments = self.assignments()
+        stale_at = self.make_seed_stale(assignments, days_ago=29)
+        self.write_sales(assignments)
+        with self.assertRaisesRegex(ValueError, "stale"):
+            validate(
+                self.sales_path,
+                base_feed=self.base_path,
+                maximum_age_days=28,
+            )
+        current_base = self.root / "current-base.js"
+        output = self.root / "aligned-sales.js"
+        cache = self.root / "cache.json"
+        write_assignments(
+            current_base,
+            {
+                "SURREY_LAND_REG_TRANSACTIONS": [{
+                    "id": "txn-one",
+                    "propertyRecordId": self.property_one,
+                    "address": "1 TEST ROAD",
+                    "postcode": "KT10 0AA",
+                    "date": "2025-01-02",
+                    "price": 2_000_000,
+                    "propertyType": "Detached",
+                    "category": "A",
+                }]
+            },
+        )
+        refreshed_row = {
+            "tx": "hmlr-refreshed",
+            "paon": "1",
+            "street": "TEST ROAD",
+            "postcode": "KT10 0AA",
+            "price": "2000000",
+            "date": "2025-01-02",
+            "propertyType": (
+                "http://landregistry.data.gov.uk/def/common/detached"
+            ),
+            "category": (
+                "http://landregistry.data.gov.uk/def/ppi/"
+                "standard-price-paid-transaction"
+            ),
+        }
+        argv = [
+            "collect_title_history.py",
+            "--input", str(current_base),
+            "--output", str(output),
+            "--cache", str(cache),
+            "--seed-feed", str(self.sales_path),
+            "--deployment-mode", "commercial",
+            "--refresh-days", "28",
+            "--workers", "1",
+            "--batch-size", "1",
+            "--pause", "0",
+        ]
+        with patch.object(sys, "argv", argv), patch(
+            "collect_title_history.fetch_batch",
+            return_value={"KT100AA": [refreshed_row]},
+        ) as fetch:
+            collect_title_history_main()
+
+        fetch.assert_called_once_with(["KT10 0AA"], 90)
+        text = output.read_text(encoding="utf-8")
+        histories = assignment(text, "SURREY_SALES_HISTORY")
+        metadata = assignment(text, "SURREY_SALES_HISTORY_META")
+        self.assertEqual(
+            histories[self.property_one]["transactions"][0]["id"],
+            "hmlr-refreshed",
+        )
+        self.assertNotEqual(histories[self.property_one]["updatedAt"], stale_at)
+        self.assertNotEqual(metadata["sourceCheckedAt"], stale_at)
+        validate(
+            output,
+            base_feed=current_base,
+            minimum_properties_with_history=1,
+            minimum_transactions=1,
+            maximum_properties_unavailable=0,
+            maximum_age_days=1,
+        )
 
     def test_valid_prior_publication_beats_an_incomplete_fresh_cache(self):
         self.write_sales(self.assignments())
