@@ -278,8 +278,47 @@ jobs:
             git push origin "HEAD:$STAGING_BRANCH"
           fi
 
-  refresh-sales-history:
+  reconcile-inspire-coverage:
     needs: align-expanded-context
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out committed expanded context
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.STAGING_BRANCH }}
+          fetch-depth: 0
+
+      - name: Synchronise staging branch
+        run: |
+          git fetch origin "$STAGING_BRANCH"
+          git checkout -B "$STAGING_BRANCH" "origin/$STAGING_BRANCH"
+
+      - name: Reconcile INSPIRE coverage to the staged property universe
+        run: |
+          PYTHONPATH=scripts python3 scripts/reconcile_inspire_parcel_coverage.py
+          PYTHONPATH=scripts python3 scripts/validate_inspire_parcels.py
+          PYTHONPATH=scripts python3 scripts/validate_inspire_json_schemas.py
+
+      - name: Commit reconciled INSPIRE coverage to staging
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git pull --rebase --autostash origin "$STAGING_BRANCH"
+          PYTHONPATH=scripts python3 scripts/reconcile_inspire_parcel_coverage.py
+          PYTHONPATH=scripts python3 scripts/validate_inspire_parcels.py
+          PYTHONPATH=scripts python3 scripts/validate_inspire_json_schemas.py
+          git add outputs/inspire-parcels.js
+          if git diff --cached --quiet; then
+            echo "INSPIRE coverage is already aligned."
+          else
+            git commit -m "Align INSPIRE coverage with monthly property data"
+            git push origin "HEAD:$STAGING_BRANCH"
+          fi
+
+  refresh-sales-history:
+    needs: reconcile-inspire-coverage
     runs-on: ubuntu-latest
     timeout-minutes: 360
 
@@ -410,6 +449,8 @@ jobs:
         run: |
           validate_release() {
             PYTHONPATH=scripts python3 -m unittest discover -s tests
+            PYTHONPATH=scripts python3 scripts/validate_inspire_parcels.py
+            PYTHONPATH=scripts python3 scripts/validate_inspire_json_schemas.py
             python3 scripts/build_heritage_address_ledger.py --check
             python3 scripts/enrich_listed_buildings.py --validate-only
             python3 scripts/check_data_completeness.py --strict-metadata

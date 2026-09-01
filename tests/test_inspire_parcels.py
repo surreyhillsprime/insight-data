@@ -22,6 +22,7 @@ from collect_inspire_parcels import (
     translated_signed_area,
 )
 from insight_data_utils import read_js
+from reconcile_inspire_parcel_coverage import reconcile_feed
 from validate_inspire_parcels import (
     feed_failures,
     parse_feed,
@@ -142,11 +143,13 @@ class InspirePublicationTests(unittest.TestCase):
         cls.registry_path = ROOT / "config" / "inspire-parcel-associations.json"
         cls.authorities_path = ROOT / "config" / "inspire-authorities.json"
         cls.transitions_path = ROOT / "config" / "inspire-association-transitions.json"
+        cls.feed_schema_path = ROOT / "config" / "inspire-parcels.schema.json"
         cls.transactions_path = ROOT / "outputs" / "surrey-transactions.js"
         cls.feed = parse_feed(cls.feed_path)
         cls.registry = json.loads(cls.registry_path.read_text())
         cls.authorities = json.loads(cls.authorities_path.read_text())
         cls.transitions = json.loads(cls.transitions_path.read_text())["records"]
+        cls.feed_schema = json.loads(cls.feed_schema_path.read_text())
         transactions, _summary, metadata = read_js(cls.transactions_path)
         cls.canonical_ids = {row["propertyRecordId"] for row in transactions}
         cls.retired_property_ids = retired_property_ids_from_metadata(metadata)
@@ -291,19 +294,202 @@ class InspirePublicationTests(unittest.TestCase):
         expanded = set(self.canonical_ids) | {extra}
         self.assertEqual(registry_failures(self.registry, expanded), [])
         coverage = coverage_metadata(expanded, self.feed["associationsByProperty"])
-        self.assertEqual(coverage["canonicalProperties"], 3763)
+        self.assertEqual(coverage["canonicalProperties"], len(expanded))
         self.assertEqual(coverage["associatedProperties"], 3228)
-        self.assertEqual(coverage["unassociatedProperties"], 535)
+        self.assertEqual(
+            coverage["unassociatedProperties"],
+            len(expanded) - len(self.feed["associationsByProperty"]),
+        )
         self.assertLess(
             coverage["coveragePercent"],
             self.feed["coverage"]["coveragePercent"],
         )
 
-    def test_reviewed_identity_deduplication_may_reduce_the_live_denominator(self):
-        baseline = self.registry["approvalBaseline"]
-
-        self.assertLess(len(self.canonical_ids), baseline["canonicalProperties"])
+    def test_live_denominator_is_independent_of_the_historical_approval_baseline(self):
+        self.assertEqual(self.registry["approvalBaseline"]["canonicalProperties"], 3766)
+        self.assertEqual(
+            self.feed["coverage"]["canonicalProperties"],
+            len(self.canonical_ids),
+        )
         self.assertEqual(registry_failures(self.registry, self.canonical_ids), [])
+
+    def test_coverage_reconciliation_preserves_audited_evidence_and_is_idempotent(self):
+        extra = "property:99 NEW ROAD GUILDFORD GU1 9ZZ|GU19ZZ"
+        expanded = set(self.canonical_ids) | {extra}
+        registry_sha256 = hashlib.sha256(self.registry_path.read_bytes()).hexdigest()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "inspire-parcels.js"
+            path.write_bytes(self.feed_path.read_bytes())
+            before = parse_feed(path)
+
+            changed, reconciled = reconcile_feed(
+                path,
+                canonical_ids=expanded,
+                registry=self.registry,
+                authorities=self.authorities,
+                feed_schema=self.feed_schema,
+                registry_sha256=registry_sha256,
+                configured_transitions=self.transitions,
+                retired_property_ids=self.retired_property_ids,
+                publication_time="2026-08-12T12:00:00Z",
+            )
+
+            self.assertTrue(changed)
+            self.assertEqual(
+                reconciled["coverage"],
+                coverage_metadata(expanded, before["associationsByProperty"]),
+            )
+            for key in (
+                "schemaVersion",
+                "canonicalIdentityMode",
+                "associationSemantics",
+                "source",
+                "associationTransitions",
+                "associationsByProperty",
+                "parcelsById",
+            ):
+                self.assertEqual(reconciled[key], before[key])
+            self.assertEqual(
+                reconciled["source"]["sourceSnapshot"],
+                before["source"]["sourceSnapshot"],
+            )
+            self.assertNotEqual(reconciled["releaseId"], before["releaseId"])
+            parsed, _raw_core, digest = parse_runtime(
+                path,
+                "window.INSIGHT_INSPIRE_PARCELS",
+            )
+            self.assertEqual(parsed, reconciled)
+            self.assertTrue(reconciled["releaseId"].endswith("-" + digest))
+            published_bytes = path.read_bytes()
+
+            changed_again, same_feed = reconcile_feed(
+                path,
+                canonical_ids=expanded,
+                registry=self.registry,
+                authorities=self.authorities,
+                feed_schema=self.feed_schema,
+                registry_sha256=registry_sha256,
+                configured_transitions=self.transitions,
+                retired_property_ids=self.retired_property_ids,
+                publication_time="2026-08-13T12:00:00Z",
+            )
+
+            self.assertFalse(changed_again)
+            self.assertEqual(same_feed, reconciled)
+            self.assertEqual(path.read_bytes(), published_bytes)
+
+    def test_coverage_reconciliation_blocks_non_coverage_contract_failures(self):
+        extra = "property:99 NEW ROAD GUILDFORD GU1 9ZZ|GU19ZZ"
+        expanded = set(self.canonical_ids) | {extra}
+        registry_sha256 = hashlib.sha256(self.registry_path.read_bytes()).hexdigest()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "inspire-parcels.js"
+            core = {
+                key: deepcopy(value)
+                for key, value in self.feed.items()
+                if key not in {"generatedAt", "releaseId"}
+            }
+            core["source"]["displayCrs"] = "EPSG:3857"
+            body, _release_id = finalise_body(
+                core,
+                "2026-08-12T12:00:00Z",
+                "inspire-parcels",
+                core["source"]["sourceSnapshot"].removeprefix("hmlr-inspire-"),
+            )
+            path.write_text(
+                "window.INSIGHT_INSPIRE_PARCELS = " + body + ";\n",
+                encoding="utf-8",
+            )
+            invalid_bytes = path.read_bytes()
+
+            with self.assertRaisesRegex(ValueError, "source/display CRS"):
+                reconcile_feed(
+                    path,
+                    canonical_ids=expanded,
+                    registry=self.registry,
+                    authorities=self.authorities,
+                    feed_schema=self.feed_schema,
+                    registry_sha256=registry_sha256,
+                    configured_transitions=self.transitions,
+                    retired_property_ids=self.retired_property_ids,
+                    publication_time="2026-08-13T12:00:00Z",
+                )
+            self.assertEqual(path.read_bytes(), invalid_bytes)
+
+    def test_coverage_reconciliation_blocks_unknown_associations(self):
+        contracted = set(self.canonical_ids)
+        contracted.remove(next(iter(self.feed["associationsByProperty"])))
+        registry_sha256 = hashlib.sha256(self.registry_path.read_bytes()).hexdigest()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "inspire-parcels.js"
+            path.write_bytes(self.feed_path.read_bytes())
+            original_bytes = path.read_bytes()
+
+            with self.assertRaisesRegex(ValueError, "unknown canonical property"):
+                reconcile_feed(
+                    path,
+                    canonical_ids=contracted,
+                    registry=self.registry,
+                    authorities=self.authorities,
+                    feed_schema=self.feed_schema,
+                    registry_sha256=registry_sha256,
+                    configured_transitions=self.transitions,
+                    retired_property_ids=self.retired_property_ids,
+                    publication_time="2026-08-13T12:00:00Z",
+                )
+            self.assertEqual(path.read_bytes(), original_bytes)
+
+    def test_coverage_reconciliation_blocks_schema_only_defects(self):
+        extra = "property:99 NEW ROAD GUILDFORD GU1 9ZZ|GU19ZZ"
+        expanded = set(self.canonical_ids) | {extra}
+        registry_sha256 = hashlib.sha256(self.registry_path.read_bytes()).hexdigest()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "inspire-parcels.js"
+            core = {
+                key: deepcopy(value)
+                for key, value in self.feed.items()
+                if key not in {"generatedAt", "releaseId"}
+            }
+            core["debug"] = {"privateNotes": "must never be carried into publication"}
+            body, _release_id = finalise_body(
+                core,
+                "2026-08-12T12:00:00Z",
+                "inspire-parcels",
+                core["source"]["sourceSnapshot"].removeprefix("hmlr-inspire-"),
+            )
+            path.write_text(
+                "window.INSIGHT_INSPIRE_PARCELS = " + body + ";\n",
+                encoding="utf-8",
+            )
+            invalid_bytes = path.read_bytes()
+
+            with self.assertRaisesRegex(ValueError, "published JSON Schema"):
+                reconcile_feed(
+                    path,
+                    canonical_ids=expanded,
+                    registry=self.registry,
+                    authorities=self.authorities,
+                    feed_schema=self.feed_schema,
+                    registry_sha256=registry_sha256,
+                    configured_transitions=self.transitions,
+                    retired_property_ids=self.retired_property_ids,
+                    publication_time="2026-08-13T12:00:00Z",
+                )
+            self.assertEqual(path.read_bytes(), invalid_bytes)
+
+    def test_monthly_property_refresh_reconciles_inspire_before_sales(self):
+        workflow = (ROOT / ".github/workflows/monthly-property-refresh.yml").read_text()
+        reconcile_job = workflow.index("reconcile-inspire-coverage:")
+        sales_job = workflow.index("refresh-sales-history:")
+        self.assertLess(reconcile_job, sales_job)
+        self.assertIn(
+            "needs: reconcile-inspire-coverage",
+            workflow[sales_job:],
+        )
+        reconciliation = workflow[reconcile_job:sales_job]
+        self.assertIn("scripts/reconcile_inspire_parcel_coverage.py", reconciliation)
+        self.assertIn("scripts/validate_inspire_parcels.py", reconciliation)
+        self.assertIn("git add outputs/inspire-parcels.js", reconciliation)
 
     def test_raw_core_mutation_changes_release_digest(self):
         core = {key: deepcopy(value) for key, value in self.feed.items() if key not in {"generatedAt", "releaseId"}}
