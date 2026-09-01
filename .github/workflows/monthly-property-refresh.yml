@@ -318,8 +318,9 @@ jobs:
           --seed-feed outputs/sales-history.js
           --deployment-mode commercial
           --refresh-days 28
-          --workers 3
+          --workers 1
           --batch-size 8
+          --pause 1
 
       - name: Validate sales history against the staged property universe
         run: >-

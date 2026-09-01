@@ -5,17 +5,21 @@ import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, call, patch
+from urllib.error import HTTPError
 
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from collect_title_history import (  # noqa: E402
+    RequestPacer,
     cache_coverage,
+    fetch_batch,
     load_seed_history,
     main as collect_title_history_main,
     migrate_existing_history,
+    retry_wait_seconds,
     seed_record_is_fresh,
 )
 from validate_sales_history_feed import (  # noqa: E402
@@ -442,7 +446,9 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         ) as fetch:
             collect_title_history_main()
 
-        fetch.assert_called_once_with(["KT10 0AA"], 90)
+        fetch.assert_called_once()
+        self.assertEqual(fetch.call_args.args, (["KT10 0AA"], 90))
+        self.assertIsInstance(fetch.call_args.kwargs["request_pacer"], RequestPacer)
         text = output.read_text(encoding="utf-8")
         histories = assignment(text, "SURREY_SALES_HISTORY")
         metadata = assignment(text, "SURREY_SALES_HISTORY_META")
@@ -523,6 +529,76 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         self.assertEqual(status, "complete")
         self.assertEqual(rows, [{"tx": "newly-fetched-row"}])
         self.assertTrue(checked_at)
+
+    def test_fetch_batch_retries_rate_limit_and_honours_retry_after(self):
+        rate_limit = HTTPError(
+            url="https://landregistry.example/query",
+            code=429,
+            msg="Too Many Requests",
+            hdrs={"Retry-After": "7"},
+            fp=None,
+        )
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps({
+            "results": {"bindings": []}
+        }).encode("utf-8")
+        with patch(
+            "collect_title_history.urllib.request.urlopen",
+            side_effect=[rate_limit, response],
+        ) as urlopen, patch("collect_title_history.time.sleep") as sleep:
+            result = fetch_batch(["KT10 0AA"], 90)
+
+        self.assertEqual(result, {"KT100AA": []})
+        self.assertEqual(urlopen.call_count, 2)
+        sleep.assert_called_once_with(7.0)
+
+    def test_fetch_batch_exhausts_bounded_rate_limit_retries(self):
+        errors = [
+            HTTPError(
+                url="https://landregistry.example/query",
+                code=429,
+                msg="Too Many Requests",
+                hdrs={},
+                fp=None,
+            )
+            for _ in range(3)
+        ]
+        with patch(
+            "collect_title_history.urllib.request.urlopen",
+            side_effect=errors,
+        ) as urlopen, patch("collect_title_history.time.sleep") as sleep:
+            with self.assertRaises(HTTPError):
+                fetch_batch(["KT10 0AA"], 90, retries=2)
+
+        self.assertEqual(urlopen.call_count, 3)
+        self.assertEqual(sleep.call_count, 2)
+
+    def test_request_pacer_spaces_starts_across_shared_workers(self):
+        pacer = RequestPacer(1)
+        with patch(
+            "collect_title_history.time.monotonic",
+            side_effect=[10.0, 10.25, 11.5, 11.75, 12.5],
+        ), patch("collect_title_history.time.sleep") as sleep:
+            pacer.wait()
+            pacer.wait()
+            pacer.wait()
+
+        self.assertEqual(sleep.call_args_list, [call(0.75), call(0.75)])
+
+    def test_request_pacer_applies_server_cooldown_to_shared_workers(self):
+        pacer = RequestPacer(1)
+        with patch(
+            "collect_title_history.time.monotonic",
+            side_effect=[10.0, 10.25, 17.0],
+        ), patch("collect_title_history.time.sleep") as sleep:
+            pacer.defer(7)
+            pacer.wait()
+
+        sleep.assert_called_once_with(6.75)
+
+    def test_rate_limit_wait_is_bounded_with_safe_fallback(self):
+        self.assertEqual(retry_wait_seconds("3600", 0), 30)
+        self.assertEqual(retry_wait_seconds(None, 0), 4)
 
     def test_unavailable_property_regression_is_fail_closed(self):
         self.write_sales(self.assignments())
@@ -615,6 +691,8 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
             3,
         )
         self.assertIn("--refresh-days 28", sales_workflow)
+        self.assertIn("--workers 1", sales_workflow)
+        self.assertIn("--pause 1", sales_workflow)
         self.assertIn("--seed-feed outputs/sales-history.js", sales_workflow)
         self.assertIn("check_data_completeness.py --base-only", sales_workflow)
         preflight_index = sales_workflow.index(
@@ -622,6 +700,12 @@ class SalesHistoryPublicationContractTests(unittest.TestCase):
         )
         producer_index = sales_workflow.index("collect_title_history.py")
         self.assertLess(preflight_index, producer_index)
+
+        monthly = (
+            ROOT / ".github" / "workflows" / "monthly-property-refresh.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("--workers 1", monthly)
+        self.assertIn("--pause 1", monthly)
 
         daily = (
             ROOT / ".github" / "workflows" / "data-completeness.yml"
