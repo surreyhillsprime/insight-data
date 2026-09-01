@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "collectedAt": "2026-08-31T21:44:19Z",
+  "collectedAt": "2026-09-01T09:43:30Z",
   "timeZone": "Europe/London",
   "policy": {
     "bankRate": 3.75,
-    "observationDate": "2026-08-27",
+    "observationDate": "2026-08-28",
     "rateSeriesId": "IUDBEDR",
     "rateDownloadUrl": "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom=01/Jan/2024&Dateto=now&SeriesCodes=IUDBEDR&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N",
     "nextDecisionDate": "2026-09-17",
@@ -58,12 +58,14 @@
     "londonAnnualChange": -2.5,
     "londonPreviousAnnualChange": -3.1,
     "observationMonth": "2026-06",
-    "retrievedAt": "2026-08-31T21:44:19Z",
+    "retrievedAt": "2026-09-01T09:43:30Z",
     "provisional": true,
     "sourceUrl": "https://landregistry.data.gov.uk/data/ukhpi/region/united-kingdom/month.json?_pageSize=2&_sort=-refPeriodStart"
   },
   "collectionStatus": {
-    "mode": "live",
-    "staleSources": []
+    "mode": "last-known-good",
+    "staleSources": [
+      "bank-of-england-iumbv34"
+    ]
   }
 }
