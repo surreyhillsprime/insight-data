@@ -3629,6 +3629,19 @@
       "status": "matched",
       "updatedAt": "2026-08-31T15:09:08Z"
     },
+    "GU13NW": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Waterden Road",
+          "constraintCount": 1,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-09-01T10:36:11Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-09-01T10:36:11Z"
+    },
     "GU13PB": {
       "data": {
         "planningConstraints": {
@@ -5223,6 +5236,19 @@
       },
       "status": "matched",
       "updatedAt": "2026-08-31T15:30:26Z"
+    },
+    "GU248HG": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-09-01T10:36:13Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-09-01T10:36:13Z"
     },
     "GU248HN": {
       "data": {
@@ -10445,6 +10471,19 @@
       "status": "no_match",
       "updatedAt": "2026-08-31T15:05:54Z"
     },
+    "GU98JG": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: GREAT AUSTINS FARNHAM",
+          "constraintCount": 1,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-09-01T10:36:12Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-09-01T10:36:12Z"
+    },
     "GU98JJ": {
       "data": {
         "planningConstraints": {
@@ -10769,6 +10808,19 @@
       },
       "status": "matched",
       "updatedAt": "2026-08-31T15:07:44Z"
+    },
+    "KT108LA": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: West End",
+          "constraintCount": 1,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-09-01T10:36:09Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-09-01T10:36:09Z"
     },
     "KT108LF": {
       "data": {
@@ -16732,6 +16784,18 @@
       "status": "matched",
       "updatedAt": "2026-08-31T15:07:42Z"
     },
+    "KT212EQ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-09-01T10:36:12Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-09-01T10:36:12Z"
+    },
     "KT212ER": {
       "data": {
         "planningConstraints": {
@@ -17638,6 +17702,18 @@
       },
       "status": "no_match",
       "updatedAt": "2026-08-31T15:30:32Z"
+    },
+    "KT227HT": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-09-01T10:36:10Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-09-01T10:36:10Z"
     },
     "KT227UT": {
       "data": {
@@ -19545,11 +19621,11 @@
           "constraintCount": 0,
           "lookupStatus": "successful",
           "source": "Planning Data API",
-          "updatedAt": "2026-07-22T10:40:32Z"
+          "updatedAt": "2026-09-01T10:36:13Z"
         }
       },
       "status": "no_match",
-      "updatedAt": "2026-07-22T10:40:32Z"
+      "updatedAt": "2026-09-01T10:36:13Z"
     },
     "RH20LD": {
       "data": {
@@ -20688,6 +20764,18 @@
       "status": "no_match",
       "updatedAt": "2026-08-31T15:09:15Z"
     },
+    "RH80EN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-09-01T10:36:10Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-09-01T10:36:10Z"
+    },
     "RH80ES": {
       "data": {
         "planningConstraints": {
@@ -21096,6 +21184,18 @@
       },
       "status": "matched",
       "updatedAt": "2026-08-31T15:16:11Z"
+    },
+    "SM72EB": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-09-01T10:36:11Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-09-01T10:36:11Z"
     },
     "SM73EL": {
       "data": {
@@ -41913,6 +42013,6 @@
       "updatedAt": "2026-08-02T15:24:36Z"
     }
   },
-  "updatedAt": "2026-08-31T15:30:32Z",
+  "updatedAt": "2026-09-01T10:36:15Z",
   "version": 1
 }

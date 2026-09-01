@@ -26,8 +26,8 @@
     "Use official NHLE geometry to refine map location only after property identity is confirmed.",
     "No direct NHLE match is not legal proof that a property is unlisted or outside listed-building curtilage."
   ],
-  "canonicalPropertyCount": 3762,
-  "canonicalPropertyDigest": "3355e3ed94aa0dd995ecd53b05cb70e66f140ae74df34504a4e3370fc9e05190",
+  "canonicalPropertyCount": 3785,
+  "canonicalPropertyDigest": "a72842713cb030bed392ca7bfd5ec8a08e9fe648bc642763215e510fa15fe4bd",
   "officialAddressRecordsScreened": 6624,
   "officialUniqueListEntriesScreened": 6624,
   "candidatePropertyCount": 1415,
@@ -42,7 +42,7 @@
   "confirmedPairDigest": "d61394c612481fcedbf06f4215d87036ce73a5273a71602ca8346465393a61f4",
   "documentedNoDirectPropertyCount": 44,
   "genericNoDirectPropertyCount": 3555,
-  "unknownPropertyCount": 21,
+  "unknownPropertyCount": 44,
   "confirmedMappings": [
     {
       "propertyRecordId": "property:1 THE MANSION COBHAM PARK COBHAM KT11 3LE|KT113LE",
@@ -2649,12 +2649,75 @@
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
+      "propertyRecordId": "property:12 GREAT AUSTINS FARNHAM GU9 8JG|GU98JG",
+      "address": "12, GREAT AUSTINS, FARNHAM, GU9 8JG",
+      "postcode": "GU9 8JG",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:15 HIGHLANDS ROAD REIGATE RH2 0LA|RH20LA",
+      "address": "15, HIGHLANDS ROAD, REIGATE, RH2 0LA",
+      "postcode": "RH2 0LA",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:17 CHARGATE CLOSE HERSHAM WALTON ON THAMES KT12 5DW|KT125DW",
+      "address": "17, CHARGATE CLOSE, HERSHAM, WALTON-ON-THAMES, KT12 5DW",
+      "postcode": "KT12 5DW",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:17 LITTLEWORTH ROAD ESHER KT10 9PD|KT109PD",
+      "address": "17, LITTLEWORTH ROAD, ESHER, KT10 9PD",
+      "postcode": "KT10 9PD",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:19 AUSTEN ROAD GUILDFORD GU1 3NW|GU13NW",
+      "address": "19, AUSTEN ROAD, GUILDFORD, GU1 3NW",
+      "postcode": "GU1 3NW",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:20 WATER LANE COBHAM KT11 2PB|KT112PB",
       "address": "20, WATER LANE, COBHAM, KT11 2PB",
       "postcode": "KT11 2PB",
       "listEntryNumbers": [],
       "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
       "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:20 WEST END LANE ESHER KT10 8LA|KT108LA",
+      "address": "20, WEST END LANE, ESHER, KT10 8LA",
+      "postcode": "KT10 8LA",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:3 CLIFFORD MANOR ROAD GUILDFORD GU4 8AG|GU48AG",
+      "address": "3, CLIFFORD MANOR ROAD, GUILDFORD, GU4 8AG",
+      "postcode": "GU4 8AG",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
@@ -2667,12 +2730,30 @@
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
+      "propertyRecordId": "property:4 ASHCROFT PARK COBHAM KT11 2DN|KT112DN",
+      "address": "4, ASHCROFT PARK, COBHAM, KT11 2DN",
+      "postcode": "KT11 2DN",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:5 TORLAND DRIVE OXSHOTT LEATHERHEAD KT22 0SA|KT220SA",
       "address": "5, TORLAND DRIVE, OXSHOTT, LEATHERHEAD, KT22 0SA",
       "postcode": "KT22 0SA",
       "listEntryNumbers": [],
       "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
       "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:5 WOODSIDE ROAD COBHAM KT11 2QR|KT112QR",
+      "address": "5, WOODSIDE ROAD, COBHAM, KT11 2QR",
+      "postcode": "KT11 2QR",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
@@ -2694,12 +2775,39 @@
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
+      "propertyRecordId": "property:7 PIT FARM ROAD GUILDFORD GU1 2JH|GU12JH",
+      "address": "7, PIT FARM ROAD, GUILDFORD, GU1 2JH",
+      "postcode": "GU1 2JH",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:77 MASSETTS ROAD HORLEY RH6 7EB|RH67EB",
       "address": "77, MASSETTS ROAD, HORLEY, RH6 7EB",
       "postcode": "RH6 7EB",
       "listEntryNumbers": [],
       "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
       "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:9 PELHAMS WALK ESHER KT10 8QA|KT108QA",
+      "address": "9, PELHAMS WALK, ESHER, KT10 8QA",
+      "postcode": "KT10 8QA",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:9 ST JOHNS AVENUE LEATHERHEAD KT22 7HT|KT227HT",
+      "address": "9, ST JOHNS AVENUE, LEATHERHEAD, KT22 7HT",
+      "postcode": "KT22 7HT",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
@@ -2730,6 +2838,15 @@
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
+      "propertyRecordId": "property:FLAT 9 KINGSDOWN CASTLE HILL FARNHAM GU9 0AD|GU90AD",
+      "address": "FLAT 9, KINGSDOWN, CASTLE HILL, FARNHAM, GU9 0AD",
+      "postcode": "GU9 0AD",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:HAVANA HOUSE 2 CRANLEY ROAD HERSHAM WALTON ON THAMES KT12 5BP|KT125BP",
       "address": "HAVANA HOUSE, 2, CRANLEY ROAD, HERSHAM, WALTON-ON-THAMES, KT12 5BP",
       "postcode": "KT12 5BP",
@@ -2745,6 +2862,15 @@
       "listEntryNumbers": [],
       "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
       "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:LAUREL BANK BOURNE GROVE LOWER BOURNE FARNHAM GU10 3QT|GU103QT",
+      "address": "LAUREL BANK, BOURNE GROVE, LOWER BOURNE, FARNHAM, GU10 3QT",
+      "postcode": "GU10 3QT",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
@@ -2766,6 +2892,24 @@
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
+      "propertyRecordId": "property:MEADCROFT GRENVILLE ROAD SHACKLEFORD GODALMING GU8 6AX|GU86AX",
+      "address": "MEADCROFT, GRENVILLE ROAD, SHACKLEFORD, GODALMING, GU8 6AX",
+      "postcode": "GU8 6AX",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:MULBERRY LODGE KENT HATCH ROAD OXTED RH8 0SZ|RH80SZ",
+      "address": "MULBERRY LODGE, KENT HATCH ROAD, OXTED, RH8 0SZ",
+      "postcode": "RH8 0SZ",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:NORTH DOWNS HOUSE THE RIDGE WOLDINGHAM CATERHAM CR3 7AH|CR37AH",
       "address": "NORTH DOWNS HOUSE, THE RIDGE, WOLDINGHAM, CATERHAM, CR3 7AH",
       "postcode": "CR3 7AH",
@@ -2781,6 +2925,42 @@
       "listEntryNumbers": [],
       "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
       "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:RAVENS POINT TOR LANE WEYBRIDGE KT13 0NS|KT130NS",
+      "address": "RAVENS POINT, TOR LANE, WEYBRIDGE, KT13 0NS",
+      "postcode": "KT13 0NS",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:SHARDELOES ASHTEAD WOODS ROAD ASHTEAD KT21 2EQ|KT212EQ",
+      "address": "SHARDELOES, ASHTEAD WOODS ROAD, ASHTEAD, KT21 2EQ",
+      "postcode": "KT21 2EQ",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:SKERRYVORE UVEDALE ROAD OXTED RH8 0EN|RH80EN",
+      "address": "SKERRYVORE, UVEDALE ROAD, OXTED, RH8 0EN",
+      "postcode": "RH8 0EN",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:SPRINGACRES SPRING WOODS VIRGINIA WATER GU25 4PW|GU254PW",
+      "address": "SPRINGACRES, SPRING WOODS, VIRGINIA WATER, GU25 4PW",
+      "postcode": "GU25 4PW",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
@@ -2811,12 +2991,39 @@
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
+      "propertyRecordId": "property:WENTWORTH LODGE PORTNALL RISE VIRGINIA WATER GU25 4JZ|GU254JZ",
+      "address": "WENTWORTH LODGE, PORTNALL RISE, VIRGINIA WATER, GU25 4JZ",
+      "postcode": "GU25 4JZ",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:WILJOY 32 GARRATTS LANE BANSTEAD SM7 2EB|SM72EB",
+      "address": "WILJOY, 32, GARRATTS LANE, BANSTEAD, SM7 2EB",
+      "postcode": "SM7 2EB",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
       "propertyRecordId": "property:WOODHAY WHITE LANE GUILDFORD GU4 8PU|GU48PU",
       "address": "WOODHAY, WHITE LANE, GUILDFORD, GU4 8PU",
       "postcode": "GU4 8PU",
       "listEntryNumbers": [],
       "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
       "reviewedAt": "2026-08-02",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
+    },
+    {
+      "propertyRecordId": "property:WOODLANDS RYDE CHOBHAM PARK LANE CHOBHAM WOKING GU24 8HG|GU248HG",
+      "address": "WOODLANDS RYDE, CHOBHAM PARK LANE, CHOBHAM, WOKING, GU24 8HG",
+      "postcode": "GU24 8HG",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     }
   ],
@@ -7830,10 +8037,10 @@
   ],
   "universeReconciliation": {
     "schemaVersion": 1,
-    "reconciledAt": "2026-08-11",
-    "previousPropertyCount": 3766,
-    "currentPropertyCount": 3762,
-    "addedPropertyCount": 0,
+    "reconciledAt": "2026-09-01",
+    "previousPropertyCount": 3762,
+    "currentPropertyCount": 3785,
+    "addedPropertyCount": 23,
     "removedPropertyCount": 0,
     "sourceAddressVariantCount": 379,
     "identityAliasesCollapsed": 205,
