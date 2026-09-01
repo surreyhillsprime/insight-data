@@ -8,15 +8,19 @@ It does not represent the legal title register, ownership, deeds, or charges.
 
 import argparse
 import json
+import math
 import os
 import re
 import tempfile
+import threading
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 from insight_data_utils import DEFAULT_INPUT_JS, clean, load_cache, normalise_postcode, read_js, utc_now, write_cache
@@ -50,6 +54,63 @@ DEFAULT_LOCAL_ROOT = Path(os.environ.get("INSIGHT_LOCAL_DATA_ROOT", DEFAULT_SUPP
 DEFAULT_OUTPUT = DEFAULT_LOCAL_ROOT / "sales-history.js"
 DEFAULT_CACHE = DEFAULT_LOCAL_ROOT / "cache" / "title-history-cache.json"
 LOCAL_MARKER = ".insight-local-only"
+RETRYABLE_HTTP_STATUS_CODES = frozenset({408, 429, 500, 502, 503, 504})
+DEFAULT_FETCH_RETRIES = 2
+MAX_RETRY_WAIT_SECONDS = 30
+
+
+class RequestPacer:
+    """Space request starts across every worker sharing this pacer."""
+
+    def __init__(self, seconds_between_starts):
+        self.seconds_between_starts = max(0.0, float(seconds_between_starts))
+        self._lock = threading.Lock()
+        self._next_start = 0.0
+
+    def wait(self):
+        if not self.seconds_between_starts:
+            return
+        with self._lock:
+            current = time.monotonic()
+            wait = max(0.0, self._next_start - current)
+            if wait:
+                time.sleep(wait)
+                current = time.monotonic()
+            self._next_start = max(self._next_start, current) + self.seconds_between_starts
+
+    def defer(self, seconds):
+        """Apply one server-requested cooldown to every sharing worker."""
+
+        seconds = max(0.0, float(seconds))
+        if not seconds:
+            return
+        with self._lock:
+            self._next_start = max(
+                self._next_start,
+                time.monotonic() + seconds,
+            )
+
+
+def retry_wait_seconds(retry_after, attempt, *, now=None):
+    """Return one bounded wait for a transient HMLR response."""
+
+    requested = None
+    try:
+        requested = float(retry_after)
+    except (TypeError, ValueError):
+        try:
+            retry_at = parsedate_to_datetime(str(retry_after))
+            if retry_at.tzinfo is None:
+                retry_at = retry_at.replace(tzinfo=timezone.utc)
+            requested = (
+                retry_at.astimezone(timezone.utc) - (now or datetime.now(timezone.utc))
+            ).total_seconds()
+        except (TypeError, ValueError, OverflowError):
+            requested = None
+    fallback = 4 * (attempt + 1) ** 2
+    if requested is None or not math.isfinite(requested) or requested <= 0:
+        requested = fallback
+    return min(MAX_RETRY_WAIT_SECONDS, max(1.0, requested))
 
 
 def address_key(value):
@@ -224,22 +285,61 @@ ORDER BY DESC(?date)
 """.strip()
 
 
-def fetch_batch(postcodes, timeout):
+def fetch_batch(
+    postcodes,
+    timeout,
+    *,
+    retries=DEFAULT_FETCH_RETRIES,
+    request_pacer=None,
+):
     body = urllib.parse.urlencode({
         "query": sparql_query(postcodes),
         "format": "application/sparql-results+json",
     }).encode("utf-8")
-    request = urllib.request.Request(
-        SPARQL_ENDPOINT,
-        data=body,
-        headers={
-            "Accept": "application/sparql-results+json",
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "INSIGHT local full Price Paid history collector",
-        },
-    )
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        payload = json.loads(response.read().decode("utf-8"))
+    retries = max(0, int(retries))
+    for attempt in range(retries + 1):
+        if request_pacer is not None:
+            request_pacer.wait()
+        request = urllib.request.Request(
+            SPARQL_ENDPOINT,
+            data=body,
+            headers={
+                "Accept": "application/sparql-results+json",
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "INSIGHT local full Price Paid history collector",
+            },
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            break
+        except urllib.error.HTTPError as error:
+            if error.code not in RETRYABLE_HTTP_STATUS_CODES or attempt >= retries:
+                raise
+            retry_after = error.headers.get("Retry-After") if error.headers else None
+            wait = retry_wait_seconds(retry_after, attempt)
+            print(
+                f"HMLR returned HTTP {error.code}; waiting {wait:.0f}s before "
+                f"retry {attempt + 1}/{retries} for {len(postcodes)} postcode(s).",
+                flush=True,
+            )
+            if request_pacer is None:
+                time.sleep(wait)
+            else:
+                request_pacer.defer(wait)
+        except (urllib.error.URLError, TimeoutError):
+            if attempt >= retries:
+                raise
+            wait = retry_wait_seconds(None, attempt)
+            print(
+                f"HMLR connection failed; waiting {wait:.0f}s before "
+                f"retry {attempt + 1}/{retries} for {len(postcodes)} postcode(s).",
+                flush=True,
+            )
+            if request_pacer is None:
+                time.sleep(wait)
+            else:
+                request_pacer.defer(wait)
     grouped = {normalise_postcode(postcode): [] for postcode in postcodes}
     for binding in payload.get("results", {}).get("bindings", []):
         row = {key: value.get("value", "") for key, value in binding.items()}
@@ -656,6 +756,7 @@ def main():
         )
     ]
     batches = list(chunks(pending, max(1, args.batch_size)))
+    request_pacer = RequestPacer(args.pause)
     print(
         f"Price Paid history: {len(properties)} properties, {len(selected)} postcodes, "
         f"{len(fresh_seed)} fresh seed records, {len(pending)} postcodes to fetch.",
@@ -664,7 +765,12 @@ def main():
 
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as executor:
         futures = {
-            executor.submit(fetch_batch, [postcode_labels[key] for key in batch], args.timeout): batch
+            executor.submit(
+                fetch_batch,
+                [postcode_labels[key] for key in batch],
+                args.timeout,
+                request_pacer=request_pacer,
+            ): batch
             for batch in batches
         }
         completed = 0
@@ -683,8 +789,6 @@ def main():
             if not args.cache_only:
                 write_cache(args.cache, cache, CACHE_VERSION)
             print(f"Fetched {completed}/{len(pending)} postcodes.", flush=True)
-            if args.pause:
-                time.sleep(args.pause)
 
     history = {}
     matched_transactions = 0

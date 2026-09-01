@@ -43,8 +43,9 @@ jobs:
           --seed-feed outputs/sales-history.js
           --deployment-mode commercial
           --refresh-days 28
-          --workers 3
+          --workers 1
           --batch-size 8
+          --pause 1
       - name: Validate commercial feed against every £2m+ property
         run: >-
           python3 scripts/validate_sales_history_feed.py
