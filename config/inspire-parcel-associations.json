@@ -13896,15 +13896,22 @@
       "titleConfirmed": false
     },
     {
-      "associationStatus": "automatic_indicative",
-      "boundaryDistanceMetres": 13.0185,
-      "evidenceTier": "transaction_linked_indicative",
+      "associationStatus": "reviewed_indicative",
+      "boundaryDistanceMetres": 13.0173,
+      "evidenceTier": "reviewed_indicative",
       "exactUprnIdentityConfirmed": false,
-      "inspireId": "64286934",
+      "inspireId": "64871044",
       "legalBoundaryConfirmed": false,
-      "matchMethod": "ppd-linked-uprn-unique-clear-containment",
+      "matchMethod": "reviewed-hmlr-parcel-lifecycle-geometry-continuity",
       "propertyId": "property:54 POTTERS LANE SEND WOKING GU23 7AL|GU237AL",
-      "reviewDecision": null,
+      "reviewDecision": {
+        "decision": "approve_indicative_parcel",
+        "decisionBatch": "hmlr_september_2026_parcel_lifecycle",
+        "reviewedAt": "2026-09-09T05:45:56Z",
+        "reviewedBy": "Codex source-geometry review",
+        "evidence": "docs/inspire-september-2026-recovery.md",
+        "semantics": "reviewed indicative parcel association only"
+      },
       "spatialClassification": "unique_interior_clear",
       "titleConfirmed": false
     },
@@ -43765,7 +43772,7 @@
       "titleConfirmed": false
     }
   ],
-  "registryVersion": "inspire-parcel-associations-2026-08-10-v1",
+  "registryVersion": "inspire-parcel-associations-2026-09-09-v1",
   "schemaVersion": 1,
   "sourceStudy": {
     "automaticAuditSha256": "bf3d6b759502cb25e493f3f66ed2fa76f498000f944cb4582b8d0a3637719142",
