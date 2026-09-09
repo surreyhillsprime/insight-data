@@ -88,7 +88,22 @@
         "evidenceTier": {"enum": ["transaction_linked_indicative", "calibrated_epc_indicative", "reviewed_indicative", "authoritative_uprn_indicative"]},
         "spatialClassification": {"enum": ["unique_interior_clear", "unique_interior_edge"]},
         "boundaryDistanceMetres": {"type": ["number", "null"], "minimum": 0},
-        "reviewDecision": {"type": ["object", "null"]},
+        "reviewDecision": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["decision", "decisionBatch", "reviewedAt", "semantics"],
+              "properties": {
+                "decision": {"type": "string", "minLength": 1},
+                "decisionBatch": {"type": "string", "minLength": 1},
+                "reviewedAt": {"type": "string", "minLength": 1},
+                "semantics": {"type": "string", "minLength": 1}
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
         "sourceSnapshot": {"type": "string", "pattern": "^hmlr-inspire-"},
         "titleConfirmed": {"const": false},
         "exactUprnIdentityConfirmed": {"const": false},

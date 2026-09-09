@@ -2,3 +2,4 @@
 __pycache__/
 *.pyc
 work/title-history-cache.json
+work/hmlr-identifier-downloads/

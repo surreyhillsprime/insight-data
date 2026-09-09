@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from insight_data_utils import read_js
-from runtime_release import parse_runtime
+from runtime_release import parse_runtime, public_review_decision
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -321,7 +321,9 @@ def feed_failures(
             continue
         if parcel_id != registry_record["inspireId"] or association.get("parcelIds") != [parcel_id]:
             failures.append(f"{property_id}: parcel index differs from registry")
-        for field in ("associationStatus", "matchMethod", "evidenceTier", "spatialClassification", "boundaryDistanceMetres", "reviewDecision"):
+        if association.get("reviewDecision") != public_review_decision(registry_record.get("reviewDecision")):
+            failures.append(f"{property_id}: reviewDecision differs from the exact public registry projection")
+        for field in ("associationStatus", "matchMethod", "evidenceTier", "spatialClassification", "boundaryDistanceMetres"):
             if association.get(field) != registry_record.get(field):
                 failures.append(f"{property_id}: {field} differs from registry")
         if not re.fullmatch(r"hmlr-inspire-\d{4}-\d{2}-\d{2}", str(association.get("sourceSnapshot") or "")):

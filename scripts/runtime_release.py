@@ -8,6 +8,13 @@ import re
 from pathlib import Path
 
 
+def public_review_decision(decision: dict | None) -> dict | None:
+    """The exact review DTO accepted by both the browser and native app."""
+    if decision is None:
+        return None
+    return {key: decision[key] for key in ("decision", "decisionBatch", "reviewedAt", "semantics")}
+
+
 def finalise_body(core_payload: dict, generated_at: str, release_prefix: str, release_date: str) -> tuple[str, str]:
     if "releaseId" in core_payload or "generatedAt" in core_payload:
         raise ValueError("generatedAt/releaseId must be appended only after hashing the raw core payload")

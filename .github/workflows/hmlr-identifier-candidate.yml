@@ -1,0 +1,70 @@
+name: HMLR Property Identifier Candidate
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Monthly INSIGHT Property Refresh]
+    types: [completed]
+    branches: [main]
+  schedule:
+    # Check after PPD's 20th-working-day publication, with retries. INSPIRE
+    # geometry retains its separate first-Sunday publication schedule.
+    - cron: "30 12 20-31 * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hmlr-identifier-candidate
+  cancel-in-progress: false
+
+jobs:
+  candidate:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m pip install pyproj==3.6.1 jsonschema==4.23.0
+      - name: Restore official source downloads
+        uses: actions/cache@v4
+        with:
+          path: work/hmlr-identifier-downloads
+          key: hmlr-identifier-downloads-${{ github.run_id }}
+          restore-keys: hmlr-identifier-downloads-
+      - name: Acquire and validate HMLR UPRNs and OS points
+        run: |
+          PYTHONPATH=scripts python3 scripts/collect_hmlr_identifiers.py --download-current
+          python3 scripts/enrich_os_uprn.py --hmlr-only
+      - name: Check current INSPIRE geometry against official links
+        run: |
+          curl --fail --location --retry 3 --retry-all-errors \
+            https://cdn.proj.org/uk_os_OSTN15_NTv2_OSGBtoETRS.tif \
+            --output /tmp/uk_os_OSTN15_NTv2_OSGBtoETRS.tif
+          echo "5d6ed64d2119952c4c559fa1fccbc594b6520fc3ec3ef2fc10be13202c4384fa  /tmp/uk_os_OSTN15_NTv2_OSGBtoETRS.tif" | sha256sum --check --strict
+          PYTHONPATH=scripts python3 scripts/collect_inspire_parcels.py \
+            --download-current --download-dir /tmp/hmlr-inspire-surrey \
+            --ostn15-grid /tmp/uk_os_OSTN15_NTv2_OSGBtoETRS.tif
+      - name: Validate complete candidate
+        run: |
+          PYTHONPATH=scripts python3 -m unittest tests.test_hmlr_identifiers tests.test_inspire_parcels
+          PYTHONPATH=scripts python3 scripts/validate_property_uprn_links.py
+          PYTHONPATH=scripts python3 scripts/validate_inspire_parcels.py
+          PYTHONPATH=scripts python3 scripts/validate_inspire_parcel_review_queue.py
+          PYTHONPATH=scripts python3 scripts/validate_inspire_json_schemas.py
+          python3 scripts/check_data_completeness.py --base-only
+      - name: Retain validated files for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: hmlr-property-identifier-candidate
+          path: |
+            work/hmlr-identifier-state.json
+            outputs/property-uprn-links.js
+            outputs/surrey-transactions.js
+            outputs/inspire-parcels.js
+            outputs/inspire-parcel-review-queue.js
+          if-no-files-found: error
+          retention-days: 90

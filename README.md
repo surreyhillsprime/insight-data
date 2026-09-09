@@ -118,14 +118,25 @@ surveyed site area, title-plan extent or exact legal boundary. Association
 records therefore keep title, exact-UPRN and legal-boundary confirmations
 explicitly false.
 
-`outputs/property-uprn-links.js` is the independent future enrichment seam.
-It is empty and fail closed today. A future record must be keyed by the same
+`outputs/property-uprn-links.js` publishes authoritative HMLR transaction-linked
+UPRNs joined to OS Open UPRN coordinates. HMLR takes precedence over other UPRN
+sources; those remain backups where HMLR supplies no relationship. The initial
+July 2026 lookup contributes 36 canonical properties. Acquisition retains
+transaction UUIDs and monthly evidence in `work/hmlr-identifier-state.json`,
+because each monthly lookup is incremental, with no historical backfill.
+Raw UPRNs remain acquisition evidence; app packaging merges this primary stream
+with its private fallback points and projects only the existing map DTO.
+See [the implementation and 36-property audit](docs/hmlr-uprn-priority-2026-09-09.md).
+
+Every record must be keyed by the same
 canonical `propertyRecordId`, carry an explicit confirmed/reviewed match state
 and finite GB coordinates, declare its coordinate basis and licence/entitlement,
 and pass duplicate-UPRN review rules. An accepted authoritative link can add an
 automatic indicative association only when its point lies in exactly one
 previously unshared INSPIRE parcel and is more than two metres from every
-boundary. Every other result stays unassociated in the intentionally public
+boundary. For HMLR links, that parcel must also agree with HMLR's direct INSPIRE
+lookup. A missing freehold lookup or a conflicting parcel remains unassociated.
+Every other result stays unassociated in the intentionally public
 `outputs/inspire-parcel-review-queue.js`. Previously published automatic UPRN
 associations are append-only unless an explicit reviewed record is added to
 `config/inspire-association-transitions.json`. The same ordered, append-only
@@ -136,6 +147,15 @@ when a reviewed successor exists: `remove` is deliberately terminal and a
 future restoration would require a separately reviewed contract migration. A UPRN may refine evidence
 or a display point; it can never create, merge or replace an INSIGHT property
 identity.
+
+`hmlr-identifier-candidate.yml` checks the published lookup links after the
+20th-working-day PPD release and after a successful monthly property refresh.
+It validates the current official OS archive against its advertised checksum,
+retains prior monthly HMLR relationships, and generates a coherent candidate.
+This workflow has read-only repository permissions and uploads files for review;
+it does not commit, push, or change production. Scheduled automatic publication
+requires separate approval. Existing INSPIRE geometry publication keeps its
+first-Sunday schedule.
 
 The producer hashes the exact minified UTF-8 bytes of each deterministic core
 payload. It then appends `generatedAt` and `releaseId`, in that order, as the
