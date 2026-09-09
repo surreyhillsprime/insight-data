@@ -109,8 +109,9 @@ def short_names(items, limit=3):
 
 
 def constraints_cache_key(item):
+    from uprn_priority import preferred_property_uprn
     postcode = normalise_postcode(item.get("postcode"))
-    uprn = clean(item.get("uprn") or (item.get("ordnanceSurvey") or {}).get("uprn"))
+    uprn = preferred_property_uprn(item)
     return uprn or postcode or clean(item.get("id"))
 
 

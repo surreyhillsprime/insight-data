@@ -8,6 +8,9 @@ import sys
 import urllib.request
 from collections import Counter, defaultdict
 from io import StringIO
+from pathlib import Path
+
+from uprn_priority import PRIMARY_FEED, primary_links
 
 from insight_data_utils import (
     DEFAULT_INPUT_JS,
@@ -173,11 +176,36 @@ def match_uprn(item, lat, lon, by_postcode, by_grid, args):
     }
 
 
+def hmlr_links(transactions, path=None):
+    links = primary_links(Path(path) if path else PRIMARY_FEED)
+    if set(links) - {row.get("propertyRecordId") for row in transactions}:
+        raise ValueError("Primary HMLR UPRN feed references an unknown canonical property")
+    return links
+
+
+def apply_hmlr_link(item, link):
+    output = dict(item)
+    output["uprn"] = link["uprn"]
+    output["ordnanceSurvey"] = {
+        "source": "OS Open UPRN", "updatedAt": link["checkedAt"],
+        "uprn": link["uprn"], "uprnPrecision": "HMLR transaction-linked UPRN",
+        "uprnLinkSource": "HM Land Registry", "uprnLinkSnapshot": link["sourceSnapshot"],
+    }
+    return output
+
+
 def enrich_transactions(transactions, cache, args):
+    primary = hmlr_links(transactions, getattr(args, "hmlr_links", None))
+    if getattr(args, "hmlr_only", False):
+        output = [apply_hmlr_link(item, primary[item["propertyRecordId"]])
+                  if item.get("propertyRecordId") in primary else item for item in transactions]
+        return output, Counter(hmlrUprnMatches=sum(item.get("propertyRecordId") in primary for item in transactions)), True, False
     rows, transformer_available = uprn_rows(args)
     if not rows:
         print("No OS Open UPRN CSV found; OS enrichment skipped.")
-        return transactions, Counter(), False, transformer_available
+        output = [apply_hmlr_link(item, primary[item["propertyRecordId"]])
+                  if item.get("propertyRecordId") in primary else item for item in transactions]
+        return output, Counter(hmlrUprnMatches=sum(item.get("propertyRecordId") in primary for item in transactions)), bool(primary), transformer_available
     print(f"Loaded {len(rows)} Surrey UPRN rows.")
     by_postcode, by_grid = build_index(rows)
     enriched = []
@@ -188,6 +216,10 @@ def enrich_transactions(transactions, cache, args):
         output = dict(item)
         if limit and index > limit:
             enriched.append(output)
+            continue
+        if item.get("propertyRecordId") in primary:
+            enriched.append(apply_hmlr_link(item, primary[item["propertyRecordId"]]))
+            stats["hmlrUprnMatches"] += 1
             continue
         try:
             lat, lon, coord_data = ensure_coordinates(item, cache, args)
@@ -225,6 +257,8 @@ def parse_args():
     parser.add_argument("--max-match-distance-m", type=int, default=150, help="Maximum nearest-UPRN match distance.")
     parser.add_argument("--progress-every", type=int, default=25, help="Print progress every N records.")
     parser.add_argument("--dry-run", action="store_true", help="Do not write outputs.")
+    parser.add_argument("--hmlr-links", type=Path, help="Validated primary HMLR UPRN feed.")
+    parser.add_argument("--hmlr-only", action="store_true", help="Apply authoritative HMLR links without refreshing fallback matches.")
     return parser.parse_args()
 
 
@@ -238,6 +272,13 @@ def main():
     print("OS UPRN summary: " + ", ".join(f"{key}={value}" for key, value in sorted(stats.items())))
     if args.dry_run:
         return 0
+    if args.hmlr_only:
+        if enriched == transactions:
+            print("HMLR UPRN context unchanged.")
+            return 0
+        write_js(args.write_js, enriched, meta)
+        print(f"Updated {args.write_js} with authoritative HMLR UPRNs")
+        return 0
 
     meta["osRefresh"] = {
         "updatedAt": utc_now(),
@@ -245,6 +286,7 @@ def main():
         "sourceLoaded": source_loaded,
         "bngTransformerAvailable": transformer_available,
         "uprnMatches": stats.get("uprnMatches", 0),
+        "hmlrUprnMatches": stats.get("hmlrUprnMatches", 0),
         "maxMatchDistanceMetres": args.max_match_distance_m,
     }
     meta = finalise_historical_expansion(

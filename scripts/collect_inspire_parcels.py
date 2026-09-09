@@ -28,7 +28,7 @@ from pathlib import Path
 
 from insight_data_utils import read_js
 from validate_property_uprn_links import parse_feed as parse_uprn_feed, validation_failures as uprn_validation_failures
-from runtime_release import finalise_body, parse_runtime
+from runtime_release import finalise_body, parse_runtime, public_review_decision
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -548,6 +548,7 @@ def build_feed(
     prior_release_id: str | None,
     prior_source_snapshot: str | None,
     prior_published_transitions: list[dict],
+    hmlr_parcel_ids: dict[str, set[str]] | None = None,
 ) -> tuple[dict, dict]:
     if registry.get("canonicalIdentityMode") != IDENTITY_MODE:
         raise ValueError("Association registry canonical identity mode has drifted")
@@ -649,7 +650,7 @@ def build_feed(
             "evidenceTier": row["evidenceTier"],
             "spatialClassification": row["spatialClassification"],
             "boundaryDistanceMetres": row["boundaryDistanceMetres"],
-            "reviewDecision": row["reviewDecision"],
+            "reviewDecision": public_review_decision(row["reviewDecision"]),
             "sourceSnapshot": source_snapshot,
             "titleConfirmed": False,
             "exactUprnIdentityConfirmed": False,
@@ -664,6 +665,10 @@ def build_feed(
             outcome = "review_required_non_authoritative_link"
         elif len(parcel_ids) == 0:
             outcome = "rejected_no_containing_inspire_parcel"
+        elif str(link.get("sourceId", "")).startswith("hmlr_ppd_uprn_") and not (hmlr_parcel_ids or {}).get(property_id):
+            outcome = "review_required_no_hmlr_parcel_link"
+        elif str(link.get("sourceId", "")).startswith("hmlr_ppd_uprn_") and not set(parcel_ids).intersection(hmlr_parcel_ids[property_id]):
+            outcome = "review_required_hmlr_parcel_mismatch"
         elif len(parcel_ids) > 1:
             outcome = "review_required_multiple_containing_parcels"
         elif hits[parcel_ids[0]] <= 2:
@@ -938,6 +943,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--associations", type=Path, default=DEFAULT_ASSOCIATIONS)
     parser.add_argument("--transactions", type=Path, default=DEFAULT_TRANSACTIONS)
     parser.add_argument("--property-uprn-links", type=Path, default=DEFAULT_PROPERTY_UPRN_LINKS)
+    parser.add_argument("--hmlr-identifier-state", type=Path, default=ROOT / "work/hmlr-identifier-state.json")
     parser.add_argument("--source-dir", type=Path)
     parser.add_argument("--download-current", action="store_true")
     parser.add_argument("--download-dir", type=Path, default=Path("/tmp/insight-hmlr-inspire"))
@@ -968,6 +974,14 @@ def main() -> int:
     uprn_failures = uprn_validation_failures(property_uprn_feed, canonical_ids)
     if uprn_failures:
         raise ValueError("Invalid property-UPRN feed: " + "; ".join(uprn_failures))
+    hmlr_parcel_ids = {}
+    if args.hmlr_identifier_state.exists():
+        from collect_hmlr_identifiers import preferred_records
+        state = json.loads(args.hmlr_identifier_state.read_text(encoding="utf-8"))
+        hmlr_parcel_ids = {
+            property_id: {parcel_id for _, record in records for parcel_id in record["inspireIds"]}
+            for property_id, records in preferred_records(state, transactions).items()
+        }
     prior_feed = existing_global(args.output, GLOBAL_NAME)
     prior_associations = dict(prior_feed.get("associationsByProperty") or {})
     prior_published_transitions = list(prior_feed.get("associationTransitions") or [])
@@ -992,6 +1006,7 @@ def main() -> int:
         prior_feed.get("releaseId"),
         prior_feed.get("source", {}).get("sourceSnapshot") if isinstance(prior_feed.get("source"), dict) else None,
         prior_published_transitions,
+        hmlr_parcel_ids,
     )
     feed, review_queue, changed, review_changed = publish_runtime_feeds(
         feed,

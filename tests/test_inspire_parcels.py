@@ -269,8 +269,12 @@ class InspirePublicationTests(unittest.TestCase):
         self.assertGreaterEqual(statuses["reviewed_indicative"], 358)
 
     def test_feed_has_exact_approved_indexes_and_no_uprn(self):
-        self.assertEqual(len(self.feed["associationsByProperty"]), 3228)
-        self.assertEqual(len(self.feed["parcelsById"]), 3228)
+        associations = self.feed["associationsByProperty"]
+        registered = {row["propertyId"] for row in self.registry["records"]}
+        self.assertTrue(registered.issubset(associations))
+        self.assertEqual(set(self.feed["parcelsById"]), {row["primaryParcelId"] for row in associations.values()})
+        for property_id in set(associations) - registered:
+            self.assertEqual(associations[property_id]["evidenceTier"], "authoritative_uprn_indicative")
         self.assertNotIn('"uprn"', self.feed_path.read_text().casefold())
         # Source totals change with each monthly release. Require complete
         # authority coverage, configured safety floors and reconciled counts.
@@ -337,7 +341,7 @@ class InspirePublicationTests(unittest.TestCase):
         self.assertEqual(registry_failures(self.registry, expanded), [])
         coverage = coverage_metadata(expanded, self.feed["associationsByProperty"])
         self.assertEqual(coverage["canonicalProperties"], len(expanded))
-        self.assertEqual(coverage["associatedProperties"], 3228)
+        self.assertEqual(coverage["associatedProperties"], len(self.feed["associationsByProperty"]))
         self.assertEqual(
             coverage["unassociatedProperties"],
             len(expanded) - len(self.feed["associationsByProperty"]),
@@ -617,7 +621,7 @@ class UPRNOnboardingTests(unittest.TestCase):
         def transform(x, y, direction=None):
             return x, y
 
-    def build_synthetic(self, directory, links, prior=None, transitions=None):
+    def build_synthetic(self, directory, links, prior=None, transitions=None, hmlr_parcel_ids=None):
         source = Path(directory) / "Test_Authority.zip"
         ring = [(0, 0), (10, 0), (10, 10), (0, 10), (0, 0)]
         write_source_zip(source, [feature_xml("100", ring)])
@@ -639,7 +643,7 @@ class UPRNOnboardingTests(unittest.TestCase):
         return build_feed(
             config, registry, Path(directory), self.IdentityTransformer(), {property_id}, set(), uprn_feed,
             "a" * 64, prior or {}, transitions or [],
-            None, None, [],
+            None, None, [], hmlr_parcel_ids,
         )
 
     def link(self):

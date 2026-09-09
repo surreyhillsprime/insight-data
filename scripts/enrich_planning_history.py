@@ -134,7 +134,8 @@ def application_year_range(applications):
 
 
 def property_uprn(item):
-    return clean(item.get("uprn") or (item.get("ordnanceSurvey") or {}).get("uprn"))
+    from uprn_priority import preferred_property_uprn
+    return preferred_property_uprn(item)
 
 
 def property_match_key(item):

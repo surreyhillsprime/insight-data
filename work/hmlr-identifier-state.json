@@ -1,0 +1,521 @@
+{
+  "schemaVersion": 1,
+  "publications": {
+    "2026-07": {
+      "release": "2026-07",
+      "files": {
+        "uprn": {
+          "url": "https://price-paid-data.publicdata.landregistry.gov.uk/pp-uprn-lookup-jul-2026.csv",
+          "file": "pp-uprn-lookup-jul-2026.csv",
+          "sha256": "1d05becac589365a0f87b81f06b9a79c83281a600f49267b7f18a36f91ef3254",
+          "lastModified": "Fri, 28 Aug 2026 05:12:48 GMT"
+        },
+        "inspire": {
+          "url": "https://price-paid-data.publicdata.landregistry.gov.uk/pp-inspire-id-lookup-jul-2026.csv",
+          "file": "pp-inspire-id-lookup-jul-2026.csv",
+          "sha256": "63c56c4bd6dfdbfaf3d78c5ad94adcc50593d1315c09713cb2b6b653a984d291",
+          "lastModified": "Fri, 28 Aug 2026 05:12:46 GMT"
+        },
+        "ppd": {
+          "url": "https://price-paid-data.publicdata.landregistry.gov.uk/pp-monthly-update-new-version.csv",
+          "file": "pp-monthly-update-new-version.csv",
+          "sha256": "f92fff441ecbeba0f4891524fc968c8d336a4dff5ecadcd3ce4fe73f500b781c",
+          "lastModified": "Fri, 28 Aug 2026 05:12:46 GMT"
+        }
+      },
+      "publishedDate": "2026-08-28",
+      "checkedAt": "2026-09-09T05:59:25Z"
+    }
+  },
+  "transactions": {
+    "{49E87C32-71E8-591C-E063-4704A8C00C31}": {
+      "propertyId": "property:FOXWOOD 15A LONGDOWN ROAD LOWER BOURNE FARNHAM GU10 3JU|GU103JU",
+      "transactionId": "lr-25ec5954fd4af0d59189",
+      "saleDate": "2025-03-19",
+      "publication": "2026-07",
+      "uprns": [
+        "200001537986"
+      ],
+      "inspireIds": [
+        "64507213"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-43EA-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:CHARTERS SOUTH RIDGE WEYBRIDGE KT13 0NF|KT130NF",
+      "transactionId": "lr-ff9c8900f82a591101db",
+      "saleDate": "2025-09-18",
+      "publication": "2026-07",
+      "uprns": [
+        "100061347191"
+      ],
+      "inspireIds": [
+        "33484678"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4403-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:17 CHARGATE CLOSE HERSHAM WALTON ON THAMES KT12 5DW|KT125DW",
+      "transactionId": "lr-5559c77f9376778f71cf",
+      "saleDate": "2026-02-05",
+      "publication": "2026-07",
+      "uprns": [
+        "100061327312"
+      ],
+      "inspireIds": [
+        "55705540"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4405-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:OLD WESTWICK CHANTRY VIEW ROAD GUILDFORD GU1 3XW|GU13XW",
+      "transactionId": "lr-eda7005feec1fbd531ed",
+      "saleDate": "2026-07-07",
+      "publication": "2026-07",
+      "uprns": [
+        "200001874287"
+      ],
+      "inspireIds": [
+        "32718219",
+        "58707598"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-443F-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:20 WEST END LANE ESHER KT10 8LA|KT108LA",
+      "transactionId": "lr-d89a7d5c0633bbf77e1a",
+      "saleDate": "2026-07-14",
+      "publication": "2026-07",
+      "uprns": [
+        "100061319813"
+      ],
+      "inspireIds": [
+        "34102734"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4443-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:5 WOODSIDE ROAD COBHAM KT11 2QR|KT112QR",
+      "transactionId": "lr-686f8d1e76042b554583",
+      "saleDate": "2026-01-29",
+      "publication": "2026-07",
+      "uprns": [
+        "100062357169"
+      ],
+      "inspireIds": [
+        "34167619"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4445-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:11 OAKWOOD ROAD VIRGINIA WATER GU25 4RZ|GU254RZ",
+      "transactionId": "lr-01e114c379e4a8fb38e6",
+      "saleDate": "2026-03-16",
+      "publication": "2026-07",
+      "uprns": [
+        "100061507354"
+      ],
+      "inspireIds": [
+        "32670476"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4450-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:19 AUSTEN ROAD GUILDFORD GU1 3NW|GU13NW",
+      "transactionId": "lr-1251e33a4b713b702570",
+      "saleDate": "2026-06-02",
+      "publication": "2026-07",
+      "uprns": [
+        "100062669143"
+      ],
+      "inspireIds": [
+        "32764600"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4464-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:MULBERRY LODGE KENT HATCH ROAD OXTED RH8 0SZ|RH80SZ",
+      "transactionId": "lr-ecee7d7483eaadca78f4",
+      "saleDate": "2026-06-26",
+      "publication": "2026-07",
+      "uprns": [
+        "100061585190"
+      ],
+      "inspireIds": [
+        "38959615"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-446E-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:SINGLE OAK GOLF CLUB ROAD WEYBRIDGE KT13 0NJ|KT130NJ",
+      "transactionId": "lr-f3a704f42d6fdab3d0b1",
+      "saleDate": "2026-02-02",
+      "publication": "2026-07",
+      "uprns": [],
+      "inspireIds": [
+        "33491331"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-453F-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:9 ST JOHNS AVENUE LEATHERHEAD KT22 7HT|KT227HT",
+      "transactionId": "lr-b4ed8ccb8d031a5ef07f",
+      "saleDate": "2026-06-19",
+      "publication": "2026-07",
+      "uprns": [
+        "100061437935"
+      ],
+      "inspireIds": [
+        "34570740"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4590-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:7 PIT FARM ROAD GUILDFORD GU1 2JH|GU12JH",
+      "transactionId": "lr-ecf0263d0c62bb985ab8",
+      "saleDate": "2026-02-26",
+      "publication": "2026-07",
+      "uprns": [
+        "100061399498"
+      ],
+      "inspireIds": [
+        "32803569"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-45A6-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:SKERRYVORE UVEDALE ROAD OXTED RH8 0EN|RH80EN",
+      "transactionId": "lr-18697cf15ff442c9fbef",
+      "saleDate": "2026-06-19",
+      "publication": "2026-07",
+      "uprns": [
+        "100061587172"
+      ],
+      "inspireIds": [
+        "38707736"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4614-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:BIRCHWOOD LEIGH PLACE COBHAM KT11 2HL|KT112HL",
+      "transactionId": "lr-8809f510f9ee633d47be",
+      "saleDate": "2025-10-07",
+      "publication": "2026-07",
+      "uprns": [
+        "10033324012"
+      ],
+      "inspireIds": [
+        "54970186",
+        "54970187"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-461D-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:RAVENS POINT TOR LANE WEYBRIDGE KT13 0NS|KT130NS",
+      "transactionId": "lr-4793c561bc8f30217874",
+      "saleDate": "2025-09-15",
+      "publication": "2026-07",
+      "uprns": [
+        "100061347949"
+      ],
+      "inspireIds": [
+        "53543159"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4632-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:12 GREAT AUSTINS FARNHAM GU9 8JG|GU98JG",
+      "transactionId": "lr-b2d0a5ef01ae9cf0ef7c",
+      "saleDate": "2026-01-14",
+      "publication": "2026-07",
+      "uprns": [
+        "100061603097"
+      ],
+      "inspireIds": [
+        "31460808"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-463C-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:5 ERISWELL CRESCENT HERSHAM WALTON ON THAMES KT12 5DS|KT125DS",
+      "transactionId": "lr-523528bc830939fa9490",
+      "saleDate": "2025-09-12",
+      "publication": "2026-07",
+      "uprns": [
+        "100061328864"
+      ],
+      "inspireIds": [
+        "54935198"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4667-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:9 ALBURY ROAD HERSHAM WALTON ON THAMES KT12 5DY|KT125DY",
+      "transactionId": "lr-97fc7eab8b393840c245",
+      "saleDate": "2026-02-13",
+      "publication": "2026-07",
+      "uprns": [
+        "100061325401"
+      ],
+      "inspireIds": [
+        "54936704"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-467B-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:SPRINGACRES SPRING WOODS VIRGINIA WATER GU25 4PW|GU254PW",
+      "transactionId": "lr-8e2a7dc9b832a87edff9",
+      "saleDate": "2026-06-26",
+      "publication": "2026-07",
+      "uprns": [
+        "100061506634"
+      ],
+      "inspireIds": [
+        "32632598"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-46FF-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:24 FAIRACRES COBHAM KT11 2JW|KT112JW",
+      "transactionId": "lr-f80eaee4a77f90bec1c9",
+      "saleDate": "2024-12-20",
+      "publication": "2026-07",
+      "uprns": [
+        "100061307853"
+      ],
+      "inspireIds": [
+        "34019808",
+        "34020256",
+        "34020860"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4735-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:4 ASHCROFT PARK COBHAM KT11 2DN|KT112DN",
+      "transactionId": "lr-0ffdadbdc6e79b784d43",
+      "saleDate": "2026-02-06",
+      "publication": "2026-07",
+      "uprns": [
+        "100061306722"
+      ],
+      "inspireIds": [
+        "34014851"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-477C-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:LAUREL BANK BOURNE GROVE LOWER BOURNE FARNHAM GU10 3QT|GU103QT",
+      "transactionId": "lr-32cb3c10026abbf97170",
+      "saleDate": "2026-06-12",
+      "publication": "2026-07",
+      "uprns": [
+        "10013892610"
+      ],
+      "inspireIds": [
+        "45893077"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4784-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:HEATHERLING JUMPS ROAD CHURT FARNHAM GU10 2JY|GU102JY",
+      "transactionId": "lr-4a429d6ccbaa29927aab",
+      "saleDate": "2026-03-31",
+      "publication": "2026-07",
+      "uprns": [
+        "100061604456"
+      ],
+      "inspireIds": [
+        "31586484"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-48BC-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:WENTWORTH LODGE PORTNALL RISE VIRGINIA WATER GU25 4JZ|GU254JZ",
+      "transactionId": "lr-2e39c5ed20556be3eaba",
+      "saleDate": "2025-09-08",
+      "publication": "2026-07",
+      "uprns": [
+        "100061507419"
+      ],
+      "inspireIds": [
+        "32568685"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-48E5-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:SHARDELOES ASHTEAD WOODS ROAD ASHTEAD KT21 2EQ|KT212EQ",
+      "transactionId": "lr-72738185ec334779611e",
+      "saleDate": "2026-01-09",
+      "publication": "2026-07",
+      "uprns": [
+        "100061414440"
+      ],
+      "inspireIds": [
+        "34736838"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-495B-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:17 LITTLEWORTH ROAD ESHER KT10 9PD|KT109PD",
+      "transactionId": "lr-6700e74d1a059c768e3a",
+      "saleDate": "2026-06-19",
+      "publication": "2026-07",
+      "uprns": [
+        "100061317109"
+      ],
+      "inspireIds": [
+        "34313693"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-49A0-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:3 CLIFFORD MANOR ROAD GUILDFORD GU4 8AG|GU48AG",
+      "transactionId": "lr-bc25e62972192bb64952",
+      "saleDate": "2026-06-24",
+      "publication": "2026-07",
+      "uprns": [
+        "100061385530"
+      ],
+      "inspireIds": [
+        "32724538"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-49AB-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:5 FOX WOOD WALTON ON THAMES KT12 4BS|KT124BS",
+      "transactionId": "lr-d89c4cf83d296452756c",
+      "saleDate": "2026-02-27",
+      "publication": "2026-07",
+      "uprns": [
+        "10013117613"
+      ],
+      "inspireIds": [
+        "33713916"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-49B5-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:MEADCROFT GRENVILLE ROAD SHACKLEFORD GODALMING GU8 6AX|GU86AX",
+      "transactionId": "lr-bb8660288f59a5939381",
+      "saleDate": "2026-06-15",
+      "publication": "2026-07",
+      "uprns": [
+        "100061379972"
+      ],
+      "inspireIds": [
+        "32287920"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-49BF-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:9 PELHAMS WALK ESHER KT10 8QA|KT108QA",
+      "transactionId": "lr-b4924fcae4f147a9f472",
+      "saleDate": "2025-08-11",
+      "publication": "2026-07",
+      "uprns": [
+        "100061318376"
+      ],
+      "inspireIds": [
+        "34151502"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-49CB-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:HOLT HOUSE 3 OAKSEND CLOSE OXSHOTT LEATHERHEAD KT22 0NX|KT220NX",
+      "transactionId": "lr-0ff7474436951e6e3e2b",
+      "saleDate": "2026-06-29",
+      "publication": "2026-07",
+      "uprns": [
+        "10013119520"
+      ],
+      "inspireIds": [
+        "34241477"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4A63-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:2 ONSLOW ROAD HERSHAM WALTON ON THAMES KT12 5BB|KT125BB",
+      "transactionId": "lr-0057d495dff3b5eab3ed",
+      "saleDate": "2025-10-03",
+      "publication": "2026-07",
+      "uprns": [
+        "100061332732"
+      ],
+      "inspireIds": [
+        "58665647"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4B56-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:FLAT 9 KINGSDOWN CASTLE HILL FARNHAM GU9 0AD|GU90AD",
+      "transactionId": "lr-cd6e0a9efbac999e2f71",
+      "saleDate": "2025-10-10",
+      "publication": "2026-07",
+      "uprns": [
+        "10094582150"
+      ],
+      "inspireIds": [],
+      "withdrawn": false
+    },
+    "{5834E4E9-4B92-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:WOODLANDS RYDE CHOBHAM PARK LANE CHOBHAM WOKING GU24 8HG|GU248HG",
+      "transactionId": "lr-80adacc9572ef7d1ab80",
+      "saleDate": "2025-11-28",
+      "publication": "2026-07",
+      "uprns": [
+        "100061565684"
+      ],
+      "inspireIds": [
+        "64812700"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4BA9-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:WILJOY 32 GARRATTS LANE BANSTEAD SM7 2EB|SM72EB",
+      "transactionId": "lr-fc50037cc9f4f4b7de5d",
+      "saleDate": "2026-06-17",
+      "publication": "2026-07",
+      "uprns": [
+        "68122498"
+      ],
+      "inspireIds": [
+        "35827646"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-4BB0-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:9 EATON PARK ROAD COBHAM KT11 2JJ|KT112JJ",
+      "transactionId": "lr-d7fb22955868481fcf4b",
+      "saleDate": "2025-10-20",
+      "publication": "2026-07",
+      "uprns": [
+        "100062357136"
+      ],
+      "inspireIds": [
+        "34070557"
+      ],
+      "withdrawn": false
+    },
+    "{5834E4E9-C25F-29C7-E063-4804A8C015BC}": {
+      "propertyId": "property:15 HIGHLANDS ROAD REIGATE RH2 0LA|RH20LA",
+      "transactionId": "lr-7208dc44746c1a774c69",
+      "saleDate": "2025-09-24",
+      "publication": "2026-07",
+      "uprns": [
+        "68173031"
+      ],
+      "inspireIds": [
+        "55776129"
+      ],
+      "withdrawn": false
+    }
+  },
+  "osSources": {
+    "c50c1b6e6129f7fced4309ee873a25bdcb7f5679ba938b64227240580faa21f1": {
+      "version": "2026-08",
+      "sha256": "c50c1b6e6129f7fced4309ee873a25bdcb7f5679ba938b64227240580faa21f1",
+      "md5": "2f023512afc378cd7b9351b24ccf1a34",
+      "checkedAt": "2026-09-09T06:40:53Z"
+    }
+  }
+}

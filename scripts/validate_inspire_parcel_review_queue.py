@@ -25,6 +25,8 @@ AUTO_OUTCOME = "automatically_associated_indicative"
 ALLOWED_OUTCOMES = {
     AUTO_OUTCOME,
     "review_required_non_authoritative_link",
+    "review_required_no_hmlr_parcel_link",
+    "review_required_hmlr_parcel_mismatch",
     "rejected_no_containing_inspire_parcel",
     "review_required_multiple_containing_parcels",
     "review_required_boundary_proximity",
