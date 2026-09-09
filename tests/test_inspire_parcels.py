@@ -4,6 +4,7 @@ import math
 import tempfile
 import unittest
 import zipfile
+from collections import Counter
 from copy import deepcopy
 from pathlib import Path
 
@@ -251,17 +252,58 @@ class InspirePublicationTests(unittest.TestCase):
                 self.assertEqual(parcel["areaAcres"], values["acres"])
                 self.assertEqual(parcel["centroid"], values["centroid"])
                 self.assertEqual(parcel["bbox"], values["bbox"])
-        self.assertEqual(self.feed["coverage"]["associatedProperties"], 3228)
-        self.assertEqual(self.feed["coverage"]["automaticIndicative"], 2870)
-        self.assertEqual(self.feed["coverage"]["reviewedIndicative"], 358)
+        # The approved parent corrections remain required as later reviews add
+        # to the cohort. August's automatic/reviewed totals are not live totals.
+        statuses = Counter(
+            item["associationStatus"]
+            for item in self.feed["associationsByProperty"].values()
+        )
+        self.assertEqual(
+            self.feed["coverage"]["automaticIndicative"],
+            statuses["automatic_indicative"],
+        )
+        self.assertEqual(
+            self.feed["coverage"]["reviewedIndicative"],
+            statuses["reviewed_indicative"],
+        )
+        self.assertGreaterEqual(statuses["reviewed_indicative"], 358)
 
     def test_feed_has_exact_approved_indexes_and_no_uprn(self):
         self.assertEqual(len(self.feed["associationsByProperty"]), 3228)
         self.assertEqual(len(self.feed["parcelsById"]), 3228)
         self.assertNotIn('"uprn"', self.feed_path.read_text().casefold())
-        self.assertEqual(self.feed["source"]["sourceFeatureOccurrences"], 525580)
-        self.assertEqual(self.feed["source"]["sourceDistinctInspireIds"], 523956)
-        self.assertEqual(self.feed["source"]["sourceDuplicateOccurrences"], 1624)
+        # Source totals change with each monthly release. Require complete
+        # authority coverage, configured safety floors and reconciled counts.
+        source = self.feed["source"]
+        stats = {row["authoritySlug"]: row for row in source["authorityStats"]}
+        configured = {row["slug"]: row for row in self.authorities["authorities"]}
+        self.assertEqual(set(stats), set(configured))
+        self.assertEqual(len(stats), len(source["authorityStats"]))
+        for slug, authority in configured.items():
+            self.assertGreaterEqual(
+                stats[slug]["featureOccurrences"], authority["minimumFeatures"]
+            )
+            self.assertEqual(
+                stats[slug]["featureOccurrences"], stats[slug]["declaredFeatures"]
+            )
+            self.assertEqual(
+                stats[slug]["featureOccurrences"],
+                stats[slug]["distinctInspireIds"] + stats[slug]["duplicateOccurrences"],
+            )
+            self.assertEqual(stats[slug]["malformedFeatures"], 0)
+        self.assertEqual(
+            source["sourceFeatureOccurrences"],
+            sum(row["featureOccurrences"] for row in stats.values()),
+        )
+        self.assertGreaterEqual(
+            source["sourceDistinctInspireIds"],
+            self.authorities["minimumDistinctInspireIds"],
+        )
+        self.assertGreaterEqual(source["sourceDuplicateOccurrences"], 0)
+        self.assertEqual(
+            source["sourceFeatureOccurrences"],
+            source["sourceDistinctInspireIds"] + source["sourceDuplicateOccurrences"],
+        )
 
     def test_monthly_workflow_tracks_hmlr_cadence_and_pinned_grid(self):
         workflow = (ROOT / ".github/workflows/monthly-inspire-parcels.yml").read_text()
@@ -331,7 +373,7 @@ class InspirePublicationTests(unittest.TestCase):
                 registry_sha256=registry_sha256,
                 configured_transitions=self.transitions,
                 retired_property_ids=self.retired_property_ids,
-                publication_time="2026-08-12T12:00:00Z",
+                publication_time=before["generatedAt"],
             )
 
             self.assertTrue(changed)
@@ -371,7 +413,7 @@ class InspirePublicationTests(unittest.TestCase):
                 registry_sha256=registry_sha256,
                 configured_transitions=self.transitions,
                 retired_property_ids=self.retired_property_ids,
-                publication_time="2026-08-13T12:00:00Z",
+                publication_time=None,
             )
 
             self.assertFalse(changed_again)
@@ -392,7 +434,7 @@ class InspirePublicationTests(unittest.TestCase):
             core["source"]["displayCrs"] = "EPSG:3857"
             body, _release_id = finalise_body(
                 core,
-                "2026-08-12T12:00:00Z",
+                self.feed["generatedAt"],
                 "inspire-parcels",
                 core["source"]["sourceSnapshot"].removeprefix("hmlr-inspire-"),
             )
@@ -412,7 +454,7 @@ class InspirePublicationTests(unittest.TestCase):
                     registry_sha256=registry_sha256,
                     configured_transitions=self.transitions,
                     retired_property_ids=self.retired_property_ids,
-                    publication_time="2026-08-13T12:00:00Z",
+                    publication_time=self.feed["generatedAt"],
                 )
             self.assertEqual(path.read_bytes(), invalid_bytes)
 
@@ -435,7 +477,7 @@ class InspirePublicationTests(unittest.TestCase):
                     registry_sha256=registry_sha256,
                     configured_transitions=self.transitions,
                     retired_property_ids=self.retired_property_ids,
-                    publication_time="2026-08-13T12:00:00Z",
+                    publication_time=self.feed["generatedAt"],
                 )
             self.assertEqual(path.read_bytes(), original_bytes)
 
@@ -453,7 +495,7 @@ class InspirePublicationTests(unittest.TestCase):
             core["debug"] = {"privateNotes": "must never be carried into publication"}
             body, _release_id = finalise_body(
                 core,
-                "2026-08-12T12:00:00Z",
+                self.feed["generatedAt"],
                 "inspire-parcels",
                 core["source"]["sourceSnapshot"].removeprefix("hmlr-inspire-"),
             )
@@ -473,7 +515,7 @@ class InspirePublicationTests(unittest.TestCase):
                     registry_sha256=registry_sha256,
                     configured_transitions=self.transitions,
                     retired_property_ids=self.retired_property_ids,
-                    publication_time="2026-08-13T12:00:00Z",
+                    publication_time=self.feed["generatedAt"],
                 )
             self.assertEqual(path.read_bytes(), invalid_bytes)
 
