@@ -33,6 +33,8 @@ SUMMARY_LABELS = {
 SIGNAL_KINDS = {"epc_observation", "property_planning", "sale_age_milestone"}
 OPPORTUNITY_KINDS = {"property_opportunity"}
 MINIMUM_MARKET_HOLDING_GAPS = 20
+SALE_INTERVAL_MARGIN_FRACTION = 0.10
+MINIMUM_SALE_INTERVAL_MARGIN_DAYS = 90
 DATE_RE = re.compile(r"^(?:19|20)\d{2}(?:-\d{2}(?:-\d{2})?)?$")
 SOURCE_FAMILY_BY_SIGNAL_KIND = {
     "epc_observation": "epc",
@@ -588,6 +590,12 @@ def recorded_sale_dates(
     })
 
 
+def sale_interval_research_margin(average_days: int) -> int:
+    """Product research threshold; not an estimate of seller intent."""
+    return max(MINIMUM_SALE_INTERVAL_MARGIN_DAYS, math.ceil(average_days * SALE_INTERVAL_MARGIN_FRACTION))
+
+
+
 def sale_age_signals(
     records: Mapping[str, Mapping[str, Any]],
     as_of: date,
@@ -628,7 +636,8 @@ def sale_age_signals(
             cohort_basis = "overall"
             cohort_name = "all tracked markets"
         average_days = round(sum(cohort_gaps) / len(cohort_gaps))
-        crossing_date = sold + timedelta(days=average_days)
+        margin_days = sale_interval_research_margin(average_days)
+        crossing_date = sold + timedelta(days=average_days + margin_days)
         days_since_crossing = (as_of - crossing_date).days
         if not 0 <= days_since_crossing < crossing_window_days:
             continue
@@ -657,21 +666,25 @@ def sale_age_signals(
                 kind="sale_age_milestone",
                 rank=max(55, 78 - days_since_crossing),
                 record=record,
-                title=f"Recorded holding-interval crossing · {property_ref(record)['address']}",
+                title=f"Recorded sale-interval research threshold · {property_ref(record)['address']}",
                 fact=(
                     f"The latest matched Price Paid sale is dated {sold.isoformat()}. "
-                    f"Its elapsed interval crossed the tracked {average_years:.1f}-year "
-                    f"average for {cohort_label} on {crossing_date.isoformat()}."
+                    f"Its elapsed interval reached {average_days + margin_days:,} days on {crossing_date.isoformat()}, "
+                    f"{margin_days:,} days beyond the tracked {average_years:.1f}-year "
+                    f"average for {cohort_label}."
                 ),
                 why=(
-                    f"The crossing occurred {days_since_crossing} day"
+                    f"The research threshold was reached {days_since_crossing} day"
                     f"{'s' if days_since_crossing != 1 else ''} ago, within the "
                     f"{crossing_window_days}-day alert window. The benchmark uses "
-                    f"{len(cohort_gaps):,} consecutive recorded Price Paid sale gaps."
+                    f"{len(cohort_gaps):,} consecutive recorded Price Paid sale gaps. "
+                    "INSIGHT only surfaces this interval after it exceeds the cohort mean by "
+                    "10%, rounded up to whole days, with a minimum 90-day margin."
                 ),
                 context=(
                     "This is a benchmark against recorded Price Paid transaction gaps, not proof "
-                    "of continuous legal ownership. Crossing the average does not predict a future transaction."
+                    "of continuous legal ownership. The research threshold is a prioritisation rule, "
+                    "not evidence of seller intent or a prediction of a future transaction."
                 ),
                 effective_date=crossing_date.isoformat(),
                 precision="day",

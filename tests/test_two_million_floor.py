@@ -118,7 +118,7 @@ class TwoMillionFloorTests(unittest.TestCase):
             "category": "A",
         }
         self.assertEqual(len(excluded_transaction_failures([bad_published_row])), 1)
-        self.assertEqual(transaction_exclusion_metadata()["reviewedExclusionCount"], 1)
+        self.assertEqual(transaction_exclusion_metadata()["reviewedExclusionCount"], 2)
 
     def test_exclusion_review_day_uses_the_product_london_timezone(self):
         boundary = datetime(2026, 8, 1, 23, 30, tzinfo=timezone.utc)

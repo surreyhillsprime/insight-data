@@ -1,7 +1,7 @@
 {
   "$schema": "./heritage-listing-overrides.schema.json",
   "schemaVersion": 1,
-  "updatedAt": "2026-09-01",
+  "updatedAt": "2026-09-10",
   "productionRequired": true,
   "mappings": [
     {
@@ -14001,16 +14001,6 @@
       "reviewedBy": "Codex exhaustive official address, document and planning-evidence audit",
       "reviewedAt": "2026-07-28",
       "note": "Exhaustive current Surrey NHLE address-corpus screen found no supported direct property identity. This is not legal proof that the property is unlisted or outside listed-building curtilage."
-    },
-    {
-      "propertyRecordId": "property:9 ST JOHNS AVENUE LEATHERHEAD KT22 7HT|KT227HT",
-      "address": "9, ST JOHNS AVENUE, LEATHERHEAD, KT22 7HT",
-      "postcode": "KT22 7HT",
-      "status": "unknown",
-      "listEntryNumbers": [],
-      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
-      "reviewedAt": "2026-09-01",
-      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
       "propertyRecordId": "property:9 TEMPLES CLOSE FARNHAM GU10 1RB|GU101RB",

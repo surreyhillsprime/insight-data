@@ -32,6 +32,7 @@ from insight_data_utils import (
     structured_delivery_point_key,
 )
 from enrich_planning_history import address_score
+from transaction_exclusions import find_transaction_exclusion, load_transaction_exclusion_ledger
 from sweep_land_registry import SPARQL_ENDPOINT, build_address, category_label, price_text, property_label
 from validate_sales_history_feed import (
     ADDRESS_DATA_USE,
@@ -390,6 +391,16 @@ def transaction_from_base(row):
 def matched_history_rows(item, rows, known_sales, source_address_variants=()):
     """Match reviewed aliases without treating a shared sale fact as identity."""
 
+    exclusion_ledger = load_transaction_exclusion_ledger()
+    rows = [
+        row for row in rows
+        if not find_transaction_exclusion({
+            **row,
+            "address": build_address(row).upper(),
+            "propertyType": property_label(row.get("propertyType")),
+            "category": category_label(row.get("category")),
+        }, exclusion_ledger)
+    ]
     target = address_key(item.get("address"))
     delivery_point = structured_delivery_point_key(item)
     delivery_rows = {
@@ -520,6 +531,7 @@ def migrate_existing_history(transactions, prior_history, prior_meta, deployment
         prior_records_by_property[key][prior_key] = prior_record
 
     history = {}
+    exclusion_ledger = load_transaction_exclusion_ledger()
     for key, item in properties.items():
         source_records = list(prior_records_by_property.get(key, {}).values())
         if not source_records:
@@ -532,6 +544,8 @@ def migrate_existing_history(transactions, prior_history, prior_meta, deployment
         transactions_by_id = {}
         for record in selected_records:
             for sale in record.get("transactions") or []:
+                if find_transaction_exclusion(sale, exclusion_ledger):
+                    continue
                 source_id = clean(sale.get("id"))
                 if not source_id:
                     raise ValueError(f"Prior sales history for {key} contains a transaction without a source id")
@@ -680,6 +694,7 @@ def main():
         help="Rebuild only from the exact existing cache; never fetch or mutate it.",
     )
     args = parser.parse_args()
+    exclusion_ledger = load_transaction_exclusion_ledger()
 
     transactions, _summary, base_meta = read_js(args.input)
     if args.migrate_from_history:
@@ -880,7 +895,7 @@ def main():
                 if base_fallbacks:
                     sales.extend(base_fallbacks)
                     match_method += "+canonical-base"
-            unique = {sale["id"]: sale for sale in sales}
+            unique = {sale["id"]: sale for sale in sales if not find_transaction_exclusion(sale, exclusion_ledger)}
             sales = sorted(
                 unique.values(),
                 key=lambda sale: (sale["date"], sale["id"]),
