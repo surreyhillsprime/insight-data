@@ -8,6 +8,8 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+from transaction_exclusions import find_transaction_exclusion, load_transaction_exclusion_ledger
+
 
 MAX_FEED_BYTES = 50 * 1024 * 1024
 MAX_LOOKUP_KEYS = 200_000
@@ -154,6 +156,7 @@ def validate(
     properties_with_history = 0
     transactions_found = 0
     published_transaction_ids = set()
+    exclusion_ledger = load_transaction_exclusion_ledger()
     complete_check_times = []
     record_update_times = []
     for key, record in canonical.items():
@@ -200,6 +203,9 @@ def validate(
         for transaction in transactions:
             if not isinstance(transaction, dict):
                 raise ValueError("Sales-history transaction is not an object")
+            exclusion = find_transaction_exclusion(transaction, exclusion_ledger)
+            if exclusion:
+                raise ValueError(f"Reviewed transaction exclusion {exclusion['id']} is present in sales history")
             transaction_id = str(transaction.get("id") or "")
             if not transaction_id:
                 raise ValueError("Sales-history transaction has no source id")

@@ -635,7 +635,7 @@ class TodayFeedTests(unittest.TestCase):
         ))
         validate_today_feed(feed, metadata, self.schema)
 
-    def test_sale_age_signal_is_a_recent_average_gap_crossing(self):
+    def test_sale_age_signal_requires_material_margin_and_recent_threshold_crossing(self):
         as_of = date(2026, 7, 25)
         gap_days = 3652
 
@@ -685,9 +685,10 @@ class TodayFeedTests(unittest.TestCase):
             ("recent", 5),
             ("expired", 30),
             ("future", -1),
+            ("barely-above-mean", -363),
         ):
             property_id = f"property:{name.upper()}|KT100AA"
-            latest_sale = as_of - timedelta(days=gap_days + days_since_crossing)
+            latest_sale = as_of - timedelta(days=gap_days + 366 + days_since_crossing)
             event_row, evidence_row = sale_row(property_id, name, latest_sale)
             record = fixture_record(
                 property_id,
@@ -730,6 +731,10 @@ class TodayFeedTests(unittest.TestCase):
         self.assertEqual(crossing["attributes"]["holdingIntervalCohortBasis"], "overall")
         self.assertEqual(crossing["attributes"]["holdingIntervalSampleSize"], 1)
         self.assertEqual(metadata["criteria"]["saleAgeCrossingWindowDays"], 30)
+        self.assertIn("4,018 days", crossing["fact"])
+        self.assertIn("366 days beyond", crossing["fact"])
+        self.assertIn("minimum 90-day margin", crossing["why"])
+        self.assertIn("not evidence of seller intent", crossing["context"])
 
         next_feed, _next_metadata = build_for((as_of + timedelta(days=1)).isoformat())
         next_crossing = next(
@@ -749,6 +754,14 @@ class TodayFeedTests(unittest.TestCase):
                 if item["kind"] == "sale_age_milestone"
             },
         )
+
+
+    def test_sale_interval_margin_has_minimum_and_rounds_up(self):
+        from today_feed import sale_interval_research_margin
+        self.assertEqual(sale_interval_research_margin(500), 90)
+        self.assertEqual(sale_interval_research_margin(900), 90)
+        self.assertEqual(sale_interval_research_margin(901), 91)
+        self.assertEqual(sale_interval_research_margin(3052), 306)
 
     def test_published_today_asset_is_non_empty_and_valid(self):
         feed, metadata = read_today_feed(ROOT / "outputs" / "today-feed.js")

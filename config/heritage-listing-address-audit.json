@@ -26,8 +26,8 @@
     "Use official NHLE geometry to refine map location only after property identity is confirmed.",
     "No direct NHLE match is not legal proof that a property is unlisted or outside listed-building curtilage."
   ],
-  "canonicalPropertyCount": 3785,
-  "canonicalPropertyDigest": "a72842713cb030bed392ca7bfd5ec8a08e9fe648bc642763215e510fa15fe4bd",
+  "canonicalPropertyCount": 3784,
+  "canonicalPropertyDigest": "92511608afbcb379c42bd3f0992dfa717ef15a7eb78bc5ed066f677d67d6535f",
   "officialAddressRecordsScreened": 6624,
   "officialUniqueListEntriesScreened": 6624,
   "candidatePropertyCount": 1415,
@@ -42,7 +42,7 @@
   "confirmedPairDigest": "d61394c612481fcedbf06f4215d87036ce73a5273a71602ca8346465393a61f4",
   "documentedNoDirectPropertyCount": 44,
   "genericNoDirectPropertyCount": 3555,
-  "unknownPropertyCount": 44,
+  "unknownPropertyCount": 43,
   "confirmedMappings": [
     {
       "propertyRecordId": "property:1 THE MANSION COBHAM PARK COBHAM KT11 3LE|KT113LE",
@@ -2802,15 +2802,6 @@
       "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
     },
     {
-      "propertyRecordId": "property:9 ST JOHNS AVENUE LEATHERHEAD KT22 7HT|KT227HT",
-      "address": "9, ST JOHNS AVENUE, LEATHERHEAD, KT22 7HT",
-      "postcode": "KT22 7HT",
-      "listEntryNumbers": [],
-      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
-      "reviewedAt": "2026-09-01",
-      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown."
-    },
-    {
       "propertyRecordId": "property:BEAUMONT LODGE EAST ROAD WEYBRIDGE KT13 0LE|KT130LE",
       "address": "BEAUMONT LODGE, EAST ROAD, WEYBRIDGE, KT13 0LE",
       "postcode": "KT13 0LE",
@@ -4954,6 +4945,18 @@
       "retiredAt": "2026-08-05",
       "retirementReason": "Reviewed address identity consolidated into canonical property property:9 SANDOWN AVENUE ESHER KT10 9NT|KT109NT; evidence retained for audit history.",
       "canonicalPropertyRecordId": "property:9 SANDOWN AVENUE ESHER KT10 9NT|KT109NT"
+    },
+    {
+      "propertyRecordId": "property:9 ST JOHNS AVENUE LEATHERHEAD KT22 7HT|KT227HT",
+      "address": "9, ST JOHNS AVENUE, LEATHERHEAD, KT22 7HT",
+      "postcode": "KT22 7HT",
+      "status": "unknown",
+      "listEntryNumbers": [],
+      "reviewedBy": "Automated canonical-universe reconciliation (fail-closed)",
+      "reviewedAt": "2026-09-01",
+      "note": "New canonical property identity. No current address/document screening decision has been published; heritage status remains unknown.",
+      "retiredAt": "2026-09-10",
+      "retirementReason": "Canonical property identity absent from the current £2m+ base feed; evidence retained for audit history."
     },
     {
       "propertyRecordId": "property:9 WOLSEY ROAD EAST MOLESEY EAST MOLESEY KT8 9EL|KT89EL",
@@ -8037,13 +8040,13 @@
   ],
   "universeReconciliation": {
     "schemaVersion": 1,
-    "reconciledAt": "2026-09-01",
-    "previousPropertyCount": 3762,
-    "currentPropertyCount": 3785,
-    "addedPropertyCount": 23,
-    "removedPropertyCount": 0,
+    "reconciledAt": "2026-09-10",
+    "previousPropertyCount": 3785,
+    "currentPropertyCount": 3784,
+    "addedPropertyCount": 0,
+    "removedPropertyCount": 1,
     "sourceAddressVariantCount": 379,
-    "identityAliasesCollapsed": 205,
+    "identityAliasesCollapsed": 206,
     "newIdentityPolicy": "explicit_unknown_pending_review",
     "removedIdentityPolicy": "retained_in_retired_mappings",
     "addressIdentityPolicy": "producer-source-address-variant-ledger-only",

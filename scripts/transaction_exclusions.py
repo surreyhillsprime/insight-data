@@ -70,7 +70,7 @@ def canonical_source_id(value):
 def transaction_signature(record):
     try:
         price = int(float(str(record.get("price", "")).replace(",", "")))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         price = None
     return (
         canonical_address(record.get("address")),
@@ -153,8 +153,11 @@ def load_transaction_exclusion_ledger(path=DEFAULT_LEDGER):
 def find_transaction_exclusion(record, ledger=None):
     ledger = ledger or load_transaction_exclusion_ledger()
     record_signature = transaction_signature(record)
+    # History publications retain the official URL in id; processed base rows
+    # use an lr- hash and must continue to use the exact-tuple fallback.
+    history_source_id = record.get("id") if SOURCE_TRANSACTION_RE.fullmatch(clean(record.get("id"))) else ""
     record_source_id = canonical_source_id(
-        record.get("tx") or record.get("sourceTransactionId") or record.get("source_transaction_id")
+        record.get("tx") or record.get("sourceTransactionId") or record.get("source_transaction_id") or history_source_id
     )
     for entry in ledger["exclusions"]:
         expected_source_id = canonical_source_id(entry["sourceTransactionId"])

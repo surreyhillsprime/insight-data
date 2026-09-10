@@ -19,6 +19,23 @@
       "evidence": "Product owner review on 2026-08-02, corroborated by the impossible GBP 39,899 per sq ft derived from the matched 92 sq m EPC.",
       "reviewedAt": "2026-08-02",
       "reviewedBy": "INSIGHT product owner"
+    },
+    {
+      "id": "hmlr-5834e4e9-453f-29c7-e063-4804a8c015bc-price-input-error",
+      "disposition": "exclude",
+      "source": "HM Land Registry Price Paid Data",
+      "sourceTransactionId": "http://landregistry.data.gov.uk/data/ppi/transaction/5834E4E9-453F-29C7-E063-4804A8C015BC/current",
+      "transactionUuid": "5834E4E9-453F-29C7-E063-4804A8C015BC",
+      "address": "9, ST JOHNS AVENUE, LEATHERHEAD, KT22 7HT",
+      "postcode": "KT22 7HT",
+      "price": 112500000,
+      "date": "2026-06-19",
+      "propertyType": "Detached",
+      "category": "A",
+      "reason": "Product owner identified the published GBP 112.5m as a 100x price input error and instructed exclusion from the active database.",
+      "evidence": "Explicit INSIGHT product owner review on 2026-09-10 following the installed Build 103 workflow audit; the retained sales-history record supplies the exact HMLR transaction identity. No replacement price is asserted or published.",
+      "reviewedAt": "2026-09-10",
+      "reviewedBy": "INSIGHT product owner"
     }
   ]
 }
