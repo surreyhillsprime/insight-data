@@ -1,7 +1,7 @@
-# Targeted EPC recovery for Build 117
+# Targeted and expanded EPC recovery for Build 117
 
-The corrected retained-cache review verifies 2,931 of the installed cohort's
-4,738 sales. The remaining 1,807 sales represent 1,486 properties. This candidate
+The initial corrected retained-cache review verified 2,931 of the installed cohort's
+4,738 sales. The remaining 1,807 sales represented 1,486 properties. This candidate
 job retrieves additional official-register evidence using the repository's
 existing `EPC_BEARER_TOKEN`, with the exact-property identity guard retained.
 
@@ -75,6 +75,67 @@ Regenerate transactions and their summaries, property records, valuation seeds,
 runtime projections and Today as one generation. Validate the result and package
 before installation and the fresh 15-minute installed workflow audit. This
 candidate job alone is not release sign-off or a claim of complete EPC coverage.
+
+## Expanded recovery of all remaining properties
+
+The first run, followed by local source revalidation, verified 3,555 of 4,738
+sales. The remaining 1,183 sales represent 958 properties. The expanded lane
+reopens all of these properties, including completed postcode-only negatives
+and earlier errors. It does not treat an old negative as the answer to a new
+address or UPRN query.
+
+Set `epc_backfill_only=true` and `epc_expand_missing=true` on the same isolated
+workflow. Supply the independently reviewed canonical context SHA-256 in
+`epc_recovery_context_sha256`. The private JSON context is gzip-compressed,
+base64-encoded and supplied through the dedicated `EPC_RECOVERY_CONTEXT_B64`
+repository secret. No context contents belong in workflow inputs, logs or
+public artifacts. Keep the RSA private key on the release owner's Mac.
+
+The context binds the complete ordered 17-field sales cohort and frozen app
+revision. It provides reviewed literal aliases, independently verified HMLR
+UPRNs and optional council identity evidence. Every source is hash-pinned. Indicative
+property-point UPRNs may be included separately as `discoveryUprns`; they only
+generate register queries and never prove identity. The reviewed v2 plan has
+958 targets, four authoritative HMLR UPRNs, 13 alias groups and 589 additional
+discovery-only UPRNs, producing 2,199 distinct queries. This is a search plan,
+not a forecast of additional usable matches.
+
+The official [search gateway](https://github.com/communitiesuk/epb-data-warehouse/blob/main/lib/gateway/assessment_search_gateway.rb)
+uses a contiguous address substring over address lines and post town. For the
+four properties without a ledger postcode, discovery therefore adds the
+structured building-and-road address and the road-and-town phrase alongside the
+complete ledger address. These are additional lookup strings; no identity
+condition is relaxed. Punctuation normalization is not assumed. The API's
+`council[]` filter accepts official council names, not statistical codes;
+`councilCode` in the private context is used only as identity evidence and is
+never forwarded as that filter.
+
+The expanded producer rechecks the strict retained/postcode baseline first,
+then performs every applicable address, postcode, UPRN and alias query before
+choosing certificates. Four workers share a maximum of 9,000 HTTP requests and
+75 minutes across both phases; the isolated job has a 90-minute limit. Query
+pagination must finish completely, and repeated queries/certificates share
+results and symbolic failures. A newly unresolved property outside the reviewed
+context stops the expanded run so it cannot silently miss part of the cohort.
+
+Admission still requires the complete dwelling identity, including house number,
+unit and annexe extent. A missing ledger postcode requires the original full
+delivery address and independently available locality information; a postcode
+from the candidate is never inserted into the ledger to make it match itself.
+Full certificate identity, date, rating, area and cache replay are checked.
+Every recovered record retains allowlisted source identity snapshots in the
+encrypted result. Recovered identities cannot replay without the independently
+verified context. Invalid facts or failed replay remain unresolved. A completed
+search whose newest exact certificate has no usable whole-property area is
+recorded separately from an error, and cannot fall back to an older certificate.
+
+For an expanded result, verify the context against the external reviewed digest
+using `epc_recovery_identity.load_recovery_context`, with the complete original
+app rows. Pass that trusted object as `recovery_context` to
+`apply_candidate_to_frozen_app`. The seven EPC-only patch fields and non-EPC
+preservation checks remain unchanged. Regenerate the coherent application
+assets only after independent source replay. This lane does not publish feeds,
+modify the installed app or relax the existing release completeness gate.
 
 Whole-property area uses explicit declared totals. Supported SAP 12/13 schemas
 without a total sum all building-part storey and room-in-roof areas, rounding the

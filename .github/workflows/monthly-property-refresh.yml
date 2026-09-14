@@ -14,6 +14,16 @@ on:
         required: false
         type: string
         default: ""
+      epc_expand_missing:
+        description: "Reopen the reviewed missing-property cohort in the isolated EPC backfill lane"
+        required: false
+        type: boolean
+        default: false
+      epc_recovery_context_sha256:
+        description: "Reviewed SHA-256 pin for the private expanded EPC recovery context"
+        required: false
+        type: string
+        default: ""
   schedule:
     - cron: "0 6 1 * *"
 
@@ -95,13 +105,21 @@ jobs:
           persist-credentials: false
 
       - name: Verify runner cryptography and EPC contracts before provider access
-        run: PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=scripts python3 -m unittest tests.test_epc_backfill_candidate tests.test_epc_backfill_concurrency tests.test_epc_backfill_workflow tests.test_epc_candidate_result tests.test_epc_identity tests.test_publication_contract
+        run: PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=scripts python3 -m unittest tests.test_epc_backfill_candidate tests.test_epc_backfill_concurrency tests.test_epc_query_client tests.test_expand_epc_recovery tests.test_epc_backfill_workflow tests.test_epc_candidate_result tests.test_epc_identity tests.test_publication_contract
 
       - name: Backfill the reviewed EPC candidate and encrypt its private result
         env:
           EPC_BEARER_TOKEN: ${{ secrets.EPC_BEARER_TOKEN }}
           EPC_RESULT_PUBLIC_KEY: ${{ inputs.epc_result_public_key }}
-        run: python3 scripts/backfill_epc_candidate.py --output-dir "$RUNNER_TEMP/insight-epc-result"
+          EPC_EXPAND_MISSING: ${{ inputs.epc_expand_missing }}
+          EPC_RECOVERY_CONTEXT_SHA256: ${{ inputs.epc_recovery_context_sha256 }}
+          EPC_RECOVERY_CONTEXT_B64: ${{ secrets.EPC_RECOVERY_CONTEXT_B64 }}
+        run: |
+          if [ "$EPC_EXPAND_MISSING" = "true" ]; then
+            python3 scripts/expand_epc_recovery.py --output-dir "$RUNNER_TEMP/insight-epc-result"
+          else
+            python3 scripts/backfill_epc_candidate.py --output-dir "$RUNNER_TEMP/insight-epc-result"
+          fi
 
       - name: Retain only the encrypted result and safe receipt
         if: always()

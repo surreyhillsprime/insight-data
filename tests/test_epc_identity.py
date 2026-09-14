@@ -532,5 +532,285 @@ class EPCWholePropertyAreaTests(unittest.TestCase):
         self.assertFalse(any("reconciliation" in component for component in evidence["components"]))
 
 
+class EPCRecoveryIdentityTests(unittest.TestCase):
+    """Recovery is opt-in, bound to the cohort, and replayable from source facts."""
+
+    def target(self, **changes):
+        import epc_recovery_identity as recovery
+        row = sale(**changes)
+        row.setdefault("propertyRecordId", "property:" + recovery._canonical_text(row["address"])
+                       + "|" + epc.normalise_postcode(row["postcode"]))
+        return row
+
+    def context(self, rows, claims=None, properties=None):
+        import epc_recovery_identity as recovery
+        payload = {"schemaVersion": 1, "cohortIdentitySha256": recovery.cohort_digest(rows),
+                   "frozenAppCommit": "a" * 40,
+                   "sourceHashes": {"hmlrLinks": "b" * 64, "reviewedAliases": "c" * 64,
+                                    "councils": "d" * 64, "uprnDiscovery": "e" * 64},
+                   "properties": properties if properties is not None else {
+                       rows[0]["propertyRecordId"]: claims or {}}}
+        return recovery.load_recovery_context(payload, rows, expected_sha256=recovery.context_digest(payload))
+
+    def official(self, uprn="100000001"):
+        return {"authoritativeUprn": {"uprn": uprn,
+                "sourceId": "hmlr_ppd_uprn_202607_os_202608_test", "sourceSnapshot": "2026-08"}}
+
+    def certificate(self, address, **changes):
+        return {"addressLine1": address, "certificateNumber": "synthetic-recovery-1",
+                "registrationDate": "2024-01-01", **changes}
+
+    def cached(self, full, summary=None):
+        import epc_recovery_identity as recovery
+        number = epc.extract_certificate_number(full) or epc.extract_certificate_number(summary or {})
+        cached = record(epc.candidate_address(full), number=number,
+                        date=epc.extract_registration_date(full))
+        cached["certificateIdentity"] = recovery.certificate_identity_snapshot(full)
+        cached["certificateFetch"] = {"requestedNumber": number,
+                                       "returnedNumber": epc.extract_certificate_number(full)}
+        if summary is not None:
+            cached["summaryIdentity"] = recovery.certificate_identity_snapshot(summary)
+        return cached
+
+    def test_context_requires_external_hash_full_cohort_and_exact_transaction_membership(self):
+        import epc_recovery_identity as recovery
+        target = self.target(postcode="")
+        payload = {"schemaVersion": 1, "cohortIdentitySha256": recovery.cohort_digest([target]),
+                   "frozenAppCommit": "a" * 40, "sourceHashes": {},
+                   "properties": {target["propertyRecordId"]: {}}}
+        for expected, rows in [("0" * 64, [target]),
+                               (recovery.context_digest(payload), [{**target, "price": 4}])]:
+            with self.assertRaises(ValueError):
+                recovery.load_recovery_context(payload, rows, expected_sha256=expected)
+        context = self.context([target])
+        for change in [{"id": "different"}, {"town": "WOKING"}, {"price": 5}]:
+            with self.assertRaises(ValueError):
+                recovery.resolve_identity({**target, **change}, {}, context)
+        with self.assertRaises(TypeError):
+            context.properties[target["propertyRecordId"]]["councilCode"] = "E07000000"
+        with self.assertRaises(ValueError):
+            recovery.resolve_identity(target, {}, {"claimedVerified": True})
+        recovery.resolve_identity({**target, "floorAreaSqm": 500}, {}, context)
+
+    def test_exact_old_guard_is_default_and_untargeted_properties_stay_strict(self):
+        import epc_recovery_identity as recovery
+        target = self.target(postcode="")
+        full = self.certificate("2 HIGH STREET BAGSHOT GU19 5AE")
+        self.assertFalse(epc.delivery_identity(target, full)[0])
+        self.assertFalse(recovery.resolve_identity(target, full, self.context([target], properties={}))[0])
+        self.assertEqual(recovery.resolve_identity(target, full, self.context([target])),
+                         (True, "exact_full_delivery_with_independent_locality"))
+        self.assertEqual(target["postcode"], "")
+
+    def test_no_postcode_needs_complete_independent_context_not_source_postcode(self):
+        import epc_recovery_identity as recovery
+        target = self.target(paon="WILLOW HOUSE", postcode="", locality="THE GREEN")
+        context = self.context([target], {"councilCode": "E07000001"})
+        full = self.certificate("WILLOW HOUSE HIGH STREET THE GREEN BAGSHOT GU19 5AE")
+        self.assertTrue(recovery.resolve_identity(target, full, context)[0])
+        for address in ["WILLOW HOUSE HIGH STREET BAGSHOT GU19 5AE",
+                        "WILLOW HOUSE HIGH STREET THE GREEN GU19 5AE",
+                        "WILLOW HOUSE LOW STREET THE GREEN BAGSHOT GU19 5AE",
+                        "OTHER HOUSE HIGH STREET THE GREEN BAGSHOT GU19 5AE",
+                        "FLAT 1 WILLOW HOUSE HIGH STREET THE GREEN BAGSHOT GU19 5AE",
+                        "WILLOW HOUSE HIGH STREET ANNEXE THE GREEN BAGSHOT GU19 5AE"]:
+            with self.subTest(address=address):
+                self.assertFalse(recovery.resolve_identity(target, self.certificate(address), context)[0])
+        for extra in [{"postTown": "WOKING"}, {"council_code": "E07000002"}, {"postcode": "KT6 5HE"}]:
+            self.assertFalse(recovery.resolve_identity(target, {**full, **extra}, context)[0])
+        missing_town = {**target, "town": ""}
+        self.assertFalse(recovery.resolve_identity(missing_town, full, self.context([missing_town]))[0])
+        other = {**target, "id": "other", "propertyRecordId": "property:OTHER|GU195AE"}
+        self.assertFalse(recovery.resolve_identity(target, full, self.context([target, other]))[0])
+
+    def test_official_uprn_permits_named_alias_but_never_wrong_extent_or_road(self):
+        import epc_recovery_identity as recovery
+        target = self.target(paon="WILLOW HOUSE")
+        context = self.context([target], self.official())
+        full = self.certificate("CEDAR HOUSE HIGH STREET BAGSHOT GU19 5AE", uprn="000100000001")
+        self.assertFalse(epc.delivery_identity(target, full)[0])
+        self.assertEqual(recovery.resolve_identity(target, full, context),
+                         (True, "hmlr_uprn_with_delivery_extent"))
+        for address in ["CEDAR HOUSE 8 HIGH STREET BAGSHOT GU19 5AE",
+                        "FLAT 1 CEDAR HOUSE HIGH STREET BAGSHOT GU19 5AE",
+                        "ANNEXE CEDAR HOUSE HIGH STREET BAGSHOT GU19 5AE",
+                        "GROUND FLOOR CEDAR HOUSE HIGH STREET BAGSHOT GU19 5AE",
+                        "BASEMENT CEDAR HOUSE HIGH STREET BAGSHOT GU19 5AE",
+                        "GARAGE CEDAR HOUSE HIGH STREET BAGSHOT GU19 5AE",
+                        "REAR WING CEDAR HOUSE HIGH STREET BAGSHOT GU19 5AE",
+                        "CEDAR HOUSE LOW STREET BAGSHOT GU19 5AE",
+                        "CEDAR HOUSE HIGH STREET WOKING GU19 5AE",
+                        "CEDAR HOUSE HIGH STREET BAGSHOT GU19 5AB"]:
+            self.assertFalse(recovery.resolve_identity(target, {**full, "addressLine1": address}, context)[0])
+        self.assertFalse(recovery.resolve_identity(target, {**full, "uprn": "100000002"}, context)[0])
+        cottage = {**full, "addressLine1": "CEDAR COTTAGE HIGH STREET BAGSHOT GU19 5AE"}
+        self.assertTrue(recovery.resolve_identity(target, cottage, context)[0])
+        for expected, changed in [("WEST WING WILLOW HOUSE", "EAST WING CEDAR HOUSE"),
+                                  ("LEFT GARAGE WILLOW HOUSE", "RIGHT GARAGE CEDAR HOUSE")]:
+            partial = self.target(paon=expected, postcode="")
+            scoped = self.context([partial], self.official())
+            wrong = self.certificate(changed + " HIGH STREET BAGSHOT GU19 5AE", uprn="100000001")
+            self.assertFalse(recovery.resolve_identity(partial, wrong, scoped)[0])
+            exact = self.certificate(expected + " HIGH STREET BAGSHOT GU19 5AE", uprn="100000001")
+            self.assertTrue(recovery.resolve_identity(partial, exact, scoped)[0])
+            self.assertIsNotNone(epc.validated_cached_epc(partial, self.cached(exact), recovery_context=scoped))
+
+    def test_no_postcode_rejects_other_canonical_delivery_and_explicit_locality_conflict(self):
+        import epc_recovery_identity as recovery
+        target = self.target(postcode="", locality="THE GREEN")
+        full = self.certificate("2 HIGH STREET THE GREEN BAGSHOT GU19 5AE")
+        context = self.context([target])
+        self.assertTrue(recovery.resolve_identity(target, {**full, "locality": "THE GREEN"}, context)[0])
+        self.assertFalse(recovery.resolve_identity(target, {**full, "locality": "OTHER VILLAGE"}, context)[0])
+        unknown = self.target(postcode="")
+        source = self.certificate("2 HIGH STREET BAGSHOT GU19 5AE", locality="THE GREEN")
+        self.assertTrue(recovery.resolve_identity(unknown, source, self.context([unknown]))[0])
+        other = self.target(postcode="GU19 5AE", locality="THE GREEN", id="sale-2", county="SURREY",
+                            address="2 HIGH STREET THE GREEN BAGSHOT SURREY GU19 5AE")
+        self.assertTrue(epc.delivery_identity(other, full)[0])
+        self.assertFalse(recovery.resolve_identity(target, full, self.context([target, other]))[0])
+
+    def test_discovery_uprns_only_query_and_cannot_admit_wrong_delivery(self):
+        import epc_recovery_identity as recovery
+        target = self.target(paon="WILLOW HOUSE")
+        context = self.context([target], {"discoveryUprns": ["100000001"]})
+        self.assertIn({"uprn": "100000001"}, recovery.discovery_queries(target, context))
+        for address in ["CEDAR HOUSE HIGH STREET BAGSHOT GU19 5AE",
+                        "FLAT 1 WILLOW HOUSE HIGH STREET BAGSHOT GU19 5AE",
+                        "WILLOW HOUSE LOW STREET BAGSHOT GU19 5AE"]:
+            self.assertFalse(recovery.resolve_identity(target, self.certificate(address, uprn="100000001"), context)[0])
+        claims = {**self.official(), "discoveryUprns": ["000100000001", "100000002"]}
+        queries = recovery.discovery_queries(target, self.context([target], claims))
+        self.assertEqual(sum("uprn" in query for query in queries), 2)
+        for values in [["0"], [True], ["1", "01"], [str(i) for i in range(1, 6)]]:
+            with self.assertRaises(ValueError):
+                self.context([target], {"discoveryUprns": values})
+
+    def test_missing_postcode_discovery_adds_bounded_contiguous_address_variants(self):
+        import epc_recovery_identity as recovery
+        target = self.target(paon="WILLOW HOUSE, 14", saon="FLAT 2", postcode="")
+        claims = {"councilCode": "E07000001"}
+        queries = recovery.discovery_queries(target, self.context([target], claims))
+        self.assertEqual({query["address"] for query in queries if "address" in query}, {
+            target["address"], "FLAT 2 WILLOW HOUSE 14 HIGH STREET", "HIGH STREET BAGSHOT"})
+        self.assertFalse(any("council[]" in query or "councilCode" in query for query in queries))
+        self.assertFalse(any(query == {"address": "HIGH STREET"} for query in queries))
+        known = self.target(paon="WILLOW HOUSE, 14", saon="FLAT 2")
+        queries = recovery.discovery_queries(known, self.context([known], claims))
+        self.assertEqual(sum("address" in query for query in queries), 1)
+        self.assertFalse(any("council[]" in query for query in queries))
+        duplicate = self.target(postcode="", address="2 HIGH STREET")
+        queries = recovery.discovery_queries(duplicate, self.context([duplicate]))
+        self.assertEqual(sum(query == {"address": "2 HIGH STREET"} for query in queries), 1)
+
+    def test_shared_official_uprn_and_alias_members_are_rejected(self):
+        first, second = self.target(), self.target(paon="4", id="sale-2")
+        with self.assertRaises(ValueError):
+            self.context([first, second], properties={first["propertyRecordId"]: self.official(),
+                                                       second["propertyRecordId"]: self.official()})
+        with self.assertRaises(ValueError):
+            self.context([first, second], {"reviewedAliases": [{"groupId": "reviewed-test",
+                         "members": [first["propertyRecordId"], second["propertyRecordId"]]}]})
+
+    def test_reviewed_alias_requires_complete_literal_member_and_postcode(self):
+        import epc_recovery_identity as recovery
+        target = self.target(paon="WILLOW HOUSE")
+        claims = {"reviewedAliases": [{"groupId": "reviewed-test", "members": [target["propertyRecordId"],
+                          "property:CEDAR HOUSE HIGH STREET BAGSHOT GU19 5AE|GU195AE"]}]}
+        context = self.context([target], claims)
+        full = self.certificate("CEDAR HOUSE HIGH STREET BAGSHOT", postcode="GU19 5AE")
+        self.assertEqual(recovery.resolve_identity(target, full, context), (True, "reviewed_full_address_alias"))
+        for changes in [{"addressLine1": "CEDAR HOUSE HIGH STREET"}, {"postcode": "GU19 5AB"},
+                        {"addressLine1": "THE ANNEXE CEDAR HOUSE HIGH STREET BAGSHOT"}]:
+            self.assertFalse(recovery.resolve_identity(target, {**full, **changes}, context)[0])
+        self.assertTrue(recovery.replay_cached_identity(target, self.cached(full, full), context)[0])
+
+    def test_summary_only_uprn_requires_crossvalidated_full_identity_and_keeps_omission(self):
+        import epc_recovery_identity as recovery
+        target = self.target(paon="WILLOW HOUSE")
+        context = self.context([target], self.official())
+        full = self.certificate("CEDAR HOUSE HIGH STREET BAGSHOT GU19 5AE")
+        full.pop("certificateNumber")
+        summary = {**full, "certificateNumber": "synthetic-recovery-1", "uprn": "100000001"}
+        self.assertEqual(recovery.resolve_identity(target, full, context, summary),
+                         (True, "hmlr_uprn_with_crossvalidated_summary"))
+        cached = self.cached(full, summary)
+        self.assertNotIn("uprn", cached["certificateIdentity"])
+        self.assertNotIn("certificateNumber", cached["certificateIdentity"])
+        self.assertIsNotNone(epc.validated_cached_epc(target, cached, recovery_context=context))
+        for changes in [{"addressLine1": "OTHER HOUSE HIGH STREET BAGSHOT GU19 5AE"},
+                        {"registrationDate": "2024-02-01"}, {"postcode": "GU19 5AB"}]:
+            self.assertFalse(recovery.resolve_identity(target, full, context, {**summary, **changes})[0])
+        conflict = {**full, "uprn": "100000002"}
+        self.assertFalse(recovery.resolve_identity(target, conflict, context, summary)[0])
+
+    def test_original_unstructured_exact_full_address_replays_with_snapshots(self):
+        import epc_recovery_identity as recovery
+        target = self.target(paon="", street="", address="2 HIGH STREET BAGSHOT GU19 5AE")
+        full = self.certificate("2 HIGH STREET BAGSHOT GU19 5AE")
+        context = self.context([target])
+        self.assertEqual(recovery.resolve_identity(target, full, context), (True, "exact_full_address"))
+        self.assertTrue(recovery.replay_cached_identity(target, self.cached(full, full), context)[0])
+
+    def test_cache_claims_cannot_replace_context_or_original_source_facts(self):
+        import epc_recovery_identity as recovery
+        target = self.target(postcode="")
+        context = self.context([target])
+        full = self.certificate("2 HIGH STREET BAGSHOT GU19 5AE")
+        cached = self.cached(full, full)
+        self.assertIsNone(epc.validated_cached_epc(target, cached))
+        for mutate in [lambda value: value.pop("certificateIdentity"),
+                       lambda value: value["certificateFetch"].update(requestedNumber="wrong"),
+                       lambda value: value["certificateFetch"].update(returnedNumber="wrong"),
+                       lambda value: value["certificateFetch"].update(uprn="100000001"),
+                       lambda value: value["certificateIdentity"].update(addressLine1="8 HIGH STREET BAGSHOT GU19 5AE"),
+                       lambda value: value["summaryIdentity"].update(registrationDate="2024-02-01"),
+                       lambda value: value["certificateIdentity"].update(rawPayload="private")]:
+            changed = copy.deepcopy(cached)
+            mutate(changed)
+            changed["recoveryMethod"] = "exact_full_delivery_with_independent_locality"
+            changed["claimedContextHash"] = context.payload_sha256
+            self.assertIsNone(epc.validated_cached_epc(target, changed, recovery_context=context))
+        explicit = self.cached({**full, "uprn": "100000001"})
+        explicit["certificateFetch"]["uprn"] = "000100000001"
+        self.assertIsNotNone(epc.validated_cached_epc(target, explicit, recovery_context=context))
+        explicit["certificateFetch"]["uprn"] = "100000002"
+        self.assertIsNone(epc.validated_cached_epc(target, explicit, recovery_context=context))
+
+    def test_recovery_replays_retained_index_reprices_sales_and_publication_stays_private(self):
+        import epc_recovery_identity as recovery
+        target = self.target(postcode="")
+        repeated = {**target, "id": "sale-2", "price": 4_000_000, "date": "2026-01-01"}
+        context = self.context([target, repeated])
+        full = self.certificate("2 HIGH STREET BAGSHOT GU19 5AE")
+        cached = self.cached(full, full)
+        cache = {"records": {epc.stable_transaction_key(target): cached}}
+        before = copy.deepcopy(([target, repeated], cache))
+        with patch.object(epc, "request_json", side_effect=AssertionError("No provider calls")):
+            rows, reviewed, report = epc.revalidate_retained_cache([target, repeated], cache, context)
+        self.assertEqual(([target, repeated], cache), before)
+        self.assertEqual(report["sourceChecksPerformed"], 0)
+        for old, row in zip([target, repeated], rows):
+            self.assertTrue(row["epcMatched"])
+            self.assertEqual(row["pricePerSqft"], round(old["price"] / row["floorAreaSqft"]))
+            self.assertEqual({key: value for key, value in row.items() if key not in epc.PUBLIC_EPC_FIELDS}, old)
+        self.assertTrue(epc.publication_matches_cache(rows, reviewed, context))
+        self.assertFalse(epc.publication_matches_cache(rows, reviewed))
+        self.assertEqual(epc.terminal_cache_accounting(rows, reviewed, 10000, context)["matchedCacheRecords"], 2)
+        self.assertFalse(any(key in json.dumps(rows) for key in ["certificateIdentity", "summaryIdentity", "recoveryMethod", "synthetic-recovery"]))
+
+    def test_same_certificate_conflicting_source_uprns_are_quarantined_regardless_of_order(self):
+        target = self.target(postcode="")
+        context = self.context([target])
+        first = self.cached(self.certificate("2 HIGH STREET BAGSHOT GU19 5AE", uprn="100000001"))
+        second = self.cached(self.certificate("2 HIGH STREET BAGSHOT GU19 5AE", uprn="100000002"))
+        for values in [(first, second), (second, first)]:
+            cache = {"records": dict(zip([epc.stable_transaction_key(target), "other"], values))}
+            _index, conflicts = epc.retained_certificate_index(cache, context)
+            self.assertEqual(conflicts, {"synthetic-recovery-1"})
+            rows, _, _ = epc.revalidate_retained_cache([target], cache, context)
+            self.assertFalse(rows[0]["epcMatched"])
+
+
 if __name__ == "__main__":
     unittest.main()

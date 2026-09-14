@@ -554,7 +554,7 @@ def delivery_conflict_reason(expected, actual):
     return "unresolved_named_identity_or_alias"
 
 
-def delivery_identity(transaction, epc_record):
+def delivery_identity(transaction, epc_record, recovery_context=None, summary=None):
     """Require the entire delivery point, before ranking or trusting EPC facts.
 
     Structured HMLR identity is authoritative. Certificate address suffixes may
@@ -563,6 +563,9 @@ def delivery_identity(transaction, epc_record):
     address equality after removing their declared town/locality suffixes.
     """
 
+    if recovery_context is not None:
+        from epc_recovery_identity import resolve_identity
+        return resolve_identity(transaction, epc_record, recovery_context, summary=summary)
     postcode = normalise_postcode(transaction.get("postcode"))
     if not postcode or certificate_postcode(epc_record) != postcode:
         return False, "postcode_missing_or_conflicting"
@@ -631,7 +634,14 @@ def retained_certificate(epc):
     }
 
 
-def validated_cached_epc(transaction, record, conflicting_certificate_ids=()):
+def _cache_delivery_identity(transaction, record, recovery_context=None):
+    if recovery_context is not None and "certificateIdentity" in record:
+        from epc_recovery_identity import replay_cached_identity
+        return replay_cached_identity(transaction, record, recovery_context)
+    return delivery_identity(transaction, retained_certificate(record.get("epc") or {}))
+
+
+def validated_cached_epc(transaction, record, conflicting_certificate_ids=(), recovery_context=None):
     if not isinstance(record, dict) or record.get("status") != "matched":
         return None
     epc = record.get("epc")
@@ -645,7 +655,7 @@ def validated_cached_epc(transaction, record, conflicting_certificate_ids=()):
     certificate = retained_certificate(epc)
     if extract_certificate_number(certificate) in conflicting_certificate_ids:
         return None
-    if not delivery_identity(transaction, certificate)[0]:
+    if not _cache_delivery_identity(transaction, record, recovery_context)[0]:
         return None
     area = floor_area_from_certificate(certificate)
     date = extract_registration_date(certificate)
@@ -889,12 +899,12 @@ def best_epc_match(
     }
 
 
-def cache_record_is_fresh(record, refresh_days, transaction=None, conflicting_certificate_ids=()):
+def cache_record_is_fresh(record, refresh_days, transaction=None, conflicting_certificate_ids=(), recovery_context=None):
     if not record:
         return False
     if record.get("status") == "matched":
         # A legacy score or target-address key is never identity evidence.
-        return transaction is not None and validated_cached_epc(transaction, record, conflicting_certificate_ids) is not None
+        return transaction is not None and validated_cached_epc(transaction, record, conflicting_certificate_ids, recovery_context) is not None
     if record.get("status") == "no_match" and record.get("evidenceScope") == "retained-cache-only":
         # Finding no exact certificate in retained evidence is not a new
         # register search, even when its previous lookup timestamp is recent.
@@ -941,11 +951,12 @@ def without_unverified_epc(item):
     return cleaned
 
 
-def retained_certificate_index(cache):
+def retained_certificate_index(cache, recovery_context=None):
     """Retain original evidence/check dates, and quarantine contradictory IDs."""
 
     by_id = {}
     conflicts = set()
+    identity_uprns = {}
     for record in cache.get("records", {}).values():
         if not isinstance(record, dict) or record.get("status") != "matched":
             continue
@@ -956,6 +967,18 @@ def retained_certificate_index(cache):
         number = extract_certificate_number(certificate)
         if not number:
             continue
+        if recovery_context is not None:
+            from epc_recovery_identity import _certificate_uprn
+            try:
+                values = {_certificate_uprn(record[field])
+                          for field in ("certificateIdentity", "summaryIdentity")
+                          if isinstance(record.get(field), dict)} - {None}
+            except ValueError:
+                values = set()
+                conflicts.add(number)
+            identity_uprns.setdefault(number, set()).update(values)
+            if len(identity_uprns[number]) > 1:
+                conflicts.add(number)
         # Price/PPSF and original target address vary across sales; certificate
         # identity, area, rating and registration date must not vary by target.
         signature = (identity_text(epc.get("epcAddress")), certificate_postcode(certificate),
@@ -963,24 +986,40 @@ def retained_certificate_index(cache):
         if number in by_id and by_id[number][0] != signature:
             conflicts.add(number)
         else:
-            by_id.setdefault(number, (signature, record))
+            existing = by_id.get(number)
+            if recovery_context is not None and existing and "certificateIdentity" in record and "certificateIdentity" not in existing[1]:
+                by_id[number] = (signature, record)
+            else:
+                by_id.setdefault(number, (signature, record))
     by_postcode = {}
     for number, (_signature, record) in by_id.items():
         if number not in conflicts:
             postcode = certificate_postcode(retained_certificate(record["epc"]))
             if postcode:
                 by_postcode.setdefault(postcode, []).append(record)
+    if recovery_context is not None:
+        from epc_recovery_identity import TrustedRecoveryContext
+        if not isinstance(recovery_context, TrustedRecoveryContext):
+            raise ValueError("EPC recovery requires an explicitly verified context")
+        for property_id in recovery_context.properties:
+            candidates = {}
+            for transaction in recovery_context.rows_by_property[property_id]:
+                retained = cache.get("records", {}).get(stable_transaction_key(transaction), {})
+                number = (retained.get("epc") or {}).get("epcCertificateNumber")
+                if number in by_id and number not in conflicts:
+                    candidates[number] = by_id[number][1]
+            by_postcode["recovery:" + property_id] = list(candidates.values())
     return by_postcode, conflicts
 
 
-def revalidate_retained_cache(transactions, cache):
+def revalidate_retained_cache(transactions, cache, recovery_context=None):
     """Pure offline review: no network, no writes, no new source-check dates.
 
     This is a review of retained certificates, not proof of register coverage.
     Return candidate rows/cache for separately authorized private staging only.
     """
 
-    by_postcode, conflicts = retained_certificate_index(cache)
+    by_postcode, conflicts = retained_certificate_index(cache, recovery_context)
     reviewed_cache = copy.deepcopy(cache)
     reviewed_records = reviewed_cache.setdefault("records", {})
     rows, decisions = [], []
@@ -990,13 +1029,22 @@ def revalidate_retained_cache(transactions, cache):
         prior = cache.get("records", {}).get(key)
         eligible = []
         rejected = Counter()
-        candidates = by_postcode.get(normalise_postcode(transaction.get("postcode")), [])
+        candidate_keys = [normalise_postcode(transaction.get("postcode"))]
+        if recovery_context is not None:
+            from epc_recovery_identity import discovery_queries
+            candidate_keys.append("recovery:" + str(transaction.get("propertyRecordId") or ""))
+            candidate_keys.extend(query["postcode"] for query in discovery_queries(transaction, recovery_context) if "postcode" in query)
+        candidates_by_id = {}
+        for candidate_key in candidate_keys:
+            for candidate in by_postcode.get(candidate_key, []):
+                candidates_by_id[candidate["epc"]["epcCertificateNumber"]] = candidate
+        candidates = list(candidates_by_id.values())
         for record in candidates:
-            epc = validated_cached_epc(transaction, record)
+            epc = validated_cached_epc(transaction, record, conflicts, recovery_context)
             if epc:
                 eligible.append((epc["epcRegistrationDate"], epc["epcCertificateNumber"], epc, record))
             else:
-                accepted_identity, rejection = delivery_identity(transaction, retained_certificate(record["epc"]))
+                accepted_identity, rejection = _cache_delivery_identity(transaction, record, recovery_context)
                 rejected["invalid_retained_certificate_facts" if accepted_identity else rejection] += 1
         eligible.sort(key=lambda value: (value[0], value[1]), reverse=True)
         chosen = eligible[0] if eligible else None
@@ -1019,6 +1067,9 @@ def revalidate_retained_cache(transactions, cache):
                 "identityGuardVersion": IDENTITY_GUARD_VERSION,
                 "evidenceScope": "retained-cache-only", "identityReviewReason": reason,
             }
+            for field in ("certificateIdentity", "summaryIdentity", "certificateFetch", "recoveryMethod"):
+                if field in retained:
+                    reviewed_records[key][field] = copy.deepcopy(retained[field])
             disposition = "retained" if prior and (prior.get("epc") or {}).get("epcCertificateNumber") == epc["epcCertificateNumber"] else "replaced"
         else:
             disposition = "unknown"
@@ -1029,7 +1080,7 @@ def revalidate_retained_cache(transactions, cache):
             }
         counts[disposition] += 1
         prior_epc = (prior or {}).get("epc")
-        prior_reason = delivery_identity(transaction, retained_certificate(prior_epc))[1] if isinstance(prior_epc, dict) else "no_retained_match"
+        prior_reason = _cache_delivery_identity(transaction, prior, recovery_context)[1] if isinstance(prior_epc, dict) else "no_retained_match"
         decisions.append({"transactionId": transaction.get("id"), "disposition": disposition,
                           "reason": reason, "previousMatchIdentity": prior_reason,
                           "candidateRejections": dict(rejected), "eligibleRetainedCertificates": len(eligible)})
@@ -1041,11 +1092,11 @@ def revalidate_retained_cache(transactions, cache):
     }
 
 
-def terminal_cache_accounting(transactions, cache, refresh_days):
+def terminal_cache_accounting(transactions, cache, refresh_days, recovery_context=None):
     """Reconcile every current transaction key to fresh terminal evidence."""
 
     records = cache.get("records", {})
-    _index, conflicts = retained_certificate_index(cache)
+    _index, conflicts = retained_certificate_index(cache, recovery_context)
     matched = 0
     no_match = 0
     errors = 0
@@ -1057,7 +1108,7 @@ def terminal_cache_accounting(transactions, cache, refresh_days):
         status = record.get("status")
         if status == "error":
             errors += 1
-        elif status == "matched" and cache_record_is_fresh(record, refresh_days, item, conflicts):
+        elif status == "matched" and cache_record_is_fresh(record, refresh_days, item, conflicts, recovery_context):
             matched += 1
         elif status == "no_match" and cache_record_is_fresh(record, refresh_days, item):
             no_match += 1
@@ -1083,12 +1134,12 @@ def terminal_cache_can_reconcile(accounting, transaction_count):
     )
 
 
-def publication_matches_cache(transactions, cache):
+def publication_matches_cache(transactions, cache, recovery_context=None):
     """Equal counts cannot prove the published area/rating/PPSF is still right."""
 
-    _index, conflicts = retained_certificate_index(cache)
+    _index, conflicts = retained_certificate_index(cache, recovery_context)
     for transaction in transactions:
-        epc = validated_cached_epc(transaction, cache.get("records", {}).get(stable_transaction_key(transaction)), conflicts)
+        epc = validated_cached_epc(transaction, cache.get("records", {}).get(stable_transaction_key(transaction)), conflicts, recovery_context)
         expected = publishable_epc_fields(epc) if epc else {"epcMatched": False}
         actual = {key: value for key, value in transaction.items() if key in PUBLIC_EPC_FIELDS}
         if actual != expected:
