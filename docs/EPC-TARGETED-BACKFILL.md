@@ -15,6 +15,12 @@ commit a cache or update an application. The default monthly path is preserved.
 - Source app commit: `fc9565fd6abdde6ce3b74b888f3173fac2b66ea4`.
 - Input asset SHA-256: `30774d097d8578cc8025208d8bcf909c2bc4926134681d825f3211067ca6e082`.
 - Retained cache SHA-256: `099b1a55936663987dc1a3d8eca61f8e01774f548804547e3f63e2f33860eb82`.
+- Runner input: this repository's tracked feed, SHA-256
+  `e8d692733241e411ca9d403125cc0a70efd000ac42cff7e5bb64e92f97c77990`,
+  minus the one explicitly excluded transaction. Its 17 identity/sales fields
+  match the app's exact ordered cohort, fingerprint
+  `1dcc423f2b0fef79de4c7db9dc6b3581b5142ca1f973918e3fb9193ae9fdc06d`.
+  The runner does not need access to the private app repository.
 - All 4,738 IDs, ordering and non-EPC facts must remain unchanged. The separately
   excluded £112.5m transaction cannot enter this candidate.
 - Existing verified evidence is retained. Fresh searches target unresolved
@@ -46,10 +52,16 @@ run/source verification establishes which producer created the artifact.
 
 ## Subsequent application rebuild
 
-The decrypted result contains candidate rows and metadata, a private resumable
+The decrypted result contains EPC-only patches, EPC metadata, a private resumable
 cache, the initial identity decisions, minimized fetched certificate/search
-evidence and the aggregate report. Review recovered coverage and remaining
-identity problems before staging application assets.
+evidence and the aggregate report. Use
+`backfill_epc_candidate.apply_candidate_to_frozen_app(candidate, input_path)` on
+the Mac to produce private candidate rows. It verifies the original app asset,
+the full ordered ID cohort and every patch against the exact certificate cache.
+It changes only the seven EPC-derived fields and preserves the app's non-EPC hash.
+This avoids replacing private app planning, school, UPRN or estate context with
+the data repository's different projections. Review recovered coverage and
+remaining identity problems before staging application assets.
 
 Retained records preserve their original provider-check dates. Fresh records
 carry their own `searchedAt`. The candidate has a separate

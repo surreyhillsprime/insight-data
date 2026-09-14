@@ -61,6 +61,37 @@ class Opener:
 
 
 class CandidateMatchingTests(unittest.TestCase):
+    def test_epc_patches_preserve_app_context_and_clear_old_unknown_measurements(self):
+        original = sale(planningConstraints={"preserved": True}, floorAreaSqm=999,
+                        floorAreaSqft=10000, pricePerSqft=300, epcMatched=True)
+        cache = {"version": 3, "records": {}}
+        patched = candidate.apply_epc_patches([original], [{"id": original["id"], "epcMatched": False}], cache)
+        self.assertEqual(patched[0]["planningConstraints"], {"preserved": True})
+        self.assertNotIn("floorAreaSqm", patched[0])
+        self.assertNotIn("pricePerSqft", patched[0])
+        self.assertEqual(candidate.non_epc_digest([original]), candidate.non_epc_digest(patched))
+        for patch in [
+            {"id": "other", "epcMatched": False},
+            {"id": original["id"], "epcMatched": False, "uprn": "different"},
+            {"id": original["id"], "epcMatched": True, "floorAreaSqm": 200},
+        ]:
+            with self.assertRaises(ValueError):
+                candidate.apply_epc_patches([original], [patch], cache)
+        with self.assertRaises(ValueError):
+            candidate.apply_epc_patches([original], [], cache)
+
+    def test_patch_transport_contains_no_full_context_rows_or_source_metadata(self):
+        row = sale(planningConstraints={"private_context": True})
+        payload = {"rows": [row], "meta": {"epcEnrichment": {"status": "partial"},
+                   "propertyContext": "do not copy"}, "cache": {"records": {}}, "report": {}}
+        with patch.object(candidate, "COHORT_IDENTITY_SHA256", candidate.identity_digest([row])):
+            result = candidate.patch_candidate(payload)
+        self.assertNotIn("rows", result)
+        self.assertNotIn("meta", result)
+        self.assertNotIn("planningConstraints", result["epcPatches"][0])
+        self.assertNotIn("propertyContext", json.dumps(result))
+        self.assertEqual(result["frozenAppInputSha256"], candidate.INPUT_SHA256)
+
     def test_full_certificate_required_and_wrong_neighbour_rejected(self):
         client = MemoryClient([certificate(paon="8")])
         result = candidate.exact_register_match(sale(), client)

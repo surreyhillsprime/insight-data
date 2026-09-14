@@ -26,11 +26,15 @@ from insight_data_utils import read_js, utc_now
 
 ROOT = Path(__file__).resolve().parents[1]
 INPUT_COMMIT = "fc9565fd6abdde6ce3b74b888f3173fac2b66ea4"
-INPUT_URL = ("https://raw.githubusercontent.com/surreyhillsprime/Insight/"
-             + INPUT_COMMIT + "/outputs/surrey-transactions.js")
 INPUT_SHA256 = "30774d097d8578cc8025208d8bcf909c2bc4926134681d825f3211067ca6e082"
+SOURCE_FEED_SHA256 = "e8d692733241e411ca9d403125cc0a70efd000ac42cff7e5bb64e92f97c77990"
 CACHE_SHA256 = "099b1a55936663987dc1a3d8eca61f8e01774f548804547e3f63e2f33860eb82"
 NON_EPC_SHA256 = "bcb7df612a891e3b8bba3c8f5ed526c2619a43ae8351aae32025c8f6d893a97f"
+COHORT_IDENTITY_SHA256 = "1dcc423f2b0fef79de4c7db9dc6b3581b5142ca1f973918e3fb9193ae9fdc06d"
+EXCLUDED_TRANSACTION_ID = "lr-b4ed8ccb8d031a5ef07f"
+IDENTITY_FIELDS = ("id", "address", "saon", "paon", "street", "locality", "town",
+                   "district", "postcode", "price", "date", "propertyType", "category",
+                   "market", "estateId", "propertyRecordId", "county")
 TRANSACTIONS = 4738
 BASELINE_MATCHES = 2931
 MAX_RESPONSE_BYTES = 20 * 1024 * 1024
@@ -48,6 +52,11 @@ def non_epc_digest(rows):
                              ensure_ascii=False).encode())
 
 
+def identity_digest(rows):
+    return digest(json.dumps([{key: row.get(key) for key in IDENTITY_FIELDS} for row in rows],
+                             sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode())
+
+
 class NoRedirects(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, request, response, code, message, headers, new_url):
         return None
@@ -61,13 +70,13 @@ def bounded_body(response):
 
 
 def load_frozen_inputs(input_path=None):
-    if input_path:
-        raw = Path(input_path).read_bytes()
-    else:
-        request = urllib.request.Request(INPUT_URL, headers={"User-Agent": "INSIGHT EPC candidate"})
-        with urllib.request.build_opener(NoRedirects()).open(request, timeout=30) as response:
-            raw = bounded_body(response)
-    if digest(raw) != INPUT_SHA256:
+    # The app repository is private. Reconstruct only its exact sales/identity
+    # cohort from this repository's pinned feed; return EPC patches, never its
+    # different planning/UPRN/school/estate context as replacement app rows.
+    source = Path(input_path) if input_path else ROOT / "outputs" / "surrey-transactions.js"
+    raw = source.read_bytes()
+    expected = INPUT_SHA256 if input_path else SOURCE_FEED_SHA256
+    if digest(raw) != expected:
         raise ValueError("Frozen transaction input hash mismatch")
     cache_raw = (ROOT / "work" / "epc-cache.json").read_bytes()
     if digest(cache_raw) != CACHE_SHA256:
@@ -76,9 +85,60 @@ def load_frozen_inputs(input_path=None):
         path = Path(directory) / "transactions.js"
         path.write_bytes(raw)
         rows, _summary, meta = read_js(path)
-    if len(rows) != TRANSACTIONS or non_epc_digest(rows) != NON_EPC_SHA256:
+    if not input_path:
+        if len(rows) != TRANSACTIONS + 1 or sum(row.get("id") == EXCLUDED_TRANSACTION_ID for row in rows) != 1:
+            raise ValueError("Frozen exclusion must identify exactly one transaction")
+        rows = [row for row in rows if row.get("id") != EXCLUDED_TRANSACTION_ID]
+    if (len(rows) != TRANSACTIONS or identity_digest(rows) != COHORT_IDENTITY_SHA256
+            or len({row.get("id") for row in rows}) != TRANSACTIONS):
         raise ValueError("Frozen transaction cohort mismatch")
     return rows, meta, json.loads(cache_raw)
+
+
+def patch_candidate(payload):
+    """Transport only EPC changes for the separately pinned private app feed."""
+    rows = payload["rows"]
+    if identity_digest(rows) != COHORT_IDENTITY_SHA256:
+        raise ValueError("Candidate cohort identity changed")
+    result = {key: value for key, value in payload.items() if key not in ("rows", "meta")}
+    result.update({"schema": "insight.epc-patch-candidate.v1", "frozenAppInputSha256": INPUT_SHA256,
+                   "cohortIdentitySha256": COHORT_IDENTITY_SHA256,
+                   "epcEnrichment": payload["meta"]["epcEnrichment"],
+                   "epcPatches": [{"id": row["id"], **{key: value for key, value in row.items()
+                                                       if key in epc.PUBLIC_EPC_FIELDS}} for row in rows]})
+    return result
+
+
+def apply_epc_patches(rows, patches, cache):
+    if len(rows) != len(patches) or [row.get("id") for row in rows] != [row.get("id") for row in patches]:
+        raise ValueError("EPC patches must preserve the complete ordered transaction cohort")
+    result = []
+    for row, patch in zip(rows, patches):
+        if not set(patch) <= epc.PUBLIC_EPC_FIELDS | {"id"}:
+            raise ValueError("EPC patch contains non-EPC fields")
+        result.append({**epc.without_unverified_epc(row), **patch})
+    if non_epc_digest(result) != non_epc_digest(rows) or not epc.publication_matches_cache(result, cache):
+        raise ValueError("EPC patches do not reconcile to unchanged sales and exact certificates")
+    return result
+
+
+def apply_candidate_to_frozen_app(candidate, input_path):
+    source = Path(input_path)
+    if (candidate.get("schema") != "insight.epc-patch-candidate.v1"
+            or candidate.get("frozenAppInputSha256") != INPUT_SHA256
+            or candidate.get("cohortIdentitySha256") != COHORT_IDENTITY_SHA256
+            or digest(source.read_bytes()) != INPUT_SHA256):
+        raise ValueError("Candidate is not bound to the frozen application input")
+    rows, _summary, meta = read_js(source)
+    if non_epc_digest(rows) != NON_EPC_SHA256 or identity_digest(rows) != COHORT_IDENTITY_SHA256:
+        raise ValueError("Application cohort changed")
+    result = apply_epc_patches(rows, candidate["epcPatches"], candidate["cache"])
+    if sum(bool(row.get("epcMatched")) for row in result) != candidate["report"]["verifiedAfter"]:
+        raise ValueError("Candidate coverage does not reconcile to its patches")
+    previous_check = (meta.get("epcEnrichment") or {}).get("updatedAt")
+    meta["epcEnrichment"] = copy.deepcopy(candidate["epcEnrichment"])
+    meta["epcEnrichment"].update({"updatedAt": previous_check, "retainedEvidenceCheckedAt": previous_check})
+    return result, meta
 
 
 class RegisterClient:
@@ -371,6 +431,7 @@ def main():
     parser.add_argument("--input-js", type=Path, help="Optional local copy of the exact pinned input")
     args = parser.parse_args()
     os.umask(0o077)
+    print("EPC candidate stage: recipient validation", flush=True)
     recipient = os.environ.get("EPC_RESULT_PUBLIC_KEY", "")
     validate_recipient(recipient)
     token = os.environ.get("EPC_BEARER_TOKEN", "").strip()
@@ -378,17 +439,22 @@ def main():
         raise ValueError("EPC_BEARER_TOKEN is not configured")
     if args.output_dir.exists():
         raise ValueError("Output directory must be new")
+    print("EPC candidate stage: frozen cohort validation", flush=True)
     rows, meta, cache = load_frozen_inputs(args.input_js)
     baseline, _reviewed, _report = epc.revalidate_retained_cache(rows, cache)
     if sum(bool(item.get("epcMatched")) for item in baseline) != BASELINE_MATCHES:
         raise ValueError("Reviewed identity baseline changed")
+    print("EPC candidate stage: targeted register searches", flush=True)
     payload, report = backfill(rows, meta, cache, RegisterClient(token))
     report.update({"inputCommit": INPUT_COMMIT, "inputSha256": INPUT_SHA256,
                    "retainedCacheSha256": CACHE_SHA256,
+                   "sourceFeedSha256": SOURCE_FEED_SHA256,
+                   "cohortIdentitySha256": COHORT_IDENTITY_SHA256,
                    "producerCommit": os.environ.get("GITHUB_SHA", "local-uncommitted"),
                    "githubRunId": os.environ.get("GITHUB_RUN_ID", "local"),
                    "githubRunAttempt": os.environ.get("GITHUB_RUN_ATTEMPT", "local")})
-    seal_result(payload, report, recipient, args.output_dir)
+    print("EPC candidate stage: encrypted patch result", flush=True)
+    seal_result(patch_candidate(payload), report, recipient, args.output_dir)
     print(json.dumps(report, sort_keys=True))
     return 0 if report["sourceAccounting"]["pending"] == 0 else 2
 
