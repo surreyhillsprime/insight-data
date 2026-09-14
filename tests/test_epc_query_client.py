@@ -341,6 +341,81 @@ class GeneralizedRegisterQueryTests(unittest.TestCase):
                 self.assertNotIn("synthetic-private-contact", json.dumps(retained))
                 self.assertEqual(client._inflight, {})
 
+    def test_quantity_measurements_survive_full_transport_cache_and_evidence_replay(self):
+        parts = [{"building_part_number": 1, "sap_floor_dimensions": [
+            {"storey": 0, "total_floor_area": {"value": 100.2, "quantity": "square metres"}},
+            {"storey": 1, "total_floor_area": {"value": 100.2, "quantity": "square metres"}},
+            {"storey": 99, "total_floor_area": {"value": 20.2, "quantity": "sq m"}},
+        ], "sap_room_in_roof": {"floor_area": {"value": 20.2, "quantity": "square metres"}}}]
+        transaction = {"address": "1 TEST ROAD, BAGSHOT", "postcode": "GU19 5AE",
+                       "paon": "1", "saon": "", "street": "TEST ROAD", "town": "BAGSHOT",
+                       "price": 3000000}
+        for schema, declared, expected_area in (
+            ("SAP-Schema-13.0", None, 221.0),
+            ("RdSAP-Schema-20.0.0", {"value": 270.4, "quantity": "square metres"}, 270.4),
+        ):
+            with self.subTest(schema=schema):
+                item = certificate(schemaType=schema, sap_building_parts=copy.deepcopy(parts))
+                if declared is None:
+                    del item["totalFloorArea"]
+                else:
+                    item["totalFloorArea"] = declared
+                opener = SyntheticOpener(lambda _, item=item: response({"data": item}))
+                client = candidate.RegisterClient("synthetic", opener=opener, spacing=0)
+                client.prefetch_certificates(["one", "one"])
+                full = client.certificate("one")
+                self.assertEqual(client.requests, 1)
+                self.assertIs(full, client.certificates["one"])
+                self.assertEqual(client._failures, {})
+                evidence = candidate.retained_register_evidence(client)
+                retained = evidence["requestedCertificates"]["one"]
+                self.assertEqual(retained["sap_building_parts"], parts)
+                measured = candidate.epc.floor_area_evidence(retained)
+                self.assertEqual(measured, candidate.epc.floor_area_evidence(item))
+                self.assertEqual(measured, candidate.epc.floor_area_evidence(full))
+                self.assertEqual(measured["areaSqm"], expected_area)
+                if declared is None:
+                    self.assertEqual(measured["unroundedAreaSqm"], 220.6)
+                    self.assertEqual(len(measured["components"]), 3)
+                    self.assertEqual(measured["components"][-1]["reconciliation"],
+                                     "same-building-part-roof-99")
+                matched = candidate.checked_certificate_record(transaction, "one", retained, certificate())
+                self.assertEqual(matched["status"], "matched")
+                self.assertEqual(matched["epc"]["floorAreaSqm"], expected_area)
+                self.assertEqual(matched["epc"]["floorAreaSqft"], round(expected_area * candidate.epc.SQM_TO_SQFT))
+                json.dumps(evidence, allow_nan=False)
+
+    def test_quantity_objects_reject_extra_fields_and_nonfinite_values_before_caching(self):
+        for location in ("declared", "dimension", "roof"):
+            for invalid in ("extra", "nonfinite"):
+                with self.subTest(location=location, invalid=invalid):
+                    quantity = {"value": 150, "quantity": "square metres"}
+                    if invalid == "extra":
+                        quantity["contact"] = "synthetic-private-contact"
+                        expected = "invalid_full_certificate_evidence"
+                    else:
+                        quantity["value"] = float("inf")
+                        expected = "invalid_register_json"
+                    item = certificate(schemaType="SAP-Schema-13.0")
+                    if location == "declared":
+                        item["totalFloorArea"] = quantity
+                    elif location == "dimension":
+                        item["sap_building_parts"] = [{"building_part_number": 1,
+                            "sap_floor_dimensions": [{"floor": 0, "total_floor_area": quantity}]}]
+                    else:
+                        item["sap_building_parts"] = [{"building_part_number": 1,
+                            "sap_room_in_roof": {"floor_area": quantity}}]
+                    client = candidate.RegisterClient("synthetic", opener=SyntheticOpener(
+                        lambda _, item=item: response({"data": item})), spacing=0)
+                    client.prefetch_certificates(["one"])
+                    with self.assertRaisesRegex(RuntimeError, "^" + expected + "$"):
+                        client.certificate("one")
+                    self.assertEqual(client.requests, 1)
+                    self.assertEqual(client.certificates, {})
+                    retained = candidate.retained_register_evidence(client)
+                    self.assertEqual(retained, {"postcodeSearches": {}, "requestedCertificates": {}})
+                    self.assertNotIn("synthetic-private-contact", json.dumps(retained, allow_nan=False))
+
     def test_nonfinite_provider_numbers_never_poison_cached_or_sealed_evidence(self):
         for number in ("NaN", "Infinity", "-Infinity", "1e400", "-1e400"):
             for kind in ("query", "legacy", "certificate"):

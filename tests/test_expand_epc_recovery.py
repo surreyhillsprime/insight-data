@@ -6,10 +6,11 @@ import gzip
 import io
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import ExitStack, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -18,6 +19,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import backfill_epc_candidate as base
 import enrich_epc_data as epc
 import expand_epc_recovery as recovery
+import epc_candidate_result as sealed_result
 from epc_recovery_identity import cohort_digest, context_digest, load_recovery_context
 from insight_data_utils import utc_now
 from tests.test_epc_backfill_candidate import certificate
@@ -267,6 +269,137 @@ class RecoveryEntrypointTests(unittest.TestCase):
                 recovery.main()
             client.assert_not_called()
             seal.assert_not_called()
+
+
+class RecoveryDiagnosticTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.keys = tempfile.TemporaryDirectory(prefix="epc-diagnostic-test-keys-")
+        cls.private = Path(cls.keys.name) / "private.pem"
+        sealed_result._write_private(cls.private, b"")
+        subprocess.run([sealed_result.OPENSSL, "genpkey", "-algorithm", "RSA", "-pkeyopt",
+                        "rsa_keygen_bits:3072", "-out", str(cls.private)],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        cls.public = sealed_result._openssl(["pkey", "-in", str(cls.private), "-pubout"]).decode("ascii")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.keys.cleanup()
+
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory(prefix="epc-diagnostic-test-")
+        self.addCleanup(self.directory.cleanup)
+        self.destination = Path(self.directory.name) / "result"
+        self.rows = [target(id="first"), target("8", id="other")]
+        self.context, _ = trusted(self.rows, {self.rows[0]["propertyRecordId"]: {}})
+        self.context_bytes = base64.b64encode(gzip.compress(json.dumps(self.context).encode())).decode()
+        self.client = FixtureRegister([certificate()])
+        self.environment = {
+            "EPC_BEARER_TOKEN": "synthetic-token", "EPC_RESULT_PUBLIC_KEY": self.public,
+            "EPC_RECOVERY_CONTEXT_B64": self.context_bytes,
+            "EPC_RECOVERY_CONTEXT_SHA256": context_digest(self.context),
+            "GITHUB_SHA": "b" * 40, "GITHUB_RUN_ID": "123", "GITHUB_RUN_ATTEMPT": "1",
+        }
+
+    def run_main(self, *extra_patches):
+        with ExitStack() as stack:
+            stack.enter_context(patch.dict(os.environ, self.environment, clear=True))
+            stack.enter_context(patch.object(sys, "argv", ["expand_epc_recovery", "--output-dir", str(self.destination)]))
+            stack.enter_context(patch.object(base, "load_frozen_inputs", return_value=(self.rows, {}, {"records": {}})))
+            stack.enter_context(patch.object(base, "COHORT_IDENTITY_SHA256", base.identity_digest(self.rows)))
+            stack.enter_context(patch.object(base, "RegisterClient", return_value=self.client))
+            for item in extra_patches:
+                stack.enter_context(item)
+            output = stack.enter_context(redirect_stdout(io.StringIO()))
+            status = recovery.main()
+        return status, output.getvalue()
+
+    def test_scope_failure_retains_decryptable_baseline_but_never_admits_candidate(self):
+        status, output = self.run_main()
+        self.assertEqual(status, 1)
+        self.assertEqual(self.client.query_searches, {})
+        opened = sealed_result.open_result(self.destination, self.private)
+        diagnostic, receipt = opened["payload"], opened["public_receipt"]
+        self.assertEqual(diagnostic["schema"], recovery.DIAGNOSTIC_SCHEMA)
+        self.assertFalse(diagnostic["candidateUsable"])
+        self.assertFalse(diagnostic["publicationPerformed"])
+        self.assertEqual(receipt["code"], "recovery_context_missing_newly_unresolved")
+        self.assertEqual(receipt["status"], "failed")
+        self.assertEqual(receipt["producerCommit"], "b" * 40)
+        self.assertEqual(receipt["recoveryContextSha256"], context_digest(self.context))
+        self.assertEqual(receipt["strictBaselineTransactions"], 2)
+        self.assertEqual(receipt["strictBaselineVerifiedSales"], 1)
+        self.assertEqual(set(receipt), {"status", "stage", "code", "candidateUsable", "publicationPerformed",
+            "strictBaselineTransactions", "strictBaselineVerifiedSales", "strictBaselineHttpRequests",
+            "inputCommit", "inputSha256", "retainedCacheSha256", "sourceFeedSha256", "cohortIdentitySha256",
+            "recoveryContextSha256", "producerCommit", "githubRunId", "githubRunAttempt"})
+        baseline = diagnostic["strictBaseline"]
+        self.assertEqual([row["id"] for row in baseline["epcPatches"]], [row["id"] for row in self.rows])
+        self.assertEqual(baseline["registerEvidence"]["requestedCertificates"]["synthetic-one"],
+                         base.minimized_certificate(certificate()))
+        self.assertEqual(set(baseline), {"epcPatches", "epcEnrichment", "cache", "registerEvidence", "report"})
+        self.assertTrue(base.apply_epc_patches(self.rows, baseline["epcPatches"], baseline["cache"])[0]["epcMatched"])
+        # Schema rejection must precede even opening the original private app asset.
+        with self.assertRaisesRegex(ValueError, "not bound to the frozen"):
+            base.apply_candidate_to_frozen_app(diagnostic, self.destination / "does-not-exist")
+        self.assertEqual({path.name for path in self.destination.iterdir()}, {"result.enc", "result.key", "receipt.json"})
+        for value in (self.rows[0]["address"], self.rows[0]["propertyRecordId"], "synthetic-one",
+                      "synthetic-token", self.context_bytes):
+            self.assertNotIn(value, output)
+            for path in self.destination.iterdir():
+                self.assertNotIn(value.encode(), path.read_bytes())
+
+    def test_unexpected_exception_body_and_credentials_are_never_captured(self):
+        private_error = "Bearer synthetic-private-secret; confidential provider body"
+        status, output = self.run_main(patch.object(recovery, "expanded_recovery", side_effect=RuntimeError(private_error)))
+        self.assertEqual(status, 1)
+        opened = sealed_result.open_result(self.destination, self.private)
+        self.assertEqual(opened["public_receipt"]["code"], "expanded_validation_failed")
+        for value in (private_error, "synthetic-private-secret", "synthetic-token", self.context_bytes):
+            self.assertNotIn(value, json.dumps(opened))
+            self.assertNotIn(value, output)
+
+    def test_unrelated_baseline_additions_are_excluded_and_credentials_fail_closed(self):
+        baseline, _ = base.backfill(self.rows, {}, {"records": {}}, self.client)
+        baseline["Authorization"] = "Bearer synthetic-extra-secret"
+        status, output = self.run_main(patch.object(base, "backfill", return_value=(baseline, baseline["report"])))
+        self.assertEqual(status, 1)
+        opened = sealed_result.open_result(self.destination, self.private)
+        self.assertNotIn("synthetic-extra-secret", json.dumps(opened))
+        # A credential embedded in a required retained field cannot be sealed.
+        other = Path(self.directory.name) / "rejected"
+        self.destination = other
+        baseline["cache"]["Authorization"] = "Bearer synthetic-retained-secret"
+        status, output = self.run_main(patch.object(base, "backfill", return_value=(baseline, baseline["report"])))
+        self.assertEqual(status, 1)
+        self.assertFalse(other.exists())
+        self.assertNotIn("synthetic-retained-secret", output)
+
+    def test_minimization_and_encryption_failures_have_no_plaintext_fallback(self):
+        for failure in (
+            patch.object(base, "patch_candidate", side_effect=ValueError("Bearer synthetic-minimization-secret")),
+            patch.object(sealed_result, "_aes", side_effect=ValueError("Bearer synthetic-encryption-secret")),
+        ):
+            with self.subTest(failure=failure.attribute):
+                status, output = self.run_main(failure)
+                self.assertEqual(status, 1)
+                self.assertFalse(self.destination.exists())
+                self.assertNotIn("secret", output)
+                self.assertIn("no feed or cache was published", output)
+
+    def test_untrusted_run_pin_is_not_echoed_or_sealed(self):
+        self.environment["GITHUB_RUN_ID"] = "synthetic-private-run-body"
+        status, output = self.run_main()
+        self.assertEqual(status, 1)
+        self.assertFalse(self.destination.exists())
+        self.assertNotIn("synthetic-private-run-body", output)
+
+    def test_failure_before_baseline_completion_is_not_retained_as_reviewed(self):
+        with patch.object(recovery, "seal_result") as seal:
+            with self.assertRaises(RuntimeError):
+                self.run_main(patch.object(base, "backfill", side_effect=RuntimeError("synthetic-failure")))
+            seal.assert_not_called()
+        self.assertFalse(self.destination.exists())
 
 
 if __name__ == "__main__":

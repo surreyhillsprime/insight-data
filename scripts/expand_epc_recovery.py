@@ -34,6 +34,11 @@ MAX_CONTEXT_BYTES = 512 * 1024
 MAX_QUERIES_PER_PROPERTY = 32
 MAX_CERTIFICATES_PER_PROPERTY = 32
 STRATEGY_VERSION = 1
+DIAGNOSTIC_SCHEMA = "insight.epc-recovery-diagnostic.v1"
+
+
+class RecoveryContextScopeError(ValueError):
+    """The completed baseline contains unresolved properties outside approval."""
 
 
 def _unique_object(pairs):
@@ -159,7 +164,7 @@ def expanded_recovery(baseline_payload, context_payload, context, client):
     if not currently_missing <= target_ids:
         # A newly withdrawn baseline certificate needs an updated, reviewed
         # context too. Never quietly omit it from an all-missing recovery run.
-        raise ValueError("Recovery context omits newly unresolved properties")
+        raise RecoveryContextScopeError("Recovery context omits newly unresolved properties")
     plans, pending, exact_by_property, candidate_counts = {}, {}, {}, {}
     for property_id in sorted(target_ids):
         try:
@@ -271,6 +276,57 @@ def expanded_recovery(baseline_payload, context_payload, context, client):
             "registerEvidence":base.retained_register_evidence(client), "report":report}, report
 
 
+def failed_expansion_diagnostic(baseline, context_payload, code):
+    """Retain only the already completed baseline, never a failed candidate.
+
+    Its register evidence was minimized before backfill returned. Do not inspect
+    the live client, exceptions or environment credentials at this boundary.
+    The outer diagnostic schema deliberately fails normal candidate admission.
+    """
+    if code not in {"recovery_context_missing_newly_unresolved", "expanded_validation_failed"}:
+        raise ValueError("Unsupported diagnostic failure code")
+    source = {
+        "inputCommit": base.INPUT_COMMIT, "inputSha256": base.INPUT_SHA256,
+        "retainedCacheSha256": base.CACHE_SHA256, "sourceFeedSha256": base.SOURCE_FEED_SHA256,
+        "cohortIdentitySha256": base.COHORT_IDENTITY_SHA256,
+        "recoveryContextSha256": context_digest(context_payload),
+        "producerCommit": os.environ.get("GITHUB_SHA", "local-uncommitted"),
+        "githubRunId": os.environ.get("GITHUB_RUN_ID", "local"),
+        "githubRunAttempt": os.environ.get("GITHUB_RUN_ATTEMPT", "local"),
+    }
+    for key, value in source.items():
+        if key in {"githubRunId", "githubRunAttempt"}:
+            valid = isinstance(value, str) and (value == "local" or re.fullmatch(r"[1-9][0-9]{0,19}", value))
+        elif key == "producerCommit" and value == "local-uncommitted":
+            valid = True
+        else:
+            valid = isinstance(value, str) and re.fullmatch(r"[0-9a-f]{40}" if key.endswith("Commit") else r"[0-9a-f]{64}", value)
+        if not valid:
+            raise ValueError("Diagnostic source binding is invalid")
+    # Select fields explicitly: neither unrelated future payload additions nor
+    # an exception body can silently enter the retained diagnostic.
+    selected = {key: baseline[key] for key in ("rows", "meta", "cache", "registerEvidence", "report")}
+    projected = base.patch_candidate(selected)
+    rows = baseline["rows"]
+    report = baseline["report"]
+    verified = sum(row.get("epcMatched") is True for row in rows)
+    counts = {"strictBaselineTransactions": len(rows), "strictBaselineVerifiedSales": verified,
+              "strictBaselineHttpRequests": report["httpRequests"]}
+    if (any(type(value) is not int or value < 0 for value in counts.values())
+            or report.get("transactions") != len(rows) or report.get("verifiedAfter") != verified):
+        raise ValueError("Diagnostic baseline accounting is invalid")
+    receipt = {"status": "failed", "stage": "expanded_recovery", "code": code,
+               "candidateUsable": False, "publicationPerformed": False, **counts, **source}
+    diagnostic = {
+        "schema": DIAGNOSTIC_SCHEMA, "candidateUsable": False, "publicationPerformed": False,
+        "failure": {key: receipt[key] for key in ("status", "stage", "code")},
+        "source": source,
+        "strictBaseline": copy.deepcopy({key: projected[key] for key in
+            ("epcPatches", "epcEnrichment", "cache", "registerEvidence", "report")}),
+    }
+    return diagnostic, receipt
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -292,7 +348,20 @@ def main():
     baseline, baseline_report = base.backfill(rows, meta, cache, client)
     print(json.dumps({"stage":"strict_baseline_rechecked", "verifiedSales":baseline_report["verifiedAfter"],
                       "requests":client.requests}), flush=True)
-    payload, report = expanded_recovery(baseline, context_payload, context, client)
+    try:
+        payload, report = expanded_recovery(baseline, context_payload, context, client)
+    except Exception as error:
+        code = ("recovery_context_missing_newly_unresolved" if isinstance(error, RecoveryContextScopeError)
+                else "expanded_validation_failed")
+        try:
+            diagnostic, receipt = failed_expansion_diagnostic(baseline, context_payload, code)
+            seal_result(diagnostic, receipt, recipient, args.output_dir)
+        except Exception:
+            # No plaintext fallback, raw exception or second output destination.
+            print("Expanded EPC recovery failed validation; no feed or cache was published.")
+            return 1
+        print(json.dumps(receipt, sort_keys=True), flush=True)
+        return 1
     report.update(inputCommit=base.INPUT_COMMIT, inputSha256=base.INPUT_SHA256,
                   retainedCacheSha256=base.CACHE_SHA256, sourceFeedSha256=base.SOURCE_FEED_SHA256,
                   cohortIdentitySha256=base.COHORT_IDENTITY_SHA256,

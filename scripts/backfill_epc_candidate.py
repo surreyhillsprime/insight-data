@@ -636,7 +636,7 @@ def minimized_certificate(item):
             raise ValueError("Non-finite field in minimized certificate")
         if value is None or type(value) in (str, int, float, bool):
             return value
-        if (area and isinstance(value, dict) and set(value) == {"value", "unit"}
+        if (area and isinstance(value, dict) and set(value) in ({"value", "unit"}, {"value", "quantity"})
                 and all(part is None or type(part) in (str, int, float, bool)
                         for part in value.values())):
             return {key: scalar(part) for key, part in value.items()}
