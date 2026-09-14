@@ -3,6 +3,17 @@ name: Monthly INSIGHT Property Refresh
 on:
   workflow_call:
   workflow_dispatch:
+    inputs:
+      epc_backfill_only:
+        description: "Run an isolated EPC candidate backfill without publishing data"
+        required: false
+        type: boolean
+        default: false
+      epc_result_public_key:
+        description: "PEM RSA recipient public key for the encrypted EPC candidate result"
+        required: false
+        type: string
+        default: ""
   schedule:
     - cron: "0 6 1 * *"
 
@@ -10,7 +21,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: insight-data-refresh
+  group: insight-data-refresh${{ github.event_name == 'workflow_dispatch' && inputs.epc_backfill_only && '-epc-backfill' || '' }}
   queue: max
   cancel-in-progress: false
 
@@ -20,6 +31,7 @@ env:
 
 jobs:
   monthly-property-refresh:
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.epc_backfill_only }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
 
@@ -67,6 +79,42 @@ jobs:
             git commit -m "Checkpoint INSIGHT monthly property data"
             git push origin "HEAD:$STAGING_BRANCH"
           fi
+
+  epc-backfill:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.epc_backfill_only }}
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out the exact requested revision without stored credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify runner cryptography and EPC contracts before provider access
+        run: PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=scripts python3 -m unittest tests.test_epc_backfill_candidate tests.test_epc_backfill_workflow tests.test_epc_candidate_result tests.test_epc_identity tests.test_publication_contract
+
+      - name: Backfill the reviewed EPC candidate and encrypt its private result
+        env:
+          EPC_BEARER_TOKEN: ${{ secrets.EPC_BEARER_TOKEN }}
+          EPC_RESULT_PUBLIC_KEY: ${{ inputs.epc_result_public_key }}
+        run: python3 scripts/backfill_epc_candidate.py --output-dir "$RUNNER_TEMP/insight-epc-result"
+
+      - name: Retain only the encrypted result and safe receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: epc-backfill-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/insight-epc-result/*.enc
+            ${{ runner.temp }}/insight-epc-result/*.key
+            ${{ runner.temp }}/insight-epc-result/receipt.json
+          retention-days: 3
+          if-no-files-found: error
+          overwrite: false
 
   refresh-epc:
     needs: monthly-property-refresh
