@@ -16,7 +16,7 @@ BACKFILL_IF = "${{ github.event_name == 'workflow_dispatch' && inputs.epc_backfi
 MONTHLY_IF = "${{ github.event_name != 'workflow_dispatch' || !inputs.epc_backfill_only }}"
 PREFLIGHT = (
     "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=scripts python3 -m unittest "
-    "tests.test_epc_backfill_candidate tests.test_epc_backfill_workflow "
+    "tests.test_epc_backfill_candidate tests.test_epc_backfill_concurrency tests.test_epc_backfill_workflow "
     "tests.test_epc_candidate_result tests.test_epc_identity tests.test_publication_contract"
 )
 

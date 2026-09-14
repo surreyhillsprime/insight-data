@@ -12,11 +12,13 @@ import json
 import os
 import re
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import date, datetime, timezone
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import enrich_epc_data as epc
@@ -142,12 +144,18 @@ def apply_candidate_to_frozen_app(candidate, input_path):
 
 
 class RegisterClient:
-    """A fixed-origin, bounded client; provider responses never enter public logs."""
+    """Fixed-origin retrieval with shared budgets and single-flight evidence caches."""
 
     def __init__(self, token, *, opener=None, sleep=time.sleep, max_requests=5000,
                  max_seconds=2700, spacing=0.3):
         self.token = token
-        self.opener = opener or urllib.request.build_opener(NoRedirects())
+        self.opener = opener
+        self._thread_local = threading.local()
+        self._lock = threading.Lock()
+        self._admission_lock = threading.Lock()
+        self._inflight = {}
+        self._failures = {}
+        self._next_request_at = 0
         self.sleep = sleep
         self.max_requests = max_requests
         self.deadline = time.monotonic() + max_seconds
@@ -157,23 +165,115 @@ class RegisterClient:
         self.certificates = {}
         self.auth_failed = False
 
+    def _request_opener(self):
+        if self.opener is not None:
+            return self.opener
+        if not hasattr(self._thread_local, "opener"):
+            self._thread_local.opener = urllib.request.build_opener(NoRedirects())
+        return self._thread_local.opener
+
+    def _admit_request(self):
+        # Serialize pacing, but release the state lock while sleeping so an
+        # authentication failure from another worker can stop this admission.
+        with self._admission_lock:
+            with self._lock:
+                if self.auth_failed:
+                    raise RuntimeError("register_authentication_failed")
+                now = time.monotonic()
+                if self.requests >= self.max_requests or now >= self.deadline:
+                    raise RuntimeError("register_budget_reached")
+                delay = max(0, self._next_request_at - now)
+                if now + delay >= self.deadline:
+                    raise RuntimeError("register_budget_reached")
+            if delay:
+                self.sleep(delay)
+            with self._lock:
+                if self.auth_failed:
+                    raise RuntimeError("register_authentication_failed")
+                now = time.monotonic()
+                if self.requests >= self.max_requests or now >= self.deadline:
+                    raise RuntimeError("register_budget_reached")
+                self.requests += 1
+                self._next_request_at = now + self.spacing
+
+    def _cached_lookup(self, kind, key, cache, retrieve):
+        identity = (kind, key)
+        while True:
+            with self._lock:
+                if key in cache:
+                    return cache[key]
+                if self.auth_failed:
+                    raise RuntimeError("register_authentication_failed")
+                if identity in self._failures:
+                    raise RuntimeError(self._failures[identity])
+                event = self._inflight.get(identity)
+                if event is None:
+                    event = self._inflight[identity] = threading.Event()
+                    owner = True
+                else:
+                    owner = False
+            if owner:
+                break
+            event.wait()
+        try:
+            result = retrieve()
+            with self._lock:
+                cache[key] = result
+            return result
+        except BaseException as error:
+            # Do not preserve provider bodies, exception objects or credentials
+            # in the shared failure cache. Always release duplicate waiters,
+            # including when an unexpected exception interrupts retrieval.
+            reason = str(error) if isinstance(error, RuntimeError) else "register_unexpected_failure"
+            if not re.fullmatch(r"[a-z][a-z0-9_]{0,79}", reason):
+                reason = "register_request_failed"
+            with self._lock:
+                self._failures[identity] = reason
+            if isinstance(error, RuntimeError):
+                raise RuntimeError(reason) from None
+            raise
+        finally:
+            with self._lock:
+                self._inflight.pop(identity, None)
+                event.set()
+
+    @staticmethod
+    def _prefetch(values, retrieve):
+        def attempt(value):
+            try:
+                retrieve(value)
+            except RuntimeError:
+                # The normal matching path will receive the cached symbolic
+                # failure and account for this item as unresolved.
+                pass
+
+        with ThreadPoolExecutor(max_workers=4, thread_name_prefix="epc-register") as pool:
+            for _ in pool.map(attempt, values):
+                pass
+
+    def prefetch_searches(self, rows):
+        unique = {}
+        for row in rows:
+            postcode = epc.normalise_postcode(row.get("postcode"))
+            if postcode:
+                unique.setdefault(postcode, row)
+        self._prefetch(unique.values(), self.search)
+
+    def prefetch_certificates(self, numbers):
+        self._prefetch(dict.fromkeys(numbers), self.certificate)
+
     def request(self, path, params):
         if path not in ("/api/domestic/search", "/api/certificate"):
             raise ValueError("Unsupported EPC endpoint")
-        if self.auth_failed:
-            raise RuntimeError("register_authentication_failed")
         url = API_BASE + path + "?" + urllib.parse.urlencode(params)
         for attempt in range(3):
-            if self.requests >= self.max_requests or time.monotonic() >= self.deadline:
-                raise RuntimeError("register_budget_reached")
-            self.sleep(self.spacing)
-            self.requests += 1
+            self._admit_request()
             request = urllib.request.Request(url, headers={
                 "Authorization": "Bearer " + self.token, "Accept": "application/json",
                 "User-Agent": "INSIGHT verified EPC backfill",
             })
             try:
-                with self.opener.open(request, timeout=15) as response:
+                with self._request_opener().open(request, timeout=15) as response:
                     payload = json.loads(bounded_body(response))
                 if not isinstance(payload, dict):
                     raise RuntimeError("invalid_register_response")
@@ -185,7 +285,8 @@ class RegisterClient:
                     return {"data": [], "pagination": {
                         "totalRecords": 0, "currentPage": 1, "totalPages": 0}}
                 if code in (401, 403):
-                    self.auth_failed = True
+                    with self._lock:
+                        self.auth_failed = True
                 if code in (429, 500, 502, 503, 504) and attempt < 2:
                     self.sleep(15 * (attempt + 1))
                     continue
@@ -205,8 +306,10 @@ class RegisterClient:
             # The matcher requires postcode identity; an unscoped address
             # search cannot establish the missing delivery-point evidence.
             raise RuntimeError("property_postcode_unresolved")
-        if postcode in self.searches:
-            return self.searches[postcode]
+        return self._cached_lookup("search", postcode, self.searches,
+                                   lambda: self._search(postcode))
+
+    def _search(self, postcode):
         rows = []
         expected_total = None
         for page in range(1, 21):
@@ -247,26 +350,26 @@ class RegisterClient:
         numbers = [epc.extract_certificate_number(item) for item in rows]
         if any(not value for value in numbers) or len(set(numbers)) != len(numbers):
             raise RuntimeError("duplicate_or_missing_search_identifier")
-        self.searches[postcode] = rows
         return rows
 
     def certificate(self, number):
-        if number not in self.certificates:
-            payload = self.request("/api/certificate", {"certificate_number": number})
-            data = payload.get("data")
-            if not isinstance(data, dict) or not data:
-                raise RuntimeError("certificate_unavailable")
-            # The register's documented RdSAP full-record schemas can omit
-            # the identifier. Bind such responses to this exact request and
-            # independently require full address and registration-date identity.
-            if epc.extract_certificate_number(data) not in ("", number):
-                raise RuntimeError("certificate_number_conflict")
-            self.certificates[number] = data
-        return self.certificates[number]
+        return self._cached_lookup("certificate", number, self.certificates,
+                                   lambda: self._certificate(number))
+
+    def _certificate(self, number):
+        payload = self.request("/api/certificate", {"certificate_number": number})
+        data = payload.get("data")
+        if not isinstance(data, dict) or not data:
+            raise RuntimeError("certificate_unavailable")
+        # The register's documented RdSAP full-record schemas can omit
+        # the identifier. Bind such responses to this exact request and
+        # independently require full address and registration-date identity.
+        if epc.extract_certificate_number(data) not in ("", number):
+            raise RuntimeError("certificate_number_conflict")
+        return data
 
 
-def exact_register_match(transaction, client):
-    candidates = client.search(transaction)
+def exact_summaries(transaction, candidates):
     exact = {}
     for item in candidates:
         if epc.delivery_identity(transaction, item)[0]:
@@ -276,47 +379,60 @@ def exact_register_match(transaction, client):
             exact[number] = item
     if len(exact) > 32:
         raise RuntimeError("exact_certificate_review_limit")
+    return exact
+
+
+def checked_certificate_record(transaction, number, certificate, summary):
+    """Rebuild measurements only from the requested full certificate."""
+    if epc.extract_certificate_number(certificate) not in ("", number):
+        raise RuntimeError("certificate_number_conflict")
+    if not epc.delivery_identity(transaction, summary)[0] or not epc.delivery_identity(transaction, certificate)[0]:
+        raise RuntimeError("full_certificate_identity_conflict")
+    registered = epc.extract_registration_date(certificate)
+    try:
+        if date.fromisoformat(registered) > datetime.now(timezone.utc).date():
+            raise ValueError("Future certificate")
+    except (TypeError, ValueError):
+        raise RuntimeError("invalid_certificate_date") from None
+    summary_date = epc.extract_registration_date(summary)
+    if summary_date and summary_date != registered:
+        raise RuntimeError("certificate_registration_conflict")
+    summary_uprn, full_uprn = summary.get("uprn"), certificate.get("uprn")
+    if summary_uprn and full_uprn and str(summary_uprn).lstrip("0") != str(full_uprn).lstrip("0"):
+        raise RuntimeError("certificate_uprn_conflict")
+    measurement = epc.floor_area_evidence(certificate)
+    if not measurement:
+        return None
+    area = measurement["areaSqm"]
+    sqft = round(area * epc.SQM_TO_SQFT)
+    result = {"status": "matched", "identityGuardVersion": epc.IDENTITY_GUARD_VERSION,
+              "epc": {
+                  "epcMatched": True, "floorAreaSqm": round(area, 1),
+                  "floorAreaSqft": sqft, "pricePerSqft": round(transaction["price"] / sqft),
+                  "epcRating": epc.extract_rating(certificate) or epc.extract_rating(summary),
+                  "epcRegistrationDate": registered, "epcCertificateNumber": number,
+                  "epcAddress": epc.candidate_address(certificate), "epcMatchScore": 1.0,
+                  "epcSource": "MHCLG EPC Register",
+              }, "floorAreaEvidence": measurement,
+              "certificateFetch": {"requestedNumber": number,
+                  "returnedNumber": epc.extract_certificate_number(certificate), "uprn": full_uprn,
+                  "summaryRegistrationDate": summary_date,
+                  "summaryRating": epc.extract_rating(summary)}}
+    return result if epc.validated_cached_epc(transaction, result) else None
+
+
+def exact_register_match(transaction, client):
+    candidates = client.search(transaction)
+    exact = exact_summaries(transaction, candidates)
     admitted = []
     latest_seen = ""
     unusable_dates = set()
     for number in sorted(exact):
         certificate = client.certificate(number)
-        if epc.extract_certificate_number(certificate) not in ("", number):
-            raise RuntimeError("certificate_number_conflict")
-        if not epc.delivery_identity(transaction, certificate)[0]:
-            raise RuntimeError("full_certificate_identity_conflict")
+        record = checked_certificate_record(transaction, number, certificate, exact[number])
         registered = epc.extract_registration_date(certificate)
-        try:
-            if date.fromisoformat(registered) > datetime.now(timezone.utc).date():
-                raise ValueError("Future certificate")
-        except ValueError:
-            raise RuntimeError("invalid_certificate_date") from None
-        summary_date = epc.extract_registration_date(exact[number])
-        if summary_date and summary_date != registered:
-            raise RuntimeError("certificate_registration_conflict")
-        summary_uprn = exact[number].get("uprn")
-        full_uprn = certificate.get("uprn")
-        if summary_uprn and full_uprn and str(summary_uprn).lstrip("0") != str(full_uprn).lstrip("0"):
-            raise RuntimeError("certificate_uprn_conflict")
         latest_seen = max(latest_seen, registered)
-        area = epc.floor_area_from_certificate(certificate)
-        if not area:
-            unusable_dates.add(registered)
-            continue
-        sqft = round(area * epc.SQM_TO_SQFT)
-        record = {"status": "matched", "identityGuardVersion": epc.IDENTITY_GUARD_VERSION,
-                  "epc": {
-                      "epcMatched": True, "floorAreaSqm": round(area, 1),
-                      "floorAreaSqft": sqft, "pricePerSqft": round(transaction["price"] / sqft),
-                      "epcRating": epc.extract_rating(certificate) or epc.extract_rating(exact[number]),
-                      "epcRegistrationDate": registered,
-                      "epcCertificateNumber": number, "epcAddress": epc.candidate_address(certificate),
-                      "epcMatchScore": 1.0, "epcSource": "MHCLG EPC Register",
-                  }, "certificateFetch": {"requestedNumber": number,
-                      "returnedNumber": epc.extract_certificate_number(certificate),
-                      "uprn": full_uprn, "summaryRegistrationDate": summary_date}}
-        validated = epc.validated_cached_epc(transaction, record)
-        if validated:
+        if record:
             admitted.append(record)
         else:
             unusable_dates.add(registered)
@@ -332,20 +448,82 @@ def exact_register_match(transaction, client):
     return newest[0]
 
 
-def retained_register_evidence(client):
-    """Keep just identity/measurement evidence, excluding assessor/contact data."""
+def minimized_certificate(item):
+    """Retain source fields needed to replay identity, rating and whole area."""
     fields = set(epc.ADDRESS_KEYS) | set(epc.AREA_KEYS) | {
-        "certificateNumber", "certificate_number", "registrationDate", "registration_date",
-        "currentEnergyEfficiencyBand", "current_energy_efficiency_band", "uprn", "uprn_source",
+        "certificateNumber", "certificate_number", "certificate-number", "lmkKey", "lmk-key", "LMK_KEY",
+        "registrationDate", "registration_date", "lodgementDate", "lodgement_date", "lodgement-datetime",
+        "currentEnergyEfficiencyBand", "current_energy_efficiency_band", "current-energy-efficiency",
+        "current-energy-rating", "POSTCODE", "uprn", "uprn_source",
         "schema_type", "schemaType", "energy_rating_current", "status",
     }
+    result = {name: copy.deepcopy(value) for name, value in item.items() if name in fields}
+    if isinstance(item.get("sap_building_parts"), list):
+        parts = []
+        for part in item["sap_building_parts"]:
+            if not isinstance(part, dict):
+                parts.append(None)
+                continue
+            kept = {key: copy.deepcopy(part[key]) for key in ("building_part_number",) if key in part}
+            if "sap_floor_dimensions" in part:
+                dimensions = part["sap_floor_dimensions"]
+                kept["sap_floor_dimensions"] = [
+                    {key: copy.deepcopy(value) for key, value in floor.items()
+                     if key in ("floor", "storey", "total_floor_area")}
+                    if isinstance(floor, dict) else None for floor in dimensions
+                ] if isinstance(dimensions, list) else None
+            if "sap_room_in_roof" in part:
+                roof = part["sap_room_in_roof"]
+                kept["sap_room_in_roof"] = {
+                    "floor_area": copy.deepcopy(roof.get("floor_area"))
+                } if isinstance(roof, dict) else None
+            parts.append(kept)
+        result["sap_building_parts"] = parts
+    for extract in (epc.floor_area_evidence, epc.candidate_address, epc.extract_postcode,
+                    epc.extract_registration_date, epc.extract_rating, epc.extract_certificate_number):
+        if extract(result) != extract(item):
+            raise ValueError("Minimized certificate changes replayable evidence")
+    return result
+
+
+def retained_register_evidence(client):
+    """Keep replayable identity/measurement evidence, excluding contact data."""
     return {
-        "postcodeSearches": {key: [{name: value for name, value in item.items() if name in fields}
-                                    for item in rows]
+        "postcodeSearches": {key: [minimized_certificate(item) for item in rows]
                              for key, rows in getattr(client, "searches", {}).items()},
-        "requestedCertificates": {key: {name: value for name, value in item.items() if name in fields}
+        "requestedCertificates": {key: minimized_certificate(item)
                                   for key, item in getattr(client, "certificates", {}).items()},
     }
+
+
+def prefetch_backfill_evidence(baseline, records, client):
+    if not hasattr(client, "prefetch_certificates") or not hasattr(client, "prefetch_searches"):
+        return False
+    retained_numbers = {records[epc.stable_transaction_key(row)]["epc"]["epcCertificateNumber"]
+                        for row in baseline if row.get("epcMatched")}
+    unresolved = [row for row in baseline if not row.get("epcMatched")]
+    print(json.dumps({"stage": "retained_certificate_measurements", "certificates": len(retained_numbers)}), flush=True)
+    client.prefetch_certificates(sorted(retained_numbers))
+    print(json.dumps({"stage": "unresolved_postcode_searches", "requests": client.requests}), flush=True)
+    client.prefetch_searches(unresolved)
+    exact_numbers = set()
+    for row in unresolved:
+        try:
+            exact_numbers.update(exact_summaries(row, client.search(row)))
+        except RuntimeError:
+            # The serial admission pass retains the exact symbolic failure.
+            continue
+    print(json.dumps({"stage": "new_exact_certificate_measurements", "certificates": len(exact_numbers),
+                      "requests": client.requests}), flush=True)
+    client.prefetch_certificates(sorted(exact_numbers))
+    return True
+
+
+def lookup_error(error):
+    # Provider bodies/credentials must never become retained diagnostic strings.
+    reason = str(error) if isinstance(error, RuntimeError) else "unexpected_lookup_error"
+    return {"status": "error", "reason": reason if re.fullmatch(r"[a-z_0-9]+", reason)
+            else "unexpected_lookup_error"}
 
 
 def backfill(rows, meta, retained_cache, client):
@@ -353,40 +531,57 @@ def backfill(rows, meta, retained_cache, client):
     keys = {epc.stable_transaction_key(row) for row in rows}
     reviewed["records"] = {key: value for key, value in reviewed["records"].items() if key in keys}
     records = reviewed["records"]
-    output = []
-    looked_up = {}
-    attempted_rows = 0
-    error_rows = 0
-    for index, row in enumerate(baseline):
-        if not row.get("epcMatched"):
-            key = epc.stable_transaction_key(row)
-            identity = tuple(epc.normalise_text(row.get(field)) for field in (
-                "address", "paon", "saon", "street", "postcode", "locality", "town", "district"))
-            network_available = (not client.auth_failed and client.requests < client.max_requests
-                                 and time.monotonic() < client.deadline)
-            if identity in looked_up or network_available:
-                if identity not in looked_up:
-                    try:
+    baseline_records = copy.deepcopy(records)
+    prefetched = prefetch_backfill_evidence(baseline, records, client)
+    output, looked_up = [], {}
+    attempted_rows = error_rows = retained_rechecks = 0
+    new_identities, retained_ids = set(), set()
+    for index, prior_row in enumerate(baseline):
+        key = epc.stable_transaction_key(prior_row)
+        previous = baseline_records[key]
+        retained = bool(prior_row.get("epcMatched"))
+        number = previous["epc"]["epcCertificateNumber"] if retained else None
+        identity = (number,) + tuple(epc.normalise_text(prior_row.get(field)) for field in (
+            "address", "paon", "saon", "street", "postcode", "locality", "town", "district"))
+        row = epc.without_unverified_epc(prior_row)
+        network_available = (not client.auth_failed and client.requests < client.max_requests
+                             and time.monotonic() < client.deadline)
+        if identity in looked_up or network_available or prefetched:
+            if identity not in looked_up:
+                try:
+                    if retained:
+                        summary = epc.retained_certificate(previous["epc"])
+                        result = checked_certificate_record(row, number, client.certificate(number), summary)
+                        if result is None:
+                            raise RuntimeError("retained_certificate_area_unusable")
+                        retained_ids.add(number)
+                    else:
                         result = exact_register_match(row, client)
-                    except Exception as error:
-                        # Only our symbolic reasons may enter even the private
-                        # result; never retain a token-bearing provider body.
-                        reason = str(error) if isinstance(error, RuntimeError) else "unexpected_lookup_error"
-                        if not re.fullmatch(r"[a-z_0-9]+", reason):
-                            reason = "unexpected_lookup_error"
-                        result = {"status": "error", "reason": reason}
-                    result.update({"searchedAt": utc_now(), "evidenceScope": "targeted-register-search",
-                                   "identityGuardVersion": epc.IDENTITY_GUARD_VERSION})
-                    looked_up[identity] = result
-                result = copy.deepcopy(looked_up[identity])
-                result.update({"address": row.get("address"), "postcode": row.get("postcode")})
-                records[key] = result
-                attempted_rows += 1
-                error_rows += result.get("status") == "error"
-                facts = epc.validated_cached_epc(row, result)
-                if facts:
-                    result["epc"] = facts
-                    row = {**row, **epc.publishable_epc_fields(facts)}
+                        new_identities.add(identity)
+                except Exception as error:
+                    result = lookup_error(error)
+                    if not retained:
+                        new_identities.add(identity)
+                result.update({"searchedAt": utc_now(),
+                               "evidenceScope": "retained-certificate-refetch" if retained else "targeted-register-search",
+                               "identityGuardVersion": epc.IDENTITY_GUARD_VERSION})
+                looked_up[identity] = result
+            result = copy.deepcopy(looked_up[identity])
+            result.update({"address": row.get("address"), "postcode": row.get("postcode")})
+            records[key] = result
+            attempted_rows += not retained
+            retained_rechecks += retained
+            error_rows += result.get("status") == "error"
+            facts = epc.validated_cached_epc(row, result)
+            if facts:
+                result["epc"] = facts
+                row.update(epc.publishable_epc_fields(facts))
+        else:
+            # A retained measurement is not grandfathered after this correction.
+            records[key] = {"status": "error", "reason": "register_budget_reached",
+                            "address": row.get("address"), "postcode": row.get("postcode"),
+                            "identityGuardVersion": epc.IDENTITY_GUARD_VERSION}
+            error_rows += 1
         output.append(row)
         if (index + 1) % 250 == 0:
             print(json.dumps({"processed": index + 1, "requests": client.requests,
@@ -398,24 +593,32 @@ def backfill(rows, meta, retained_cache, client):
     accounting = epc.terminal_cache_accounting(output, reviewed, 90)
     before = sum(bool(item.get("epcMatched")) for item in baseline)
     after = sum(bool(item.get("epcMatched")) for item in output)
+    added = sum(not old.get("epcMatched") and bool(new.get("epcMatched")) for old, new in zip(baseline, output))
+    withdrawn = sum(bool(old.get("epcMatched")) and not new.get("epcMatched") for old, new in zip(baseline, output))
+    corrected_areas = sum(bool(old.get("epcMatched")) and bool(new.get("epcMatched"))
+                          and old["floorAreaSqm"] != new["floorAreaSqm"] for old, new in zip(baseline, output))
     report = {"status": "candidate_complete" if accounting["pending"] == 0 else "candidate_partial",
               "createdAt": utc_now(), "transactions": len(output), "verifiedBefore": before,
               "verifiedAfter": after, "addedVerifiedSales": after - before,
+              "newlyVerifiedSales": added, "withdrawnRetainedSales": withdrawn,
+              "correctedRetainedAreaSales": corrected_areas,
+              "retainedTransactionRowsRechecked": retained_rechecks,
+              "verifiedRetainedCertificateIds": len(retained_ids),
               "coveragePercent": round(after * 100 / len(output), 3),
-              "attemptedTransactionRows": attempted_rows, "uniquePropertyLookups": len(looked_up),
+              "attemptedTransactionRows": attempted_rows, "uniquePropertyLookups": len(new_identities),
               "httpRequests": client.requests, "lookupErrorRows": error_rows,
               "sourceAccounting": accounting, "nonEpcSha256": non_epc_digest(output),
               "authenticationFailed": client.auth_failed, "publicationPerformed": False}
     candidate_meta = copy.deepcopy(meta)
     candidate_meta["epcEnrichment"] = {
         "source": "MHCLG Get energy performance of buildings data API",
-        # A mixed candidate is not a fresh register check of all properties.
-        # The encrypted cache retains exact per-property searchedAt values for
-        # the coordinated rebuild. Keep the old blanket timestamp conservative.
+        # Known certificates were refetched; only unresolved identities received
+        # a complete postcode search for the latest register evidence.
         "updatedAt": (meta.get("epcEnrichment") or {}).get("updatedAt"),
         "targetedSearchCompletedAt": report["createdAt"],
+        "retainedMeasurementsRecheckedAt": report["createdAt"],
         "retainedEvidenceCheckedAt": (meta.get("epcEnrichment") or {}).get("updatedAt"),
-        "evidenceScope": "retained-and-targeted-register-search", "matched": after,
+        "evidenceScope": "refetched-measurements-and-targeted-register-search", "matched": after,
         "coveragePercent": round(after * 100 / len(output), 1),
         "identityGuardVersion": epc.IDENTITY_GUARD_VERSION,
         "status": "complete" if accounting["pending"] == 0 else "partial", **accounting,
@@ -444,7 +647,7 @@ def main():
     baseline, _reviewed, _report = epc.revalidate_retained_cache(rows, cache)
     if sum(bool(item.get("epcMatched")) for item in baseline) != BASELINE_MATCHES:
         raise ValueError("Reviewed identity baseline changed")
-    print("EPC candidate stage: targeted register searches", flush=True)
+    print("EPC candidate stage: certificate measurement checks and targeted searches", flush=True)
     payload, report = backfill(rows, meta, cache, RegisterClient(token))
     report.update({"inputCommit": INPUT_COMMIT, "inputSha256": INPUT_SHA256,
                    "retainedCacheSha256": CACHE_SHA256,

@@ -18,6 +18,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from collections import Counter
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP, localcontext
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -275,18 +276,140 @@ def extract_rating(record):
     return ""
 
 
+def _area_decimal(value):
+    """Read a finite positive measurement, never a number embedded in prose."""
+    if isinstance(value, dict):
+        if set(value) != {"value", "quantity"} or not isinstance(value["quantity"], str):
+            return None
+        if value["quantity"].strip().lower() not in {"square metres", "square meters", "m2", "m²"}:
+            return None
+        value = value["value"]
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        return None
+    text = str(value).strip()
+    if len(text) > 128 or not re.fullmatch(r"[+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", text):
+        return None
+    try:
+        number = Decimal(text)
+    except InvalidOperation:
+        return None
+    # Evidence is serialized as a JSON number; reject underflow to zero too.
+    return number if number.is_finite() and 0 < number <= 4000 and float(number) > 0 else None
+
+
+def _dimension_identity(value):
+    """Normalize schema integer identifiers without equating different floors."""
+    if isinstance(value, bool) or not isinstance(value, (int, str)):
+        return None
+    text = str(value).strip()
+    return int(text) if re.fullmatch(r"-?\d{1,6}", text) else None
+
+
+def floor_area_evidence(record):
+    """Return an explicit whole-property measurement and replayable provenance.
+
+    MHCLG's 20260908141211 domestic-view migration prefers a declared total,
+    otherwise sums every SAP storey and room-in-roof area. General recursive
+    key matching can select heat-loss area, one storey or a CO2 intensity.
+    """
+    if not isinstance(record, dict):
+        return None
+    schemas = [record[key] for key in ("schema_type", "schemaType") if key in record]
+    if any(not isinstance(value, str) for value in schemas) or len(set(schemas)) > 1:
+        return None
+    schema = schemas[0] if schemas else ""
+    declared = [key for key in AREA_KEYS if key in record]
+    if declared:
+        measured = [(key, _area_decimal(record[key])) for key in declared]
+        if any(value is None or value < 25 for _key, value in measured):
+            return None
+        if len({value for _key, value in measured}) != 1:
+            return None
+        area = float(measured[0][1])
+        return {"areaSqm": area, "basis": "declared-whole-property-area",
+                "schemaType": schema,
+                "components": [{"path": "$." + key, "areaSqm": float(value)}
+                               for key, value in measured]}
+
+    # These legacy schemas lack a declared total in some full responses.
+    # Do not infer equivalent nesting or units for an unreviewed schema.
+    if schema not in {"SAP-Schema-12.0", "SAP-Schema-13.0"}:
+        return None
+    parts = record.get("sap_building_parts")
+    if not isinstance(parts, list) or not parts:
+        return None
+    components = []
+    part_numbers = set()
+    measurements = []
+    for part_index, part in enumerate(parts):
+        if not isinstance(part, dict):
+            return None
+        part_number = _dimension_identity(part.get("building_part_number"))
+        if part_number is None or part_number < 1 or part_number in part_numbers:
+            return None
+        part_numbers.add(part_number)
+        dimensions = part.get("sap_floor_dimensions")
+        if not isinstance(dimensions, list) or not dimensions:
+            return None
+        floor_numbers = set()
+        part_floor_key = None
+        for floor_index, dimension in enumerate(dimensions):
+            if not isinstance(dimension, dict):
+                return None
+            floor_keys = [key for key in ("floor", "storey") if key in dimension]
+            if len(floor_keys) != 1:
+                return None
+            floor_key = floor_keys[0]
+            if part_floor_key is not None and floor_key != part_floor_key:
+                return None
+            part_floor_key = floor_key
+            floor_number = _dimension_identity(dimension[floor_key])
+            if floor_number is None or floor_number in floor_numbers:
+                return None
+            floor_numbers.add(floor_number)
+            area = _area_decimal(dimension.get("total_floor_area"))
+            if area is None:
+                return None
+            measurements.append(area)
+            components.append({
+                "path": f"$.sap_building_parts[{part_index}].sap_floor_dimensions[{floor_index}].total_floor_area",
+                "areaSqm": float(area), "buildingPartNumber": part_number,
+                "floorKey": floor_key, "floor": floor_number,
+            })
+        if "sap_room_in_roof" in part:
+            roof = part["sap_room_in_roof"]
+            if not isinstance(roof, dict):
+                return None
+            area = _area_decimal(roof.get("floor_area"))
+            if area is None:
+                return None
+            measurements.append(area)
+            components.append({
+                "path": f"$.sap_building_parts[{part_index}].sap_room_in_roof.floor_area",
+                "areaSqm": float(area), "buildingPartNumber": part_number,
+            })
+    # The source schema reserves building-part 1 for the main dwelling.
+    if 1 not in part_numbers:
+        return None
+    # Preserve every accepted source digit until the final register rounding.
+    # Decimal's default 28-digit context can otherwise round a value just below
+    # a half-integer upward before ROUND_HALF_UP sees it.
+    with localcontext() as context:
+        context.prec = max(28, max(value.adjusted() for value in measurements)
+                           - min(value.as_tuple().exponent for value in measurements)
+                           + len(str(len(measurements))) + 2)
+        total = sum(measurements, Decimal(0))
+        area = total.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    if not 25 <= area <= 4000:
+        return None
+    return {"areaSqm": float(area), "basis": "sap-building-parts-sum",
+            "schemaType": schema, "components": components,
+            "unroundedAreaSqm": float(total)}
+
+
 def floor_area_from_certificate(record):
-    for key in AREA_KEYS:
-        area = valid_floor_area_sqm(record.get(key))
-        if area:
-            return area
-    for key, value in flatten_dict(record).items():
-        normalised = normalise_key(key)
-        if "floor" in normalised and "area" in normalised and "room" not in normalised:
-            area = valid_floor_area_sqm(value)
-            if area:
-                return area
-    return None
+    evidence = floor_area_evidence(record)
+    return evidence["areaSqm"] if evidence else None
 
 
 def certificate_debug_keys(record):

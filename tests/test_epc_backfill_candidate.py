@@ -136,7 +136,7 @@ class CandidateMatchingTests(unittest.TestCase):
         client = MemoryClient([certificate("old", date="2020-01-01"), certificate("new", area=None)])
         self.assertEqual(candidate.exact_register_match(sale(), client)["status"], "no_match")
 
-    def test_retain_verified_sales_and_fetch_only_unresolved_reprice_repeats(self):
+    def test_refetch_retained_measurements_and_search_only_unresolved_reprice_repeats(self):
         old = sale("1", id="verified")
         first = sale(id="missing-one")
         repeat = sale(id="missing-repeat", date="2025-02-01", price=4_000_000)
@@ -144,7 +144,7 @@ class CandidateMatchingTests(unittest.TestCase):
                  record("1 HIGH STREET BAGSHOT GU19 5AE", number="retained")}}
         original = copy.deepcopy(cache)
         rows = [old, first, repeat]
-        client = MemoryClient([certificate()])
+        client = MemoryClient([certificate(), certificate("retained", paon="1", date="2024-01-01", rating="D")])
         payload, report = candidate.backfill(rows, {}, cache, client)
         self.assertEqual(cache, original)
         self.assertEqual(client.searched, ["missing-one"])
@@ -152,6 +152,8 @@ class CandidateMatchingTests(unittest.TestCase):
         self.assertEqual(report["verifiedAfter"], 3)
         self.assertEqual(report["addedVerifiedSales"], 2)
         self.assertEqual(report["uniquePropertyLookups"], 1)
+        self.assertEqual(report["retainedTransactionRowsRechecked"], 1)
+        self.assertEqual(report["verifiedRetainedCertificateIds"], 1)
         self.assertEqual(report["sourceAccounting"]["pending"], 0)
         self.assertEqual(candidate.non_epc_digest(rows), candidate.non_epc_digest(payload["rows"]))
         a, b = payload["rows"][1:]
@@ -159,6 +161,93 @@ class CandidateMatchingTests(unittest.TestCase):
         self.assertNotEqual(a["pricePerSqft"], b["pricePerSqft"])
         self.assertTrue(all(set(row) <= epc.PUBLIC_EPC_FIELDS | set(rows[i])
                             for i, row in enumerate(payload["rows"])))
+
+    def test_retained_partial_floor_is_replaced_by_full_sap_area_with_replayable_evidence(self):
+        row = sale()
+        cached = record("2 HIGH STREET BAGSHOT GU19 5AE", number="retained", area=100)
+        cache = {"version": 3, "records": {epc.stable_transaction_key(row): cached}}
+        full = certificate("retained", date="2024-01-01", rating="D")
+        del full["totalFloorArea"]
+        full.update({"schema_type": "SAP-Schema-12.0", "assessor_name": "must be removed",
+                     "sap_building_parts": [{"building_part_number": 1, "private_note": "remove",
+                         "sap_floor_dimensions": [
+                             {"floor": 0, "total_floor_area": 100, "heat_loss_area": 45},
+                             {"floor": 1, "total_floor_area": 100},
+                         ], "sap_room_in_roof": {"floor_area": 30.5, "other": "remove"}}]})
+        client = MemoryClient([full])
+        client.certificates = {"retained": full}
+        payload, report = candidate.backfill([row], {}, cache, client)
+        self.assertEqual(payload["rows"][0]["floorAreaSqm"], 231)
+        self.assertEqual(report["correctedRetainedAreaSales"], 1)
+        self.assertEqual(report["withdrawnRetainedSales"], 0)
+        self.assertEqual(report["newlyVerifiedSales"], 0)
+        kept = payload["registerEvidence"]["requestedCertificates"]["retained"]
+        evidence = payload["cache"]["records"][epc.stable_transaction_key(row)]["floorAreaEvidence"]
+        self.assertEqual(epc.floor_area_evidence(kept), evidence)
+        self.assertNotIn("must be removed", json.dumps(kept))
+        self.assertNotIn("heat_loss_area", json.dumps(kept))
+        self.assertNotIn("private_note", json.dumps(kept))
+        self.assertNotIn("other", json.dumps(kept))
+        self.assertEqual(cached["epc"]["floorAreaSqm"], 100)
+
+    def test_retained_missing_or_conflicting_measurement_cannot_keep_old_ppsf(self):
+        for full in (certificate("retained", area=None, date="2024-01-01"),
+                     certificate("retained", paon="8", date="2024-01-01")):
+            row = sale()
+            cache = {"version": 3, "records": {epc.stable_transaction_key(row):
+                     record("2 HIGH STREET BAGSHOT GU19 5AE", number="retained")}}
+            payload, report = candidate.backfill([row], {}, cache, MemoryClient([full]))
+            self.assertFalse(payload["rows"][0]["epcMatched"])
+            self.assertNotIn("pricePerSqft", payload["rows"][0])
+            self.assertEqual(report["withdrawnRetainedSales"], 1)
+            self.assertEqual(report["addedVerifiedSales"], -1)
+            self.assertEqual(report["sourceAccounting"]["pending"], 1)
+            self.assertEqual(report["sourceAccounting"]["noMatchCacheRecords"], 0)
+
+    def test_minimization_preserves_all_supported_certificate_aliases(self):
+        for keys, extract, value in [
+            (("certificateNumber", "certificate_number", "certificate-number", "lmkKey", "lmk-key", "LMK_KEY"),
+             epc.extract_certificate_number, "synthetic"),
+            (("registrationDate", "registration_date", "lodgementDate", "lodgement_date", "lodgement-datetime"),
+             epc.extract_registration_date, "2025-01-01"),
+            (("currentEnergyEfficiencyBand", "current_energy_efficiency_band", "current-energy-efficiency", "current-energy-rating"),
+             epc.extract_rating, "B"),
+        ]:
+            for key in keys:
+                source = {key: value, "assessor_contact": "removed"}
+                kept = candidate.minimized_certificate(source)
+                self.assertEqual(extract(kept), value)
+                self.assertNotIn("assessor_contact", kept)
+
+    def test_duplicate_sale_keys_keep_baseline_identity_when_refetch_fails(self):
+        first, second = sale(id="one"), sale(id="two")
+        self.assertEqual(epc.stable_transaction_key(first), epc.stable_transaction_key(second))
+        cache = {"version": 3, "records": {epc.stable_transaction_key(first):
+                 record("2 HIGH STREET BAGSHOT GU19 5AE", number="retained")}}
+        client = MemoryClient([certificate("retained", area=None, date="2024-01-01")])
+        payload, report = candidate.backfill([first, second], {}, cache, client)
+        self.assertEqual(report["withdrawnRetainedSales"], 2)
+        self.assertEqual(report["sourceAccounting"]["pending"], 2)
+        self.assertEqual(report["sourceAccounting"]["errors"], 2)
+        self.assertEqual(client.requests, 1)
+        self.assertTrue(all(not row["epcMatched"] for row in payload["rows"]))
+        self.assertEqual([row["id"] for row in payload["rows"]], ["one", "two"])
+
+    def test_prefetched_source_evidence_is_admitted_after_last_request_budget_is_spent(self):
+        old = sale("1", id="verified")
+        new = sale(id="new")
+        retained = certificate("retained", paon="1", date="2024-01-01", rating="D")
+        fresh = certificate("fresh")
+        cache = {"version": 3, "records": {epc.stable_transaction_key(old):
+                 record("1 HIGH STREET BAGSHOT GU19 5AE", number="retained")}}
+        opener = Opener([{"data": retained}, {"data": [retained, fresh], "pagination": {
+            "totalRecords": 2, "totalPages": 1, "currentPage": 1}}, {"data": fresh}])
+        client = candidate.RegisterClient("synthetic", opener=opener, spacing=0, max_requests=3)
+        payload, report = candidate.backfill([old, new], {}, cache, client)
+        self.assertEqual(report["verifiedAfter"], 2)
+        self.assertEqual(report["sourceAccounting"]["pending"], 0)
+        self.assertEqual(client.requests, 3)
+        self.assertEqual(set(payload["registerEvidence"]["requestedCertificates"]), {"retained", "fresh"})
 
     def test_last_allowed_lookup_is_reused_for_later_sales_of_same_property(self):
         client = MemoryClient([certificate()])

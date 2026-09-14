@@ -276,5 +276,195 @@ class EPCIdentityTests(unittest.TestCase):
             self.assertEqual((source.read_bytes(), cache.read_bytes()), before)
 
 
+class EPCWholePropertyAreaTests(unittest.TestCase):
+    # Minimal measurement excerpts from MHCLG's official SAP12 SAP/RdSAP
+    # fixtures and domestic-view regression expectations (both publish 98m²).
+    @staticmethod
+    def sap(schema="SAP-Schema-12.0"):
+        return {"schema_type": schema, "sap_building_parts": [{
+            "building_part_number": 1,
+            "sap_floor_dimensions": [
+                {"storey": 0, "heat_loss_area": 28.8, "total_floor_area": 28.8},
+                {"storey": 1, "heat_loss_area": 0, "total_floor_area": 28.8},
+                {"storey": 2, "heat_loss_area": 0, "total_floor_area": 40},
+            ],
+        }], "co2_emissions_current_per_floor_area": 20}
+
+    @staticmethod
+    def rdsap():
+        return {"schema_type": "SAP-Schema-12.0", "sap_building_parts": [
+            {"building_part_number": 1, "identifier": "Main Dwelling",
+             "sap_room_in_roof": {"floor_area": 18.3},
+             "sap_floor_dimensions": [
+                 {"floor": 0, "total_floor_area": 31.26},
+                 {"floor": 1, "total_floor_area": 31.26},
+             ]},
+            {"building_part_number": 2, "identifier": "Extension 1",
+             "sap_floor_dimensions": [
+                 {"floor": 0, "total_floor_area": 8.47},
+                 {"floor": 1, "total_floor_area": 8.47},
+             ]},
+        ]}
+
+    def test_declared_whole_total_precedes_part_measurements_and_intensities(self):
+        source = self.sap("SAP-Schema-13.0")
+        source["total_floor_area"] = 69
+        evidence = epc.floor_area_evidence(source)
+        self.assertEqual(evidence["areaSqm"], 69)
+        self.assertEqual(evidence["basis"], "declared-whole-property-area")
+        self.assertEqual(evidence["components"], [{"path": "$.total_floor_area", "areaSqm": 69}])
+        self.assertEqual(epc.floor_area_from_certificate(source), 69)
+
+    def test_reviewed_direct_aliases_remain_supported(self):
+        for key in epc.AREA_KEYS:
+            with self.subTest(key=key):
+                self.assertEqual(epc.floor_area_from_certificate({key: "120.25"}), 120.25)
+        self.assertEqual(epc.floor_area_from_certificate({"total_floor_area": 25}), 25)
+        self.assertEqual(epc.floor_area_from_certificate({"total_floor_area": 4000}), 4000)
+
+    def test_numeric_strings_and_explicit_square_metre_wrappers(self):
+        for value in [120.25, "120.25", "1.2025e2",
+                      {"value": "120.25", "quantity": "square metres"},
+                      {"value": 120.25, "quantity": "m²"}]:
+            with self.subTest(value=value):
+                self.assertEqual(epc.floor_area_from_certificate({"total_floor_area": value}), 120.25)
+
+    def test_invalid_explicit_total_never_falls_back_to_a_partial_or_nested_area(self):
+        invalid = [None, True, False, 0, -120, 24, 4001, float("inf"), float("nan"),
+                   "NaN", "Infinity", "-120", "approx 120", "120 m2", "120-150",
+                   "1e-999999999", [120], {"value": 120},
+                   {"value": 120, "quantity": "square feet"},
+                   {"value": True, "quantity": "square metres"},
+                   {"value": 120, "quantity": "square metres", "other": 1}]
+        for value in invalid:
+            with self.subTest(value=value):
+                source = self.sap()
+                source["total_floor_area"] = value
+                self.assertIsNone(epc.floor_area_evidence(source))
+
+    def test_conflicting_direct_aliases_are_not_arbitrarily_selected(self):
+        self.assertIsNone(epc.floor_area_evidence({"total_floor_area": 120, "totalFloorArea": 121}))
+        self.assertIsNone(epc.floor_area_evidence({"total_floor_area": None, "totalFloorArea": 120}))
+        self.assertEqual(epc.floor_area_from_certificate({"total_floor_area": "120", "totalFloorArea": 120}), 120)
+
+    def test_legacy_sap_sums_all_storeys_not_first_heat_loss_area(self):
+        evidence = epc.floor_area_evidence(self.sap())
+        self.assertEqual(evidence["basis"], "sap-building-parts-sum")
+        self.assertEqual(evidence["areaSqm"], 98)
+        self.assertEqual(evidence["unroundedAreaSqm"], 97.6)
+        self.assertEqual([item["areaSqm"] for item in evidence["components"]], [28.8, 28.8, 40])
+        self.assertEqual([item["floor"] for item in evidence["components"]], [0, 1, 2])
+        self.assertTrue(all(item["path"].endswith(".total_floor_area") for item in evidence["components"]))
+
+    def test_legacy_rdsap_includes_every_extension_and_room_in_roof(self):
+        evidence = epc.floor_area_evidence(self.rdsap())
+        self.assertEqual(evidence["areaSqm"], 98)
+        self.assertEqual(evidence["unroundedAreaSqm"], 97.76)
+        self.assertEqual(len(evidence["components"]), 5)
+        roof = [item for item in evidence["components"] if ".sap_room_in_roof." in item["path"]]
+        self.assertEqual(roof, [{"path": "$.sap_building_parts[0].sap_room_in_roof.floor_area",
+                                "areaSqm": 18.3, "buildingPartNumber": 1}])
+        # Equal areas on distinct floors are separate contributions.
+        self.assertEqual(sum(item["areaSqm"] == 31.26 for item in evidence["components"]), 2)
+        self.assertEqual(sum(item["areaSqm"] == 8.47 for item in evidence["components"]), 2)
+
+    def test_nested_derivation_requires_an_explicit_reviewed_schema(self):
+        self.assertEqual(epc.floor_area_from_certificate(self.sap("SAP-Schema-13.0")), 98)
+        alias = self.sap()
+        alias["schemaType"] = alias.pop("schema_type")
+        self.assertEqual(epc.floor_area_from_certificate(alias), 98)
+        alias["schema_type"] = "SAP-Schema-13.0"
+        self.assertIsNone(epc.floor_area_evidence(alias))
+        for schema in ["", "SAP-Schema-14.0", "RdSAP-Schema-21.0.1", None, [], 12]:
+            with self.subTest(schema=schema):
+                self.assertIsNone(epc.floor_area_evidence(self.sap(schema)))
+
+    def test_unrelated_floor_area_keys_and_carbon_intensity_cannot_supply_area(self):
+        for value in [
+            {"co2_emissions_current_per_floor_area": 200},
+            {"nested": {"total_floor_area": 200}},
+            {"sap_floor_dimensions": [{"total_floor_area": 200}]},
+            {"heat_loss_area": 200},
+        ]:
+            self.assertIsNone(epc.floor_area_evidence({"schema_type": "SAP-Schema-12.0", **value}))
+        source = self.sap()
+        for floor in source["sap_building_parts"][0]["sap_floor_dimensions"]:
+            floor.pop("total_floor_area")
+            floor["heat_loss_area"] = 200
+        self.assertIsNone(epc.floor_area_evidence(source))
+
+    def test_duplicate_part_or_floor_identity_is_rejected_without_deduplicating_equal_areas(self):
+        duplicate_part = self.rdsap()
+        duplicate_part["sap_building_parts"][1]["building_part_number"] = "1"
+        self.assertIsNone(epc.floor_area_evidence(duplicate_part))
+        duplicate_floor = self.sap()
+        duplicate_floor["sap_building_parts"][0]["sap_floor_dimensions"][1]["storey"] = "0"
+        self.assertIsNone(epc.floor_area_evidence(duplicate_floor))
+        missing_main = self.sap()
+        missing_main["sap_building_parts"][0]["building_part_number"] = 2
+        self.assertIsNone(epc.floor_area_evidence(missing_main))
+        mixed_identities = self.sap()
+        dimension = mixed_identities["sap_building_parts"][0]["sap_floor_dimensions"][1]
+        dimension["floor"] = dimension.pop("storey")
+        self.assertIsNone(epc.floor_area_evidence(mixed_identities))
+        self.assertEqual(epc.floor_area_from_certificate(self.rdsap()), 98)
+
+    def test_partial_or_malformed_measurement_arrays_cannot_be_summed(self):
+        malformed = []
+        for part_value in [None, {}, [], "missing"]:
+            source = self.sap()
+            source["sap_building_parts"] = part_value
+            malformed.append(source)
+        for dimensions in [None, {}, [], [None], [{"storey": 0}], [{"total_floor_area": 200}],
+                           [{"storey": 0, "floor": 0, "total_floor_area": 200}],
+                           [{"storey": True, "total_floor_area": 200}],
+                           [{"storey": 0.5, "total_floor_area": 200}]]:
+            source = self.sap()
+            source["sap_building_parts"][0]["sap_floor_dimensions"] = dimensions
+            malformed.append(source)
+        for number in [None, True, 0, -1, "unknown"]:
+            source = self.sap()
+            source["sap_building_parts"][0]["building_part_number"] = number
+            malformed.append(source)
+        for roof in [None, {}, [], {"floor_area": None}, {"floor_area": -10}]:
+            source = self.rdsap()
+            source["sap_building_parts"][0]["sap_room_in_roof"] = roof
+            malformed.append(source)
+        for index, source in enumerate(malformed):
+            with self.subTest(index=index):
+                self.assertIsNone(epc.floor_area_evidence(source))
+
+    def test_component_units_and_numeric_strings_are_validated_before_aggregation(self):
+        source = self.sap()
+        source["sap_building_parts"][0]["sap_floor_dimensions"][0]["total_floor_area"] = {
+            "value": "28.8", "quantity": "square metres"}
+        self.assertEqual(epc.floor_area_from_certificate(source), 98)
+        source["sap_building_parts"][0]["sap_floor_dimensions"][0]["total_floor_area"]["quantity"] = "square feet"
+        self.assertIsNone(epc.floor_area_evidence(source))
+
+    def test_decimal_aggregate_uses_postgresql_half_up_and_whole_property_bounds(self):
+        source = self.sap()
+        floors = source["sap_building_parts"][0]["sap_floor_dimensions"]
+        floors[:] = [{"storey": 0, "total_floor_area": "28.5"},
+                     {"storey": 1, "total_floor_area": "30"}]
+        self.assertEqual(epc.floor_area_from_certificate(source), 59)
+        floors[:] = [{"storey": 0, "total_floor_area": "100.49999999999999999999999999999"}]
+        self.assertEqual(epc.floor_area_from_certificate(source), 100)
+        for values, expected in [([12, 12], None), ([12.3, 12.3], 25), ([2000, 2000], 4000),
+                                 ([2000, 2001], None)]:
+            floors[:] = [{"storey": i, "total_floor_area": value} for i, value in enumerate(values)]
+            self.assertEqual(epc.floor_area_from_certificate(source), expected)
+
+    def test_evidence_is_pure_and_contains_only_measurement_provenance(self):
+        source = self.rdsap()
+        source["assessor"] = {"contact": "private-source-sentinel"}
+        source["sap_building_parts"][0]["unrelated"] = "private-source-sentinel"
+        before = copy.deepcopy(source)
+        evidence = epc.floor_area_evidence(source)
+        self.assertEqual(source, before)
+        self.assertNotIn("private-source-sentinel", json.dumps(evidence))
+        self.assertEqual(set(evidence), {"areaSqm", "basis", "schemaType", "components", "unroundedAreaSqm"})
+
+
 if __name__ == "__main__":
     unittest.main()

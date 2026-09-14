@@ -23,8 +23,10 @@ commit a cache or update an application. The default monthly path is preserved.
   The runner does not need access to the private app repository.
 - All 4,738 IDs, ordering and non-EPC facts must remain unchanged. The separately
   excluded £112.5m transaction cannot enter this candidate.
-- Existing verified evidence is retained. Fresh searches target unresolved
-  properties, reuse postcode results and verify full certificate identity.
+- All retained certificate measurements are fetched and verified again. Fresh
+  postcode searches target unresolved properties and verify full certificate
+  identity. Four workers share one request budget and paced admission; repeated
+  postcodes and certificate IDs reuse one request, including symbolic failures.
 - Complete pagination is required. Conflicting identities, incomplete responses,
   failed authentication and exhausted request/time budgets remain unresolved.
 - The latest exact certificate is used only when its measurement evidence is
@@ -63,8 +65,8 @@ This avoids replacing private app planning, school, UPRN or estate context with
 the data repository's different projections. Review recovered coverage and
 remaining identity problems before staging application assets.
 
-Retained records preserve their original provider-check dates. Fresh records
-carry their own `searchedAt`. The candidate has a separate
+Refetched records carry their own `searchedAt`. Retained certificate refetches
+are distinguished from complete postcode searches for the newest certificate. The candidate has a separate
 `targetedSearchCompletedAt`; its blanket `updatedAt` stays at the retained source
 timestamp so the mixed dataset cannot imply every property was just checked.
 The application rebuild must use those per-record dates when projecting evidence.
@@ -73,6 +75,14 @@ Regenerate transactions and their summaries, property records, valuation seeds,
 runtime projections and Today as one generation. Validate the result and package
 before installation and the fresh 15-minute installed workflow audit. This
 candidate job alone is not release sign-off or a claim of complete EPC coverage.
+
+Whole-property area uses explicit declared totals. Supported SAP 12/13 schemas
+without a total sum all building-part storey and room-in-roof areas, rounding the
+sum to whole square metres using the [official domestic-view calculation](https://github.com/communitiesuk/epb-data-warehouse/blob/main/db/migrate/20260908141211_domestic_views_fix_total_floor_area.rb).
+Partial or malformed measurements remain unresolved. The encrypted candidate
+retains the minimal source components so every admitted area can be independently
+replayed. Reports distinguish newly matched sales, corrected retained areas and
+retained measurements withdrawn after source validation.
 
 API contracts checked against the official [domestic search documentation](https://get-energy-performance-data.communities.gov.uk/api-technical-documentation/search-certificates/domestic)
 and [full-certificate documentation](https://get-energy-performance-data.communities.gov.uk/api-technical-documentation/fetch-certificate-data).
