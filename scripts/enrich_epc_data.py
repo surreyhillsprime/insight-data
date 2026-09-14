@@ -281,7 +281,7 @@ def _area_decimal(value):
     if isinstance(value, dict):
         if set(value) != {"value", "quantity"} or not isinstance(value["quantity"], str):
             return None
-        if value["quantity"].strip().lower() not in {"square metres", "square meters", "m2", "m²"}:
+        if value["quantity"].strip().lower() not in {"square metres", "square meters", "sq m", "m2", "m²"}:
             return None
         value = value["value"]
     if isinstance(value, bool) or not isinstance(value, (int, float, str)):
@@ -353,6 +353,7 @@ def floor_area_evidence(record):
             return None
         floor_numbers = set()
         part_floor_key = None
+        roof_dimension = None
         for floor_index, dimension in enumerate(dimensions):
             if not isinstance(dimension, dict):
                 return None
@@ -376,6 +377,8 @@ def floor_area_evidence(record):
                 "areaSqm": float(area), "buildingPartNumber": part_number,
                 "floorKey": floor_key, "floor": floor_number,
             })
+            if floor_number == 99:
+                roof_dimension = (area, components[-1])
         if "sap_room_in_roof" in part:
             roof = part["sap_room_in_roof"]
             if not isinstance(roof, dict):
@@ -383,11 +386,21 @@ def floor_area_evidence(record):
             area = _area_decimal(roof.get("floor_area"))
             if area is None:
                 return None
-            measurements.append(area)
-            components.append({
-                "path": f"$.sap_building_parts[{part_index}].sap_room_in_roof.floor_area",
-                "areaSqm": float(area), "buildingPartNumber": part_number,
-            })
+            roof_path = f"$.sap_building_parts[{part_index}].sap_room_in_roof.floor_area"
+            if roof_dimension is not None:
+                # SAP12/13 define floor/storey 99 as roof space/rooms. The
+                # same part's separate roof measurement is an equivalent
+                # identity, not a second physical floor. Preserve both paths.
+                if roof_dimension[0] != area:
+                    return None
+                roof_dimension[1]["equivalentSourcePaths"] = [roof_path]
+                roof_dimension[1]["reconciliation"] = "same-building-part-roof-99"
+            else:
+                measurements.append(area)
+                components.append({
+                    "path": roof_path,
+                    "areaSqm": float(area), "buildingPartNumber": part_number,
+                })
     # The source schema reserves building-part 1 for the main dwelling.
     if 1 not in part_numbers:
         return None

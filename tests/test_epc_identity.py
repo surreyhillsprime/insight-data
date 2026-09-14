@@ -325,6 +325,7 @@ class EPCWholePropertyAreaTests(unittest.TestCase):
     def test_numeric_strings_and_explicit_square_metre_wrappers(self):
         for value in [120.25, "120.25", "1.2025e2",
                       {"value": "120.25", "quantity": "square metres"},
+                      {"value": "120.25", "quantity": "sq m"},
                       {"value": 120.25, "quantity": "m²"}]:
             with self.subTest(value=value):
                 self.assertEqual(epc.floor_area_from_certificate({"total_floor_area": value}), 120.25)
@@ -464,6 +465,71 @@ class EPCWholePropertyAreaTests(unittest.TestCase):
         self.assertEqual(source, before)
         self.assertNotIn("private-source-sentinel", json.dumps(evidence))
         self.assertEqual(set(evidence), {"areaSqm", "basis", "schemaType", "components", "unroundedAreaSqm"})
+
+    def test_same_part_roof_99_is_counted_once_with_both_source_paths(self):
+        for identity_key in ("floor", "storey"):
+            source = self.sap()
+            part = source["sap_building_parts"][0]
+            part["sap_floor_dimensions"] = [
+                {identity_key: 0, "total_floor_area": 120},
+                {identity_key: 99, "total_floor_area": "30.25"},
+            ]
+            part["sap_room_in_roof"] = {"floor_area": {"value": 30.25, "quantity": "sq m"}}
+            before = copy.deepcopy(source)
+            evidence = epc.floor_area_evidence(source)
+            self.assertEqual(source, before)
+            self.assertEqual(evidence["areaSqm"], 150)
+            self.assertEqual(evidence["unroundedAreaSqm"], 150.25)
+            self.assertEqual(len(evidence["components"]), 2)
+            roof = evidence["components"][1]
+            self.assertEqual(roof["path"], "$.sap_building_parts[0].sap_floor_dimensions[1].total_floor_area")
+            self.assertEqual(roof["equivalentSourcePaths"], ["$.sap_building_parts[0].sap_room_in_roof.floor_area"])
+            self.assertEqual(roof["reconciliation"], "same-building-part-roof-99")
+
+    def test_conflicting_roof_99_area_rejects_derived_total_but_declared_total_wins(self):
+        source = self.sap("SAP-Schema-13.0")
+        part = source["sap_building_parts"][0]
+        part["sap_floor_dimensions"] = [{"floor": 0, "total_floor_area": 120},
+                                        {"floor": 99, "total_floor_area": "30.250000000000001"}]
+        part["sap_room_in_roof"] = {"floor_area": "30.25"}
+        self.assertIsNone(epc.floor_area_evidence(source))
+        source["total_floor_area"] = 160
+        evidence = epc.floor_area_evidence(source)
+        self.assertEqual(evidence["areaSqm"], 160)
+        self.assertEqual(evidence["basis"], "declared-whole-property-area")
+
+    def test_roof_99_reconciliation_is_separate_for_each_building_part(self):
+        source = self.rdsap()
+        for part in source["sap_building_parts"]:
+            part["sap_floor_dimensions"] = [{"floor": 0, "total_floor_area": 40},
+                                            {"floor": 1, "total_floor_area": 40},
+                                            {"floor": 99, "total_floor_area": 20}]
+            part["sap_room_in_roof"] = {"floor_area": 20}
+        evidence = epc.floor_area_evidence(source)
+        self.assertEqual(evidence["areaSqm"], 200)
+        self.assertEqual(len(evidence["components"]), 6)
+        reconciled = [component for component in evidence["components"] if "reconciliation" in component]
+        self.assertEqual([component["buildingPartNumber"] for component in reconciled], [1, 2])
+        self.assertNotEqual(reconciled[0]["equivalentSourcePaths"], reconciled[1]["equivalentSourcePaths"])
+
+    def test_equal_ordinary_floor_and_roof_areas_remain_distinct(self):
+        source = self.sap()
+        part = source["sap_building_parts"][0]
+        part["sap_floor_dimensions"] = [{"storey": 0, "total_floor_area": 40},
+                                        {"storey": 1, "total_floor_area": 40}]
+        part["sap_room_in_roof"] = {"floor_area": 40}
+        evidence = epc.floor_area_evidence(source)
+        self.assertEqual(evidence["areaSqm"], 120)
+        self.assertEqual(len(evidence["components"]), 3)
+        self.assertFalse(any("reconciliation" in component for component in evidence["components"]))
+
+    def test_roof_99_without_separate_roof_area_remains_one_floor(self):
+        source = self.sap()
+        source["sap_building_parts"][0]["sap_floor_dimensions"] = [
+            {"storey": 0, "total_floor_area": 120}, {"storey": 99, "total_floor_area": 30}]
+        evidence = epc.floor_area_evidence(source)
+        self.assertEqual(evidence["areaSqm"], 150)
+        self.assertFalse(any("reconciliation" in component for component in evidence["components"]))
 
 
 if __name__ == "__main__":

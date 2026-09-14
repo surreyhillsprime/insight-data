@@ -79,6 +79,15 @@ candidate job alone is not release sign-off or a claim of complete EPC coverage.
 Whole-property area uses explicit declared totals. Supported SAP 12/13 schemas
 without a total sum all building-part storey and room-in-roof areas, rounding the
 sum to whole square metres using the [official domestic-view calculation](https://github.com/communitiesuk/epb-data-warehouse/blob/main/db/migrate/20260908141211_domestic_views_fix_total_floor_area.rb).
+The [SAP12](https://github.com/communitiesuk/epb-data-warehouse/blob/7cba4abf294f4108848619a75b3e901fc058a209/api/schemas/xml/SAP-Schema-12.0/UDT/SAP-Domains.xsd#L399-L440)
+and [SAP13](https://github.com/communitiesuk/epb-data-warehouse/blob/7cba4abf294f4108848619a75b3e901fc058a209/api/schemas/xml/SAP-Schema-13.0/UDT/SAP-Domains.xsd#L421-L462)
+schemas identify code 99 as roof space/rooms. INSIGHT therefore reconciles an
+exactly equal code-99 floor/storey and room-in-roof measurement in the same
+building part as one physical area, retaining both source paths. This is an
+explicit identity reconciliation derived from the schema, rather than blindly
+adding both representations. Conflicting pairs remain unresolved; equal areas
+on ordinary floors or different building parts remain separate. Explicit whole
+property totals still take precedence. `sq m` is normalized as square metres.
 Partial or malformed measurements remain unresolved. The encrypted candidate
 retains the minimal source components so every admitted area can be independently
 replayed. Reports distinguish newly matched sales, corrected retained areas and
@@ -89,3 +98,14 @@ and [full-certificate documentation](https://get-energy-performance-data.communi
 Some documented full-certificate schemas omit a repeated certificate number;
 those responses remain bound to the exact request, complete address identity,
 registration date and agreeing UPRN when both responses provide it.
+
+## Revalidation of a downloaded result
+
+The full-certificate evidence is retained in the authenticated encrypted result.
+A later measurement correction can be replayed locally with zero provider calls,
+without replacing source evidence or advancing per-record `searchedAt` values.
+Bind any derived candidate to the original GitHub run, producer revision and ZIP
+digest, and record the local derivation commit separately. Preserve the original
+run receipt and distinguish its reported counts from the locally revalidated
+counts. Repeat source-area, rating/date, identity, ordered-cohort and EPC-only
+patch checks before accepting that derived candidate.
