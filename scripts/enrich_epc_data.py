@@ -7,6 +7,7 @@ adds price-per-square-foot fields to each matched transaction.
 """
 
 import argparse
+import copy
 import json
 import math
 import os
@@ -17,6 +18,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from collections import Counter
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP, localcontext
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -31,6 +33,7 @@ API_BASE = "https://api.get-energy-performance-data.communities.gov.uk"
 SQM_TO_SQFT = 10.76391041671
 DEFAULT_MIN_SCORE = 0.55
 CACHE_VERSION = 3
+IDENTITY_GUARD_VERSION = 1
 REQUEST_TIMEOUT = 12
 REQUEST_RETRIES = 1
 
@@ -273,18 +276,153 @@ def extract_rating(record):
     return ""
 
 
+def _area_decimal(value):
+    """Read a finite positive measurement, never a number embedded in prose."""
+    if isinstance(value, dict):
+        if set(value) != {"value", "quantity"} or not isinstance(value["quantity"], str):
+            return None
+        if value["quantity"].strip().lower() not in {"square metres", "square meters", "sq m", "m2", "m²"}:
+            return None
+        value = value["value"]
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        return None
+    text = str(value).strip()
+    if len(text) > 128 or not re.fullmatch(r"[+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", text):
+        return None
+    try:
+        number = Decimal(text)
+    except InvalidOperation:
+        return None
+    # Evidence is serialized as a JSON number; reject underflow to zero too.
+    return number if number.is_finite() and 0 < number <= 4000 and float(number) > 0 else None
+
+
+def _dimension_identity(value):
+    """Normalize schema integer identifiers without equating different floors."""
+    if isinstance(value, bool) or not isinstance(value, (int, str)):
+        return None
+    text = str(value).strip()
+    return int(text) if re.fullmatch(r"-?\d{1,6}", text) else None
+
+
+def floor_area_evidence(record):
+    """Return an explicit whole-property measurement and replayable provenance.
+
+    MHCLG's 20260908141211 domestic-view migration prefers a declared total,
+    otherwise sums every SAP storey and room-in-roof area. General recursive
+    key matching can select heat-loss area, one storey or a CO2 intensity.
+    """
+    if not isinstance(record, dict):
+        return None
+    schemas = [record[key] for key in ("schema_type", "schemaType") if key in record]
+    if any(not isinstance(value, str) for value in schemas) or len(set(schemas)) > 1:
+        return None
+    schema = schemas[0] if schemas else ""
+    declared = [key for key in AREA_KEYS if key in record]
+    if declared:
+        measured = [(key, _area_decimal(record[key])) for key in declared]
+        if any(value is None or value < 25 for _key, value in measured):
+            return None
+        if len({value for _key, value in measured}) != 1:
+            return None
+        area = float(measured[0][1])
+        return {"areaSqm": area, "basis": "declared-whole-property-area",
+                "schemaType": schema,
+                "components": [{"path": "$." + key, "areaSqm": float(value)}
+                               for key, value in measured]}
+
+    # These legacy schemas lack a declared total in some full responses.
+    # Do not infer equivalent nesting or units for an unreviewed schema.
+    if schema not in {"SAP-Schema-12.0", "SAP-Schema-13.0"}:
+        return None
+    parts = record.get("sap_building_parts")
+    if not isinstance(parts, list) or not parts:
+        return None
+    components = []
+    part_numbers = set()
+    measurements = []
+    for part_index, part in enumerate(parts):
+        if not isinstance(part, dict):
+            return None
+        part_number = _dimension_identity(part.get("building_part_number"))
+        if part_number is None or part_number < 1 or part_number in part_numbers:
+            return None
+        part_numbers.add(part_number)
+        dimensions = part.get("sap_floor_dimensions")
+        if not isinstance(dimensions, list) or not dimensions:
+            return None
+        floor_numbers = set()
+        part_floor_key = None
+        roof_dimension = None
+        for floor_index, dimension in enumerate(dimensions):
+            if not isinstance(dimension, dict):
+                return None
+            floor_keys = [key for key in ("floor", "storey") if key in dimension]
+            if len(floor_keys) != 1:
+                return None
+            floor_key = floor_keys[0]
+            if part_floor_key is not None and floor_key != part_floor_key:
+                return None
+            part_floor_key = floor_key
+            floor_number = _dimension_identity(dimension[floor_key])
+            if floor_number is None or floor_number in floor_numbers:
+                return None
+            floor_numbers.add(floor_number)
+            area = _area_decimal(dimension.get("total_floor_area"))
+            if area is None:
+                return None
+            measurements.append(area)
+            components.append({
+                "path": f"$.sap_building_parts[{part_index}].sap_floor_dimensions[{floor_index}].total_floor_area",
+                "areaSqm": float(area), "buildingPartNumber": part_number,
+                "floorKey": floor_key, "floor": floor_number,
+            })
+            if floor_number == 99:
+                roof_dimension = (area, components[-1])
+        if "sap_room_in_roof" in part:
+            roof = part["sap_room_in_roof"]
+            if not isinstance(roof, dict):
+                return None
+            area = _area_decimal(roof.get("floor_area"))
+            if area is None:
+                return None
+            roof_path = f"$.sap_building_parts[{part_index}].sap_room_in_roof.floor_area"
+            if roof_dimension is not None:
+                # SAP12/13 define floor/storey 99 as roof space/rooms. The
+                # same part's separate roof measurement is an equivalent
+                # identity, not a second physical floor. Preserve both paths.
+                if roof_dimension[0] != area:
+                    return None
+                roof_dimension[1]["equivalentSourcePaths"] = [roof_path]
+                roof_dimension[1]["reconciliation"] = "same-building-part-roof-99"
+            else:
+                measurements.append(area)
+                components.append({
+                    "path": roof_path,
+                    "areaSqm": float(area), "buildingPartNumber": part_number,
+                })
+    # The source schema reserves building-part 1 for the main dwelling.
+    if 1 not in part_numbers:
+        return None
+    # Preserve every accepted source digit until the final register rounding.
+    # Decimal's default 28-digit context can otherwise round a value just below
+    # a half-integer upward before ROUND_HALF_UP sees it.
+    with localcontext() as context:
+        context.prec = max(28, max(value.adjusted() for value in measurements)
+                           - min(value.as_tuple().exponent for value in measurements)
+                           + len(str(len(measurements))) + 2)
+        total = sum(measurements, Decimal(0))
+        area = total.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    if not 25 <= area <= 4000:
+        return None
+    return {"areaSqm": float(area), "basis": "sap-building-parts-sum",
+            "schemaType": schema, "components": components,
+            "unroundedAreaSqm": float(total)}
+
+
 def floor_area_from_certificate(record):
-    for key in AREA_KEYS:
-        area = valid_floor_area_sqm(record.get(key))
-        if area:
-            return area
-    for key, value in flatten_dict(record).items():
-        normalised = normalise_key(key)
-        if "floor" in normalised and "area" in normalised and "room" not in normalised:
-            area = valid_floor_area_sqm(value)
-            if area:
-                return area
-    return None
+    evidence = floor_area_evidence(record)
+    return evidence["areaSqm"] if evidence else None
 
 
 def certificate_debug_keys(record):
@@ -330,9 +468,217 @@ def significant_tokens(value, postcode="", town=""):
     return tokens
 
 
+POSTCODE_PATTERN = re.compile(r"\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b")
+ADDRESS_ABBREVIATIONS = {
+    "RD": "ROAD", "ST": "STREET", "AVE": "AVENUE", "AV": "AVENUE",
+    "LN": "LANE", "DR": "DRIVE", "CL": "CLOSE", "CT": "COURT",
+    "GDNS": "GARDENS", "GDEN": "GARDEN", "CRES": "CRESCENT",
+    "PL": "PLACE", "SQ": "SQUARE", "TER": "TERRACE",
+}
+UNACCOUNTED_EXTENT_TOKENS = frozenset({
+    "ANNEX", "ANNEXE", "FLAT", "UNIT", "ROOM", "PLOT", "SUITE",
+    "MAISONETTE", "FLOOR", "BASEMENT", "REAR", "PENTHOUSE", "OUTBUILDING",
+    "OUTBUILDINGS", "BLOCK", "STABLE", "STABLES", "GARAGE", "GARAGES",
+    "WING", "COTTAGE", "LODGE", "BARN", "BUNGALOW", "BUILDING", "BUILDINGS",
+})
+# A reviewed additional road clause on the retained exact Woodside House
+# certificate. This is a postcode/street-scoped context allowance, never a
+# property-name alias or permission to omit a primary delivery identifier.
+REVIEWED_ADDITIONAL_ROAD_CONTEXT = {
+    ("KT65HE", "COCKCROW HILL"): ("ST MARYS ROAD",),
+}
+
+
+def identity_text(value, street=False, preserve_article=False):
+    """Formatting normalization only; never discard letters, numbers or names."""
+
+    value = clean(value).upper().replace("’", "'")
+    value = re.sub(r"(?<=[A-Z])'(?=[A-Z])", "", value)
+    # Distinguish a range from separate numbers and from one primary number.
+    value = re.sub(r"(?<=\d)\s*[-–—]\s*(?=\d)", " RANGE ", value)
+    tokens = normalise_text(value).split()
+    if street:
+        # ST at the start can mean Saint; only expand a suffix abbreviation.
+        if tokens:
+            tokens[-1] = ADDRESS_ABBREVIATIONS.get(tokens[-1], tokens[-1])
+    else:
+        tokens = ["FLAT" if token == "APARTMENT" else token for token in tokens]
+        if not preserve_article and tokens[:1] == ["THE"]:
+            tokens = tokens[1:]
+    return " ".join(tokens)
+
+
+def attributed_address_suffix(transaction, suffix):
+    """Every suffix word must belong to a declared or reviewed place clause."""
+
+    phrases = {
+        tuple(identity_text(transaction.get(key), preserve_article=True).split())
+        for key in ("town", "locality", "district", "county")
+        if clean(transaction.get(key))
+    }
+    # The producer's declared transaction universe is Surrey. This permits
+    # the county label, not arbitrary additional locality or premises text.
+    phrases.add(("SURREY",))
+    road_key = (normalise_postcode(transaction.get("postcode")),
+                identity_text(transaction.get("street") or transaction.get("locality"), street=True))
+    phrases.update(tuple(value.split()) for value in REVIEWED_ADDITIONAL_ROAD_CONTEXT.get(road_key, ()))
+    reachable = {0}
+    for index in range(len(suffix) + 1):
+        if index not in reachable:
+            continue
+        for phrase in phrases:
+            if phrase and tuple(suffix[index:index + len(phrase)]) == phrase:
+                reachable.add(index + len(phrase))
+    return len(suffix) in reachable
+
+
+def certificate_postcode(record):
+    explicit = normalise_postcode(extract_postcode(record))
+    embedded = {normalise_postcode(value) for value in POSTCODE_PATTERN.findall(candidate_address(record).upper())}
+    if explicit:
+        embedded.add(explicit)
+    return next(iter(embedded)) if len(embedded) == 1 else ""
+
+
+def delivery_conflict_reason(expected, actual):
+    if not actual:
+        return "delivery_identity_missing"
+    if ("ANNEX" in expected.split() or "ANNEXE" in expected.split()) != ("ANNEX" in actual.split() or "ANNEXE" in actual.split()):
+        return "annexe_extent_conflict"
+    unit = r"\b(?:FLAT|UNIT|PLOT|ROOM|SUITE)\s+([A-Z]|\d+[A-Z]?(?: RANGE \d+[A-Z]?)?)\b"
+    if re.findall(unit, expected) != re.findall(unit, actual):
+        return "unit_identifier_conflict"
+    numbers = r"\b\d+[A-Z]?(?: RANGE \d+[A-Z]?)?\b"
+    if re.findall(numbers, expected) != re.findall(numbers, actual):
+        return "primary_number_conflict_or_missing"
+    return "unresolved_named_identity_or_alias"
+
+
+def delivery_identity(transaction, epc_record, recovery_context=None, summary=None):
+    """Require the entire delivery point, before ranking or trusting EPC facts.
+
+    Structured HMLR identity is authoritative. Certificate address suffixes may
+    contain additional locality/road context, but may not omit or add anything
+    in front of the matching street. Unstructured inputs require complete exact
+    address equality after removing their declared town/locality suffixes.
+    """
+
+    if recovery_context is not None:
+        from epc_recovery_identity import resolve_identity
+        return resolve_identity(transaction, epc_record, recovery_context, summary=summary)
+    postcode = normalise_postcode(transaction.get("postcode"))
+    if not postcode or certificate_postcode(epc_record) != postcode:
+        return False, "postcode_missing_or_conflicting"
+    epc_address = POSTCODE_PATTERN.sub(" ", candidate_address(epc_record).upper())
+    paon = clean(transaction.get("paon"))
+    street = clean(transaction.get("street") or transaction.get("locality"))
+    if paon and street:
+        expected = identity_text(" ".join(filter(None, [clean(transaction.get("saon")), paon])))
+        road = identity_text(street, street=True)
+        # Normalize a street abbreviation only in the already known road slot.
+        road_tokens = road.split()
+        if not expected or not road_tokens:
+            return False, "identity_missing"
+        alternatives = {road_tokens[-1]}
+        alternatives.update(key for key, value in ADDRESS_ABBREVIATIONS.items() if value == road_tokens[-1])
+        normalized = identity_text(epc_address).split()
+        road_positions = []
+        for index in range(len(normalized) - len(road_tokens) + 1):
+            chunk = normalized[index:index + len(road_tokens)]
+            if chunk[:-1] == road_tokens[:-1] and chunk[-1] in alternatives:
+                road_positions.append(index)
+        if not road_positions:
+            return False, "street_not_exact"
+        # A house name can contain its street ("Parklands House, Parklands").
+        # Match the complete delivery prefix at the road boundary, rather than
+        # treating the first occurrence inside the house name as the street.
+        road_start = next((index for index in road_positions
+                           if " ".join(normalized[:index]) == expected), road_positions[0])
+        if " ".join(normalized[:road_start]) != expected:
+            return False, delivery_conflict_reason(expected, " ".join(normalized[:road_start]))
+        suffix = normalized[road_start + len(road_tokens):]
+        # Certificates can put a flat/annexe after the street. Such a suffix is
+        # an unaccounted delivery point, not harmless town/locality context.
+        if any(token in UNACCOUNTED_EXTENT_TOKENS for token in suffix):
+            return False, "unaccounted_suffix_unit_or_extent"
+        if any(re.fullmatch(r"\d+[A-Z]?", token) for token in suffix):
+            return False, "unaccounted_suffix_number"
+        if not attributed_address_suffix(transaction, suffix):
+            return False, "unattributed_address_suffix"
+        return True, "exact_delivery_point"
+
+    def unstructured(value):
+        value = identity_text(POSTCODE_PATTERN.sub(" ", clean(value).upper()))
+        # Remove complete declared trailing locality/town phrases only.
+        suffixes = [identity_text(transaction.get(key)) for key in ("town", "locality")]
+        for _ in range(3):
+            for suffix in suffixes:
+                if suffix and value.endswith(" " + suffix):
+                    value = value[:-(len(suffix) + 1)].strip()
+        return identity_text(value, street=True)
+
+    expected = unstructured(transaction.get("address"))
+    actual = unstructured(epc_address)
+    return (True, "exact_full_address") if expected and expected == actual else (False, delivery_conflict_reason(expected, actual))
+
+
+def retained_certificate(epc):
+    """Adapt private cache facts, never its claimed target address or score."""
+
+    return {
+        "addressLine1": epc.get("epcAddress"),
+        "certificateNumber": epc.get("epcCertificateNumber"),
+        "registrationDate": epc.get("epcRegistrationDate"),
+        "totalFloorArea": epc.get("floorAreaSqm"),
+        "currentEnergyEfficiencyBand": epc.get("epcRating"),
+    }
+
+
+def _cache_delivery_identity(transaction, record, recovery_context=None):
+    if recovery_context is not None and "certificateIdentity" in record:
+        from epc_recovery_identity import replay_cached_identity
+        return replay_cached_identity(transaction, record, recovery_context)
+    return delivery_identity(transaction, retained_certificate(record.get("epc") or {}))
+
+
+def validated_cached_epc(transaction, record, conflicting_certificate_ids=(), recovery_context=None):
+    if not isinstance(record, dict) or record.get("status") != "matched":
+        return None
+    epc = record.get("epc")
+    if not isinstance(epc, dict):
+        return None
+    if not all(isinstance(epc.get(key), str) for key in ("epcAddress", "epcCertificateNumber", "epcRegistrationDate")):
+        return None
+    rating = epc.get("epcRating")
+    if rating is not None and (not isinstance(rating, str) or rating not in ("", "A", "B", "C", "D", "E", "F", "G")):
+        return None
+    certificate = retained_certificate(epc)
+    if extract_certificate_number(certificate) in conflicting_certificate_ids:
+        return None
+    if not _cache_delivery_identity(transaction, record, recovery_context)[0]:
+        return None
+    area = floor_area_from_certificate(certificate)
+    date = extract_registration_date(certificate)
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date):
+        return None
+    try:
+        datetime.strptime(date, "%Y-%m-%d")
+    except (TypeError, ValueError):
+        return None
+    if not area or not extract_certificate_number(certificate) or not numeric(transaction.get("price")):
+        return None
+    sqft = round(area * SQM_TO_SQFT)
+    result = dict(epc)
+    result.update({"epcMatched": True, "floorAreaSqm": round(area, 1),
+                   "floorAreaSqft": sqft, "pricePerSqft": round(transaction["price"] / sqft)})
+    return result
+
+
 def address_score(transaction, candidate, certificate=None):
     candidate = candidate or {}
     certificate = certificate or {}
+    if not delivery_identity(transaction, certificate or candidate)[0]:
+        return 0.0
     land_postcode = normalise_postcode(transaction.get("postcode"))
     candidate_postcode = normalise_postcode(extract_postcode(certificate) or extract_postcode(candidate))
     if land_postcode and candidate_postcode and land_postcode != candidate_postcode:
@@ -469,7 +815,7 @@ def best_epc_match(
         (
             (address_score(transaction, candidate), candidate)
             for candidate in candidates
-            if extract_certificate_number(candidate)
+            if extract_certificate_number(candidate) and delivery_identity(transaction, candidate)[0]
         ),
         key=lambda item: (item[0], candidate_sort_key(item[1])),
         reverse=True,
@@ -491,6 +837,12 @@ def best_epc_match(
             continue
         certificate_number = extract_certificate_number(candidate)
         certificate = fetch_certificate(certificate_number, token, certificate_cache)
+        if certificate and extract_certificate_number(certificate) not in ("", certificate_number):
+            diagnostics["certificate_number_conflict"] += 1
+            continue
+        if certificate and not delivery_identity(transaction, certificate)[0]:
+            diagnostics["certificate_identity_rejected"] += 1
+            continue
         final_score = address_score(transaction, candidate, certificate)
         area_sqm = floor_area_from_certificate(certificate) or floor_area_from_certificate(candidate)
         if final_score > best_seen["finalScore"]:
@@ -512,6 +864,7 @@ def best_epc_match(
                 continue
             match = {
                 "status": "matched",
+                "identityGuardVersion": IDENTITY_GUARD_VERSION,
                 "candidateCount": len(candidates),
                 "epc": {
                     "epcMatched": True,
@@ -546,11 +899,16 @@ def best_epc_match(
     }
 
 
-def cache_record_is_fresh(record, refresh_days):
+def cache_record_is_fresh(record, refresh_days, transaction=None, conflicting_certificate_ids=(), recovery_context=None):
     if not record:
         return False
     if record.get("status") == "matched":
-        return True
+        # A legacy score or target-address key is never identity evidence.
+        return transaction is not None and validated_cached_epc(transaction, record, conflicting_certificate_ids, recovery_context) is not None
+    if record.get("status") == "no_match" and record.get("evidenceScope") == "retained-cache-only":
+        # Finding no exact certificate in retained evidence is not a new
+        # register search, even when its previous lookup timestamp is recent.
+        return False
     # A transport/API failure is not evidence about the property. Always
     # retry it on the next checkpointed run instead of suppressing recovery
     # for the normal no-match refresh window.
@@ -585,10 +943,160 @@ def public_epc_record(item):
     return cleaned
 
 
-def terminal_cache_accounting(transactions, cache, refresh_days):
+def without_unverified_epc(item):
+    cleaned = public_epc_record(item)
+    for key in PUBLIC_EPC_FIELDS:
+        cleaned.pop(key, None)
+    cleaned["epcMatched"] = False
+    return cleaned
+
+
+def retained_certificate_index(cache, recovery_context=None):
+    """Retain original evidence/check dates, and quarantine contradictory IDs."""
+
+    by_id = {}
+    conflicts = set()
+    identity_uprns = {}
+    for record in cache.get("records", {}).values():
+        if not isinstance(record, dict) or record.get("status") != "matched":
+            continue
+        epc = record.get("epc")
+        if not isinstance(epc, dict):
+            continue
+        certificate = retained_certificate(epc)
+        number = extract_certificate_number(certificate)
+        if not number:
+            continue
+        if recovery_context is not None:
+            from epc_recovery_identity import _certificate_uprn
+            try:
+                values = {_certificate_uprn(record[field])
+                          for field in ("certificateIdentity", "summaryIdentity")
+                          if isinstance(record.get(field), dict)} - {None}
+            except ValueError:
+                values = set()
+                conflicts.add(number)
+            identity_uprns.setdefault(number, set()).update(values)
+            if len(identity_uprns[number]) > 1:
+                conflicts.add(number)
+        # Price/PPSF and original target address vary across sales; certificate
+        # identity, area, rating and registration date must not vary by target.
+        signature = (identity_text(epc.get("epcAddress")), certificate_postcode(certificate),
+                     epc.get("floorAreaSqm"), epc.get("epcRating"), epc.get("epcRegistrationDate"))
+        if number in by_id and by_id[number][0] != signature:
+            conflicts.add(number)
+        else:
+            existing = by_id.get(number)
+            if recovery_context is not None and existing and "certificateIdentity" in record and "certificateIdentity" not in existing[1]:
+                by_id[number] = (signature, record)
+            else:
+                by_id.setdefault(number, (signature, record))
+    by_postcode = {}
+    for number, (_signature, record) in by_id.items():
+        if number not in conflicts:
+            postcode = certificate_postcode(retained_certificate(record["epc"]))
+            if postcode:
+                by_postcode.setdefault(postcode, []).append(record)
+    if recovery_context is not None:
+        from epc_recovery_identity import TrustedRecoveryContext
+        if not isinstance(recovery_context, TrustedRecoveryContext):
+            raise ValueError("EPC recovery requires an explicitly verified context")
+        for property_id in recovery_context.properties:
+            candidates = {}
+            for transaction in recovery_context.rows_by_property[property_id]:
+                retained = cache.get("records", {}).get(stable_transaction_key(transaction), {})
+                number = (retained.get("epc") or {}).get("epcCertificateNumber")
+                if number in by_id and number not in conflicts:
+                    candidates[number] = by_id[number][1]
+            by_postcode["recovery:" + property_id] = list(candidates.values())
+    return by_postcode, conflicts
+
+
+def revalidate_retained_cache(transactions, cache, recovery_context=None):
+    """Pure offline review: no network, no writes, no new source-check dates.
+
+    This is a review of retained certificates, not proof of register coverage.
+    Return candidate rows/cache for separately authorized private staging only.
+    """
+
+    by_postcode, conflicts = retained_certificate_index(cache, recovery_context)
+    reviewed_cache = copy.deepcopy(cache)
+    reviewed_records = reviewed_cache.setdefault("records", {})
+    rows, decisions = [], []
+    counts = Counter()
+    for transaction in transactions:
+        key = stable_transaction_key(transaction)
+        prior = cache.get("records", {}).get(key)
+        eligible = []
+        rejected = Counter()
+        candidate_keys = [normalise_postcode(transaction.get("postcode"))]
+        if recovery_context is not None:
+            from epc_recovery_identity import discovery_queries
+            candidate_keys.append("recovery:" + str(transaction.get("propertyRecordId") or ""))
+            candidate_keys.extend(query["postcode"] for query in discovery_queries(transaction, recovery_context) if "postcode" in query)
+        candidates_by_id = {}
+        for candidate_key in candidate_keys:
+            for candidate in by_postcode.get(candidate_key, []):
+                candidates_by_id[candidate["epc"]["epcCertificateNumber"]] = candidate
+        candidates = list(candidates_by_id.values())
+        for record in candidates:
+            epc = validated_cached_epc(transaction, record, conflicts, recovery_context)
+            if epc:
+                eligible.append((epc["epcRegistrationDate"], epc["epcCertificateNumber"], epc, record))
+            else:
+                accepted_identity, rejection = _cache_delivery_identity(transaction, record, recovery_context)
+                rejected["invalid_retained_certificate_facts" if accepted_identity else rejection] += 1
+        eligible.sort(key=lambda value: (value[0], value[1]), reverse=True)
+        chosen = eligible[0] if eligible else None
+        if chosen:
+            latest = [entry for entry in eligible if entry[0] == chosen[0]]
+            if len({(entry[2]["floorAreaSqm"], entry[2].get("epcRating")) for entry in latest}) > 1:
+                chosen = None
+                reason = "conflicting_latest_exact_certificates"
+            else:
+                reason = "latest_exact_retained_certificate"
+        else:
+            reason = "no_exact_retained_certificate" if candidates else "no_retained_certificate_for_postcode"
+        row = without_unverified_epc(transaction)
+        if chosen:
+            _date, _number, epc, retained = chosen
+            row.update(publishable_epc_fields(epc))
+            reviewed_records[key] = {
+                "status": "matched", "epc": epc, "address": transaction.get("address"),
+                "postcode": transaction.get("postcode"), "searchedAt": retained.get("searchedAt"),
+                "identityGuardVersion": IDENTITY_GUARD_VERSION,
+                "evidenceScope": "retained-cache-only", "identityReviewReason": reason,
+            }
+            for field in ("certificateIdentity", "summaryIdentity", "certificateFetch", "recoveryMethod"):
+                if field in retained:
+                    reviewed_records[key][field] = copy.deepcopy(retained[field])
+            disposition = "retained" if prior and (prior.get("epc") or {}).get("epcCertificateNumber") == epc["epcCertificateNumber"] else "replaced"
+        else:
+            disposition = "unknown"
+            reviewed_records[key] = {
+                "status": "no_match", "reason": reason, "address": transaction.get("address"),
+                "postcode": transaction.get("postcode"), "searchedAt": (prior or {}).get("searchedAt"),
+                "identityGuardVersion": IDENTITY_GUARD_VERSION, "evidenceScope": "retained-cache-only",
+            }
+        counts[disposition] += 1
+        prior_epc = (prior or {}).get("epc")
+        prior_reason = _cache_delivery_identity(transaction, prior, recovery_context)[1] if isinstance(prior_epc, dict) else "no_retained_match"
+        decisions.append({"transactionId": transaction.get("id"), "disposition": disposition,
+                          "reason": reason, "previousMatchIdentity": prior_reason,
+                          "candidateRejections": dict(rejected), "eligibleRetainedCertificates": len(eligible)})
+        rows.append(row)
+    return rows, reviewed_cache, {
+        "identityGuardVersion": IDENTITY_GUARD_VERSION, "evidenceScope": "retained-cache-only",
+        "sourceChecksPerformed": 0, "transactions": len(rows), "counts": dict(counts),
+        "conflictingCertificateIds": len(conflicts), "decisions": decisions,
+    }
+
+
+def terminal_cache_accounting(transactions, cache, refresh_days, recovery_context=None):
     """Reconcile every current transaction key to fresh terminal evidence."""
 
     records = cache.get("records", {})
+    _index, conflicts = retained_certificate_index(cache, recovery_context)
     matched = 0
     no_match = 0
     errors = 0
@@ -600,9 +1108,9 @@ def terminal_cache_accounting(transactions, cache, refresh_days):
         status = record.get("status")
         if status == "error":
             errors += 1
-        elif status == "matched" and cache_record_is_fresh(record, refresh_days):
+        elif status == "matched" and cache_record_is_fresh(record, refresh_days, item, conflicts, recovery_context):
             matched += 1
-        elif status == "no_match" and cache_record_is_fresh(record, refresh_days):
+        elif status == "no_match" and cache_record_is_fresh(record, refresh_days, item):
             no_match += 1
     resolved = matched + no_match
     return {
@@ -626,8 +1134,22 @@ def terminal_cache_can_reconcile(accounting, transaction_count):
     )
 
 
+def publication_matches_cache(transactions, cache, recovery_context=None):
+    """Equal counts cannot prove the published area/rating/PPSF is still right."""
+
+    _index, conflicts = retained_certificate_index(cache, recovery_context)
+    for transaction in transactions:
+        epc = validated_cached_epc(transaction, cache.get("records", {}).get(stable_transaction_key(transaction)), conflicts, recovery_context)
+        expected = publishable_epc_fields(epc) if epc else {"epcMatched": False}
+        actual = {key: value for key, value in transaction.items() if key in PUBLIC_EPC_FIELDS}
+        if actual != expected:
+            return False
+    return True
+
+
 def enrich_transactions(transactions, cache, token, args):
     records = cache.setdefault("records", {})
+    _index, conflicts = retained_certificate_index(cache)
     candidate_cache = {}
     certificate_cache = {}
     enriched = []
@@ -645,19 +1167,26 @@ def enrich_transactions(transactions, cache, token, args):
     max_seconds = args.max_run_minutes * 60 if args.max_run_minutes else 0
     aborted_reason = ""
 
+    def checked_existing(item):
+        output = without_unverified_epc(item)
+        epc = validated_cached_epc(item, records.get(stable_transaction_key(item)), conflicts)
+        if epc:
+            output.update(publishable_epc_fields(epc))
+        return output
+
     for index, item in enumerate(transactions, start=1):
         if max_seconds and time.monotonic() - started > max_seconds:
             aborted_reason = f"Stopped after {args.max_run_minutes} minutes before processing transaction {index}."
             break
 
         if limit and index > limit:
-            enriched.append(public_epc_record(item))
+            enriched.append(checked_existing(item))
             continue
 
         key = stable_transaction_key(item)
         cached = records.get(key)
         result = None
-        if cached and cache_record_is_fresh(cached, args.refresh_days):
+        if cached and cache_record_is_fresh(cached, args.refresh_days, item, conflicts):
             stats["cached"] += 1
             result = cached
         elif token:
@@ -694,11 +1223,10 @@ def enrich_transactions(transactions, cache, token, args):
             stats["skipped"] += 1
             result = cached
 
-        output = public_epc_record(item)
-        if result and result.get("status") == "matched" and result.get("epc"):
-            for key in PUBLIC_EPC_FIELDS:
-                output.pop(key, None)
-            output.update(publishable_epc_fields(result["epc"]))
+        output = without_unverified_epc(item)
+        validated_epc = validated_cached_epc(item, result, conflicts)
+        if validated_epc:
+            output.update(publishable_epc_fields(validated_epc))
             stats["matched"] += 1
         elif result and result.get("status") == "no_match":
             stats["noMatch"] += 1
@@ -720,7 +1248,7 @@ def enrich_transactions(transactions, cache, token, args):
             print(f"Processed {index}/{len(transactions)} transactions; EPC matches so far: {stats['matched']}")
 
     if aborted_reason and len(enriched) < len(transactions):
-        enriched.extend(public_epc_record(item) for item in transactions[len(enriched):])
+        enriched.extend(checked_existing(item) for item in transactions[len(enriched):])
 
     return enriched, stats, reasons, aborted_reason
 
@@ -746,6 +1274,8 @@ def parse_args():
     parser.add_argument("--allow-partial-success", action="store_true", help="Write partial EPC progress and return success when the run reaches the time limit after finding matches.")
     parser.add_argument("--progress-every", type=int, default=25, help="Print progress every N processed transactions.")
     parser.add_argument("--dry-run", action="store_true", help="Report what would happen without writing files.")
+    parser.add_argument("--revalidate-cache-only", action="store_true", help="Read-only full identity review using retained cache certificates only; never contacts the API or writes a feed/cache.")
+    parser.add_argument("--review-json", help="With --revalidate-cache-only, exclusively create an identity decision report under this worktree's .tmp/ or work/reviews/; no certificate addresses or identifiers are exported.")
     return parser.parse_args()
 
 
@@ -755,9 +1285,29 @@ def main():
     REQUEST_TIMEOUT = max(3, args.request_timeout)
     REQUEST_RETRIES = max(0, args.request_retries)
     args.progress_every = max(1, args.progress_every)
-    token = clean(os.getenv(args.token_env))
     transactions, _summary, meta = read_js(args.input_js)
     cache = load_cache(args.cache)
+
+    if args.revalidate_cache_only:
+        if args.limit:
+            raise ValueError("Offline identity review must cover every current transaction")
+        _rows, _cache, report = revalidate_retained_cache(transactions, cache)
+        if args.review_json:
+            path = Path(args.review_json).resolve()
+            allowed = (ROOT / ".tmp", ROOT / "work" / "reviews")
+            if not any(base.resolve() in path.parents for base in allowed):
+                raise ValueError("Review reports must stay in this worktree's private .tmp/ or work/reviews/ directory")
+            if path in {Path(args.cache).resolve(), Path(args.input_js).resolve(), Path(args.write_js).resolve()}:
+                raise ValueError("An identity review must not overwrite an input/cache/feed")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with path.open("x", encoding="utf-8") as handle:
+                json.dump(report, handle, indent=2, sort_keys=True)
+                handle.write("\n")
+        print(json.dumps({key: value for key, value in report.items() if key != "decisions"}, sort_keys=True))
+        return 0
+    if args.review_json:
+        raise ValueError("--review-json requires --revalidate-cache-only")
+    token = clean(os.getenv(args.token_env))
 
     existing_matches = sum(1 for item in transactions if numeric(item.get("pricePerSqft")))
     print(f"Transactions: {len(transactions)}")
@@ -766,10 +1316,12 @@ def main():
     prior_epc = meta.get("epcEnrichment") if isinstance(meta.get("epcEnrichment"), dict) else {}
     if (
         prior_epc.get("status") == "complete"
+        and prior_epc.get("identityGuardVersion") == IDENTITY_GUARD_VERSION
         and initial_accounting["resolved"] == len(transactions)
         and initial_accounting["pending"] == 0
         and initial_accounting["errors"] == 0
         and all(prior_epc.get(key) == value for key, value in initial_accounting.items())
+        and publication_matches_cache(transactions, cache)
     ):
         print("EPC enrichment is already fully reconciled; no checkpoint changes required.")
         return 0
@@ -815,6 +1367,7 @@ def main():
         "floorAreaUnit": "sq m converted to sq ft",
         "pricePerSqft": True,
         "minimumAddressMatchScore": args.min_score,
+        "identityGuardVersion": IDENTITY_GUARD_VERSION,
         "status": "complete" if complete else "partial",
         **accounting,
     }

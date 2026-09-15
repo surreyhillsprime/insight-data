@@ -235,7 +235,7 @@ class PublicationContractTests(unittest.TestCase):
         self.assertNotIn("epcCertificateNumber", cleaned)
         self.assertNotIn("epcMatchScore", cleaned)
 
-    def test_epc_enricher_preserves_approved_facts_when_no_token_is_available(self):
+    def test_epc_enricher_clears_unverified_facts_when_no_token_or_cache_is_available(self):
         row = {
             "id": "lr-test",
             "address": "1 TEST ROAD, ESHER, KT10 0AA",
@@ -260,8 +260,9 @@ class PublicationContractTests(unittest.TestCase):
             progress_every=100,
         )
         rows, _stats, _reasons, _aborted = enrich_transactions([row], {"records": {}}, "", args)
-        self.assertEqual(rows[0]["floorAreaSqft"], 3_000)
-        self.assertEqual(rows[0]["epcRating"], "C")
+        self.assertNotIn("floorAreaSqft", rows[0])
+        self.assertNotIn("epcRating", rows[0])
+        self.assertFalse(rows[0]["epcMatched"])
         self.assertNotIn("epcAddress", rows[0])
         self.assertNotIn("epcCertificateNumber", rows[0])
         self.assertNotIn("epcHistory", rows[0])
@@ -278,7 +279,8 @@ class PublicationContractTests(unittest.TestCase):
         cache = {"records": {
             stable_transaction_key(matched_row): {
                 "status": "matched",
-                "epc": {"floorAreaSqft": 2000},
+                "epc": {"floorAreaSqm": 200, "epcAddress": "1 TEST ROAD ESHER KT10 0AA",
+                        "epcCertificateNumber": "synthetic-certificate-1", "epcRegistrationDate": "2025-01-01"},
             },
             stable_transaction_key(error_row): {
                 "status": "error",
@@ -311,7 +313,8 @@ class PublicationContractTests(unittest.TestCase):
         cache = {"records": {
             stable_transaction_key(category_a): {
                 "status": "matched",
-                "epc": {"floorAreaSqft": 2000},
+                "epc": {"floorAreaSqm": 200, "epcAddress": "14 RIVER AVENUE THAMES DITTON KT7 0RS",
+                        "epcCertificateNumber": "synthetic-certificate-2", "epcRegistrationDate": "2023-01-01"},
             }
         }}
         accounting = terminal_cache_accounting([category_a, category_b], cache, 30)
