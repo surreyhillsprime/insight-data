@@ -1,0 +1,56 @@
+name: Approved EPC Certificate Review
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_sha256:
+        description: "Reviewed canonical SHA-256 of the private certificate-reference manifest"
+        required: true
+        type: string
+      epc_result_public_key:
+        description: "PEM RSA public key for the encrypted review evidence"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: insight-epc-certificate-review
+  cancel-in-progress: false
+
+jobs:
+  fetch-approved-certificates:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the exact approved source without stored credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify focused transport and encryption before provider access
+        run: PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=scripts python3 -m unittest tests.test_epc_certificate_review tests.test_epc_candidate_result
+
+      - name: Fetch only approved missing full certificates
+        env:
+          EPC_BEARER_TOKEN: ${{ secrets.EPC_BEARER_TOKEN }}
+          EPC_CERTIFICATE_REVIEW_MANIFEST_B64: ${{ secrets.EPC_CERTIFICATE_REVIEW_MANIFEST_B64 }}
+          EPC_CERTIFICATE_REVIEW_MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
+          EPC_RESULT_PUBLIC_KEY: ${{ inputs.epc_result_public_key }}
+        run: python3 scripts/fetch_epc_certificate_review.py --output-dir "$RUNNER_TEMP/insight-epc-certificate-review"
+
+      - name: Retain encrypted review evidence and aggregate receipt only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: epc-certificate-review-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/insight-epc-certificate-review/result.enc
+            ${{ runner.temp }}/insight-epc-certificate-review/result.key
+            ${{ runner.temp }}/insight-epc-certificate-review/receipt.json
+          retention-days: 3
+          if-no-files-found: error
+          overwrite: false
