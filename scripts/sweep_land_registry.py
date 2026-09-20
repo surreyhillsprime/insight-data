@@ -18,7 +18,7 @@ import time
 import urllib.parse
 import urllib.request
 from collections import Counter, defaultdict
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from private_estates import classify_estate, load_compiled_registry
@@ -67,6 +67,7 @@ BASE_METADATA_FIELDS = {
     "estateActiveDefinitionCount", "estateActiveRuleCount",
     "propertyRecordSchemaVersion", "canonicalPropertyRecords", "propertyIdentityMode",
     "transactionExclusions", "addressCanonicalisation",
+    "sourceCheckedAt", "sourceRefreshFrom", "sourceRefreshMode", "sourceFetchStatus",
 }
 
 CANONICAL_DISTRICTS = {
@@ -347,7 +348,8 @@ def current_rows_from_archives(existing_transactions=None, full_history=False):
     return transactions
 
 
-def fetch_rows(use_current_cache=False, existing_transactions=None, refresh_history=False, archive_all_years=False):
+def fetch_rows(use_current_cache=False, existing_transactions=None, refresh_history=False, archive_all_years=False,
+               acquisition=None):
     history = historical_rows(refresh=refresh_history or archive_all_years)
     if use_current_cache:
         current = [item for item in (existing_transactions or []) if clean(item.get("date")) >= CURRENT_START_DATE]
@@ -360,15 +362,25 @@ def fetch_rows(use_current_cache=False, existing_transactions=None, refresh_hist
         print(f"Current cache: {len(current):,} rows", flush=True)
     elif archive_all_years:
         current = current_rows_from_archives(existing_transactions, full_history=True)
+        if acquisition is not None:
+            acquisition.update(sourceRefreshFrom=START_DATE, sourceRefreshMode="annual-archives-all-years")
     else:
         try:
             current = fetch_current_rows()
             _raw_count, current_transactions = normalise_rows(current)
             write_processed_csv(CURRENT_CSV, current_transactions)
             print(f"Refreshed current cache: {len(current_transactions):,} rows", flush=True)
+            if acquisition is not None:
+                acquisition.update(sourceRefreshFrom=CURRENT_START_DATE, sourceRefreshMode="current-sparql")
         except Exception as error:
             print(f"WARNING current query failed; refreshing rolling annual archives: {error}", flush=True)
             current = current_rows_from_archives(existing_transactions, full_history=False)
+            if acquisition is not None:
+                acquisition.update(sourceRefreshFrom=f"{max(2010, date.today().year - 1)}-01-01",
+                                   sourceRefreshMode="annual-archives-rolling")
+    if acquisition is not None and not use_current_cache:
+        acquisition.update(sourceCheckedAt=datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                           sourceFetchStatus="verified")
     return history + current
 
 
@@ -792,6 +804,7 @@ def main():
     existing_path = Path(args.preserve_from_js) if args.preserve_from_js else Path(args.write_js)
     existing_transactions, existing_metadata = read_existing_js(existing_path)
     source = "official HMLR yearly archive + current SPARQL"
+    acquisition = {}
     if args.no_fetch:
         source = "local CSV"
         rows = read_csv(args.from_csv)
@@ -804,6 +817,7 @@ def main():
                 existing_transactions,
                 args.refresh_history,
                 args.archive_all_years,
+                acquisition=acquisition,
             )
             if args.use_current_cache:
                 source = "official HMLR yearly archive + checked-in 2010+ cache"
@@ -812,16 +826,22 @@ def main():
         except Exception as exc:
             if args.archive_all_years:
                 raise RuntimeError("Full £2m archive rebuild failed; refusing a narrower cache fallback") from exc
-            source = f"local CSV fallback after fetch error: {exc}"
-            rows = read_csv(args.from_csv)
-            if not rows_have_structured_address_schema(rows):
-                raise RuntimeError(
-                    "Official refresh failed and the fallback CSV lacks structured HMLR address fields"
-                ) from exc
+            raise RuntimeError(
+                "Official HMLR refresh failed; retaining the prior publication without claiming freshness"
+            ) from exc
 
     raw_count, transactions, address_stats = normalise_rows(rows, include_address_stats=True)
     meta = metadata(raw_count, transactions)
     transactions, meta = preserve_existing_enrichments(transactions, meta, existing_transactions, existing_metadata)
+    # A local rebuild can retain old provenance, but cannot become a verified
+    # acquisition or be published by the independent sales-dataset producer.
+    if acquisition:
+        meta.update(acquisition)
+    else:
+        meta.update({key: existing_metadata[key] for key in
+                     ("sourceCheckedAt", "sourceRefreshFrom", "sourceRefreshMode")
+                     if key in existing_metadata})
+        meta["sourceFetchStatus"] = "retained"
     print(f"Source: {source}")
     print(f"Transactions: {len(transactions)}")
     print(f"Latest sale date: {meta['to']}")

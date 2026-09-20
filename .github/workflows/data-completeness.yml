@@ -27,6 +27,11 @@ jobs:
           git diff --exit-code -- outputs/private-estates.js
       - name: Check shared feed coverage
         run: python3 scripts/check_data_completeness.py --strict-metadata
+      - name: Check published native sales dataset coherence and source freshness
+        run: |
+          if [ -f outputs/sales-dataset.json ]; then
+            python3 scripts/build_sales_dataset.py --validate
+          fi
       - name: Check published View date and official observation freshness
         run: python3 scripts/check_insight_view_freshness.py
       - name: Check published sales-history identity and freshness

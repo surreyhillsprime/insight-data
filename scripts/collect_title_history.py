@@ -200,6 +200,48 @@ def seed_record_is_fresh(
     return (current - updated.astimezone(timezone.utc)).total_seconds() < refresh_days * 86400
 
 
+def changed_base_properties(transactions, prior_transactions):
+    """Return exact old/new canonical identities whose HMLR facts changed."""
+    history_identity_fields = {
+        "id", "propertyRecordId", "address", "paon", "saon", "street", "locality", "town",
+        "postcode", "price", "date", "propertyType", "category",
+    }
+
+    def grouped(rows):
+        result = defaultdict(list)
+        for row in rows:
+            canonical_id = row.get("propertyRecordId", "")
+            if not isinstance(canonical_id, str) or not canonical_id.startswith("property:"):
+                raise ValueError("Prior/current ledger lacks an exact canonical property identity")
+            result[canonical_id].append(sha256_json({
+                field: row[field] for field in history_identity_fields if field in row
+            }))
+        return {key: sorted(values) for key, values in result.items()}
+
+    current, prior = grouped(transactions), grouped(prior_transactions)
+    return {key for key in current.keys() | prior.keys() if current.get(key) != prior.get(key)}
+
+
+def prior_base_transactions(base_path="", dataset_path=""):
+    """Use the latest validated native generation, falling back to a prior base."""
+    if dataset_path and Path(dataset_path).exists():
+        from build_sales_dataset import MAX_BYTES, validate_envelope
+        source = Path(dataset_path)
+        if source.stat().st_size > MAX_BYTES:
+            raise ValueError("Prior native sales dataset exceeds the source bound")
+        envelope = json.loads(source.read_text(encoding="utf-8"))
+        published = datetime.fromisoformat(str(envelope.get("publishedAt", "")).replace("Z", "+00:00"))
+        # An old but originally valid snapshot remains useful for identifying
+        # corrections; do not relabel it as a fresh current publication.
+        payload = validate_envelope(envelope, now=min(datetime.now(timezone.utc), published))
+        return payload["transactions"]
+    if base_path and Path(base_path).exists():
+        rows, _summary, _metadata = read_js(base_path)
+        base_feed_identity(rows)
+        return rows
+    return None
+
+
 def load_seed_history(path, refresh_days, *, allow_local=False):
     if not path:
         return {}
@@ -680,6 +722,8 @@ def main():
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--workers", type=int, default=3)
     parser.add_argument("--refresh-days", type=int, default=28)
+    parser.add_argument("--prior-base-feed", default="", help="Prior ledger used to force HMLR history refresh for changed exact properties.")
+    parser.add_argument("--prior-sales-dataset", default="", help="Prefer this validated prior native snapshot when detecting corrected or withdrawn sales.")
     parser.add_argument("--timeout", type=int, default=90)
     parser.add_argument("--pause", type=float, default=0.2)
     parser.add_argument("--deployment-mode", choices=("local", "commercial"), default="local")
@@ -697,6 +741,8 @@ def main():
     exclusion_ledger = load_transaction_exclusion_ledger()
 
     transactions, _summary, base_meta = read_js(args.input)
+    prior_transactions = prior_base_transactions(args.prior_base_feed, args.prior_sales_dataset)
+    changed_properties = changed_base_properties(transactions, prior_transactions) if prior_transactions is not None else set()
     if args.migrate_from_history:
         prior_history, prior_meta = read_history_output(args.migrate_from_history)
         history, meta = migrate_existing_history(
@@ -750,7 +796,7 @@ def main():
     fresh_seed = {
         key: seed_history.get(key)
         for key in properties
-        if seed_record_is_fresh(
+        if key not in changed_properties and seed_record_is_fresh(
             seed_history.get(key),
             key,
             args.refresh_days,
@@ -761,6 +807,11 @@ def main():
     for key, postcodes in property_postcodes.items():
         for postcode in postcodes:
             properties_by_postcode[postcode].append(key)
+    for property_id in changed_properties:
+        for postcode in property_postcodes.get(property_id, ()):
+            # Keep the old cache evidence for diagnostics, but a changed ledger
+            # must never reuse it after a failed refresh or in cache-only mode.
+            store.setdefault(postcode, {})["lastError"] = "Canonical HMLR sale facts changed; a new postcode lookup is required"
     pending = [] if args.cache_only else [
         postcode
         for postcode in selected

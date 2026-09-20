@@ -1,0 +1,77 @@
+name: HMLR native sales dataset
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insight-data-refresh
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synchronise selected branch
+        run: |
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/$GITHUB_REF_NAME"
+      - name: Test the HMLR-only publication contract
+        run: PYTHONPATH=scripts python3 -m unittest tests.test_sales_dataset tests.test_sales_history_publication_contract tests.test_two_million_floor
+      - name: Acquire official HMLR ledger without EPC or context retrieval
+        run: >-
+          python3 scripts/sweep_land_registry.py
+          --preserve-from-js outputs/surrey-transactions.js
+          --write-js "$RUNNER_TEMP/native-sales-transactions.js"
+          --write-csv "$RUNNER_TEMP/native-sales-transactions.csv"
+      - name: Validate canonical HMLR cohort coverage
+        run: python3 scripts/check_data_completeness.py --base-only --input "$RUNNER_TEMP/native-sales-transactions.js"
+      - name: Align HMLR histories for changed exact properties
+        run: >-
+          python3 scripts/collect_title_history.py
+          --input "$RUNNER_TEMP/native-sales-transactions.js"
+          --output "$RUNNER_TEMP/native-sales-history.js"
+          --cache "$RUNNER_TEMP/native-sales-history-cache.json"
+          --seed-feed outputs/sales-history.js
+          --prior-base-feed outputs/surrey-transactions.js
+          --prior-sales-dataset outputs/sales-dataset.json
+          --deployment-mode commercial
+          --refresh-days 28
+          --workers 1
+          --batch-size 8
+          --pause 1
+      - name: Build and verify one public HMLR-only snapshot
+        run: |
+          python3 scripts/build_sales_dataset.py \
+            --transactions "$RUNNER_TEMP/native-sales-transactions.js" \
+            --sales-history "$RUNNER_TEMP/native-sales-history.js"
+          python3 scripts/build_sales_dataset.py --validate
+      - name: Publish only the validated native snapshot
+        run: |
+          git config user.name "INSIGHT data bot"
+          git config user.email "insight-data-bot@users.noreply.github.com"
+          git add outputs/sales-dataset.json
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Refresh HMLR native sales dataset"
+          for attempt in 1 2 3; do
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase --autostash "origin/$GITHUB_REF_NAME"
+            python3 scripts/build_sales_dataset.py --validate
+            if git push origin "HEAD:$GITHUB_REF_NAME"; then
+              exit 0
+            fi
+          done
+          echo "::error::Could not publish the validated HMLR-only snapshot."
+          exit 1

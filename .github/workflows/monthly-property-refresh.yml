@@ -421,6 +421,7 @@ jobs:
           --output outputs/sales-history.js
           --cache work/title-history-cache.json
           --seed-feed outputs/sales-history.js
+          --prior-sales-dataset outputs/sales-dataset.json
           --deployment-mode commercial
           --refresh-days 28
           --workers 1
@@ -499,11 +500,14 @@ jobs:
             --output outputs/today-feed.js
           python3 scripts/validate_today_feed.py outputs/today-feed.js
 
+      - name: Build coherent HMLR-only native sales dataset
+        run: python3 scripts/build_sales_dataset.py
+
       - name: Commit refreshed Today opportunities to staging
         run: |
           git config user.name "INSIGHT data bot"
           git config user.email "insight-data-bot@users.noreply.github.com"
-          git add outputs/today-feed.js
+          git add outputs/today-feed.js outputs/sales-dataset.json
           if git diff --cached --quiet; then
             echo "No Today opportunity changes to commit."
           else
@@ -528,6 +532,7 @@ jobs:
               --maximum-properties-unavailable 4 \
               --maximum-age-days 45
             python3 scripts/validate_today_feed.py outputs/today-feed.js
+            python3 scripts/build_sales_dataset.py --check
           }
 
           published=false
