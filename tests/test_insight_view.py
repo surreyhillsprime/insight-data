@@ -354,9 +354,11 @@ class InsightViewTests(unittest.TestCase):
                 b"DATE,IUDBEDR\n29 Jul 2026,3.75\n30 Jul 2026,3.75\n"
             ),
             vote_html=(
+                b'<div class="published-date">Published on 30 July 2026</div>'
                 b"<p>The Committee voted by a majority of 6\xe2\x80\x933 to maintain "
-                b"Bank Rate.</p><p>Three members voted to increase Bank Rate.</p>"
+                b"Bank Rate at 3.75%.</p><p>Three members voted to increase Bank Rate.</p>"
             ),
+            calendar_html=(ROOT / "tests/fixtures/insight-view-mpc-calendar.html").read_bytes(),
         )
 
         self.assertEqual(refreshed["policy"]["observationDate"], "2026-07-30")

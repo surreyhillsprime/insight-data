@@ -9,6 +9,7 @@ import io
 import json
 import re
 import sys
+import urllib.parse
 import urllib.request
 from copy import deepcopy
 from datetime import date, datetime, time, timezone
@@ -17,6 +18,10 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Callable, Mapping
 from zoneinfo import ZoneInfo
+
+from insight_view_policy import (
+    CALENDAR_URL, announcement_rate, refresh_schedule, validate_observation_date,
+)
 
 from insight_view import (
     MARKET_SOURCE_ID,
@@ -38,6 +43,7 @@ HPI_URL = (
     "{region}/month.json?_pageSize=2&_sort=-refPeriodStart"
 )
 USER_AGENT = "INSIGHT daily official-data briefing/1.0 (+https://gaininsight.app)"
+MAXIMUM_RESPONSE_BYTES = 2_000_000
 DATE_FORMATS = (
     "%d %b %Y",
     "%d %B %Y",
@@ -67,15 +73,36 @@ def html_text(value: str) -> str:
     return parser.text()
 
 
+def _official_url(url: str) -> None:
+    parsed = urllib.parse.urlsplit(url)
+    if (parsed.scheme != "https" or parsed.hostname not in
+            {"www.bankofengland.co.uk", "landregistry.data.gov.uk"}
+            or parsed.port not in (None, 443) or parsed.username or parsed.password):
+        raise ValueError("Official observation URL is outside the approved sources")
+
+
+class _OfficialRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        _official_url(newurl)
+        if urllib.parse.urlsplit(req.full_url).hostname != urllib.parse.urlsplit(newurl).hostname:
+            raise ValueError("Official observation redirected to another source")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def fetch_bytes(url: str, timeout: int = 30) -> bytes:
+    _official_url(url)
     request = urllib.request.Request(
         url,
         headers={"User-Agent": USER_AGENT, "Accept": "*/*"},
     )
-    with urllib.request.urlopen(request, timeout=timeout) as response:
+    with urllib.request.build_opener(_OfficialRedirects()).open(request, timeout=timeout) as response:
         if getattr(response, "status", 200) != 200:
             raise ValueError(f"HTTP {response.status} from {url}")
-        return response.read()
+        _official_url(response.geturl())
+        payload = response.read(MAXIMUM_RESPONSE_BYTES + 1)
+        if len(payload) > MAXIMUM_RESPONSE_BYTES:
+            raise ValueError("Official observation response exceeds 2 MB")
+        return payload
 
 
 def parse_observation_date(value: Any) -> date | None:
@@ -313,24 +340,32 @@ def collect_snapshot(
     uk_hpi_json: bytes | None = None,
     surrey_hpi_json: bytes | None = None,
     london_hpi_json: bytes | None = None,
+    calendar_html: bytes | None = None,
+    policy_only: bool = False,
 ) -> dict[str, Any]:
     validate_snapshot(existing)
     output = deepcopy(dict(existing))
     now_utc = now.astimezone(timezone.utc).replace(microsecond=0)
     collected_at = now_utc.isoformat().replace("+00:00", "Z")
     today = now.astimezone(ZoneInfo(TIME_ZONE)).date()
-    stale: list[str] = []
+    stale = ([value for value in output["collectionStatus"]["staleSources"]
+              if value in {MORTGAGE_SOURCE_ID, MARKET_SOURCE_ID}] if policy_only else [])
 
     policy = output["policy"]
     policy_failed = False
     try:
-        rate_payload = policy_rate_csv or fetcher(clean(policy["rateDownloadUrl"]))
-        rate_rows = parse_boe_csv(rate_payload, "IUDBEDR")
-        policy["bankRate"] = round(rate_rows[-1][1], 3)
-        policy["observationDate"] = rate_rows[-1][0].isoformat()
+        calendar_payload = calendar_html if calendar_html is not None else fetcher(CALENDAR_URL)
+        policy["schedule"] = refresh_schedule(policy["schedule"], calendar_payload, today)
+        policy["sourceUrl"] = CALENDAR_URL
     except (OSError, ValueError, KeyError):
+        # Previously evidenced future dates remain usable during an outage.
+        # Their collection failure stays visible and triggers automatic retries.
         policy_failed = True
     try:
+        rate_payload = policy_rate_csv or fetcher(clean(policy["rateDownloadUrl"]))
+        rate_rows = parse_boe_csv(rate_payload, "IUDBEDR")
+        observation, bank_rate = rate_rows[-1]
+        validate_observation_date(observation, policy["observationDate"], today)
         completed = latest_completed_decision(
             policy["schedule"],
             now,
@@ -338,8 +373,17 @@ def collect_snapshot(
         )
         summary_url = mpc_summary_url(completed)
         summary_payload = vote_html or fetcher(summary_url)
+        published_rate = announcement_rate(summary_payload, completed, html_text(
+            summary_payload.decode("utf-8") if isinstance(summary_payload, bytes) else summary_payload))
+        if (observation < completed or abs(bank_rate - published_rate) > 0.00001
+                or completed.isoformat() < policy["latestVote"]["announcementDate"]):
+            raise ValueError("Bank Rate and the due MPC announcement are not coherent")
         vote = parse_vote_summary(summary_payload, completed)
         vote["sourceUrl"] = summary_url
+        # Admit the rate and vote together, only after both official observations
+        # agree. A successful but lagging endpoint is still an incomplete update.
+        policy["bankRate"] = round(bank_rate, 3)
+        policy["observationDate"] = observation.isoformat()
         policy["latestVote"] = vote
     except (OSError, ValueError, KeyError):
         policy_failed = True
@@ -353,35 +397,37 @@ def collect_snapshot(
     if policy_failed:
         stale.append(POLICY_SOURCE_ID)
 
-    mortgage = output["mortgage"]
-    try:
-        rate_payload = mortgage_csv or fetcher(clean(mortgage["downloadUrl"]))
-        rate_rows = parse_boe_csv(rate_payload, "IUMBV34")
-        latest_observation, latest_rate = rate_rows[-1]
-        previous_rate = rate_rows[-2][1] if len(rate_rows) > 1 else None
-        mortgage["rate"] = round(latest_rate, 3)
-        mortgage["previousRate"] = (
-            round(previous_rate, 3) if previous_rate is not None else None
-        )
-        mortgage["observationDate"] = latest_observation.isoformat()
-        mortgage["retrievedAt"] = collected_at
-    except (OSError, ValueError, KeyError):
-        stale.append(MORTGAGE_SOURCE_ID)
+    if not policy_only:
+        mortgage = output["mortgage"]
+        try:
+            rate_payload = mortgage_csv or fetcher(clean(mortgage["downloadUrl"]))
+            rate_rows = parse_boe_csv(rate_payload, "IUMBV34")
+            latest_observation, latest_rate = rate_rows[-1]
+            validate_observation_date(latest_observation, mortgage["observationDate"], today)
+            previous_rate = rate_rows[-2][1] if len(rate_rows) > 1 else None
+            mortgage["rate"] = round(latest_rate, 3)
+            mortgage["previousRate"] = (
+                round(previous_rate, 3) if previous_rate is not None else None
+            )
+            mortgage["observationDate"] = latest_observation.isoformat()
+            mortgage["retrievedAt"] = collected_at
+        except (OSError, ValueError, KeyError):
+            stale.append(MORTGAGE_SOURCE_ID)
 
-    market = output["market"]
-    try:
-        uk_payload = uk_hpi_json or fetcher(HPI_URL.format(region="united-kingdom"))
-        surrey_payload = surrey_hpi_json or fetcher(HPI_URL.format(region="surrey"))
-        london_payload = london_hpi_json or fetcher(HPI_URL.format(region="london"))
-        output["market"] = parse_hpi_market(
-            uk_payload,
-            surrey_payload,
-            london_payload,
-            retrieved_at=collected_at,
-            source_url=HPI_URL.format(region="united-kingdom"),
-        )
-    except (OSError, ValueError, KeyError, json.JSONDecodeError):
-        stale.append(MARKET_SOURCE_ID)
+        try:
+            uk_payload = uk_hpi_json or fetcher(HPI_URL.format(region="united-kingdom"))
+            surrey_payload = surrey_hpi_json or fetcher(HPI_URL.format(region="surrey"))
+            london_payload = london_hpi_json or fetcher(HPI_URL.format(region="london"))
+            market = parse_hpi_market(
+                uk_payload, surrey_payload, london_payload,
+                retrieved_at=collected_at,
+                source_url=HPI_URL.format(region="united-kingdom"),
+            )
+            if not output["market"]["observationMonth"] <= market["observationMonth"] <= today.strftime("%Y-%m"):
+                raise ValueError("Official HPI observation month is future or regressive")
+            output["market"] = market
+        except (OSError, ValueError, KeyError, json.JSONDecodeError):
+            stale.append(MARKET_SOURCE_ID)
 
     output["collectedAt"] = collected_at
     output["collectionStatus"] = {
@@ -398,6 +444,8 @@ def arguments(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output", type=Path, default=DEFAULT_SNAPSHOT)
     parser.add_argument("--generated-at", help="Reproducible ISO-8601 collection timestamp.")
     parser.add_argument("--timeout", type=int, default=30)
+    parser.add_argument("--mpc-only", action="store_true")
+    parser.add_argument("--mpc-calendar-html", type=Path)
     parser.add_argument("--bank-rate-csv", type=Path)
     parser.add_argument("--mortgage-csv", type=Path)
     parser.add_argument("--mpc-summary-html", type=Path)
@@ -430,6 +478,8 @@ def main(argv: list[str] | None = None) -> int:
         uk_hpi_json=read_optional(args.uk_hpi_json),
         surrey_hpi_json=read_optional(args.surrey_hpi_json),
         london_hpi_json=read_optional(args.london_hpi_json),
+        calendar_html=read_optional(args.mpc_calendar_html),
+        policy_only=args.mpc_only,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
