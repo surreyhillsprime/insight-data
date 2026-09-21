@@ -1,6 +1,8 @@
 name: HMLR native sales dataset
 
 on:
+  schedule:
+    - cron: '15 6 * * 1'
   workflow_dispatch:
 
 permissions:
@@ -32,6 +34,7 @@ jobs:
         run: >-
           python3 scripts/sweep_land_registry.py
           --preserve-from-js outputs/surrey-transactions.js
+          --prior-sales-dataset outputs/sales-dataset.json
           --write-js "$RUNNER_TEMP/native-sales-transactions.js"
           --write-csv "$RUNNER_TEMP/native-sales-transactions.csv"
       - name: Validate canonical HMLR cohort coverage

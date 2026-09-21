@@ -251,6 +251,20 @@ def validate_envelope(envelope, *, now=None):
     return payload
 
 
+def load_prior_dataset(path):
+    """Read a verified prior generation as a seed, without claiming it is fresh."""
+    if not path or not Path(path).exists():
+        return None
+    source = Path(path)
+    if source.stat().st_size > MAX_BYTES:
+        raise ValueError("Prior native sales dataset exceeds the source bound")
+    envelope = json.loads(source.read_text(encoding="utf-8"))
+    published = parse_timestamp(envelope.get("publishedAt"), "Prior publishedAt")
+    # Integrity is checked at publication time. Current per-property freshness
+    # and a new official base acquisition remain mandatory before republishing.
+    return validate_envelope(envelope, now=min(datetime.now(timezone.utc), published))
+
+
 def build_from_files(transactions_path, history_path, *, published_at=None):
     validate_history(history_path, base_feed=transactions_path, minimum_property_coverage_percent=99,
                      minimum_transactions=6735, maximum_properties_unavailable=4, maximum_age_days=45)

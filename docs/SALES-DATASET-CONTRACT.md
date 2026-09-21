@@ -57,7 +57,9 @@ dataset still matches its exact source feeds and freshness requirements. The
 daily completeness workflow uses `--validate` to validate the self-contained
 snapshot independently after the first dataset exists.
 
-The manual `sales-dataset-feed.yml` workflow performs an official HMLR sweep
+The independent `sales-dataset-feed.yml` workflow runs every Monday at 06:15 UTC
+and can also be dispatched manually. It shares the data-refresh concurrency
+queue with the other publishers. It performs an official HMLR sweep
 and targeted HMLR history alignment in runner-temporary files, publishing only
 the allowlisted JSON. It makes no EPC or context requests and does not replace
 the legacy enriched public feeds. Changed exact canonical properties (including
@@ -67,3 +69,15 @@ prior lookup timestamps. The monthly workflow also uses the prior dataset for
 this invalidation. The separate history workflow skips native dataset generation
 with an explicit notice if its legacy base has no verified acquisition metadata;
 it continues its established history/Today publication without forging freshness.
+
+The independent workflow uses the last validated native snapshot for base
+partitions outside the actual acquisition range and as a property-history seed,
+so an older legacy feed cannot remove previously accepted sales. Even a snapshot
+older than 45 days can supply retained facts after validation at its original
+publication time; it cannot supply fresh provenance. History seeds still pass
+the normal per-property 28-day check, and the new publication must pass the
+45-day source freshness gate. Each acquired base partition replaces the prior
+partition, including corrections and removals. This weekly lane does not
+re-acquire the cached 1995–2009 base archives; rolling-archive fallback replaces
+the current and preceding calendar years, while successful SPARQL replaces
+2010 onward. The envelope records the actual acquisition range.

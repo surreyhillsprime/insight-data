@@ -12,7 +12,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import sweep_land_registry as sweep
 import collect_title_history as collector
-from build_sales_dataset import build_dataset, validate_envelope, verified_base_acquisition
+from build_sales_dataset import build_dataset, load_prior_dataset, validate_envelope, verified_base_acquisition
 from validate_sales_history_feed import (
     ADDRESS_DATA_USE, ATTRIBUTION, REDISTRIBUTION_RIGHTS, SOURCE_NAME,
     base_feed_identity, sha256_json,
@@ -218,6 +218,89 @@ class SalesDatasetTests(unittest.TestCase):
         self.assertIn('--write-js "$RUNNER_TEMP/native-sales-transactions.js"', independent)
         self.assertNotIn("scripts/enrich", independent)
         self.assertNotIn("epc-cache", independent)
+        self.assertIn("- cron: '15 6 * * 1'", independent)
+        self.assertIn("workflow_dispatch:", independent)
+        self.assertIn("group: insight-data-refresh", independent)
+        self.assertIn("cancel-in-progress: false", independent)
+        self.assertEqual(independent.count("--prior-sales-dataset outputs/sales-dataset.json"), 2)
+
+    def test_old_native_snapshot_retains_unrefreshed_partitions_without_claiming_freshness(self):
+        import build_sales_dataset as producer
+        values = fixture()
+        values[0][0]["date"] = "2018-07-14"
+        values[0][1]["date"] = "1999-06-01"
+        for row in values[0]:
+            row["id"] = sweep.stable_transaction_id(row["address"], row["postcode"], row["price"],
+                                                     row["date"], row["propertyType"], row["category"])
+            record = values[2][row["propertyRecordId"]]
+            record["transactions"][0]["date"] = row["date"]
+            record["updatedAt"] = "2026-07-31T09:00:00Z"
+        values[1].update(sweep.metadata(2, values[0]))
+        values[1]["sourceCheckedAt"] = "2026-08-01T10:00:00Z"
+        values[3].update(sourceCheckedAt="2026-07-31T09:00:00Z", updatedAt="2026-08-01T10:00:00Z",
+                         baseFeedFingerprint=base_feed_identity(values[0])[3])
+        original_time = datetime(2026, 8, 1, 12, tzinfo=timezone.utc)
+        envelope = build_dataset(*values, now=original_time)
+        fresh_row = fixture()[0][0]
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "prior.json"
+            source.write_text(json.dumps(envelope))
+            with patch.object(producer, "datetime") as clock:
+                clock.now.return_value = self.now
+                payload = load_prior_dataset(source)
+            with self.assertRaisesRegex(ValueError, "stale"):
+                validate_envelope(envelope, now=self.now)
+            acquisition = {}
+            with patch.object(sweep, "historical_rows") as historical, \
+                 patch.object(sweep, "fetch_current_rows", side_effect=TimeoutError("query")), \
+                 patch.object(sweep, "fetch_archive_year", side_effect=[[fresh_row], []]), \
+                 patch.object(sweep, "CURRENT_CSV", Path(directory) / "current.csv"):
+                rows = sweep.fetch_rows(existing_transactions=[], prior_transactions=payload["transactions"],
+                                        acquisition=acquisition)
+            historical.assert_not_called()
+            self.assertEqual({row["date"] for row in rows}, {"1999-06-01", "2018-07-14", "2026-07-14"})
+            self.assertEqual(acquisition["sourceRefreshFrom"], "2025-01-01")
+            seed = collector.merge_native_history_seed({}, payload)
+            self.assertTrue(all(record["updatedAt"] == "2026-07-31T09:00:00Z" for record in seed.values()))
+            self.assertTrue(all(not collector.seed_record_is_fresh(record, key, 28, now=self.now)
+                                for key, record in seed.items()))
+
+    def test_prior_native_history_overrides_older_legacy_without_new_lookup_clock(self):
+        payload = json.loads(self.build()["payload"])
+        key = next(iter(payload["historyByProperty"]))
+        legacy = copy.deepcopy(payload["historyByProperty"])
+        legacy[key]["updatedAt"] = "2026-09-01T09:00:00Z"
+        legacy[key]["transactions"] = []
+        seed = collector.merge_native_history_seed(legacy, payload)
+        self.assertEqual(seed[key]["updatedAt"], "2026-09-20T09:00:00Z")
+        self.assertEqual(seed[key]["totalTransactions"], 1)
+        self.assertEqual(seed[key]["latestTransaction"], seed[key]["transactions"][0])
+        self.assertTrue(collector.seed_record_is_fresh(seed[key], key, 28, now=self.now))
+        self.assertEqual(len({sale["id"] for record in seed.values() for sale in record["transactions"]}), 2)
+        self.assertEqual(seed, collector.merge_native_history_seed(legacy, payload))
+
+    def test_independent_history_reuses_native_seed_when_legacy_lags(self):
+        import build_sales_dataset as producer
+        from validate_sales_history_feed import validate
+        rows = fixture()[0]
+        payload = json.loads(self.build()["payload"])
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            current, output = root / "base.js", root / "history.js"
+            current.write_text("window.SURREY_LAND_REG_TRANSACTIONS = " + json.dumps(rows) + ";\n")
+            argv = ["collector", "--input", str(current), "--prior-sales-dataset", str(root / "prior.json"),
+                    "--output", str(output), "--cache", str(root / "cache.json"),
+                    "--seed-feed", str(root / "missing-legacy.js"), "--deployment-mode", "commercial", "--pause", "0"]
+            with patch.object(sys, "argv", argv), patch.object(producer, "load_prior_dataset", return_value=payload), \
+                 patch.object(collector, "fetch_batch") as fetch:
+                collector.main()
+            fetch.assert_not_called()
+            result = collector.assignment(output.read_text(), "SURREY_SALES_HISTORY")
+            for key, prior in payload["historyByProperty"].items():
+                self.assertEqual(result[key]["updatedAt"], prior["updatedAt"])
+                self.assertEqual(result[key]["totalTransactions"], prior["totalTransactions"])
+            validate(output, base_feed=current, minimum_property_coverage_percent=99,
+                     minimum_transactions=2, maximum_properties_unavailable=4, maximum_age_days=45)
 
     def test_boolean_schema_versions_are_rejected(self):
         values = fixture()

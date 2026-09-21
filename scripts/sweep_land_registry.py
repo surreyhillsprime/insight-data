@@ -349,8 +349,14 @@ def current_rows_from_archives(existing_transactions=None, full_history=False):
 
 
 def fetch_rows(use_current_cache=False, existing_transactions=None, refresh_history=False, archive_all_years=False,
-               acquisition=None):
-    history = historical_rows(refresh=refresh_history or archive_all_years)
+               acquisition=None, prior_transactions=None):
+    if prior_transactions is not None and not (refresh_history or archive_all_years):
+        # Native publication may be ahead of the legacy feed/cache. Retain its
+        # accepted older partition while replacing the acquired partition below.
+        history = [item for item in prior_transactions if clean(item.get("date")) < CURRENT_START_DATE]
+        existing_transactions = prior_transactions
+    else:
+        history = historical_rows(refresh=refresh_history or archive_all_years)
     if use_current_cache:
         current = [item for item in (existing_transactions or []) if clean(item.get("date")) >= CURRENT_START_DATE]
         if not rows_have_structured_address_schema(current):
@@ -785,6 +791,7 @@ def parse_args():
     parser.add_argument("--write-csv", default=str(DEFAULT_CSV), help="Processed CSV output path.")
     parser.add_argument("--write-js", default=str(DEFAULT_JS), help="Generated JS output path.")
     parser.add_argument("--preserve-from-js", default="", help="Optional prior enriched feed used to preserve matching context fields.")
+    parser.add_argument("--prior-sales-dataset", default="", help="Validated native snapshot used to retain unrefreshed HMLR partitions.")
     parser.add_argument("--no-fetch", action="store_true", help="Skip the official SPARQL fetch and rebuild from CSV.")
     parser.add_argument("--use-current-cache", action="store_true", help="Download/build 1995-2009 history but reuse the checked-in 2010+ cache.")
     parser.add_argument("--refresh-history", action="store_true", help="Rebuild 1995-2009 from official structured HMLR sources.")
@@ -803,6 +810,8 @@ def main():
         raise RuntimeError("--use-current-cache and --archive-all-years are mutually exclusive")
     existing_path = Path(args.preserve_from_js) if args.preserve_from_js else Path(args.write_js)
     existing_transactions, existing_metadata = read_existing_js(existing_path)
+    from build_sales_dataset import load_prior_dataset
+    prior_dataset = load_prior_dataset(getattr(args, "prior_sales_dataset", ""))
     source = "official HMLR yearly archive + current SPARQL"
     acquisition = {}
     if args.no_fetch:
@@ -818,6 +827,7 @@ def main():
                 args.refresh_history,
                 args.archive_all_years,
                 acquisition=acquisition,
+                prior_transactions=prior_dataset["transactions"] if prior_dataset is not None else None,
             )
             if args.use_current_cache:
                 source = "official HMLR yearly archive + checked-in 2010+ cache"

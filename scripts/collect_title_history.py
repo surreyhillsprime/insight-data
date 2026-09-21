@@ -224,22 +224,33 @@ def changed_base_properties(transactions, prior_transactions):
 
 def prior_base_transactions(base_path="", dataset_path=""):
     """Use the latest validated native generation, falling back to a prior base."""
-    if dataset_path and Path(dataset_path).exists():
-        from build_sales_dataset import MAX_BYTES, validate_envelope
-        source = Path(dataset_path)
-        if source.stat().st_size > MAX_BYTES:
-            raise ValueError("Prior native sales dataset exceeds the source bound")
-        envelope = json.loads(source.read_text(encoding="utf-8"))
-        published = datetime.fromisoformat(str(envelope.get("publishedAt", "")).replace("Z", "+00:00"))
-        # An old but originally valid snapshot remains useful for identifying
-        # corrections; do not relabel it as a fresh current publication.
-        payload = validate_envelope(envelope, now=min(datetime.now(timezone.utc), published))
+    from build_sales_dataset import load_prior_dataset
+    payload = load_prior_dataset(dataset_path)
+    if payload is not None:
         return payload["transactions"]
     if base_path and Path(base_path).exists():
         rows, _summary, _metadata = read_js(base_path)
         base_feed_identity(rows)
         return rows
     return None
+
+
+def merge_native_history_seed(seed, payload):
+    """Prefer the latest actual lookup, preserving the prior native generation."""
+    merged = dict(seed)
+    if payload is None:
+        return merged
+    for key, native in payload["historyByProperty"].items():
+        existing = merged.get(key, {})
+        if clean(existing.get("updatedAt")) > clean(native.get("updatedAt")):
+            continue
+        # The public projection deliberately omits provider UUIDs. Stable local
+        # identifiers support raw-feed accounting; they are stripped on export.
+        sales = [{**sale, "id": "native-history-" + sha256_json([key, index, sale])}
+                 for index, sale in enumerate(native["transactions"])]
+        merged[key] = {**native, "transactions": sales,
+                       "latestTransaction": sales[0] if sales else None}
+    return merged
 
 
 def load_seed_history(path, refresh_days, *, allow_local=False):
@@ -741,7 +752,10 @@ def main():
     exclusion_ledger = load_transaction_exclusion_ledger()
 
     transactions, _summary, base_meta = read_js(args.input)
-    prior_transactions = prior_base_transactions(args.prior_base_feed, args.prior_sales_dataset)
+    from build_sales_dataset import load_prior_dataset
+    prior_dataset = load_prior_dataset(args.prior_sales_dataset)
+    prior_transactions = (prior_dataset["transactions"] if prior_dataset is not None
+                          else prior_base_transactions(args.prior_base_feed))
     changed_properties = changed_base_properties(transactions, prior_transactions) if prior_transactions is not None else set()
     if args.migrate_from_history:
         prior_history, prior_meta = read_history_output(args.migrate_from_history)
@@ -793,6 +807,7 @@ def main():
         args.refresh_days,
         allow_local=args.deployment_mode == "local",
     )
+    seed_history = merge_native_history_seed(seed_history, prior_dataset)
     fresh_seed = {
         key: seed_history.get(key)
         for key in properties
