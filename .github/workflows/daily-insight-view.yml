@@ -11,6 +11,9 @@ on:
       timezone: "Europe/London"
     - cron: "0 6 * * *"
       timezone: "Europe/London"
+    # Cheap HPI release gate; collection runs only when a newer official month is due.
+    - cron: "35 9 * * *"
+      timezone: "Europe/London"
     # Cheap calendar gate; no year-specific cron update is needed for new dates.
     - cron: "*/5 11-14 * * *"
       timezone: "Europe/London"
@@ -67,6 +70,8 @@ jobs:
         run: |
           if [ "$REFRESH_MODE" = "mpc" ]; then
             python3 scripts/collect_insight_view.py --mpc-only
+          elif [ "$REFRESH_MODE" = "routine" ]; then
+            python3 scripts/collect_insight_view.py --skip-hpi
           else
             python3 scripts/collect_insight_view.py
           fi

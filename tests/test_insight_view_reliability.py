@@ -9,9 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from collect_insight_view import collect_snapshot, html_text, _official_url
-from insight_view import POLICY_SOURCE_ID, build_insight_view
+from insight_view import MARKET_SOURCE_ID, POLICY_SOURCE_ID, build_insight_view
 from insight_view_policy import announcement_rate, parse_official_dates, refresh_schedule
-from check_insight_view_freshness import FAST_SCHEDULE, freshness_issues, refresh_mode
+from insight_view_hpi_policy import expected_hpi_observation_month, hpi_refresh_due
+from check_insight_view_freshness import FAST_SCHEDULE, HPI_SCHEDULE, freshness_issues, refresh_mode
 
 
 CALENDAR = (ROOT / "tests/fixtures/insight-view-mpc-calendar.html").read_bytes()
@@ -30,9 +31,35 @@ def no_network(_url):
     raise AssertionError("Unexpected network use")
 
 
+def hpi_response(region, month="2026-07", previous="2026-06"):
+    return {
+        "result": {
+            "items": [
+                {
+                    "region": region,
+                    "refMonth": month,
+                    "averagePrice": 522523,
+                    "percentageAnnualChange": -0.4,
+                    "percentageChange": 0.5,
+                },
+                {
+                    "region": region,
+                    "refMonth": previous,
+                    "averagePrice": 520105,
+                    "percentageAnnualChange": -1.2,
+                    "percentageChange": 0.0,
+                },
+            ]
+        }
+    }
+
+
 class InsightViewReliabilityTests(unittest.TestCase):
     def setUp(self):
         self.snapshot = json.loads((ROOT / "tests/fixtures/insight-view-snapshot.json").read_text())
+        # July is the latest officially published HPI month at this test date.
+        self.snapshot["market"]["observationMonth"] = "2026-07"
+        self.snapshot["market"]["retrievedAt"] = "2026-09-16T08:35:00Z"
         self.now = datetime(2026, 9, 17, 11, 5, tzinfo=timezone.utc)
 
     def collect(self, **overrides):
@@ -81,7 +108,7 @@ class InsightViewReliabilityTests(unittest.TestCase):
                 view = self.view(refreshed, now)
                 self.assertIn("latest scheduled MPC decision has not been coherently observed",
                               freshness_issues(refreshed, view, now))
-                self.assertEqual(refresh_mode(refreshed, view, now, "schedule", "17 * * * *"), "all")
+                self.assertEqual(refresh_mode(refreshed, view, now, "schedule", "17 * * * *"), "routine")
         self.assertEqual(refreshed["policy"]["nextDecisionDate"], "2026-11-05")
 
     def test_before_noon_prior_result_is_valid_but_noon_reopens_expected_decision(self):
@@ -110,6 +137,83 @@ class InsightViewReliabilityTests(unittest.TestCase):
         for section in ("mortgage", "market"):
             self.assertEqual(refreshed[section], self.snapshot[section])
         self.assertEqual(refreshed["collectionStatus"]["staleSources"], ["hm-land-registry-uk-hpi"])
+
+    def test_routine_collection_does_not_request_monthly_hpi(self):
+        calls = []
+
+        def fetcher(url):
+            calls.append(url)
+            raise AssertionError("fixture should supply every routine observation")
+
+        refreshed = collect_snapshot(
+            copy.deepcopy(self.snapshot),
+            now=self.now,
+            fetcher=fetcher,
+            calendar_html=CALENDAR,
+            policy_rate_csv=b"DATE,IUDBEDR\n16 Sep 2026,3.75\n17 Sep 2026,3.50\n",
+            vote_html=announcement(),
+            mortgage_csv=b"DATE,IUMBV34\n31 Jul 2026,4.79\n31 Aug 2026,4.92\n",
+            skip_hpi=True,
+        )
+
+        self.assertEqual(calls, [])
+        self.assertEqual(refreshed["market"], self.snapshot["market"])
+        self.assertNotIn(MARKET_SOURCE_ID, refreshed["collectionStatus"]["staleSources"])
+
+    def test_hpi_is_due_only_after_official_publication_time(self):
+        before = datetime(2026, 10, 21, 8, 29, tzinfo=timezone.utc)
+        after = datetime(2026, 10, 21, 8, 30, tzinfo=timezone.utc)
+
+        self.assertEqual(expected_hpi_observation_month(before), "2026-07")
+        self.assertFalse(hpi_refresh_due(self.snapshot, before))
+        self.assertEqual(expected_hpi_observation_month(after), "2026-08")
+        self.assertTrue(hpi_refresh_due(self.snapshot, after))
+        self.assertEqual(
+            refresh_mode(self.snapshot, None, after, "schedule", HPI_SCHEDULE),
+            "all",
+        )
+        self.assertIn(
+            "latest scheduled HPI observation has not been collected",
+            freshness_issues(self.snapshot, self.view(self.snapshot), after),
+        )
+
+    def test_due_hpi_month_must_advance_before_collection_recovers(self):
+        now = datetime(2026, 10, 21, 8, 35, tzinfo=timezone.utc)
+        refreshed = collect_snapshot(
+            copy.deepcopy(self.snapshot),
+            now=now,
+            fetcher=no_network,
+            calendar_html=CALENDAR,
+            policy_rate_csv=b"DATE,IUDBEDR\n17 Sep 2026,3.75\n",
+            vote_html=announcement("17 September 2026", "3.75", "maintain"),
+            mortgage_csv=b"DATE,IUMBV34\n31 Jul 2026,4.79\n31 Aug 2026,4.92\n",
+            uk_hpi_json=hpi_response("United Kingdom"),
+            surrey_hpi_json=hpi_response("Surrey"),
+            london_hpi_json=hpi_response("London"),
+        )
+
+        self.assertEqual(refreshed["market"], self.snapshot["market"])
+        self.assertIn(MARKET_SOURCE_ID, refreshed["collectionStatus"]["staleSources"])
+
+    def test_daily_and_news_refreshes_rebuild_without_requesting_hpi(self):
+        view = self.view(self.snapshot)
+        for event_name, schedule in (
+            ("schedule", "0 6 * * *"),
+            ("workflow_run", ""),
+        ):
+            with self.subTest(event_name=event_name):
+                self.assertEqual(
+                    refresh_mode(self.snapshot, view, self.now, event_name, schedule),
+                    "routine",
+                )
+
+    def test_existing_hpi_failure_keeps_hourly_recovery_active(self):
+        self.snapshot["collectionStatus"]["staleSources"] = [MARKET_SOURCE_ID]
+        self.assertEqual(
+            refresh_mode(self.snapshot, self.view(self.snapshot), self.now,
+                         "schedule", "17 * * * *"),
+            "all",
+        )
 
     def test_calendar_is_year_and_table_scoped_and_replaces_postponed_past_date(self):
         parsed = parse_official_dates(CALENDAR)
@@ -166,7 +270,7 @@ class InsightViewReliabilityTests(unittest.TestCase):
         refreshed = self.collect()
         view = self.view(refreshed)
         midnight_bst = datetime(2026, 9, 17, 23, 5, tzinfo=timezone.utc)
-        self.assertEqual(refresh_mode(refreshed, view, midnight_bst, "schedule", "17 * * * *"), "all")
+        self.assertEqual(refresh_mode(refreshed, view, midnight_bst, "schedule", "17 * * * *"), "routine")
         self.assertIn("published briefing is not dated today in Europe/London",
                       freshness_issues(refreshed, view, midnight_bst))
 
@@ -190,7 +294,9 @@ class InsightViewReliabilityTests(unittest.TestCase):
         self.assertIn(f'cron: "{FAST_SCHEDULE}"', workflow)
         self.assertIn('cron: "17 * * * *"', workflow)
         self.assertIn('cron: "7 0 * * *"', workflow)
+        self.assertIn(f'cron: "{HPI_SCHEDULE}"', workflow)
         self.assertIn("--mpc-only", workflow)
+        self.assertIn("--skip-hpi", workflow)
         self.assertGreater(workflow.rindex("python3 scripts/check_insight_view_freshness.py"),
                            workflow.index('git push origin "HEAD:$TARGET_BRANCH"'))
         self.assertNotIn("repository_dispatch", workflow)
