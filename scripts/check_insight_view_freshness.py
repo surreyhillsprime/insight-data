@@ -14,11 +14,13 @@ from zoneinfo import ZoneInfo
 from collect_insight_view import latest_completed_decision, next_decision
 from insight_view import POLICY_SOURCE_ID, TIME_ZONE, iso_datetime, load_snapshot
 from insight_view_policy import MINIMUM_FUTURE_DECISIONS, MINIMUM_HORIZON_DAYS, policy_is_pending
+from insight_view_hpi_policy import hpi_refresh_due
 from validate_insight_view import read_insight_view, validate
 
 
 ROOT = Path(__file__).resolve().parents[1]
 FAST_SCHEDULE = "*/5 11-14 * * *"
+HPI_SCHEDULE = "35 9 * * *"
 DAILY_SCHEDULES = {"7 0 * * *", "0 6 * * *"}
 
 
@@ -26,11 +28,16 @@ def refresh_mode(snapshot: Mapping[str, Any], view: Mapping[str, Any] | None,
                  now: datetime, event_name: str, event_schedule: str) -> str:
     local = now.astimezone(ZoneInfo(TIME_ZONE))
     today = local.date().isoformat()
-    if (event_name != "schedule" or event_schedule in DAILY_SCHEDULES
-            or not view or view.get("briefingDate") != today):
-        return "all"
     policy = snapshot["policy"]
     stale = snapshot["collectionStatus"]["staleSources"]
+    hpi_due = hpi_refresh_due(snapshot, now)
+    if event_name == "workflow_dispatch" or hpi_due:
+        return "all"
+    if "hm-land-registry-uk-hpi" in stale:
+        return "all"
+    if (event_name != "schedule" or event_schedule in DAILY_SCHEDULES
+            or not view or view.get("briefingDate") != today):
+        return "routine"
     due = latest_completed_decision(policy["schedule"], now, policy["nextDecisionTime"])
     pending = policy_is_pending(snapshot, due)
     if event_schedule == FAST_SCHEDULE:
@@ -39,9 +46,11 @@ def refresh_mode(snapshot: Mapping[str, Any], view: Mapping[str, Any] | None,
                 (pending or POLICY_SOURCE_ID in stale)):
             return "mpc"
         return "skip"
+    if event_schedule == HPI_SCHEDULE:
+        return "skip"
     collected = iso_datetime(snapshot["collectedAt"])
     if stale or pending or now - collected >= timedelta(hours=6) or collected > now:
-        return "all"
+        return "routine"
     return "skip"
 
 
@@ -60,6 +69,8 @@ def freshness_issues(snapshot: Mapping[str, Any], view: Mapping[str, Any],
     stale = snapshot["collectionStatus"]["staleSources"]
     if stale:
         issues.append("official sources remain incomplete: " + ", ".join(stale))
+    if hpi_refresh_due(snapshot, now):
+        issues.append("latest scheduled HPI observation has not been collected")
     if set(view["staleSources"]) != set(stale):
         issues.append("published source status differs from the collected snapshot")
     policy = snapshot["policy"]

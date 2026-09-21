@@ -22,6 +22,7 @@ from zoneinfo import ZoneInfo
 from insight_view_policy import (
     CALENDAR_URL, announcement_rate, refresh_schedule, validate_observation_date,
 )
+from insight_view_hpi_policy import expected_hpi_observation_month
 
 from insight_view import (
     MARKET_SOURCE_ID,
@@ -342,14 +343,21 @@ def collect_snapshot(
     london_hpi_json: bytes | None = None,
     calendar_html: bytes | None = None,
     policy_only: bool = False,
+    skip_hpi: bool = False,
 ) -> dict[str, Any]:
     validate_snapshot(existing)
     output = deepcopy(dict(existing))
     now_utc = now.astimezone(timezone.utc).replace(microsecond=0)
     collected_at = now_utc.isoformat().replace("+00:00", "Z")
     today = now.astimezone(ZoneInfo(TIME_ZONE)).date()
-    stale = ([value for value in output["collectionStatus"]["staleSources"]
-              if value in {MORTGAGE_SOURCE_ID, MARKET_SOURCE_ID}] if policy_only else [])
+    if policy_only:
+        preserved_sources = {MORTGAGE_SOURCE_ID, MARKET_SOURCE_ID}
+    elif skip_hpi:
+        preserved_sources = {MARKET_SOURCE_ID}
+    else:
+        preserved_sources = set()
+    stale = [value for value in output["collectionStatus"]["staleSources"]
+             if value in preserved_sources]
 
     policy = output["policy"]
     policy_failed = False
@@ -414,20 +422,26 @@ def collect_snapshot(
         except (OSError, ValueError, KeyError):
             stale.append(MORTGAGE_SOURCE_ID)
 
-        try:
-            uk_payload = uk_hpi_json or fetcher(HPI_URL.format(region="united-kingdom"))
-            surrey_payload = surrey_hpi_json or fetcher(HPI_URL.format(region="surrey"))
-            london_payload = london_hpi_json or fetcher(HPI_URL.format(region="london"))
-            market = parse_hpi_market(
-                uk_payload, surrey_payload, london_payload,
-                retrieved_at=collected_at,
-                source_url=HPI_URL.format(region="united-kingdom"),
-            )
-            if not output["market"]["observationMonth"] <= market["observationMonth"] <= today.strftime("%Y-%m"):
-                raise ValueError("Official HPI observation month is future or regressive")
-            output["market"] = market
-        except (OSError, ValueError, KeyError, json.JSONDecodeError):
-            stale.append(MARKET_SOURCE_ID)
+        if not skip_hpi:
+            try:
+                uk_payload = uk_hpi_json or fetcher(HPI_URL.format(region="united-kingdom"))
+                surrey_payload = surrey_hpi_json or fetcher(HPI_URL.format(region="surrey"))
+                london_payload = london_hpi_json or fetcher(HPI_URL.format(region="london"))
+                market = parse_hpi_market(
+                    uk_payload, surrey_payload, london_payload,
+                    retrieved_at=collected_at,
+                    source_url=HPI_URL.format(region="united-kingdom"),
+                )
+                expected_month = expected_hpi_observation_month(now)
+                if expected_month and market["observationMonth"] < expected_month:
+                    raise ValueError(
+                        "Official HPI endpoint has not published the due observation month"
+                    )
+                if not output["market"]["observationMonth"] <= market["observationMonth"] <= today.strftime("%Y-%m"):
+                    raise ValueError("Official HPI observation month is future or regressive")
+                output["market"] = market
+            except (OSError, ValueError, KeyError, json.JSONDecodeError):
+                stale.append(MARKET_SOURCE_ID)
 
     output["collectedAt"] = collected_at
     output["collectionStatus"] = {
@@ -445,6 +459,7 @@ def arguments(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--generated-at", help="Reproducible ISO-8601 collection timestamp.")
     parser.add_argument("--timeout", type=int, default=30)
     parser.add_argument("--mpc-only", action="store_true")
+    parser.add_argument("--skip-hpi", action="store_true")
     parser.add_argument("--mpc-calendar-html", type=Path)
     parser.add_argument("--bank-rate-csv", type=Path)
     parser.add_argument("--mortgage-csv", type=Path)
@@ -480,6 +495,7 @@ def main(argv: list[str] | None = None) -> int:
         london_hpi_json=read_optional(args.london_hpi_json),
         calendar_html=read_optional(args.mpc_calendar_html),
         policy_only=args.mpc_only,
+        skip_hpi=args.skip_hpi,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
