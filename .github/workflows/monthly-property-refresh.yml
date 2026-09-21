@@ -67,7 +67,7 @@ jobs:
           python3 scripts/check_data_completeness.py --base-only
 
       - name: Run Land Registry sweeper
-        run: python3 scripts/sweep_land_registry.py
+        run: python3 scripts/sweep_land_registry.py --prior-sales-dataset outputs/sales-dataset.json
 
       - name: Check base data completeness
         run: python3 scripts/check_data_completeness.py --base-only

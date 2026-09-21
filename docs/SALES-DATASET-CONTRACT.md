@@ -69,6 +69,8 @@ prior lookup timestamps. The monthly workflow also uses the prior dataset for
 this invalidation. The separate history workflow skips native dataset generation
 with an explicit notice if its legacy base has no verified acquisition metadata;
 it continues its established history/Today publication without forging freshness.
+It also retains the accepted native snapshot when its verified legacy base was
+acquired before the native snapshot's base.
 
 The independent workflow uses the last validated native snapshot for base
 partitions outside the actual acquisition range and as a property-history seed,

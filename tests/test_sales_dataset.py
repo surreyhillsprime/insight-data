@@ -209,6 +209,7 @@ class SalesDatasetTests(unittest.TestCase):
         monthly = (root / ".github/workflows/monthly-property-refresh.yml").read_text()
         sales = (root / ".github/workflows/sales-history-feed.yml").read_text()
         self.assertIn("python3 scripts/build_sales_dataset.py --check", monthly)
+        self.assertIn("scripts/sweep_land_registry.py --prior-sales-dataset outputs/sales-dataset.json", monthly)
         self.assertIn("git add outputs/today-feed.js outputs/sales-dataset.json", monthly)
         self.assertEqual(sales.count("python3 scripts/build_sales_dataset.py"), 2)
         self.assertEqual(sales.count("--if-verified"), 2)
@@ -255,7 +256,8 @@ class SalesDatasetTests(unittest.TestCase):
                  patch.object(sweep, "fetch_current_rows", side_effect=TimeoutError("query")), \
                  patch.object(sweep, "fetch_archive_year", side_effect=[[fresh_row], []]), \
                  patch.object(sweep, "CURRENT_CSV", Path(directory) / "current.csv"):
-                rows = sweep.fetch_rows(existing_transactions=[], prior_transactions=payload["transactions"],
+                rows = sweep.fetch_rows(existing_transactions=[],
+                                        prior_transactions=payload["transactions"] + [fixture()[0][1]],
                                         acquisition=acquisition)
             historical.assert_not_called()
             self.assertEqual({row["date"] for row in rows}, {"1999-06-01", "2018-07-14", "2026-07-14"})
@@ -341,6 +343,24 @@ class SalesDatasetTests(unittest.TestCase):
         enriched = copy.deepcopy(prior)
         enriched[0].update(epcMatched=True, floorAreaSqft=4321, estateRegistryVersion="new-policy")
         self.assertEqual(collector.changed_base_properties(enriched, prior), set())
+
+    def test_older_verified_legacy_base_cannot_replace_newer_native_acquisition(self):
+        import build_sales_dataset as producer
+        rows, metadata, _history, _history_meta = fixture()
+        metadata["sourceCheckedAt"] = "2026-09-21T09:00:00Z"
+        envelope = self.build()
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory) / "base.js"
+            output = Path(directory) / "sales-dataset.json"
+            base.write_text("window.SURREY_LAND_REG_TRANSACTIONS = " + json.dumps(rows) + ";\n"
+                            "window.SURREY_LAND_REG_META = " + json.dumps(metadata) + ";\n")
+            original = json.dumps(envelope)
+            output.write_text(original)
+            with patch.object(sys, "argv", ["producer", "--transactions", str(base), "--output", str(output), "--if-verified"]), \
+                 patch.object(producer, "datetime") as clock:
+                clock.now.return_value = self.now
+                producer.main()
+            self.assertEqual(output.read_text(), original)
 
     def test_withdrawn_sale_forces_actual_history_fetch_despite_fresh_seed_and_cache(self):
         rows, _meta, histories, _history_meta = fixture()

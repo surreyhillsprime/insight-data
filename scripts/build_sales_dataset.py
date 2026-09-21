@@ -291,6 +291,12 @@ def main():
         if source_metadata.get("sourceFetchStatus") != "verified":
             print("Native sales snapshot retained: legacy base has no verified official acquisition; use the HMLR-only refresh workflow.")
             return
+        if args.output.exists():
+            load_prior_dataset(args.output)
+            prior = json.loads(args.output.read_text(encoding="utf-8"))
+            if parse_timestamp(source_metadata.get("sourceCheckedAt"), "HMLR sourceCheckedAt") < parse_timestamp(prior["sourceCheckedAt"], "Prior sourceCheckedAt"):
+                print("Native sales snapshot retained: the verified legacy base predates the accepted native acquisition.")
+                return
     if args.validate:
         if args.output.stat().st_size > MAX_BYTES:
             raise ValueError("Sales dataset exceeds the native bound")
