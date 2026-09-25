@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "collectedAt": "2026-09-25T07:55:27Z",
+  "collectedAt": "2026-09-25T09:58:46Z",
   "timeZone": "Europe/London",
   "policy": {
     "bankRate": 3.75,
-    "observationDate": "2026-09-23",
+    "observationDate": "2026-09-24",
     "rateSeriesId": "IUDBEDR",
     "rateDownloadUrl": "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom=01/Jan/2024&Dateto=now&SeriesCodes=IUDBEDR&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N",
     "nextDecisionDate": "2026-11-05",
@@ -42,7 +42,7 @@
     "rate": 4.92,
     "previousRate": 4.79,
     "observationDate": "2026-08-31",
-    "retrievedAt": "2026-09-25T07:55:27Z",
+    "retrievedAt": "2026-09-25T09:58:46Z",
     "qualifier": "BoE quoted rate · 75% LTV",
     "sourceUrl": "https://www.bankofengland.co.uk/boeapps/database/index.asp?EC=IUMBV34&Filter=N&From=Template&G0Xtop.x=1&G0Xtop.y=1&Travel=NIxSUx",
     "downloadUrl": "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom=01/Jan/2024&Dateto=now&SeriesCodes=IUMBV34&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N"
