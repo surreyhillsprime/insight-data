@@ -2490,6 +2490,21 @@
       "status": "matched",
       "updatedAt": "2026-07-22T10:48:48Z"
     },
+    "CR53SJ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: High Road, Chipstead",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Reigate and Banstead",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-10-01T13:21:11Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-10-01T13:21:11Z"
+    },
     "CR69BR": {
       "data": {
         "planningConstraints": {
@@ -3712,6 +3727,18 @@
       "status": "no_match",
       "updatedAt": "2026-09-28T15:45:02Z"
     },
+    "GU11XB": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-10-01T13:21:03Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-10-01T13:21:03Z"
+    },
     "GU126HJ": {
       "data": {
         "planningConstraints": {
@@ -4624,6 +4651,19 @@
       },
       "status": "matched",
       "updatedAt": "2026-09-28T15:46:10Z"
+    },
+    "GU206LR": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-10-01T13:21:08Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-10-01T13:21:08Z"
     },
     "GU206LS": {
       "data": {
@@ -8462,6 +8502,19 @@
       "status": "matched",
       "updatedAt": "2026-09-28T15:41:12Z"
     },
+    "GU50QN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Waverley",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-10-01T13:21:04Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-10-01T13:21:04Z"
+    },
     "GU50QP": {
       "data": {
         "planningConstraints": {
@@ -10301,6 +10354,20 @@
       "status": "matched",
       "updatedAt": "2026-09-28T15:51:22Z"
     },
+    "GU85LA": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-10-01T13:21:05Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-10-01T13:21:05Z"
+    },
     "GU85PR": {
       "data": {
         "planningConstraints": {
@@ -10934,6 +11001,19 @@
       },
       "status": "matched",
       "updatedAt": "2026-09-28T15:42:19Z"
+    },
+    "GU98JL": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: GREAT AUSTINS FARNHAM",
+          "constraintCount": 1,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-10-01T13:21:03Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-10-01T13:21:03Z"
     },
     "GU98JP": {
       "data": {
@@ -18549,6 +18629,18 @@
       "status": "no_match",
       "updatedAt": "2026-09-28T15:29:00Z"
     },
+    "KT245DR": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-10-01T13:21:04Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-10-01T13:21:04Z"
+    },
     "KT245DX": {
       "data": {
         "planningConstraints": {
@@ -18933,6 +19025,18 @@
       },
       "status": "no_match",
       "updatedAt": "2026-09-28T15:30:58Z"
+    },
+    "KT246SA": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-10-01T13:21:11Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-10-01T13:21:11Z"
     },
     "KT246SE": {
       "data": {
@@ -20108,11 +20212,11 @@
           "constraintCount": 0,
           "lookupStatus": "successful",
           "source": "Planning Data API",
-          "updatedAt": "2026-07-22T10:40:04Z"
+          "updatedAt": "2026-10-01T13:21:06Z"
         }
       },
       "status": "no_match",
-      "updatedAt": "2026-07-22T10:40:04Z"
+      "updatedAt": "2026-10-01T13:21:06Z"
     },
     "RH27EH": {
       "data": {
@@ -20341,11 +20445,11 @@
           "constraintCount": 0,
           "lookupStatus": "successful",
           "source": "Planning Data API",
-          "updatedAt": "2026-07-22T10:41:02Z"
+          "updatedAt": "2026-10-01T13:21:07Z"
         }
       },
       "status": "no_match",
-      "updatedAt": "2026-07-22T10:41:02Z"
+      "updatedAt": "2026-10-01T13:21:07Z"
     },
     "RH29PN": {
       "data": {
@@ -20448,6 +20552,18 @@
       },
       "status": "matched",
       "updatedAt": "2026-09-28T15:28:00Z"
+    },
+    "RH41HJ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-10-01T13:21:08Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-10-01T13:21:08Z"
     },
     "RH41NG": {
       "data": {
@@ -21697,6 +21813,20 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-22T10:32:45Z"
+    },
+    "TW178LQ": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Lower Halliford Conservation Area",
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 218857/2",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-10-01T13:21:10Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-10-01T13:21:10Z"
     },
     "TW179HX": {
       "data": {
@@ -42451,6 +42581,6 @@
       "updatedAt": "2026-08-02T15:24:36Z"
     }
   },
-  "updatedAt": "2026-09-28T15:53:46Z",
+  "updatedAt": "2026-10-01T13:21:13Z",
   "version": 1
 }
