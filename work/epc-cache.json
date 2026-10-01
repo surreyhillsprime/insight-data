@@ -41530,7 +41530,7 @@
       "address": "ARLINGTON HOUSE, 33A, LEIGH HILL ROAD, COBHAM",
       "postcode": "",
       "reason": "The read operation timed out",
-      "searchedAt": "2026-10-01T13:03:23Z",
+      "searchedAt": "2026-10-01T13:17:47Z",
       "status": "error"
     },
     "ARMADALE LOWER HAMPTON ROAD SUNBURY ON THAMES TW16 5PR|TW165PR|2487500|2023-06-21": {
@@ -75234,7 +75234,7 @@
     },
     "MAGNOLIA SHERBOURNE DRIVE ASCOT SL5 0LG|SL50LG|2250000|2001-12-17": {
       "address": "MAGNOLIA, SHERBOURNE DRIVE, ASCOT, SL5 0LG",
-      "candidateCount": 9,
+      "candidateCount": 10,
       "epc": {
         "epcAddress": "Magnolia, Sherbourne Drive, ASCOT, SL5 0LG",
         "epcCertificateNumber": "0755-2875-6428-0421-3111",
@@ -75243,12 +75243,13 @@
         "epcRating": "C",
         "epcRegistrationDate": "2009-02-25",
         "epcSource": "MHCLG EPC Register",
-        "floorAreaSqft": 2960,
-        "floorAreaSqm": 275.0,
-        "pricePerSqft": 760
+        "floorAreaSqft": 5705,
+        "floorAreaSqm": 530.0,
+        "pricePerSqft": 394
       },
+      "identityGuardVersion": 1,
       "postcode": "SL5 0LG",
-      "searchedAt": "2026-09-01T10:32:14Z",
+      "searchedAt": "2026-10-01T13:18:22Z",
       "status": "matched"
     },
     "MAGNOLIA SHERBOURNE DRIVE ASCOT SL5 0LG|SL50LG|2800000|2011-03-18": {
@@ -75268,7 +75269,7 @@
       },
       "identityGuardVersion": 1,
       "postcode": "SL5 0LG",
-      "searchedAt": "2026-10-01T13:04:34Z",
+      "searchedAt": "2026-10-01T13:18:18Z",
       "status": "matched"
     },
     "MAGPIE MANOR CHURCH ROAD CLAYGATE ESHER KT10 0JP|KT100JP|2100000|2021-06-30": {
@@ -76497,7 +76498,7 @@
       },
       "identityGuardVersion": 1,
       "postcode": "KT13 0NU",
-      "searchedAt": "2026-10-01T13:07:05Z",
+      "searchedAt": "2026-10-01T13:18:20Z",
       "status": "matched"
     },
     "MEDOMSLEY CAMP END ROAD WEYBRIDGE KT13 0NU|KT130NU|3400000|2007-06-25": {
@@ -76511,12 +76512,13 @@
         "epcRating": "D",
         "epcRegistrationDate": "2008-12-08",
         "epcSource": "MHCLG EPC Register",
-        "floorAreaSqft": 1718,
-        "floorAreaSqm": 159.6,
-        "pricePerSqft": 1979
+        "floorAreaSqft": 8525,
+        "floorAreaSqm": 792.0,
+        "pricePerSqft": 399
       },
+      "identityGuardVersion": 1,
       "postcode": "KT13 0NU",
-      "searchedAt": "2026-09-01T10:25:45Z",
+      "searchedAt": "2026-10-01T13:18:21Z",
       "status": "matched"
     },
     "MEDOMSLEY CAMP END ROAD WEYBRIDGE WEYBRIDGE KT13 0NU|KT130NU|3400000|2007-06-25": {
@@ -83619,7 +83621,7 @@
       "address": "PLOT 2, BLACKHORSE NURSERY, BLACKHORSE ROAD, WOKING",
       "postcode": "",
       "reason": "The read operation timed out",
-      "searchedAt": "2026-10-01T13:03:59Z",
+      "searchedAt": "2026-10-01T13:18:17Z",
       "status": "error"
     },
     "PLOT 3 HILL HOUSE 7 BIRDS HILL DRIVE OXSHOTT LEATHERHEAD KT22 0SP|KT220SP|2250000|2006-10-06": {
@@ -94947,7 +94949,7 @@
       "address": "THE OLD GROVE, HIGH PITFOLD, HINDHEAD",
       "postcode": "",
       "reason": "The read operation timed out",
-      "searchedAt": "2026-10-01T13:03:39Z",
+      "searchedAt": "2026-10-01T13:18:02Z",
       "status": "error"
     },
     "THE OLD HOUSE PITT LANE FARNHAM GU10 3EF|GU103EF|4750000|2017-06-21": {
@@ -104356,6 +104358,6 @@
       "status": "no_match"
     }
   },
-  "updatedAt": "2026-10-01T13:17:16Z",
+  "updatedAt": "2026-10-01T13:18:24Z",
   "version": 3
 }
