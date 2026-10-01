@@ -41528,10 +41528,11 @@
     },
     "ARLINGTON HOUSE 33A LEIGH HILL ROAD COBHAM||2275000|2026-02-09": {
       "address": "ARLINGTON HOUSE, 33A, LEIGH HILL ROAD, COBHAM",
+      "candidateCount": 0,
       "postcode": "",
-      "reason": "The read operation timed out",
-      "searchedAt": "2026-10-01T13:17:47Z",
-      "status": "error"
+      "reason": "No domestic EPC certificates found for postcode",
+      "searchedAt": "2026-10-01T13:18:41Z",
+      "status": "no_match"
     },
     "ARMADALE LOWER HAMPTON ROAD SUNBURY ON THAMES TW16 5PR|TW165PR|2487500|2023-06-21": {
       "address": "ARMADALE, LOWER HAMPTON ROAD, SUNBURY-ON-THAMES, TW16 5PR",
@@ -83619,10 +83620,11 @@
     },
     "PLOT 2 BLACKHORSE NURSERY BLACKHORSE ROAD WOKING||2500000|2016-01-08": {
       "address": "PLOT 2, BLACKHORSE NURSERY, BLACKHORSE ROAD, WOKING",
+      "candidateCount": 0,
       "postcode": "",
-      "reason": "The read operation timed out",
-      "searchedAt": "2026-10-01T13:18:17Z",
-      "status": "error"
+      "reason": "No domestic EPC certificates found for postcode",
+      "searchedAt": "2026-10-01T13:18:47Z",
+      "status": "no_match"
     },
     "PLOT 3 HILL HOUSE 7 BIRDS HILL DRIVE OXSHOTT LEATHERHEAD KT22 0SP|KT220SP|2250000|2006-10-06": {
       "address": "PLOT 3, HILL HOUSE, 7, BIRDS HILL DRIVE, OXSHOTT, LEATHERHEAD, KT22 0SP",
@@ -94947,10 +94949,11 @@
     },
     "THE OLD GROVE HIGH PITFOLD HINDHEAD||8650000|2018-11-30": {
       "address": "THE OLD GROVE, HIGH PITFOLD, HINDHEAD",
+      "candidateCount": 0,
       "postcode": "",
-      "reason": "The read operation timed out",
-      "searchedAt": "2026-10-01T13:18:02Z",
-      "status": "error"
+      "reason": "No domestic EPC certificates found for postcode",
+      "searchedAt": "2026-10-01T13:18:45Z",
+      "status": "no_match"
     },
     "THE OLD HOUSE PITT LANE FARNHAM GU10 3EF|GU103EF|4750000|2017-06-21": {
       "address": "THE OLD HOUSE, PITT LANE, FARNHAM, GU10 3EF",
@@ -104358,6 +104361,6 @@
       "status": "no_match"
     }
   },
-  "updatedAt": "2026-10-01T13:18:24Z",
+  "updatedAt": "2026-10-01T13:18:49Z",
   "version": 3
 }
