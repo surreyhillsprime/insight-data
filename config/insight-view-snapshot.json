@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "collectedAt": "2026-10-14T09:54:13Z",
+  "collectedAt": "2026-10-14T09:55:30Z",
   "timeZone": "Europe/London",
   "policy": {
     "bankRate": 3.75,
@@ -63,7 +63,10 @@
     "sourceUrl": "https://landregistry.data.gov.uk/data/ukhpi/region/united-kingdom/month.json?_pageSize=2&_sort=-refPeriodStart"
   },
   "collectionStatus": {
-    "mode": "live",
-    "staleSources": []
+    "mode": "last-known-good",
+    "staleSources": [
+      "bank-of-england-iumbv34",
+      "bank-of-england-mpc"
+    ]
   }
 }
