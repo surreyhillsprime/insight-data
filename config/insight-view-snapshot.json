@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "collectedAt": "2026-10-21T18:42:51Z",
+  "collectedAt": "2026-10-21T20:27:10Z",
   "timeZone": "Europe/London",
   "policy": {
     "bankRate": 3.75,
@@ -65,6 +65,7 @@
   "collectionStatus": {
     "mode": "last-known-good",
     "staleSources": [
+      "bank-of-england-iumbv34",
       "hm-land-registry-uk-hpi"
     ]
   }
