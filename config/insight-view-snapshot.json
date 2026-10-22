@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "collectedAt": "2026-10-22T14:58:38Z",
+  "collectedAt": "2026-10-22T18:35:51Z",
   "timeZone": "Europe/London",
   "policy": {
     "bankRate": 3.75,
@@ -42,30 +42,28 @@
     "rate": 5.13,
     "previousRate": 4.92,
     "observationDate": "2026-09-30",
-    "retrievedAt": "2026-10-22T14:58:38Z",
+    "retrievedAt": "2026-10-22T18:35:51Z",
     "qualifier": "BoE quoted rate · 75% LTV",
     "sourceUrl": "https://www.bankofengland.co.uk/boeapps/database/index.asp?EC=IUMBV34&Filter=N&From=Template&G0Xtop.x=1&G0Xtop.y=1&Travel=NIxSUx",
     "downloadUrl": "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom=01/Jan/2024&Dateto=now&SeriesCodes=IUMBV34&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N"
   },
   "market": {
-    "ukAveragePrice": 272611,
-    "ukAnnualChange": 1.4,
-    "ukPreviousAnnualChange": 1.5,
-    "ukMonthlyChange": 0.7,
-    "surreyAveragePrice": 522523,
-    "surreyAnnualChange": -0.4,
-    "surreyMonthlyChange": 0.5,
-    "londonAnnualChange": -3.3,
-    "londonPreviousAnnualChange": -3.1,
-    "observationMonth": "2026-07",
-    "retrievedAt": "2026-09-21T20:47:21Z",
+    "ukAveragePrice": 273037,
+    "ukAnnualChange": 0.9,
+    "ukPreviousAnnualChange": 1.2,
+    "ukMonthlyChange": 0.3,
+    "surreyAveragePrice": 524334,
+    "surreyAnnualChange": -0.2,
+    "surreyMonthlyChange": 0.7,
+    "londonAnnualChange": -2.2,
+    "londonPreviousAnnualChange": -3.2,
+    "observationMonth": "2026-08",
+    "retrievedAt": "2026-10-22T18:35:51Z",
     "provisional": true,
     "sourceUrl": "https://landregistry.data.gov.uk/data/ukhpi/region/united-kingdom/month.json?_pageSize=2&_sort=-refPeriodStart"
   },
   "collectionStatus": {
-    "mode": "last-known-good",
-    "staleSources": [
-      "hm-land-registry-uk-hpi"
-    ]
+    "mode": "live",
+    "staleSources": []
   }
 }
