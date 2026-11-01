@@ -625,6 +625,22 @@
       "status": "matched",
       "updatedAt": "2026-07-22T10:26:12Z"
     },
+    "CR53SJ": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Reigate and Banstead",
+          "country": "England",
+          "postcodeDistrict": "CR5",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.288828,
+        "longitude": -0.167365
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:53Z"
+    },
     "CR69BR": {
       "data": {
         "geocode": {
@@ -2113,6 +2129,22 @@
       "status": "matched",
       "updatedAt": "2026-07-22T10:26:54Z"
     },
+    "GU11XB": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Guildford",
+          "country": "England",
+          "postcodeDistrict": "GU1",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.251646,
+        "longitude": -0.552927
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:49Z"
+    },
     "GU126HJ": {
       "data": {
         "geocode": {
@@ -3296,6 +3328,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-14T06:55:01Z"
+    },
+    "GU206LR": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Surrey Heath",
+          "country": "England",
+          "postcodeDistrict": "GU20",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.375811,
+        "longitude": -0.649667
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:52Z"
     },
     "GU206LS": {
       "data": {
@@ -7185,6 +7233,22 @@
       "status": "matched",
       "updatedAt": "2026-07-07T14:51:48Z"
     },
+    "GU47QY": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Woking",
+          "country": "England",
+          "postcodeDistrict": "GU4",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.280042,
+        "longitude": -0.556365
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:51Z"
+    },
     "GU47RP": {
       "data": {
         "geocode": {
@@ -8048,6 +8112,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-22T10:25:57Z"
+    },
+    "GU50QN": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Waverley",
+          "country": "England",
+          "postcodeDistrict": "GU5",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.193992,
+        "longitude": -0.541809
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:50Z"
     },
     "GU50QP": {
       "data": {
@@ -10225,6 +10305,22 @@
       "status": "matched",
       "updatedAt": "2026-07-22T10:28:22Z"
     },
+    "GU85LA": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Waverley",
+          "country": "England",
+          "postcodeDistrict": "GU8",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.131461,
+        "longitude": -0.679985
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:51Z"
+    },
     "GU85PR": {
       "data": {
         "geocode": {
@@ -10976,6 +11072,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-22T10:26:14Z"
+    },
+    "GU98JL": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Waverley",
+          "country": "England",
+          "postcodeDistrict": "GU9",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.203779,
+        "longitude": -0.78963
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:50Z"
     },
     "GU98JP": {
       "data": {
@@ -17233,6 +17345,22 @@
       "status": "matched",
       "updatedAt": "2026-07-22T10:23:09Z"
     },
+    "KT139DN": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Elmbridge",
+          "country": "England",
+          "postcodeDistrict": "KT13",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.370677,
+        "longitude": -0.449331
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:49Z"
+    },
     "KT139DP": {
       "data": {
         "geocode": {
@@ -20997,6 +21125,22 @@
       "status": "matched",
       "updatedAt": "2026-07-22T10:22:43Z"
     },
+    "KT245DR": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Guildford",
+          "country": "England",
+          "postcodeDistrict": "KT24",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.277009,
+        "longitude": -0.426289
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:50Z"
+    },
     "KT245DX": {
       "data": {
         "geocode": {
@@ -21476,6 +21620,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-22T10:23:10Z"
+    },
+    "KT246SA": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Guildford",
+          "country": "England",
+          "postcodeDistrict": "KT24",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.267195,
+        "longitude": -0.434824
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:53Z"
     },
     "KT246SE": {
       "data": {
@@ -22661,6 +22821,22 @@
       "status": "matched",
       "updatedAt": "2026-07-22T10:26:48Z"
     },
+    "RH192QG": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Tandridge",
+          "country": "England",
+          "postcodeDistrict": "RH19",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.147976,
+        "longitude": -0.069917
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:52Z"
+    },
     "RH192QQ": {
       "data": {
         "geocode": {
@@ -22967,7 +23143,7 @@
     },
     "RH20RD": {
       "status": "no_match",
-      "updatedAt": "2026-09-01T10:35:51Z"
+      "updatedAt": "2026-11-01T13:34:55Z"
     },
     "RH20SA": {
       "data": {
@@ -23481,6 +23657,22 @@
       "status": "matched",
       "updatedAt": "2026-08-01T11:16:45Z"
     },
+    "RH41HJ": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Mole Valley",
+          "country": "England",
+          "postcodeDistrict": "RH4",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.235591,
+        "longitude": -0.339219
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:52Z"
+    },
     "RH41NG": {
       "data": {
         "geocode": {
@@ -23688,6 +23880,22 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-22T10:26:59Z"
+    },
+    "RH54QG": {
+      "data": {
+        "geocode": {
+          "adminDistrict": "Mole Valley",
+          "country": "England",
+          "postcodeDistrict": "RH5",
+          "precision": "Postcode centroid",
+          "region": "South East",
+          "source": "Postcodes.io"
+        },
+        "latitude": 51.163016,
+        "longitude": -0.30521
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:34:51Z"
     },
     "RH55EE": {
       "data": {
@@ -25227,7 +25435,7 @@
     },
     "TW200HH": {
       "status": "no_match",
-      "updatedAt": "2026-09-01T10:35:50Z"
+      "updatedAt": "2026-11-01T13:34:53Z"
     },
     "TW200HT": {
       "data": {
@@ -25502,6 +25710,6 @@
       "updatedAt": "2026-07-22T10:24:17Z"
     }
   },
-  "updatedAt": "2026-09-01T10:35:51Z",
+  "updatedAt": "2026-11-01T13:34:55Z",
   "version": 1
 }
