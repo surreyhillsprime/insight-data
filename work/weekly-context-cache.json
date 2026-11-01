@@ -2491,6 +2491,21 @@
       "status": "matched",
       "updatedAt": "2026-07-22T10:48:48Z"
     },
+    "CR53SJ": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "conservationArea": "Conservation area: High Road Chipstead",
+          "constraintCount": 3,
+          "greenBelt": "Green belt: Reigate and Banstead",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:26Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:35:26Z"
+    },
     "CR69BR": {
       "data": {
         "planningConstraints": {
@@ -3713,6 +3728,18 @@
       "status": "no_match",
       "updatedAt": "2026-10-26T14:31:35Z"
     },
+    "GU11XB": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:13Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-11-01T13:35:13Z"
+    },
     "GU126HJ": {
       "data": {
         "planningConstraints": {
@@ -4625,6 +4652,19 @@
       },
       "status": "matched",
       "updatedAt": "2026-10-26T14:32:41Z"
+    },
+    "GU206LR": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Surrey Heath",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:24Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:35:24Z"
     },
     "GU206LS": {
       "data": {
@@ -7739,6 +7779,20 @@
       "status": "matched",
       "updatedAt": "2026-10-26T14:27:25Z"
     },
+    "GU47QY": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Sutton Park and Sutton Green",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Woking",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:19Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:35:19Z"
+    },
     "GU47RP": {
       "data": {
         "planningConstraints": {
@@ -8462,6 +8516,19 @@
       },
       "status": "matched",
       "updatedAt": "2026-10-26T14:28:28Z"
+    },
+    "GU50QN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Waverley",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:15Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:35:15Z"
     },
     "GU50QP": {
       "data": {
@@ -10302,6 +10369,20 @@
       "status": "matched",
       "updatedAt": "2026-10-26T14:37:04Z"
     },
+    "GU85LA": {
+      "data": {
+        "planningConstraints": {
+          "aonb": "AONB / National landscape: Surrey Hills",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Waverley",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:15Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:35:15Z"
+    },
     "GU85PR": {
       "data": {
         "planningConstraints": {
@@ -10935,6 +11016,19 @@
       },
       "status": "matched",
       "updatedAt": "2026-10-26T14:29:19Z"
+    },
+    "GU98JL": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: GREAT AUSTINS FARNHAM",
+          "constraintCount": 1,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:14Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:35:14Z"
     },
     "GU98JP": {
       "data": {
@@ -15706,6 +15800,18 @@
       "status": "matched",
       "updatedAt": "2026-07-22T10:33:49Z"
     },
+    "KT139DN": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:11Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-11-01T13:35:11Z"
+    },
     "KT139DP": {
       "data": {
         "planningConstraints": {
@@ -16511,11 +16617,11 @@
           "constraintCount": 0,
           "lookupStatus": "successful",
           "source": "Planning Data API",
-          "updatedAt": "2026-07-22T10:35:47Z"
+          "updatedAt": "2026-11-01T13:35:17Z"
         }
       },
       "status": "no_match",
-      "updatedAt": "2026-07-22T10:35:47Z"
+      "updatedAt": "2026-11-01T13:35:17Z"
     },
     "KT206HB": {
       "data": {
@@ -17031,11 +17137,11 @@
           "constraintCount": 1,
           "lookupStatus": "successful",
           "source": "Planning Data API",
-          "updatedAt": "2026-07-22T10:39:13Z"
+          "updatedAt": "2026-11-01T13:35:12Z"
         }
       },
       "status": "matched",
-      "updatedAt": "2026-07-22T10:39:13Z"
+      "updatedAt": "2026-11-01T13:35:12Z"
     },
     "KT207QT": {
       "data": {
@@ -17043,11 +17149,11 @@
           "constraintCount": 0,
           "lookupStatus": "successful",
           "source": "Planning Data API",
-          "updatedAt": "2026-07-22T10:47:44Z"
+          "updatedAt": "2026-11-01T13:35:11Z"
         }
       },
       "status": "no_match",
-      "updatedAt": "2026-07-22T10:47:44Z"
+      "updatedAt": "2026-11-01T13:35:11Z"
     },
     "KT207QU": {
       "data": {
@@ -18550,6 +18656,18 @@
       "status": "no_match",
       "updatedAt": "2026-10-26T14:17:49Z"
     },
+    "KT245DR": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:14Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-11-01T13:35:14Z"
+    },
     "KT245DX": {
       "data": {
         "planningConstraints": {
@@ -18935,6 +19053,18 @@
       "status": "no_match",
       "updatedAt": "2026-10-26T14:19:33Z"
     },
+    "KT246SA": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:27Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-11-01T13:35:27Z"
+    },
     "KT246SE": {
       "data": {
         "planningConstraints": {
@@ -19098,11 +19228,11 @@
           "constraintCount": 0,
           "lookupStatus": "successful",
           "source": "Planning Data API",
-          "updatedAt": "2026-07-22T10:46:47Z"
+          "updatedAt": "2026-11-01T13:35:21Z"
         }
       },
       "status": "no_match",
-      "updatedAt": "2026-07-22T10:46:47Z"
+      "updatedAt": "2026-11-01T13:35:21Z"
     },
     "KT65LA": {
       "data": {
@@ -19880,6 +20010,20 @@
       "status": "matched",
       "updatedAt": "2026-10-26T14:31:14Z"
     },
+    "RH192QG": {
+      "data": {
+        "planningConstraints": {
+          "article4": "Article 4: Land East Of A22 And South Of / Redhill Tonbridge Railway.",
+          "constraintCount": 2,
+          "greenBelt": "Green belt: Tandridge",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:20Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:35:20Z"
+    },
     "RH192QQ": {
       "data": {
         "planningConstraints": {
@@ -20109,11 +20253,11 @@
           "constraintCount": 0,
           "lookupStatus": "successful",
           "source": "Planning Data API",
-          "updatedAt": "2026-07-22T10:40:04Z"
+          "updatedAt": "2026-11-01T13:35:16Z"
         }
       },
       "status": "no_match",
-      "updatedAt": "2026-07-22T10:40:04Z"
+      "updatedAt": "2026-11-01T13:35:16Z"
     },
     "RH27EH": {
       "data": {
@@ -20342,11 +20486,11 @@
           "constraintCount": 0,
           "lookupStatus": "successful",
           "source": "Planning Data API",
-          "updatedAt": "2026-07-22T10:41:02Z"
+          "updatedAt": "2026-11-01T13:35:21Z"
         }
       },
       "status": "no_match",
-      "updatedAt": "2026-07-22T10:41:02Z"
+      "updatedAt": "2026-11-01T13:35:21Z"
     },
     "RH29PN": {
       "data": {
@@ -20449,6 +20593,18 @@
       },
       "status": "matched",
       "updatedAt": "2026-10-26T14:16:52Z"
+    },
+    "RH41HJ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 0,
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:23Z"
+        }
+      },
+      "status": "no_match",
+      "updatedAt": "2026-11-01T13:35:23Z"
     },
     "RH41NG": {
       "data": {
@@ -20627,6 +20783,19 @@
       },
       "status": "matched",
       "updatedAt": "2026-10-26T14:31:54Z"
+    },
+    "RH54QG": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 1,
+          "greenBelt": "Green belt: Mole Valley",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:18Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:35:18Z"
     },
     "RH55EE": {
       "data": {
@@ -21699,6 +21868,20 @@
       "status": "matched",
       "updatedAt": "2026-07-22T10:32:45Z"
     },
+    "TW178LQ": {
+      "data": {
+        "planningConstraints": {
+          "conservationArea": "Conservation area: Lower Halliford Conservation Area",
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 218857/2",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:25Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:35:25Z"
+    },
     "TW179HX": {
       "data": {
         "planningConstraints": {
@@ -21739,6 +21922,19 @@
       },
       "status": "matched",
       "updatedAt": "2026-07-22T10:46:51Z"
+    },
+    "TW183NQ": {
+      "data": {
+        "planningConstraints": {
+          "constraintCount": 2,
+          "floodRiskZone": "Flood risk zone: 219217/2, 92756/3",
+          "lookupStatus": "successful",
+          "source": "Planning Data API",
+          "updatedAt": "2026-11-01T13:35:22Z"
+        }
+      },
+      "status": "matched",
+      "updatedAt": "2026-11-01T13:35:22Z"
     },
     "TW184DY": {
       "data": {
@@ -42452,6 +42648,6 @@
       "updatedAt": "2026-08-02T15:24:36Z"
     }
   },
-  "updatedAt": "2026-10-26T14:38:58Z",
+  "updatedAt": "2026-11-01T13:35:29Z",
   "version": 1
 }
