@@ -1,0 +1,41 @@
+name: HMLR Transaction Mapping Candidate
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Observe publisher releases rather than guessing the 20th working day.
+    - cron: "0 13 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hmlr-transaction-mapping-candidate
+  cancel-in-progress: false
+
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test mapping import candidate contracts
+        run: PYTHONPATH=scripts python3 -m unittest tests.test_hmlr_mapping_packet
+      - name: Acquire the official release and build mapping candidates
+        run: PYTHONPATH=scripts python3 scripts/build_hmlr_mapping_packet.py --download-current
+      - name: Retain exact source bytes and database-import candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: hmlr-transaction-mapping-candidate
+          path: |
+            work/hmlr-mapping-candidate.json
+            work/hmlr-mapping-candidate.receipt.json
+            work/hmlr-identifier-downloads/manifest.json
+            work/hmlr-identifier-downloads/pp-*.csv
+          if-no-files-found: error
+          retention-days: 90

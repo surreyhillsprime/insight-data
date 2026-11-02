@@ -35,9 +35,24 @@ jobs:
           path: work/hmlr-identifier-downloads
           key: hmlr-identifier-downloads-${{ github.run_id }}
           restore-keys: hmlr-identifier-downloads-
+      - name: Build transaction identifier database-import candidate
+        run: |
+          PYTHONPATH=scripts python3 scripts/build_hmlr_mapping_packet.py --download-current
+      - name: Retain transaction mapping candidate independently of geometry availability
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hmlr-transaction-mapping-candidate
+          path: |
+            work/hmlr-mapping-candidate.json
+            work/hmlr-mapping-candidate.receipt.json
+            work/hmlr-identifier-downloads/manifest.json
+            work/hmlr-identifier-downloads/pp-*.csv
+          if-no-files-found: ignore
+          retention-days: 90
       - name: Acquire and validate HMLR UPRNs and OS points
         run: |
-          PYTHONPATH=scripts python3 scripts/collect_hmlr_identifiers.py --download-current
+          PYTHONPATH=scripts python3 scripts/collect_hmlr_identifiers.py
           python3 scripts/enrich_os_uprn.py --hmlr-only
       - name: Check current INSPIRE geometry against official links
         run: |
@@ -50,7 +65,7 @@ jobs:
             --ostn15-grid /tmp/uk_os_OSTN15_NTv2_OSGBtoETRS.tif
       - name: Validate complete candidate
         run: |
-          PYTHONPATH=scripts python3 -m unittest tests.test_hmlr_identifiers tests.test_inspire_parcels
+          PYTHONPATH=scripts python3 -m unittest tests.test_hmlr_identifiers tests.test_hmlr_mapping_packet tests.test_inspire_parcels
           PYTHONPATH=scripts python3 scripts/validate_property_uprn_links.py
           PYTHONPATH=scripts python3 scripts/validate_inspire_parcels.py
           PYTHONPATH=scripts python3 scripts/validate_inspire_parcel_review_queue.py

@@ -1,12 +1,15 @@
 import json
 import hashlib
+import io
 import math
 import tempfile
 import unittest
+import urllib.error
 import zipfile
 from collections import Counter
 from copy import deepcopy
 from pathlib import Path
+from unittest.mock import Mock, patch
 
 from build_property_uprn_links import empty_feed
 from collect_inspire_parcels import (
@@ -17,6 +20,7 @@ from collect_inspire_parcels import (
     build_feed,
     configure_ostn15_transform,
     coverage_metadata,
+    download_current_sources,
     polygon_measurements,
     publication_time,
     publish_runtime_feeds,
@@ -78,6 +82,64 @@ def write_source_zip(path, features):
 
 
 class InspireGeometryTests(unittest.TestCase):
+    def test_forbidden_official_listing_uses_direct_zip_with_same_cookie_opener(self):
+        page = "https://use-land-property-data.service.gov.uk/datasets/inspire/download"
+        config = {"sourcePage": page, "authorities": [{
+            "name": "Elmbridge Borough Council", "slug": "Elmbridge_Borough_Council",
+        }]}
+        opener = Mock()
+        opener.open.side_effect = [
+            urllib.error.HTTPError(page, 403, "Forbidden", {}, io.BytesIO(b"blocked")),
+            io.BytesIO(b"PK official ZIP bytes"),
+        ]
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "collect_inspire_parcels.urllib.request.build_opener", return_value=opener,
+        ):
+            download_current_sources(config, Path(directory))
+            self.assertEqual((Path(directory) / "Elmbridge_Borough_Council.zip").read_bytes(),
+                             b"PK official ZIP bytes")
+        requests = [call.args[0] for call in opener.open.call_args_list]
+        self.assertEqual([request.full_url for request in requests],
+                         [page, page + "/Elmbridge_Borough_Council.zip"])
+        self.assertTrue(all(request.get_header("User-agent") == "INSIGHT public data collector/1.0"
+                            for request in requests))
+
+    def test_listing_fallback_does_not_hide_other_http_errors_or_change_host(self):
+        official = "https://use-land-property-data.service.gov.uk/datasets/inspire/download"
+        for page, code in [(official, 500), ("https://example.test/download", 403)]:
+            opener = Mock()
+            opener.open.side_effect = urllib.error.HTTPError(page, code, "Rejected", {}, io.BytesIO())
+            with self.subTest(page=page, code=code), tempfile.TemporaryDirectory() as directory, patch(
+                "collect_inspire_parcels.urllib.request.build_opener", return_value=opener,
+            ):
+                with self.assertRaises(urllib.error.HTTPError):
+                    download_current_sources({"sourcePage": page, "authorities": []}, Path(directory))
+                self.assertEqual(opener.open.call_count, 1)
+
+    def test_direct_zip_rejection_or_html_never_becomes_source_data(self):
+        page = "https://use-land-property-data.service.gov.uk/datasets/inspire/download"
+        config = {"sourcePage": page, "authorities": [{"name": "Woking Borough Council", "slug": "Woking_Borough_Council"}]}
+        for second in [urllib.error.HTTPError(page, 403, "Forbidden", {}, io.BytesIO()), io.BytesIO(b"<html>blocked</html>")]:
+            opener = Mock()
+            opener.open.side_effect = [urllib.error.HTTPError(page, 403, "Forbidden", {}, io.BytesIO()), second]
+            with tempfile.TemporaryDirectory() as directory, patch(
+                "collect_inspire_parcels.urllib.request.build_opener", return_value=opener,
+            ):
+                with self.assertRaises((urllib.error.HTTPError, ValueError)):
+                    download_current_sources(config, Path(directory))
+                self.assertFalse(list(Path(directory).glob("*.zip")))
+
+    def test_direct_zip_fallback_rejects_path_components_in_authority_slug(self):
+        page = "https://use-land-property-data.service.gov.uk/datasets/inspire/download"
+        opener = Mock()
+        opener.open.side_effect = urllib.error.HTTPError(page, 403, "Forbidden", {}, io.BytesIO())
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "collect_inspire_parcels.urllib.request.build_opener", return_value=opener,
+        ):
+            with self.assertRaisesRegex(ValueError, "slug"):
+                download_current_sources({"sourcePage": page, "authorities": [{"name": "Bad", "slug": "../other"}]}, Path(directory))
+            self.assertEqual(opener.open.call_count, 1)
+
     def test_download_parser_associates_authority_row_with_generic_link_text(self):
         parser = DownloadLinkParser()
         parser.feed(

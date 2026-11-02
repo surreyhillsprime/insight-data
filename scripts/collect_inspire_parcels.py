@@ -17,6 +17,7 @@ import math
 import os
 import re
 import tempfile
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -55,6 +56,7 @@ ASSOCIATION_SEMANTICS = (
 )
 OSTN15_GRID_SHA256 = "5d6ed64d2119952c4c559fa1fccbc594b6520fc3ec3ef2fc10be13202c4384fa"
 OSTN15_GRID_FILENAME = "uk_os_OSTN15_NTv2_OSGBtoETRS.tif"
+OFFICIAL_DOWNLOAD_PAGE = "https://use-land-property-data.service.gov.uk/datasets/inspire/download"
 
 
 def clean(value: object) -> str:
@@ -278,11 +280,28 @@ def download_current_sources(config: dict, destination: Path) -> None:
     cookie_jar = http.cookiejar.CookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie_jar))
     request = urllib.request.Request(config["sourcePage"], headers={"User-Agent": "INSIGHT public data collector/1.0"})
-    with opener.open(request, timeout=90) as response:
-        page = response.read().decode("utf-8", "replace")
-    parser = DownloadLinkParser()
-    parser.feed(page)
-    candidate_links = [(text, href) for text, href in parser.links if href and not href.startswith("#")]
+    try:
+        with opener.open(request, timeout=90) as response:
+            page = response.read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as error:
+        if error.code != 403 or config["sourcePage"] != OFFICIAL_DOWNLOAD_PAGE:
+            raise
+        error.close()
+        # The public listing can reject an anonymous request while its public
+        # ZIP routes still establish the service's normal cookie session. Use
+        # only the existing configured authority names on that official route;
+        # every ZIP still undergoes the complete source and lifecycle audit.
+        candidate_links = []
+        for authority in config["authorities"]:
+            slug = authority["slug"]
+            if not re.fullmatch(r"[A-Za-z]+(?:_[A-Za-z]+)*", slug):
+                raise ValueError("Invalid configured INSPIRE download slug")
+            candidate_links.append((authority["name"], f"{OFFICIAL_DOWNLOAD_PAGE}/{slug}.zip"))
+        print("HMLR listing returned HTTP 403; using official authority ZIP routes with the normal cookie session.")
+    else:
+        parser = DownloadLinkParser()
+        parser.feed(page)
+        candidate_links = [(text, href) for text, href in parser.links if href and not href.startswith("#")]
     for authority in config["authorities"]:
         matches = authority_download_matches(candidate_links, authority)
         if len(matches) != 1:
