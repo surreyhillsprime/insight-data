@@ -283,6 +283,7 @@ class SalesDatasetTests(unittest.TestCase):
 
     def test_independent_history_reuses_native_seed_when_legacy_lags(self):
         import build_sales_dataset as producer
+        import validate_sales_history_feed as validator
         from validate_sales_history_feed import validate
         rows = fixture()[0]
         payload = json.loads(self.build()["payload"])
@@ -294,15 +295,21 @@ class SalesDatasetTests(unittest.TestCase):
                     "--output", str(output), "--cache", str(root / "cache.json"),
                     "--seed-feed", str(root / "missing-legacy.js"), "--deployment-mode", "commercial", "--pause", "0"]
             with patch.object(sys, "argv", argv), patch.object(producer, "load_prior_dataset", return_value=payload), \
-                 patch.object(collector, "fetch_batch") as fetch:
+                 patch.object(collector, "fetch_batch") as fetch, \
+                 patch.object(collector, "datetime", wraps=datetime) as clock, \
+                 patch.object(collector, "utc_now", return_value=self.now.isoformat()):
+                # The retained seed belongs to this fixture's clock, not the CI run date.
+                clock.now.return_value = self.now
                 collector.main()
             fetch.assert_not_called()
             result = collector.assignment(output.read_text(), "SURREY_SALES_HISTORY")
             for key, prior in payload["historyByProperty"].items():
                 self.assertEqual(result[key]["updatedAt"], prior["updatedAt"])
                 self.assertEqual(result[key]["totalTransactions"], prior["totalTransactions"])
-            validate(output, base_feed=current, minimum_property_coverage_percent=99,
-                     minimum_transactions=2, maximum_properties_unavailable=4, maximum_age_days=45)
+            with patch.object(validator, "datetime", wraps=datetime) as clock:
+                clock.now.return_value = self.now
+                validate(output, base_feed=current, minimum_property_coverage_percent=99,
+                         minimum_transactions=2, maximum_properties_unavailable=4, maximum_age_days=45)
 
     def test_boolean_schema_versions_are_rejected(self):
         values = fixture()
